@@ -2,9 +2,9 @@ package com.delulutopia.app
 
 import android.app.Application
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onRoot
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.delulutopia.app.navigation.AppearanceRoute
 import com.delulutopia.app.navigation.LettersRoute
@@ -26,18 +26,23 @@ import org.robolectric.annotation.GraphicsMode
 class AppShellScreenshotTest {
     @get:Rule val compose = createComposeRule()
 
+    private lateinit var nav: NavHostController
+
     @Composable
-    private fun Shell(dark: Boolean, start: Any?) {
-        val nav = rememberNavController()
+    private fun Shell(dark: Boolean) {
+        nav = rememberNavController()
         DelulutopiaTheme(darkTheme = dark) {
             DelulutopiaApp(themeMode = if (dark) ThemeMode.Dark else ThemeMode.Light, onThemeModeChange = {}, navController = nav)
         }
-        if (start != null) LaunchedEffect(Unit) { nav.navigate(start) }
     }
 
     private fun capture(name: String, dark: Boolean, start: Any? = null) {
-        compose.setContent { Shell(dark, start) }
+        compose.setContent { Shell(dark) }
         compose.waitForIdle()
+        if (start != null) {
+            compose.runOnIdle { nav.navigate(start) }
+            compose.waitForIdle()
+        }
         compose.onRoot().captureRoboImage("build/outputs/roborazzi/app_$name.png")
     }
 
