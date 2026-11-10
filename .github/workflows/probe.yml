@@ -1,0 +1,56 @@
+name: probe-versions
+on: { push: { branches: [probe/versions] } }
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Latest stable versions
+        run: |
+          g() { curl -s "https://dl.google.com/android/maven2/$1/maven-metadata.xml" | grep -oP '(?<=<version>)[^<]+' | grep -viE 'alpha|beta|rc|dev|eap' | tail -1; }
+          m() { curl -s "https://repo1.maven.org/maven2/$1/maven-metadata.xml" | grep -oP '(?<=<version>)[^<]+' | grep -viE 'alpha|beta|rc|dev|eap|m[0-9]' | sort -V | tail -1; }
+          p() { curl -s "https://plugins.gradle.org/m2/$1/maven-metadata.xml" | grep -oP '(?<=<version>)[^<]+' | grep -viE 'alpha|beta|rc|dev|eap' | sort -V | tail -1; }
+          echo "AGP $(g com/android/tools/build/gradle)"
+          echo "composeBom $(g androidx/compose/compose-bom)"
+          echo "activityCompose $(g androidx/activity/activity-compose)"
+          echo "coreKtx $(g androidx/core/core-ktx)"
+          echo "coreSplash $(g androidx/core/core-splashscreen)"
+          echo "lifecycle $(g androidx/lifecycle/lifecycle-runtime-compose)"
+          echo "navigationCompose $(g androidx/navigation/navigation-compose)"
+          echo "datastore $(g androidx/datastore/datastore-preferences)"
+          echo "room $(g androidx/room/room-runtime)"
+          echo "hiltNavCompose $(g androidx/hilt/hilt-navigation-compose)"
+          echo "hiltLifecycleVmCompose $(g androidx/hilt/hilt-lifecycle-viewmodel-compose)"
+          echo "biometric $(g androidx/biometric/biometric)"
+          echo "material3Adaptive $(g androidx/compose/material3/adaptive/adaptive)"
+          echo "material3AdaptiveNavSuite $(g androidx/compose/material3/material3-adaptive-navigation-suite)"
+          echo "windowSizeM3 $(g androidx/compose/material3/material3-window-size-class)"
+          echo "glance $(g androidx/glance/glance-appwidget)"
+          echo "work $(g androidx/work/work-runtime-ktx)"
+          echo "camerax $(g androidx/camera/camera-core)"
+          echo "media3 $(g androidx/media3/media3-exoplayer)"
+          echo "junitExt $(g androidx/test/ext/junit)"
+          echo "testCore $(g androidx/test/core)"
+          echo "uiautomator $(g androidx/test/uiautomator/uiautomator)"
+          echo "googleServices $(g com/google/gms/google-services)"
+          echo "firebaseBom $(g com/google/firebase/firebase-bom)"
+          echo "kotlin $(m org/jetbrains/kotlin/kotlin-gradle-plugin)"
+          echo "ksp $(m com/google/devtools/ksp/com.google.devtools.ksp.gradle.plugin)"
+          echo "kspPortal $(p com/google/devtools/ksp/com.google.devtools.ksp.gradle.plugin)"
+          echo "hilt $(g com/google/dagger/hilt-android-gradle-plugin) / central $(m com/google/dagger/hilt-android)"
+          echo "coroutines $(m org/jetbrains/kotlinx/kotlinx-coroutines-core)"
+          echo "serialization $(m org/jetbrains/kotlinx/kotlinx-serialization-json)"
+          echo "datetime $(m org/jetbrains/kotlinx/kotlinx-datetime)"
+          echo "okhttp $(m com/squareup/okhttp3/okhttp)"
+          echo "retrofit $(m com/squareup/retrofit2/retrofit)"
+          echo "coil $(m io/coil-kt/coil3/coil-compose)"
+          echo "robolectric $(m org/robolectric/robolectric)"
+          echo "roborazzi $(m io/github/takahirom/roborazzi/roborazzi)"
+          echo "junit4 $(m junit/junit)"
+          echo "turbine $(m app/cash/turbine/turbine)"
+          echo "mockk $(m io/mockk/mockk)"
+          echo "truth $(m com/google/truth/truth)"
+          echo "ktlintGradle $(p org/jlleitschuh/gradle/ktlint/org.jlleitschuh.gradle.ktlint.gradle.plugin)"
+          echo "detekt $(p io/gitlab/arturbosch/detekt/io.gitlab.arturbosch.detekt.gradle.plugin)"
+          echo "gradle $(curl -s https://services.gradle.org/versions/current | grep -oP '(?<="version" : ")[^"]+')"
+          echo "--- AGP 9.x Gradle requirement"
+          curl -s https://developer.android.com/build/releases/gradle-plugin | grep -oP 'Gradle</td>\s*<td>[0-9.]+' | head -3 || true
