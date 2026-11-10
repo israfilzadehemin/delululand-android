@@ -5,6 +5,8 @@ import com.delulutopia.buildlogic.libs
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.dependencies
+import org.gradle.kotlin.dsl.withType
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 /** Jetpack Compose for an app or library module: the Compose compiler plugin, the BOM and tooling. */
 class AndroidComposeConventionPlugin : Plugin<Project> {
@@ -15,6 +17,10 @@ class AndroidComposeConventionPlugin : Plugin<Project> {
         }
         pluginManager.withPlugin("com.android.library") {
             extensions.getByType(LibraryExtension::class.java).buildFeatures.compose = true
+        }
+        // The M3 top app bar and bottom sheet APIs are still marked experimental in Material 3 1.4.
+        tasks.withType<KotlinCompile>().configureEach {
+            compilerOptions.optIn.add("androidx.compose.material3.ExperimentalMaterial3Api")
         }
         dependencies {
             val bom = platform(libs.library("androidx-compose-bom"))
