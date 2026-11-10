@@ -36,6 +36,12 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
             }
         }
         tasks.withType<Test>().configureEach {
+            // Robolectric's FileDescriptor interceptor needs JDK internals on JDK 21+.
+            jvmArgs(
+                "--add-opens=java.base/jdk.internal.access=ALL-UNNAMED",
+                "--add-exports=java.base/jdk.internal.access=ALL-UNNAMED",
+                "--add-opens=java.base/java.io=ALL-UNNAMED",
+            )
             testLogging {
                 exceptionFormat = TestExceptionFormat.FULL
                 showStackTraces = true
