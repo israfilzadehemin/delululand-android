@@ -8,13 +8,13 @@ following the design in the project doc "Delululand — Android App Design" and 
 | Min / target SDK | 23 (Android 6.0) / 37 |
 | Stack | Kotlin 2.4, Compose (BOM), Material 3, Navigation Compose (typed routes), Hilt, DataStore |
 | Modules | `app` (shell, navigation) · `core:designsystem` (theme, fonts, components) · `build-logic` (convention plugins) |
-| Flavours | `test` → https://test.delulutopia.com · `prod` → https://delulutopia.com (install side by side) |
+| Flavours | `staging` → https://test.delulutopia.com (label "Delulutopia Test") · `prod` → https://delulutopia.com; they install side by side |
 | Application ID | `com.delulutopia.app` (`.test` and `.debug` suffixes) |
 
 ## Build
 
 ```
-./gradlew assembleTestDebug          # test server, debug
+./gradlew assembleStagingDebug       # test server, debug
 ./gradlew assembleProdRelease        # prod server, release (R8)
 ./gradlew bundleProdRelease          # Play Store bundle
 ./gradlew testProdDebugUnitTest :core:designsystem:testDebugUnitTest -Proborazzi.test.record=true

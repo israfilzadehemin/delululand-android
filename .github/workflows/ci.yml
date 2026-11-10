@@ -60,7 +60,7 @@ jobs:
         run: ./gradlew :app:lintProdDebug
 
       - name: Build APKs and bundle
-        run: ./gradlew assembleTestDebug assembleProdDebug assembleTestRelease assembleProdRelease bundleProdRelease
+        run: ./gradlew assembleStagingDebug assembleProdDebug assembleStagingRelease assembleProdRelease bundleProdRelease
 
       - name: Screenshots
         if: always()

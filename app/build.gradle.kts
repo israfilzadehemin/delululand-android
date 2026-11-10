@@ -52,10 +52,11 @@ android {
         }
     }
 
-    // C2: the server each build talks to. Test and prod install side by side.
+    // C2: the server each build talks to; both install side by side. The test-server flavour is called
+    // "staging" because AGP reserves flavour names starting with "test".
     flavorDimensions += "server"
     productFlavors {
-        create("test") {
+        create("staging") {
             dimension = "server"
             applicationIdSuffix = ".test"
             buildConfigField("String", "BASE_URL", "\"https://test.delulutopia.com/\"")
