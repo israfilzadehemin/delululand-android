@@ -51,7 +51,7 @@ jobs:
           fi
 
       - name: Code style
-        run: ./gradlew ktlintCheck
+        run: ./gradlew ktlintCheck --continue
 
       - name: Unit and screenshot tests
         run: ./gradlew testProdDebugUnitTest :core:designsystem:testDebugUnitTest -Proborazzi.test.record=true
