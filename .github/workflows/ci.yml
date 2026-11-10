@@ -10,6 +10,9 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -69,6 +72,27 @@ jobs:
           name: screenshots
           path: '**/build/outputs/roborazzi/*.png'
           if-no-files-found: warn
+
+      # Screenshots also go to the ci-screenshots branch (one folder per branch), so they can be browsed on GitHub.
+      - name: Publish screenshots to ci-screenshots
+        if: always() && github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+        env:
+          BRANCH_DIR: ${{ github.head_ref || github.ref_name }}
+        run: |
+          shopt -s globstar nullglob
+          files=(**/build/outputs/roborazzi/*.png)
+          [ ${#files[@]} -eq 0 ] && exit 0
+          dir="$RUNNER_TEMP/shots"
+          git clone --quiet --depth 1 --branch ci-screenshots "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" "$dir" 2>/dev/null || {
+            mkdir -p "$dir" && git -C "$dir" init -q -b ci-screenshots && git -C "$dir" remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}"
+          }
+          target="$dir/${BRANCH_DIR//\//-}"
+          rm -rf "$target" && mkdir -p "$target"
+          cp "${files[@]}" "$target/"
+          cd "$dir"
+          git add -A
+          git -c user.name="ci" -c user.email="ci@users.noreply.github.com" commit -qm "Screenshots for ${BRANCH_DIR} @ ${GITHUB_SHA::7}" || exit 0
+          git push -q origin ci-screenshots
 
       - name: Reports
         if: failure()

@@ -4,7 +4,10 @@ import com.delulutopia.buildlogic.libs
 import org.gradle.api.JavaVersion
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.tasks.testing.Test
+import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.kotlin.dsl.configure
+import org.gradle.kotlin.dsl.withType
 
 /** Android library module (core:*, feature:*): same SDK floor and bytecode level as the app. */
 class AndroidLibraryConventionPlugin : Plugin<Project> {
@@ -28,6 +31,13 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
             lint {
                 abortOnError = true
                 targetSdk = libs.intVersion("targetSdk")
+            }
+        }
+        tasks.withType<Test>().configureEach {
+            testLogging {
+                exceptionFormat = TestExceptionFormat.FULL
+                showStackTraces = true
+                showCauses = true
             }
         }
     }
