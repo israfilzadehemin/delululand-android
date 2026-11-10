@@ -49,7 +49,11 @@ fun DlSnackbar(message: String, modifier: Modifier = Modifier, actionLabel: Stri
         containerColor = MaterialTheme.colorScheme.inverseSurface,
         contentColor = MaterialTheme.colorScheme.inverseOnSurface,
         action = if (actionLabel != null) {
-            { TextButton(onClick = {}) { Text(actionLabel, color = MaterialTheme.colorScheme.inversePrimary, fontWeight = FontWeight.Bold) } }
+            {
+                TextButton(onClick = {}) {
+                    Text(actionLabel, color = MaterialTheme.colorScheme.inversePrimary, fontWeight = FontWeight.Bold)
+                }
+            }
         } else {
             null
         },
