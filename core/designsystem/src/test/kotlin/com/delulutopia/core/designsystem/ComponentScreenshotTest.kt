@@ -1,5 +1,6 @@
 package com.delulutopia.core.designsystem
 
+import androidx.compose.material3.Surface
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onRoot
 import com.delulutopia.core.designsystem.theme.DelulutopiaTheme
@@ -20,13 +21,13 @@ class ComponentScreenshotTest {
 
     @Test
     fun catalog_light() {
-        compose.setContent { DelulutopiaTheme(darkTheme = false) { ComponentCatalog() } }
+        compose.setContent { DelulutopiaTheme(darkTheme = false) { Surface { ComponentCatalog() } } }
         compose.onRoot().captureRoboImage("build/outputs/roborazzi/designsystem_catalog_light.png")
     }
 
     @Test
     fun catalog_dark() {
-        compose.setContent { DelulutopiaTheme(darkTheme = true) { ComponentCatalog() } }
+        compose.setContent { DelulutopiaTheme(darkTheme = true) { Surface { ComponentCatalog() } } }
         compose.onRoot().captureRoboImage("build/outputs/roborazzi/designsystem_catalog_dark.png")
     }
 }
