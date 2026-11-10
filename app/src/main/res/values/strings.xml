@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- app_name is set per flavour in build.gradle.kts (Delulutopia / Delulutopia Test) -->
+
+    <!-- Destinations (Y-A1) -->
+    <string name="nav_home">Home</string>
+    <string name="nav_letters">Letters</string>
+    <string name="nav_discussions">Discussions</string>
+    <string name="nav_emails">Emails</string>
+    <string name="nav_you">You</string>
+    <string name="nav_new">New</string>
+    <string name="nav_notifications_off">Notifications are off</string>
+
+    <!-- Per-list FABs (Y-A2) -->
+    <string name="fab_new_letter">Write a letter</string>
+    <string name="fab_continue_letter">Continue your letter</string>
+    <string name="fab_new_discussion">Start a discussion</string>
+    <string name="fab_new_email">New email</string>
+
+    <!-- Placeholder destinations until their phase lands -->
+    <string name="placeholder_title">Coming next</string>
+    <string name="placeholder_body">This screen is built in a later step of the Android app.</string>
+    <string name="placeholder_snackbar">Not built yet</string>
+
+    <!-- You and Appearance (F-Menu, F-Appearance) -->
+    <string name="you_appearance">Appearance</string>
+    <string name="appearance_title">Appearance</string>
+    <string name="appearance_theme">Theme</string>
+    <string name="appearance_light">Light</string>
+    <string name="appearance_dark">Dark</string>
+    <string name="appearance_system">Match device</string>
+    <string name="appearance_saved_note">Saved on this phone.</string>
+    <string name="back">Back</string>
+</resources>

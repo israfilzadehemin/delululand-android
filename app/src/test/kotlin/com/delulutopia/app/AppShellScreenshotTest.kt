@@ -1,0 +1,55 @@
+package com.delulutopia.app
+
+import android.app.Application
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onRoot
+import androidx.navigation.compose.rememberNavController
+import com.delulutopia.app.navigation.AppearanceRoute
+import com.delulutopia.app.navigation.LettersRoute
+import com.delulutopia.app.ui.DelulutopiaApp
+import com.delulutopia.core.designsystem.theme.DelulutopiaTheme
+import com.delulutopia.core.designsystem.theme.ThemeMode
+import com.github.takahirom.roborazzi.captureRoboImage
+import org.junit.Rule
+import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
+import org.robolectric.annotation.GraphicsMode
+
+/** The shell at the canvas phone frame (412 × 917 dp), both themes. */
+@RunWith(RobolectricTestRunner::class)
+@GraphicsMode(GraphicsMode.Mode.NATIVE)
+@Config(qualifiers = "w412dp-h917dp-xxhdpi", application = Application::class)
+class AppShellScreenshotTest {
+    @get:Rule val compose = createComposeRule()
+
+    @Composable
+    private fun Shell(dark: Boolean, start: Any?) {
+        val nav = rememberNavController()
+        DelulutopiaTheme(darkTheme = dark) {
+            DelulutopiaApp(themeMode = if (dark) ThemeMode.Dark else ThemeMode.Light, onThemeModeChange = {}, navController = nav)
+        }
+        if (start != null) LaunchedEffect(Unit) { nav.navigate(start) }
+    }
+
+    private fun capture(name: String, dark: Boolean, start: Any? = null) {
+        compose.setContent { Shell(dark, start) }
+        compose.waitForIdle()
+        compose.onRoot().captureRoboImage("build/outputs/roborazzi/app_$name.png")
+    }
+
+    @Test fun home_light() = capture("home_light", dark = false)
+
+    @Test fun home_dark() = capture("home_dark", dark = true)
+
+    @Test fun letters_light() = capture("letters_light", dark = false, start = LettersRoute)
+
+    @Test fun letters_dark() = capture("letters_dark", dark = true, start = LettersRoute)
+
+    @Test fun appearance_light() = capture("appearance_light", dark = false, start = AppearanceRoute)
+
+    @Test fun appearance_dark() = capture("appearance_dark", dark = true, start = AppearanceRoute)
+}
