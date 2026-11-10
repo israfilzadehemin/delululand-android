@@ -5,12 +5,12 @@ import androidx.lifecycle.viewModelScope
 import com.delulutopia.app.settings.DeviceSettingsRepository
 import com.delulutopia.core.designsystem.theme.ThemeMode
 import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 /** App-wide state: the theme, read before the first frame so the splash never hands over to the wrong one. */
 @HiltViewModel

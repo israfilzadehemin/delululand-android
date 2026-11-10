@@ -30,8 +30,6 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
                 abortOnError = true
                 warningsAsErrors = false
                 checkDependencies = true
-                xmlReport = false
-                sarifReport = true
             }
         }
     }

@@ -38,8 +38,8 @@ import com.delulutopia.core.designsystem.component.DlTopAppBar
 import com.delulutopia.core.designsystem.icon.DlIcons
 import com.delulutopia.core.designsystem.theme.DlTheme
 import com.delulutopia.core.designsystem.theme.ThemeMode
-import kotlinx.coroutines.launch
 import kotlin.reflect.KClass
+import kotlinx.coroutines.launch
 
 /**
  * The app shell: top app bar (title only, Y-A3), navigation bar with five destinations (Y-A1) and a
