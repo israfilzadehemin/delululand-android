@@ -95,4 +95,3 @@ fun DlTextField(
 
 /** Keys are typed and shown grouped: "k7qmwx4p2nzd" → "K7QM-WX4P-2NZD" (12 characters). */
 fun formatKey(raw: String): String = raw.uppercase().filter { it.isLetterOrDigit() }.take(12).chunked(4).joinToString("-")
-
