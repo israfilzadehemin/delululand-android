@@ -5,7 +5,7 @@ following the design in the project doc "Delululand — Android App Design" and 
 
 | | |
 | --- | --- |
-| Min / target SDK | 23 (Android 6.0) / 37 |
+| Min / target SDK | 24 (Android 7.0; the current AndroidX floor) / 37 |
 | Stack | Kotlin 2.4, Compose (BOM), Material 3, Navigation Compose (typed routes), Hilt, DataStore |
 | Modules | `app` (shell, navigation) · `core:designsystem` (theme, fonts, components) · `build-logic` (convention plugins) |
 | Flavours | `staging` → https://test.delulutopia.com (label "Delulutopia Test") · `prod` → https://delulutopia.com; they install side by side |

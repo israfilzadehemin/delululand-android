@@ -10,7 +10,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import com.delulutopia.core.designsystem.theme.DlShape
 
 /** Snackbars replace the web's toasts (§3): inverse surface, 8 dp corners, optional text action. */
@@ -27,7 +26,6 @@ fun DlSnackbar(data: SnackbarData, modifier: Modifier = Modifier) {
         shape = DlShape.snackbar,
         containerColor = MaterialTheme.colorScheme.inverseSurface,
         contentColor = MaterialTheme.colorScheme.inverseOnSurface,
-        tonalElevation = 0.dp,
         action = if (label != null) {
             {
                 TextButton(onClick = { data.performAction() }) {

@@ -6,7 +6,7 @@ ksp = "2.3.13"
 hilt = "2.60.1"
 
 # SDK levels
-minSdk = "23"
+minSdk = "24"
 targetSdk = "37"
 compileSdk = "37"
 
