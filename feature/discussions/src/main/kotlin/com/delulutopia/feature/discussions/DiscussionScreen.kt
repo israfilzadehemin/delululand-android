@@ -385,7 +385,7 @@ private fun Bar(text: String, action: @Composable () -> Unit) {
         Modifier
             .padding(start = 12.dp, end = 12.dp, top = 4.dp)
             .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.secondaryContainer, RoundedCornerShape(12.dp))
+            .background(MaterialTheme.colorScheme.primaryContainer, RoundedCornerShape(12.dp))
             .padding(start = 14.dp, end = 8.dp, top = 8.dp, bottom = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),

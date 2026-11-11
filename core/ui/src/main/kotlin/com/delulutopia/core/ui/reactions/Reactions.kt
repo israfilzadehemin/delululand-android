@@ -183,7 +183,7 @@ fun Reactions(
                         .height(chipH)
                         .widthIn(min = chipMin)
                         .clip(chipShape)
-                        .background(if (on) MaterialTheme.colorScheme.secondaryContainer else chipColour)
+                        .background(if (on) MaterialTheme.colorScheme.primaryContainer else chipColour)
                         .border(1.dp, if (on) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant, chipShape)
                         .then(
                             if (readOnly) {
@@ -255,7 +255,7 @@ fun Reactions(
                                         Modifier
                                             .size(38.dp)
                                             .clip(RoundedCornerShape(19.dp))
-                                            .background(if (mineOn(e)) MaterialTheme.colorScheme.secondaryContainer else Color.Transparent)
+                                            .background(if (mineOn(e)) MaterialTheme.colorScheme.primaryContainer else Color.Transparent)
                                             .combinedClickable {
                                                 quick = false
                                                 toggle(e)

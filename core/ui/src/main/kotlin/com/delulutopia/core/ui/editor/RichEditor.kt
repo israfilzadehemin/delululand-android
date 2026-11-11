@@ -234,7 +234,7 @@ private fun Tool(label: String, on: Boolean, enabled: Boolean, onClick: () -> Un
         Modifier
             .size(44.dp)
             .clip(RoundedCornerShape(10.dp))
-            .background(if (on) colours.secondaryContainer else Color.Transparent)
+            .background(if (on) colours.primaryContainer else Color.Transparent)
             .then(
                 if (enabled) {
                     Modifier.clickableNoFocus(onClick)

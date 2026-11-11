@@ -234,7 +234,7 @@ private fun LetterContent(letter: LetterFull, home: Home?, swiped: Boolean, vm: 
                         Modifier
                             .padding(start = 12.dp, end = 12.dp, bottom = 10.dp)
                             .fillMaxWidth()
-                            .background(MaterialTheme.colorScheme.secondaryContainer, RoundedCornerShape(12.dp))
+                            .background(MaterialTheme.colorScheme.primaryContainer, RoundedCornerShape(12.dp))
                             .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(12.dp))
                             .padding(start = 14.dp, end = 8.dp, top = 8.dp, bottom = 8.dp),
                         verticalAlignment = Alignment.CenterVertically,

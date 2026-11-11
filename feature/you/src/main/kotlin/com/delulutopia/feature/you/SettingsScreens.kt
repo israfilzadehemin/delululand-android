@@ -113,7 +113,7 @@ fun NotificationsScreen(vm: NotificationsViewModel = hiltViewModel()) {
                 return@Column
             }
             // web .dl-set-pause--on: the seal tint while everything is paused.
-            Card(background = if (s.paused) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surfaceContainerHigh) {
+            Card(background = if (s.paused) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainerHigh) {
                 DlSwitchItem(
                     "Pause all",
                     s.paused,

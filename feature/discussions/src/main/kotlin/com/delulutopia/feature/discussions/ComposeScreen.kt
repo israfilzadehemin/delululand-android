@@ -349,7 +349,7 @@ private fun PostSheet(friend: String, delay: String, window: String, onClose: ()
     val windowMs = Time.isoDurationMs(window) ?: 300_000L
     DlBottomSheet(onDismissRequest = { if (!posting) onClose() }) {
         Column(Modifier.padding(start = 24.dp, end = 24.dp, bottom = 24.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-            Box(Modifier.size(48.dp).background(MaterialTheme.colorScheme.secondaryContainer, CircleShape), contentAlignment = Alignment.Center) {
+            Box(Modifier.size(48.dp).background(MaterialTheme.colorScheme.primaryContainer, CircleShape), contentAlignment = Alignment.Center) {
                 Icon(WebIcons.Discussions, null)
             }
             Text("Post this discussion?", style = MaterialTheme.typography.headlineSmall)

@@ -193,7 +193,7 @@ private fun LazyGridScope.stampCells(section: String, stamps: List<StampView>, c
                 .aspectRatio(300f / 380f)
                 .clip(RoundedCornerShape(6.dp))
                 .then(if (on) Modifier.border(2.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(6.dp)) else Modifier)
-                .background(if (on) MaterialTheme.colorScheme.secondaryContainer else Color.Transparent)
+                .background(if (on) MaterialTheme.colorScheme.primaryContainer else Color.Transparent)
                 .clickable { pick(s) }
                 .semantics {
                     contentDescription = s.name

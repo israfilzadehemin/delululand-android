@@ -258,7 +258,7 @@ fun DoodlePad(
                                 Modifier
                                     .size(48.dp)
                                     .clip(RoundedCornerShape(12.dp))
-                                    .background(if (on) MaterialTheme.colorScheme.secondaryContainer else Color.Transparent)
+                                    .background(if (on) MaterialTheme.colorScheme.primaryContainer else Color.Transparent)
                                     .selectable(on, role = Role.RadioButton) { brush = i }
                                     .semantics { contentDescription = name },
                                 contentAlignment = Alignment.Center,
@@ -296,7 +296,7 @@ private fun Tool(icon: ImageVector, label: String, enabled: Boolean = true, on: 
         Modifier
             .size(48.dp)
             .clip(CircleShape)
-            .background(if (on) MaterialTheme.colorScheme.secondaryContainer else Color.Transparent)
+            .background(if (on) MaterialTheme.colorScheme.primaryContainer else Color.Transparent)
             .clickable(enabled = enabled, role = Role.Button, onClick = onClick)
             .semantics { contentDescription = label },
         contentAlignment = Alignment.Center,

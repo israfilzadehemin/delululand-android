@@ -579,7 +579,7 @@ private fun SendSheet(delay: String, window: String, feeling: String?, onClose: 
     val windowMs = Time.isoDurationMs(window) ?: 300_000L
     DlBottomSheet(onDismissRequest = { if (!sending) onClose() }) {
         Column(Modifier.padding(start = 24.dp, end = 24.dp, bottom = 24.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-            Box(Modifier.size(48.dp).background(MaterialTheme.colorScheme.secondaryContainer, CircleShape), contentAlignment = Alignment.Center) {
+            Box(Modifier.size(48.dp).background(MaterialTheme.colorScheme.primaryContainer, CircleShape), contentAlignment = Alignment.Center) {
                 Icon(WebIcons.Envelope, null)
             }
             Text("Send this letter?", style = MaterialTheme.typography.headlineSmall)

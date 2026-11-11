@@ -161,7 +161,7 @@ fun rememberVoiceRecording(onRecorded: (ByteArray, Long) -> Unit): VoiceState {
     if (asking) {
         DlBottomSheet(onDismissRequest = { asking = false }) {
             Column(Modifier.padding(start = 24.dp, end = 24.dp, bottom = 24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Box(Modifier.size(56.dp).background(MaterialTheme.colorScheme.secondaryContainer, CircleShape), contentAlignment = Alignment.Center) {
+                Box(Modifier.size(56.dp).background(MaterialTheme.colorScheme.primaryContainer, CircleShape), contentAlignment = Alignment.Center) {
                     Icon(WebIcons.Mic, null, Modifier.size(28.dp))
                 }
                 Text("Record a voice note", style = MaterialTheme.typography.headlineSmall)

@@ -97,15 +97,19 @@ internal fun MoodSheet(
     DlBottomSheet(onDismissRequest = onClose) {
         when (val v = view) {
             MoodView.Grid -> Column(Modifier.padding(bottom = 16.dp)) {
-                Text(
-                    "How do you feel?",
-                    Modifier.padding(start = 24.dp, end = 24.dp, top = 4.dp, bottom = 8.dp),
-                    style = MaterialTheme.typography.headlineSmall,
-                )
+                // web .dl-sheet-titlebar (mood: 18/700) with the close button at the end.
+                Row(Modifier.fillMaxWidth().padding(start = 16.dp, end = 6.dp, bottom = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        "How do you feel?",
+                        Modifier.weight(1f),
+                        style = MaterialTheme.typography.titleLarge.copy(fontSize = 18.sp, fontWeight = FontWeight.Bold),
+                    )
+                    IconButton(onClick = onClose) { Icon(WebIcons.Close, "Close", Modifier.size(20.dp)) }
+                }
                 HorizontalPager(pager, Modifier.fillMaxWidth()) { p ->
-                    Column(Modifier.padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Column(Modifier.padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                         pages[p].chunked(4).forEachIndexed { r, row ->
-                            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                                 row.forEachIndexed { k, m ->
                                     // The grid pops in tile by tile (web .dl-mood-grid: 80 ms, 20 ms apart, capped at 220 ms).
                                     Box(Modifier.weight(1f).enter(Enter.PopIn, (80 + 20 * (r * 4 + k)).coerceAtMost(220), 260)) {
@@ -210,20 +214,20 @@ private fun MoodTile(mood: Mood, on: Boolean, enabled: Boolean, onClick: () -> U
     Column(
         Modifier
             .fillMaxWidth()
-            .height(84.dp)
+            .height(76.dp)
             .clip(shape)
-            .background(if (on) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surface)
+            .background(if (on) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.background)
             .border(if (on) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant), shape)
             .clickable(enabled = enabled, role = Role.Button, onClick = onClick)
             .semantics { selected = on }
-            .padding(horizontal = 4.dp, vertical = 10.dp),
+            .padding(horizontal = 4.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterVertically),
     ) {
-        Text(mood.emoji, fontSize = 26.sp)
+        Text(mood.emoji, fontSize = 26.sp, lineHeight = 26.sp)
         Text(
             mood.label,
-            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold, fontSize = 13.sp),
+            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold, fontSize = 12.sp, lineHeight = 14.4.sp),
             textAlign = TextAlign.Center,
             maxLines = 2,
         )
@@ -236,8 +240,9 @@ private fun NewMoodTile(enabled: Boolean, onClick: () -> Unit) {
     Column(
         Modifier
             .fillMaxWidth()
-            .height(84.dp)
+            .height(76.dp)
             .clip(RoundedCornerShape(12.dp))
+            .background(MaterialTheme.colorScheme.background)
             .drawBehind {
                 drawRoundRect(
                     line,
@@ -252,7 +257,7 @@ private fun NewMoodTile(enabled: Boolean, onClick: () -> Unit) {
         Text("+", fontSize = 26.sp, color = if (enabled) MaterialTheme.colorScheme.primary else line)
         Text(
             "New mood",
-            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold, fontSize = 13.sp),
+            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold, fontSize = 12.sp, lineHeight = 14.4.sp),
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
