@@ -190,13 +190,14 @@ private fun AfterPin(friend: String?) {
         Fingerprint.markOffered(context, pending.first)
         offer = null
     }
+    val yes = stringResource(R.string.fingerprint_offer_yes)
     DlDialog(
         title = stringResource(R.string.fingerprint_offer_title),
         text = stringResource(R.string.fingerprint_offer_text),
-        confirmLabel = stringResource(R.string.fingerprint_offer_yes),
+        confirmLabel = yes,
         onConfirm = {
             close()
-            if (activity != null) Fingerprint.turnOn(activity, pending.first, pending.second, context.getString(R.string.fingerprint_offer_yes)) { }
+            if (activity != null) Fingerprint.turnOn(activity, pending.first, pending.second, yes) { }
         },
         dismissLabel = stringResource(R.string.not_now),
         onDismiss = close,
