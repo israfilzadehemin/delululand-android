@@ -3,6 +3,7 @@ package com.delulutopia.core.data
 import com.delulutopia.core.network.ApiCaller
 import com.delulutopia.core.network.ApiException
 import com.delulutopia.core.network.DelulutopiaApi
+import com.delulutopia.core.network.model.ChangePinBody
 import com.delulutopia.core.network.model.CreateUniverseRequest
 import com.delulutopia.core.network.model.CreatedUniverse
 import com.delulutopia.core.network.model.EnterRequest
@@ -11,9 +12,13 @@ import com.delulutopia.core.network.model.EntryView
 import com.delulutopia.core.network.model.InviteRequest
 import com.delulutopia.core.network.model.JoinRequest
 import com.delulutopia.core.network.model.LoginRequest
+import com.delulutopia.core.network.model.Profile
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.delay
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.toRequestBody
 
 /**
  * The key, the cards, the PIN and creating or joining a universe (doc "Delululand — Universe" §2,
@@ -44,6 +49,16 @@ class AccountRepository @Inject constructor(
     suspend fun createUniverse(request: CreateUniverseRequest): CreatedUniverse = caller.call { api.createUniverse(request) }
 
     suspend fun join(username: String, timezone: String, pin: String) = caller.call { api.join(JoinRequest(username, timezone, pin)) }
+
+    /** FS-A17: every other device stays logged in. */
+    suspend fun changePin(current: String, next: String) = withThrottleRetry("PIN_THROTTLED") { api.changePin(ChangePinBody(current, next)) }
+
+    /** P2, U9: the cropped 384 px JPEG. */
+    suspend fun uploadAvatar(jpeg: ByteArray): Profile = caller.call {
+        api.uploadAvatar(MultipartBody.Part.createFormData("file", "avatar.jpg", jpeg.toRequestBody("image/jpeg".toMediaType())))
+    }
+
+    suspend fun removeAvatar(): Profile = caller.call { api.removeAvatar() }
 
     private suspend fun <T> withThrottleRetry(throttleCode: String, block: suspend () -> T): T {
         try {

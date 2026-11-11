@@ -106,6 +106,7 @@ class CreateUniverseViewModel @Inject constructor(
                 val r = account.createUniverse(
                     CreateUniverseRequest(s.invite, s.name.trim(), s.welcome, s.citizen.username, s.citizen.timezone, pin),
                 )
+                account.uploadPhoto(s.citizen.photo)
                 _state.update { it.copy(step = 5, created = Created(r.code, r.universe.name), pin = WizardPin()) }
             } catch (e: ApiException) {
                 // C4: a refusal sends the person to the step it belongs to.

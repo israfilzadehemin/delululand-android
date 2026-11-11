@@ -1,5 +1,6 @@
 package com.delulutopia.app.ui
 
+import androidx.activity.compose.LocalActivity
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
@@ -8,13 +9,19 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.fragment.app.FragmentActivity
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleStartEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -30,6 +37,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.delulutopia.app.R
 import com.delulutopia.core.data.HomeRepository
+import com.delulutopia.core.designsystem.component.DlDialog
 import com.delulutopia.core.designsystem.component.DlNavigationBar
 import com.delulutopia.core.designsystem.component.DlNavigationItem
 import com.delulutopia.core.designsystem.component.DlNavigationYouItem
@@ -39,8 +47,8 @@ import com.delulutopia.core.designsystem.component.DlTopAppBar
 import com.delulutopia.core.designsystem.icon.DlIcons
 import com.delulutopia.core.designsystem.theme.ThemeMode
 import com.delulutopia.core.network.model.HomeSession
+import com.delulutopia.core.ui.AfterStart
 import com.delulutopia.core.ui.AppNav
-import com.delulutopia.core.ui.AppearanceRoute
 import com.delulutopia.core.ui.DiscussionsRoute
 import com.delulutopia.core.ui.EmailsRoute
 import com.delulutopia.core.ui.HomeRoute
@@ -51,6 +59,7 @@ import com.delulutopia.core.ui.LocalFirstCitizen
 import com.delulutopia.core.ui.LocalNotice
 import com.delulutopia.core.ui.LocalNoticeAction
 import com.delulutopia.core.ui.YouRoute
+import com.delulutopia.core.ui.fingerprint.Fingerprint
 import com.delulutopia.core.ui.initials
 import com.delulutopia.core.ui.notify.NotifyPermission
 import com.delulutopia.core.ui.notify.rememberNotifyAccess
@@ -60,6 +69,7 @@ import com.delulutopia.feature.discussions.discussionsGraph
 import com.delulutopia.feature.emails.emailsGraph
 import com.delulutopia.feature.home.HomeScreen
 import com.delulutopia.feature.letters.lettersGraph
+import com.delulutopia.feature.you.youGraph
 import kotlin.reflect.KClass
 import kotlinx.coroutines.launch
 
@@ -85,22 +95,62 @@ fun SignedInApp(
     shell: ShellViewModel = hiltViewModel(),
 ) {
     val state by shell.state.collectAsStateWithLifecycle()
+    val currentTheme by rememberUpdatedState(themeMode)
     LifecycleStartEffect(Unit) {
         shell.foreground()
         onStopOrDispose { shell.background() }
     }
     CompositionLocalProvider(LocalReactionsApi provides shell.reactions) {
-        DelulutopiaApp(session, state) { navController ->
+        DelulutopiaApp(session, state, overlay = { AfterPin() }) {
             composable<HomeRoute> { HomeScreen() }
             lettersGraph()
             discussionsGraph()
             emailsGraph()
-            composable<YouRoute> {
-                YouScreen(session = session, onOpenAppearance = { navController.navigate(AppearanceRoute) }, onLogout = onLogout)
-            }
-            composable<AppearanceRoute> { AppearanceScreen(themeMode, onThemeModeChange) }
+            youGraph({ currentTheme }, onThemeModeChange, onLogout)
         }
     }
+}
+
+/**
+ * What follows a PIN entry once Home is up: X1's one-time fingerprint offer, and U9's word when the
+ * citizen photo could not be uploaded.
+ */
+@Composable
+private fun AfterPin() {
+    val context = LocalContext.current
+    val activity = LocalActivity.current as? FragmentActivity
+    val notice = LocalNotice.current
+    var offer by remember {
+        val entered = Fingerprint.justEntered
+        Fingerprint.justEntered = null
+        mutableStateOf(
+            entered?.takeIf { (id, _) ->
+                activity != null && Fingerprint.available(context) && !Fingerprint.offered(context, id) && !Fingerprint.isOn(context, id)
+            },
+        )
+    }
+    LaunchedEffect(Unit) {
+        if (AfterStart.photoFailed) {
+            AfterStart.photoFailed = false
+            notice("Couldn't add your photo. You can add it in Profile.")
+        }
+    }
+    val pending = offer ?: return
+    val close = {
+        Fingerprint.markOffered(context, pending.first)
+        offer = null
+    }
+    DlDialog(
+        title = stringResource(R.string.fingerprint_offer_title),
+        text = stringResource(R.string.fingerprint_offer_text),
+        confirmLabel = stringResource(R.string.fingerprint_offer_yes),
+        onConfirm = {
+            close()
+            if (activity != null) Fingerprint.turnOn(activity, pending.first, pending.second, context.getString(R.string.fingerprint_offer_yes)) { }
+        },
+        dismissLabel = stringResource(R.string.not_now),
+        onDismiss = close,
+    )
 }
 
 /** The shell itself, stateless: [state] is Home's, [graph] the screens (tests pass their own). */
@@ -109,6 +159,7 @@ fun DelulutopiaApp(
     session: HomeSession,
     state: HomeRepository.State,
     navController: NavHostController = rememberNavController(),
+    overlay: @Composable () -> Unit = {},
     graph: NavGraphBuilder.(NavHostController) -> Unit,
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
@@ -164,11 +215,6 @@ fun DelulutopiaApp(
                     // Home's title is the universe's name (Universe §4).
                     top == TopDestination.Home -> DlTopAppBar(title = brand)
                     top != null -> DlTopAppBar(title = stringResource(top.label))
-                    destination.isOn(AppearanceRoute::class) -> DlTopAppBar(
-                        title = stringResource(R.string.appearance_title),
-                        onBack = { navController.popBackStack() },
-                        backDescription = stringResource(R.string.back),
-                    )
                 }
             },
             bottomBar = {
@@ -224,6 +270,7 @@ fun DelulutopiaApp(
                 graph(navController)
             }
         }
+        overlay()
     }
 }
 

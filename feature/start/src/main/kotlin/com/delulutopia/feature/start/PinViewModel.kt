@@ -1,5 +1,6 @@
 package com.delulutopia.feature.start
 
+import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -8,7 +9,9 @@ import com.delulutopia.core.data.AccountRepository
 import com.delulutopia.core.data.SessionRepository
 import com.delulutopia.core.network.ApiException
 import com.delulutopia.core.network.model.UserCard
+import com.delulutopia.core.ui.fingerprint.Fingerprint
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -26,6 +29,7 @@ class PinViewModel @Inject constructor(
     savedState: SavedStateHandle,
     private val account: AccountRepository,
     private val session: SessionRepository,
+    @ApplicationContext private val context: Context,
 ) : ViewModel() {
 
     enum class Mode { Enter, Create, Confirm }
@@ -53,7 +57,7 @@ class PinViewModel @Inject constructor(
         val leave: Boolean = false,
     )
 
-    private val userId = savedState.toRoute<PinDestination>().userId
+    val userId = savedState.toRoute<PinDestination>().userId
     private val _state = MutableStateFlow(UiState())
     val state: StateFlow<UiState> = _state.asStateFlow()
     private var first = ""
@@ -77,6 +81,11 @@ class PinViewModel @Inject constructor(
 
     fun onDigits(d: String) = _state.update { it.copy(digits = d, problem = if (d.isNotEmpty()) null else it.problem) }
 
+    /** X1: the PIN kept behind the fingerprint, sent as if typed; a refused one is forgotten. */
+    fun onFingerprint(pin: String) {
+        if (_state.value.mode == Mode.Enter) submit(pin, fromFingerprint = true) { account.login(userId, pin) }
+    }
+
     fun onComplete(pin: String) {
         val s = _state.value
         if (s.busy) return
@@ -89,25 +98,30 @@ class PinViewModel @Inject constructor(
                 first = ""
                 fail(Problem.Differ, Mode.Create)
             } else {
-                submit { account.createPin(userId, pin) }
+                submit(pin) { account.createPin(userId, pin) }
             }
-            Mode.Enter -> submit { account.login(userId, pin) }
+            Mode.Enter -> submit(pin) { account.login(userId, pin) }
         }
     }
 
-    private fun submit(call: suspend () -> Unit) {
+    private fun submit(pin: String, fromFingerprint: Boolean = false, call: suspend () -> Unit) {
         val mode = _state.value.mode
         _state.update { it.copy(busy = true, problem = null) }
         viewModelScope.launch {
             try {
                 call()
+                if (!fromFingerprint) Fingerprint.justEntered = userId to pin
                 session.refresh()
             } catch (e: ApiException) {
                 when {
                     e.code == "ENTRY_REQUIRED" -> _state.update { it.copy(leave = true) }
                     e.code == "NO_PIN" -> fail(null, Mode.Create)
                     e.code == "PIN_EXISTS" -> fail(null, Mode.Enter) // Set a moment ago on another device.
-                    mode == Mode.Enter && e.code in setOf("WRONG_PIN", "PIN_THROTTLED", "BAD_PIN") -> fail(Problem.Wrong, Mode.Enter)
+                    mode == Mode.Enter && e.code in setOf("WRONG_PIN", "PIN_THROTTLED", "BAD_PIN") -> {
+                        // Changed on another device since: the kept PIN is stale.
+                        if (fromFingerprint) Fingerprint.turnOff(context, userId)
+                        fail(Problem.Wrong, Mode.Enter)
+                    }
                     e.isOffline -> fail(Problem.Offline, if (mode == Mode.Enter) Mode.Enter else Mode.Create)
                     else -> fail(Problem.Text(e.message), if (mode == Mode.Enter) Mode.Enter else Mode.Create)
                 }

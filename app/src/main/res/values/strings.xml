@@ -12,31 +12,21 @@
     <string name="nav_notifications_off">Notifications are off</string>
 
     <!-- Per-list FABs (Y-A2) -->
-    <string name="fab_new_letter">Write a letter</string>
     <string name="fab_continue_letter">Continue your letter</string>
     <string name="fab_new_discussion">Start a discussion</string>
-    <string name="fab_new_email">New email</string>
 
     <!-- Placeholder destinations until their phase lands -->
     <string name="placeholder_title">Coming next</string>
     <string name="placeholder_body">This screen is built in a later step of the Android app.</string>
-    <string name="you_signed_in">Signed in to %1$s</string>
-    <string name="placeholder_snackbar">Not built yet</string>
 
     <!-- You and Appearance (F-Menu, F-Appearance) -->
-    <string name="you_appearance">Appearance</string>
-    <string name="appearance_title">Appearance</string>
-    <string name="appearance_theme">Theme</string>
-    <string name="appearance_light">Light</string>
-    <string name="appearance_dark">Dark</string>
-    <string name="appearance_system">Match device</string>
-    <string name="appearance_saved_note">Saved on this phone.</string>
     <string name="back">Back</string>
     <string name="brand">Delulutopia</string>
     <string name="cant_reach_brand">Can’t reach Delulutopia. Try again.</string>
     <string name="try_again">Try again</string>
-    <string name="you_log_out">Log out</string>
-    <string name="logout_title">Log out of %1$s?</string>
-    <string name="logout_text">Your letters and drafts stay safe. You’ll need your PIN to come back on this device.</string>
     <string name="cancel">Cancel</string>
+    <string name="not_now">Not now</string>
+    <string name="fingerprint_offer_title">Unlock with your fingerprint?</string>
+    <string name="fingerprint_offer_text">Next time, touch the sensor instead of typing your PIN. Your PIN stays on this phone, opened only by your fingerprint. You can turn it off in You.</string>
+    <string name="fingerprint_offer_yes">Use fingerprint</string>
 </resources>

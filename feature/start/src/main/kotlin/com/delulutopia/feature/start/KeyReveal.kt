@@ -40,7 +40,7 @@ import kotlinx.coroutines.launch
  * either, or after three seconds, so nobody leaves without at least seeing it.
  */
 @Composable
-internal fun KeyReveal(name: String, code: String, onContinue: () -> Unit) {
+fun KeyReveal(name: String, code: String, onContinue: () -> Unit, continueLabel: String? = null) {
     val context = LocalContext.current
     val clipboard = LocalClipboard.current
     val scope = rememberCoroutineScope()
@@ -95,6 +95,6 @@ internal fun KeyReveal(name: String, code: String, onContinue: () -> Unit) {
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
-        DlFilledButton(stringResource(R.string.continue_), onContinue, Modifier.fillMaxWidth(), enabled = ready, height = 48.dp)
+        DlFilledButton(continueLabel ?: stringResource(R.string.continue_), onContinue, Modifier.fillMaxWidth(), enabled = ready, height = 48.dp)
     }
 }

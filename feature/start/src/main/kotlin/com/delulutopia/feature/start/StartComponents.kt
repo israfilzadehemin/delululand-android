@@ -52,7 +52,7 @@ internal fun signatureTintOf(index: Int): Color = if (index == 0) DlTheme.colors
 
 /** UV-3: "Welcome to <name>" with the universe's paragraphs; Enter only (Close for the creator's preview). */
 @Composable
-internal fun WelcomeDialog(name: String, welcome: String, onEnter: () -> Unit, preview: Boolean = false) {
+fun WelcomeDialog(name: String, welcome: String, onEnter: () -> Unit, preview: Boolean = false) {
     AlertDialog(
         onDismissRequest = { if (preview) onEnter() },
         containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
@@ -170,6 +170,7 @@ internal fun ColumnScope.PinPanel(
     busy: Boolean,
     onDigits: (String) -> Unit,
     onComplete: (String) -> Unit,
+    onFingerprint: (() -> Unit)? = null,
 ) {
     Column(
         Modifier
@@ -202,6 +203,7 @@ internal fun ColumnScope.PinPanel(
         onDigits = onDigits,
         onComplete = onComplete,
         enabled = !busy,
+        onBiometric = onFingerprint,
         backspaceDescription = stringResource(R.string.backspace),
         modifier = Modifier.padding(bottom = 20.dp),
     )

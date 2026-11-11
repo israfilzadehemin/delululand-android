@@ -1,7 +1,7 @@
 package com.delulutopia.feature.start
 
 /** Doc "Delululand — Universe" U5, U7, U9 (web src/api/universe.ts, src/profile/rules.ts). */
-internal object Rules {
+object Rules {
     private val universeName = Regex("^[\\p{L}\\p{Nd}]{2,12}$")
     private val username = Regex("^[\\p{L}\\p{Nd}]{3,16}$")
     const val WELCOME_MAX = 1500

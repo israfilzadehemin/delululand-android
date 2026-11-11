@@ -171,7 +171,7 @@ fun JoinRoute(onLeave: () -> Unit, viewModel: JoinViewModel = hiltViewModel()) {
         if (s.step == 1) {
             FormColumn {
                 WizardTitle(stringResource(R.string.citizen_title))
-                CitizenStep(s.citizen, viewModel::onCitizen, taken = s.taken, serverError = s.serverError)
+                CitizenStep(s.citizen, viewModel::onCitizen, taken = s.taken, serverError = s.serverError, signature = 1)
                 DlFilledButton(
                     stringResource(R.string.continue_),
                     viewModel::next,

@@ -38,6 +38,7 @@
     <string name="pin_dots_new">New PIN</string>
     <string name="pin_dots_confirm">Confirm PIN</string>
     <string name="backspace">Backspace</string>
+    <string name="fingerprint_title">Unlock %1$s</string>
 
     <!-- Create (C1–C5) -->
     <string name="create_title">Create a universe</string>
@@ -67,7 +68,13 @@
     <string name="username_taken">That username is taken</string>
     <string name="timezone_label">Time zone</string>
     <string name="timezone_hint">This device’s zone, picked for you.</string>
-    <string name="citizen_note">Name, surname, your photo and everything else can wait for Profile.</string>
+    <string name="citizen_note">Name, surname and everything else can wait for Profile.</string>
+    <string name="your_photo">Your photo</string>
+    <string name="add_photo">Add photo</string>
+    <string name="change_photo">Change photo</string>
+    <string name="photo_optional">Optional. Initials until then.</string>
+    <string name="photo_after">Uploaded once you are in.</string>
+    <string name="photo_too_big">This photo is larger than 10 MB</string>
 
     <!-- Key reveal (C5) -->
     <string name="key_reveal_title">This is %1$s’s key</string>

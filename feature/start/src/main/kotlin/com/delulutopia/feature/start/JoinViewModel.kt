@@ -77,6 +77,7 @@ class JoinViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 account.join(s.citizen.username, s.citizen.timezone, pin)
+                account.uploadPhoto(s.citizen.photo)
                 session.refresh()
             } catch (e: ApiException) {
                 _state.update {

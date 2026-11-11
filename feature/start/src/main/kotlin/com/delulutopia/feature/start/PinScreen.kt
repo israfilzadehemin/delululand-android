@@ -1,5 +1,6 @@
 package com.delulutopia.feature.start
 
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.safeDrawingPadding
@@ -8,15 +9,21 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.fragment.app.FragmentActivity
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.delulutopia.core.designsystem.component.DlRemoteAvatar
 import com.delulutopia.core.designsystem.component.DlTopAppBar
+import com.delulutopia.core.ui.fingerprint.Fingerprint
 import com.delulutopia.feature.start.PinViewModel.Mode
 import com.delulutopia.feature.start.PinViewModel.Problem
 
@@ -24,11 +31,32 @@ import com.delulutopia.feature.start.PinViewModel.Problem
 fun PinRoute(onBack: () -> Unit, viewModel: PinViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     LaunchedEffect(state.leave) { if (state.leave) onBack() }
-    PinScreen(state, onBack, viewModel::onDigits, viewModel::onComplete)
+    val activity = LocalActivity.current as? FragmentActivity
+    val context = LocalContext.current
+    val canFingerprint = activity != null && state.mode == PinViewModel.Mode.Enter && state.user != null &&
+        Fingerprint.isOn(context, viewModel.userId) && Fingerprint.available(context)
+    val title = stringResource(R.string.fingerprint_title, state.universe.ifBlank { stringResource(R.string.brand) })
+    val ask: () -> Unit = {
+        if (activity != null) Fingerprint.unlock(activity, viewModel.userId, title, viewModel::onFingerprint) {}
+    }
+    var asked by rememberSaveable { mutableStateOf(false) }
+    LaunchedEffect(canFingerprint) {
+        if (canFingerprint && !asked) {
+            asked = true
+            ask()
+        }
+    }
+    PinScreen(state, onBack, viewModel::onDigits, viewModel::onComplete, if (canFingerprint) ask else null)
 }
 
 @Composable
-fun PinScreen(state: PinViewModel.UiState, onBack: () -> Unit, onDigits: (String) -> Unit, onComplete: (String) -> Unit) {
+fun PinScreen(
+    state: PinViewModel.UiState,
+    onBack: () -> Unit,
+    onDigits: (String) -> Unit,
+    onComplete: (String) -> Unit,
+    onFingerprint: (() -> Unit)? = null,
+) {
     Column(Modifier.fillMaxSize().safeDrawingPadding()) {
         DlTopAppBar(title = "", onBack = onBack, backDescription = stringResource(R.string.back))
         val user = state.user
@@ -72,6 +100,7 @@ fun PinScreen(state: PinViewModel.UiState, onBack: () -> Unit, onDigits: (String
             busy = state.busy || state.user == null,
             onDigits = onDigits,
             onComplete = onComplete,
+            onFingerprint = onFingerprint,
         )
     }
 }
