@@ -55,7 +55,9 @@ import com.delulutopia.core.ui.YouRoute
 import com.delulutopia.core.ui.initials
 import com.delulutopia.core.ui.notify.NotifyPermission
 import com.delulutopia.core.ui.notify.rememberNotifyAccess
+import com.delulutopia.core.ui.reactions.LocalReactionsApi
 import com.delulutopia.core.ui.signatureOf
+import com.delulutopia.feature.discussions.discussionsGraph
 import com.delulutopia.feature.home.HomeScreen
 import com.delulutopia.feature.letters.lettersGraph
 import kotlin.reflect.KClass
@@ -87,15 +89,17 @@ fun SignedInApp(
         shell.foreground()
         onStopOrDispose { shell.background() }
     }
-    DelulutopiaApp(session, state) { navController ->
-        composable<HomeRoute> { HomeScreen() }
-        lettersGraph()
-        composable<DiscussionsRoute> { PlaceholderScreen() }
-        composable<EmailsRoute> { PlaceholderScreen() }
-        composable<YouRoute> {
-            YouScreen(session = session, onOpenAppearance = { navController.navigate(AppearanceRoute) }, onLogout = onLogout)
+    CompositionLocalProvider(LocalReactionsApi provides shell.reactions) {
+        DelulutopiaApp(session, state) { navController ->
+            composable<HomeRoute> { HomeScreen() }
+            lettersGraph()
+            discussionsGraph()
+            composable<EmailsRoute> { PlaceholderScreen() }
+            composable<YouRoute> {
+                YouScreen(session = session, onOpenAppearance = { navController.navigate(AppearanceRoute) }, onLogout = onLogout)
+            }
+            composable<AppearanceRoute> { AppearanceScreen(themeMode, onThemeModeChange) }
         }
-        composable<AppearanceRoute> { AppearanceScreen(themeMode, onThemeModeChange) }
     }
 }
 
@@ -222,7 +226,6 @@ fun DelulutopiaApp(
                         hasDraft =
                         home?.me?.draftEmpty == false,
                     )
-                    TopDestination.Discussions -> DlFab(DlIcons.NotePlus, stringResource(R.string.fab_new_discussion), { notice("Not built yet") })
                     TopDestination.Emails -> DlFab(DlIcons.EnvelopePlus, stringResource(R.string.fab_new_email), { notice("Not built yet") })
                     else -> Unit
                 }

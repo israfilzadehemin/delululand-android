@@ -116,14 +116,14 @@ fun rememberVoiceRecording(onRecorded: (ByteArray, Long) -> Unit): VoiceState {
     var asking by remember { mutableStateOf(false) }
     var blocked by remember { mutableStateOf(false) }
 
-    val finish = {
+    val finish: () -> Unit = {
         val length = (SystemClock.elapsedRealtime() - recorder.startedAt).coerceAtMost(MAX_RECORDING_MS)
         val bytes = recorder.stop()
         recording = false
         elapsed = 0
         if (bytes != null) done(bytes, length)
     }
-    val begin = {
+    val begin: () -> Unit = {
         runCatching {
             OnePlayer.stop()
             recorder.start()
@@ -150,7 +150,7 @@ fun rememberVoiceRecording(onRecorded: (ByteArray, Long) -> Unit): VoiceState {
     DisposableEffect(Unit) { onDispose { recorder.cancel() } }
 
     val granted = { ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED }
-    val start = {
+    val start: () -> Unit = {
         when {
             granted() -> begin()
             !prefs.getBoolean(ASKED, false) -> asking = true

@@ -1,0 +1,308 @@
+package com.delulutopia.feature.discussions
+
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.snapshotFlow
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.scale
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.delulutopia.core.data.LetterState
+import com.delulutopia.core.data.Time
+import com.delulutopia.core.designsystem.component.DlFab
+import com.delulutopia.core.designsystem.component.DlFilledButton
+import com.delulutopia.core.designsystem.icon.DlIcons
+import com.delulutopia.core.designsystem.icon.WebIcons
+import com.delulutopia.core.designsystem.theme.DlTheme
+import com.delulutopia.core.designsystem.theme.NoteColor
+import com.delulutopia.core.network.model.Citizen
+import com.delulutopia.core.network.model.DRow
+import com.delulutopia.core.ui.ArchivedRoute
+import com.delulutopia.core.ui.ComposeDiscussionRoute
+import com.delulutopia.core.ui.DiscussionRoute
+import com.delulutopia.core.ui.LocalAppNav
+import com.delulutopia.core.ui.LocalNotice
+import com.delulutopia.core.ui.NewChip
+import com.delulutopia.core.ui.Note
+import com.delulutopia.core.ui.noteColorOf
+import com.delulutopia.core.ui.noteInk
+import com.delulutopia.core.ui.noteInkQuiet
+import com.delulutopia.core.ui.reactions.noticeLine
+import com.delulutopia.core.ui.reactions.reactionWins
+import com.delulutopia.core.ui.rememberNow
+
+/**
+ * S10 Discussions and the Archived list (web discussions/DiscussionsScreen.tsx; canvas
+ * D-Discussions, K-Archive-list): big sticky notes, newest activity first, "Archived · N" at the
+ * top, the round button to start one.
+ */
+@Composable
+fun DiscussionsScreen(archived: Boolean) {
+    val vm = hiltViewModel<DiscussionsViewModel, DiscussionsViewModel.Factory>(key = "discussions-$archived", creationCallback = { it.create(archived) })
+    val home by vm.home.collectAsStateWithLifecycle()
+    DiscussionsList(
+        archived = archived,
+        rows = if (vm.head == null && vm.rows.isEmpty()) null else vm.rows,
+        hasMore = vm.nextCursor != null,
+        archivedCount = vm.archivedCount,
+        me = home.home?.me,
+        friend = home.home?.friend,
+        onMore = vm::loadMore,
+        onFlipped = vm::refresh,
+    )
+}
+
+@Composable
+fun DiscussionsList(
+    archived: Boolean,
+    rows: List<DRow>?,
+    hasMore: Boolean,
+    archivedCount: Int,
+    me: Citizen?,
+    friend: Citizen?,
+    onMore: () -> Unit,
+    onFlipped: () -> Unit,
+) {
+    val nav = LocalAppNav.current
+    val nowMs = rememberNow()
+    val draftEmpty = me?.discussionDraftEmpty ?: true
+    val startLabel = if (draftEmpty) "Start a discussion" else "Continue your discussion draft"
+    val bar: @Composable () -> Unit = {
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = if (archived) Arrangement.Start else Arrangement.End) {
+            if (archived) {
+                TextButton(onClick = { nav.back() }, modifier = Modifier.semantics { contentDescription = "Back to Discussions" }) {
+                    Icon(WebIcons.Back, null, Modifier.size(18.dp))
+                    Text(" Discussions")
+                }
+            } else {
+                TextButton(onClick = {
+                    nav.open(ArchivedRoute)
+                }, modifier = Modifier.semantics { contentDescription = "Archived discussions: $archivedCount" }) {
+                    Icon(WebIcons.Archive, null, Modifier.size(18.dp))
+                    Text(" Archived · $archivedCount")
+                }
+            }
+        }
+    }
+    if (rows == null) {
+        Column(Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            repeat(4) { Box(Modifier.fillMaxWidth().height(80.dp).background(DlTheme.colors.letterEnvelope, RoundedCornerShape(2.dp))) }
+        }
+        return
+    }
+    LaunchedEffect(rows.any { dStateAt(it, nowMs) != it.state }) { if (rows.any { dStateAt(it, nowMs) != it.state }) onFlipped() }
+    if (rows.isEmpty() && !hasMore) {
+        Column(Modifier.fillMaxSize().padding(16.dp)) {
+            if (archived || archivedCount > 0) bar()
+            Column(
+                Modifier.weight(1f).fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
+            ) {
+                EmptyNotes()
+                if (archived) {
+                    Text("Nothing archived yet.", style = MaterialTheme.typography.titleMedium)
+                } else {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Text("No discussions yet.", style = MaterialTheme.typography.titleMedium)
+                        Text(
+                            "Start the first one.",
+                            style = MaterialTheme.typography.bodyLarge.copy(fontSize = 15.sp),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                    DlFilledButton(startLabel, { nav.open(ComposeDiscussionRoute) })
+                }
+            }
+        }
+        return
+    }
+    val list = rememberLazyListState()
+    LaunchedEffect(list, hasMore) {
+        snapshotFlow { list.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0 }.collect { last ->
+            if (hasMore && last >= list.layoutInfo.totalItemsCount - 3) onMore()
+        }
+    }
+    Box(Modifier.fillMaxSize()) {
+        LazyColumn(
+            Modifier.fillMaxSize(),
+            state = list,
+            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 96.dp),
+            verticalArrangement = Arrangement.spacedBy(18.dp),
+        ) {
+            item { bar() }
+            items(rows, key = { it.id }) { r ->
+                val index = rows.indexOf(r)
+                NoteRow(
+                    r,
+                    nowMs,
+                    authorName = if (r.mine) me?.nickname ?: "Me" else friend?.nickname ?: "Friend",
+                    friendName = friend?.nickname ?: "Friend",
+                    tilt = if (index % 2 == 0) -0.6f else 0.5f,
+                    archived = archived,
+                )
+            }
+            item {
+                Row(
+                    Modifier.fillMaxWidth().padding(vertical = 12.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    if (hasMore) {
+                        CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
+                        Text("Loading older discussions…", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    } else {
+                        Text("That is everything", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                }
+            }
+        }
+        if (!archived) {
+            DlFab(DlIcons.NotePlus, startLabel, {
+                nav.open(ComposeDiscussionRoute)
+            }, Modifier.align(Alignment.BottomEnd).padding(16.dp), hasDraft = !draftEmpty)
+        }
+    }
+}
+
+/**
+ * FS-D3–D5: title, "[Author] · Posted HH:MM · N comments", one chip, the unseen ring. Unseen
+ * reactions count in "N new" and replace the second line while they are the newest activity.
+ */
+@Composable
+private fun NoteRow(r: DRow, nowMs: Long, authorName: String, friendName: String, tilt: Float, archived: Boolean) {
+    val nav = LocalAppNav.current
+    val notice = LocalNotice.current
+    val state = dStateAt(r, nowMs)
+    val arrived = state == LetterState.ARRIVED
+    val hidden = hiddenRow(r, nowMs)
+    val reacted = r.unseenReactions
+    val fresh = r.unseenComments + reacted
+    val unseen = fresh > 0
+    val strong = r.isNew || unseen
+    val comments = commentWords(r.commentCount)
+    val lastActivity = r.lastCommentAt ?: if (r.mine) r.postedAt else r.arrivesAt
+    val active = r.activityAt?.takeIf { (Time.ms(it) ?: 0) > (Time.ms(r.postedAt) ?: 0) }
+    val whenText = if (active != null) "Active ${Time.clock(active, nowMs)}" else "Posted ${Time.clock(r.postedAt, nowMs)}"
+    val meta = if (reactionWins(r.lastReaction, reacted, lastActivity)) {
+        noticeLine(r.lastReaction!!, reacted, friendName)
+    } else {
+        "$authorName · $whenText${if (r.editedAt != null) " · edited" else ""}${if (comments.isNotEmpty()) " · $comments" else ""}"
+    }
+    val chip: @Composable () -> Unit = {
+        when {
+            r.mine && state == LetterState.IN_REACH -> Box(
+                Modifier.height(28.dp).background(DlTheme.colors.countdownChip, RoundedCornerShape(14.dp)).padding(horizontal = 10.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    "${Time.countdown((Time.ms(r.windowEndsAt) ?: 0) - nowMs)} to take back",
+                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold, fontFeatureSettings = "tnum"),
+                    color = DlTheme.colors.letterInk,
+                )
+            }
+            !arrived -> Text(Time.countdown((Time.ms(r.arrivesAt) ?: 0) - nowMs), style = DlTheme.type.countdown.copy(fontSize = 16.sp), color = noteInk)
+            r.isNew -> NewChip()
+            unseen -> NewChip(text = "$fresh new")
+        }
+    }
+    if (hidden) {
+        val arrives = Time.clock(r.arrivesAt, nowMs)
+        Note(
+            NoteColor.Blank,
+            Modifier.semantics { contentDescription = "A discussion is on its way, arrives $arrives" },
+            tilt = tilt,
+            onClick = { notice("Arrives at $arrives") },
+        ) {
+            Row(Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 26.dp, bottom = 18.dp), verticalAlignment = Alignment.CenterVertically) {
+                Column(Modifier.weight(1f)) {
+                    Text("A discussion is on its way", style = MaterialTheme.typography.bodyLarge.copy(fontSize = 15.sp), color = noteInkQuiet)
+                    Text("$authorName · arrives $arrives", style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp), color = noteInkQuiet)
+                }
+                chip()
+            }
+        }
+        return
+    }
+    Note(noteColorOf(r.color), unseen = unseen, tilt = tilt, onClick = { nav.open(DiscussionRoute(r.id)) }) {
+        Row(
+            Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 26.dp, bottom = 18.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(
+                    r.title.orEmpty(),
+                    style = DlTheme.type.noteTitle.copy(
+                        fontSize = 18.sp,
+                        lineHeight = 24.sp,
+                        fontWeight = if (strong) FontWeight.Bold else FontWeight.SemiBold,
+                    ),
+                    color = noteInk,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                Text(
+                    meta,
+                    style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp),
+                    color = noteInkQuiet,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+            chip()
+        }
+    }
+}
+
+@Composable
+private fun EmptyNotes() {
+    val line = MaterialTheme.colorScheme.outlineVariant
+    val face = DlTheme.colors.notes.getValue(NoteColor.Lemon).face
+    Canvas(Modifier.size(120.dp, 96.dp)) {
+        scale(size.width / 120f, size.height / 96f, pivot = Offset.Zero) {
+            val note = Path().apply {
+                moveTo(26f, 18f)
+                lineTo(94f, 14f)
+                lineTo(98f, 82f)
+                lineTo(30f, 86f)
+                close()
+            }
+            drawPath(note, face)
+            drawPath(note, line, style = Stroke(1.5f))
+            for (y in listOf(40f, 52f, 64f)) drawLine(line, Offset(40f, y), Offset(84f, y - 2f), 1.5f)
+        }
+    }
+}
