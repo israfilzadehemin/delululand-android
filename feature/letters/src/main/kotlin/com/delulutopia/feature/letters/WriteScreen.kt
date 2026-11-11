@@ -96,7 +96,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 /**
- * S4 Write (FS-W1–W16; web write/*; canvas W-Draft, W-Edit, W-Send, W-Late, W-Seal): the letter on
+ * S4 Write (FS-W1–W16; web write; canvas W-Draft, W-Edit, W-Send, W-Late, W-Seal): the letter on
  * the same ruled sheet it is read on, the stamp slot, the reference panel when replying, the
  * attachment strip and the formatting bar. No navigation bar while writing; Back leaves and the
  * draft autosaves.
@@ -106,7 +106,10 @@ fun WriteScreen(vm: WriteViewModel = hiltViewModel()) {
     val nav = LocalAppNav.current
     when (val load = vm.load) {
         WriteViewModel.Load.Loading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
-        WriteViewModel.Load.Failed -> Column(Modifier.fillMaxSize().padding(24.dp), verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically)) {
+        WriteViewModel.Load.Failed -> Column(
+            Modifier.fillMaxSize().padding(24.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
+        ) {
             Text(
                 if (vm.editId == null) "Couldn't load your draft. Check your connection and try again." else "This letter can't be edited.",
                 style = MaterialTheme.typography.bodyLarge,
@@ -355,7 +358,12 @@ private fun WriteFrame(
         Row(Modifier.fillMaxWidth().height(64.dp).padding(horizontal = 4.dp), verticalAlignment = Alignment.CenterVertically) {
             IconButton(onClick = onBack, enabled = backEnabled) { Icon(DlIcons.Back, backLabel) }
             Column(Modifier.weight(1f).padding(start = 4.dp)) {
-                Text(title, style = MaterialTheme.typography.titleMedium.copy(fontSize = 18.sp, fontWeight = FontWeight.Bold), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(
+                    title,
+                    style = MaterialTheme.typography.titleMedium.copy(fontSize = 18.sp, fontWeight = FontWeight.Bold),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
                 if (subtitle.isNotEmpty()) {
                     Text(
                         subtitle,
@@ -371,7 +379,11 @@ private fun WriteFrame(
         Box(Modifier.weight(1f).fillMaxWidth()) {
             Sheet(Modifier.fillMaxSize()) {
                 Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(start = 20.dp, end = 16.dp, top = 10.dp, bottom = 20.dp)) {
-                    if (error != null) Text(error, Modifier.padding(bottom = 8.dp), color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodyMedium)
+                    if (error !=
+                        null
+                    ) {
+                        Text(error, Modifier.padding(bottom = 8.dp), color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodyMedium)
+                    }
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
                         StampSlot(vm.stamp, enabled = !late) {
                             vm.loadStamps()
@@ -484,10 +496,14 @@ private fun Seal(colour: Color) {
                     drawPath(p, c.letterEdge, style = Stroke(1.dp.toPx()))
                 },
         ) {
-            WaxSeal(colour, Modifier.align(Alignment.TopCenter).offset(y = 76.dp).graphicsLayer {
+            WaxSeal(
+                colour,
+                Modifier.align(Alignment.TopCenter).offset(y = 76.dp).graphicsLayer {
                     scaleX = seal.value
                     scaleY = seal.value
-                }, size = 30.dp)
+                },
+                size = 30.dp,
+            )
         }
     }
 }
@@ -513,8 +529,15 @@ private fun SendSheet(delay: String, window: String, feeling: String?, onClose: 
             Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Text("Arrives at", style = MaterialTheme.typography.bodyMedium.copy(fontSize = 14.sp), color = MaterialTheme.colorScheme.onSurfaceVariant)
                 Row(verticalAlignment = Alignment.Bottom) {
-                    Text(Time.timeOf(nowMs + delayMs), style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold, fontFeatureSettings = "tnum"))
-                    Text(" · in ${Math.round(delayMs / 60_000.0)} min", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(
+                        Time.timeOf(nowMs + delayMs),
+                        style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold, fontFeatureSettings = "tnum"),
+                    )
+                    Text(
+                        " · in ${Math.round(delayMs / 60_000.0)} min",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
                 }
             }
             Text(
@@ -580,7 +603,15 @@ private fun ReferencePanel(vm: WriteViewModel, friend: String) {
     val olderId = rows.getOrNull(index + 1)?.id
     val newerId = if (index > 0) rows[index - 1].id else null
     val l = vm.referenced?.takeIf { it.id == id }
-    val feeling = l?.let { if (!it.moodEmoji.isNullOrEmpty() && !it.moodLabel.isNullOrEmpty()) "${it.moodEmoji} ${it.moodLabel}" else Moods.text(it.moodAtSend) }
+    val feeling = l?.let {
+        if (!it.moodEmoji.isNullOrEmpty() &&
+            !it.moodLabel.isNullOrEmpty()
+        ) {
+            "${it.moodEmoji} ${it.moodLabel}"
+        } else {
+            Moods.text(it.moodAtSend)
+        }
+    }
     val meta = listOfNotNull(friend, feeling?.let { "Feeling $it" }, l?.let { Time.clock(it.arrivesAt) }).joinToString(" · ")
     Box(Modifier.padding(start = 14.dp, end = 12.dp, top = 10.dp)) {
         Column(
@@ -608,7 +639,9 @@ private fun ReferencePanel(vm: WriteViewModel, friend: String) {
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
-                IconButton(onClick = { newerId?.let(vm::pin) }, enabled = newerId != null) { Icon(WebIcons.Back, "Newer received letter", Modifier.size(18.dp)) }
+                IconButton(onClick = {
+                    newerId?.let(vm::pin)
+                }, enabled = newerId != null) { Icon(WebIcons.Back, "Newer received letter", Modifier.size(18.dp)) }
                 IconButton(onClick = { olderId?.let(vm::pin) ?: vm.loadReceived() }, enabled = olderId != null || vm.receivedMore) {
                     Icon(WebIcons.Forward, "Older received letter", Modifier.size(18.dp))
                 }

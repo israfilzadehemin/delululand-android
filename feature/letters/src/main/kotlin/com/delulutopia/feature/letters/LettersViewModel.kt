@@ -42,13 +42,13 @@ sealed interface LetterUi {
 @HiltViewModel
 class LettersViewModel @Inject constructor(
     private val repo: LettersRepository,
-    private val home: HomeRepository,
+    private val homeRepo: HomeRepository,
     private val backend: Backend,
     private val prefs: DevicePrefs,
     private val letterActions: LetterActions,
 ) : ViewModel() {
     val rows: StateFlow<LettersRepository.State> = repo.state
-    val home: StateFlow<HomeRepository.State> = this.home.state
+    val home: StateFlow<HomeRepository.State> = homeRepo.state
     val list: StateFlow<Boolean> = prefs.lettersList
 
     private val _letters = MutableStateFlow<Map<Long, LetterUi>>(emptyMap())
@@ -82,7 +82,7 @@ class LettersViewModel @Inject constructor(
                 val letter = backend.run { letter(id) }
                 if (letter.direction == "from") {
                     // Opening a received letter marks it read: Home's NEW row and the tab dot follow.
-                    home.refreshSoon()
+                    homeRepo.refreshSoon()
                     repo.refreshSoon()
                 }
                 LetterUi.Shown(letter)
