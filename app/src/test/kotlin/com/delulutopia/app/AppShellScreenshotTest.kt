@@ -50,7 +50,7 @@ class AppShellScreenshotTest {
                 composable<DiscussionsRoute> { PlaceholderScreen() }
                 composable<EmailsRoute> { PlaceholderScreen() }
                 composable<YouRoute> { YouScreen(session = SAMPLE, onOpenAppearance = { navController.navigate(AppearanceRoute) }, onLogout = {}) }
-                composable<AppearanceRoute> { AppearanceScreen(if (dark) ThemeMode.Dark else ThemeMode.Light) {} }
+                composable<AppearanceRoute> { AppearanceScreen(if (dark) ThemeMode.Dark else ThemeMode.Light, {}) }
             }
         }
     }

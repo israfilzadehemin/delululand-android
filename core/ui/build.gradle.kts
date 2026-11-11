@@ -27,6 +27,7 @@ dependencies {
     implementation(libs.androidx.emoji2.emojipicker)
     implementation(libs.androidx.media3.exoplayer)
     implementation(libs.androidx.media3.ui)
+    implementation(libs.androidx.media3.datasource.okhttp)
     implementation(libs.androidx.exifinterface)
 
     testImplementation(libs.junit4)

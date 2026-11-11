@@ -57,7 +57,7 @@ jobs:
         run: ./gradlew ktlintCheck --continue
 
       - name: Unit and screenshot tests
-        run: ./gradlew testProdDebugUnitTest :core:designsystem:testDebugUnitTest :core:network:testDebugUnitTest :feature:start:testDebugUnitTest :core:ui:testDebugUnitTest :feature:home:testDebugUnitTest -Proborazzi.test.record=true --continue
+        run: ./gradlew testProdDebugUnitTest :core:designsystem:testDebugUnitTest :core:network:testDebugUnitTest :feature:start:testDebugUnitTest :core:ui:testDebugUnitTest :feature:home:testDebugUnitTest :feature:letters:testDebugUnitTest -Proborazzi.test.record=true --continue
 
       - name: Lint
         run: ./gradlew :app:lintProdDebug

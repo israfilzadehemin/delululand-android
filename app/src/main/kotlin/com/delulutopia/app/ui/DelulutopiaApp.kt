@@ -55,6 +55,7 @@ import com.delulutopia.core.ui.notify.NotifyPermission
 import com.delulutopia.core.ui.notify.rememberNotifyAccess
 import com.delulutopia.core.ui.signatureOf
 import com.delulutopia.feature.home.HomeScreen
+import com.delulutopia.feature.letters.lettersGraph
 import kotlin.reflect.KClass
 import kotlinx.coroutines.launch
 
@@ -86,7 +87,7 @@ fun SignedInApp(
     }
     DelulutopiaApp(session, state) { navController ->
         composable<HomeRoute> { HomeScreen() }
-        composable<LettersRoute> { PlaceholderScreen() }
+        lettersGraph()
         composable<DiscussionsRoute> { PlaceholderScreen() }
         composable<EmailsRoute> { PlaceholderScreen() }
         composable<YouRoute> {
