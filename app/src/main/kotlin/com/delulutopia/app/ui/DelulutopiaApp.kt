@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
@@ -49,6 +50,7 @@ import com.delulutopia.core.ui.LocalAppNav
 import com.delulutopia.core.ui.LocalBrand
 import com.delulutopia.core.ui.LocalFirstCitizen
 import com.delulutopia.core.ui.LocalNotice
+import com.delulutopia.core.ui.LocalNoticeAction
 import com.delulutopia.core.ui.YouRoute
 import com.delulutopia.core.ui.initials
 import com.delulutopia.core.ui.notify.NotifyPermission
@@ -115,6 +117,12 @@ fun DelulutopiaApp(
             snackbarHostState.showSnackbar(text)
         }
     }
+    val noticeAction: (String, String, () -> Unit) -> Unit = { text, action, onAction ->
+        scope.launch {
+            snackbarHostState.currentSnackbarData?.dismiss()
+            if (snackbarHostState.showSnackbar(text, actionLabel = action) == SnackbarResult.ActionPerformed) onAction()
+        }
+    }
     val nav = remember(navController) {
         object : AppNav {
             override fun open(route: Any) = navController.navigate(route)
@@ -142,6 +150,7 @@ fun DelulutopiaApp(
     CompositionLocalProvider(
         LocalAppNav provides nav,
         LocalNotice provides notice,
+        LocalNoticeAction provides noticeAction,
         LocalBrand provides brand,
         LocalFirstCitizen provides firstCitizen,
     ) {

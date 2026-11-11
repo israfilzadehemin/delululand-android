@@ -1,6 +1,9 @@
 package com.delulutopia.core.network.model
 
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonNull
+import kotlinx.serialization.json.JsonPrimitive
 
 @Serializable data class VersionBody(val version: Int)
 
@@ -16,11 +19,21 @@ import kotlinx.serialization.Serializable
 
 @Serializable data class MoodEditBody(val emoji: String, val label: String)
 
-@Serializable data class SaveDraftBody(val body: Doc, val pinnedLetterId: Long?, val stampSlug: String?, val version: Int)
+/** `pinnedLetterId` and `stampSlug` are sent as null to clear them (hence JSON values, not nullable fields). */
+@Serializable data class SaveDraftBody(val body: Doc, val pinnedLetterId: JsonElement, val stampSlug: JsonElement, val version: Int) {
+    constructor(body: Doc, pinnedLetterId: Long?, stampSlug: String?, version: Int) : this(body, orNull(pinnedLetterId), orNull(stampSlug), version)
+}
 
 @Serializable data class DraftVersionBody(val draftVersion: Int)
 
-@Serializable data class SendAgainBody(val body: Doc, val attachmentIds: List<String>, val stampSlug: String?)
+@Serializable data class SendAgainBody(val body: Doc, val attachmentIds: List<String>, val stampSlug: JsonElement) {
+    constructor(body: Doc, attachmentIds: List<String>, stampSlug: String?) : this(body, attachmentIds, orNull(stampSlug))
+}
+
+/** A value the API must receive even when it is null (the JSON defaults drop null fields). */
+fun orNull(v: Long?): JsonElement = v?.let { JsonPrimitive(it) } ?: JsonNull
+
+fun orNull(v: String?): JsonElement = v?.let { JsonPrimitive(it) } ?: JsonNull
 
 @Serializable data class BodyOnly(val body: Doc)
 

@@ -31,3 +31,6 @@ val LocalAppNav = staticCompositionLocalOf<AppNav> {
 
 /** The notice line (web `useNotice`): one short sentence in the snackbar. */
 val LocalNotice = staticCompositionLocalOf<(String) -> Unit> { {} }
+
+/** The notice line with one action ("Microphone is off for Delulutopia · Settings"). */
+val LocalNoticeAction = staticCompositionLocalOf<(text: String, action: String, onAction: () -> Unit) -> Unit> { { _, _, _ -> } }
