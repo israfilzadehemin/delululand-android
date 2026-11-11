@@ -12,10 +12,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
@@ -32,8 +34,15 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.selected
@@ -64,6 +73,8 @@ import com.delulutopia.core.ui.DiscussionsRoute
 import com.delulutopia.core.ui.EmojiPickerSheet
 import com.delulutopia.core.ui.LocalAppNav
 import com.delulutopia.core.ui.PICKABLE_NOTES
+import com.delulutopia.core.ui.Pin
+import com.delulutopia.core.ui.editingHead
 import com.delulutopia.core.ui.editor.EditorToolbar
 import com.delulutopia.core.ui.editor.RichEditor
 import com.delulutopia.core.ui.editor.RichEditorState
@@ -263,7 +274,7 @@ private fun Frame(
     var emojiOpen by remember { mutableStateOf(false) }
     val pair = DlTheme.colors.notes.getValue(vm.colour)
     Column(Modifier.fillMaxSize().imePadding()) {
-        Row(Modifier.fillMaxWidth().height(64.dp).padding(horizontal = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+        Row(Modifier.fillMaxWidth().editingHead().height(64.dp).padding(horizontal = 4.dp), verticalAlignment = Alignment.CenterVertically) {
             IconButton(onClick = onBack) { Icon(DlIcons.Back, backLabel) }
             Column(Modifier.weight(1f).padding(start = 4.dp)) {
                 Text(
@@ -283,32 +294,48 @@ private fun Frame(
             }
             DlFilledButton(action, onAction, Modifier.padding(start = 4.dp, end = 12.dp), enabled = actionEnabled, height = 40.dp)
         }
-        Column(
-            Modifier
-                .weight(1f)
-                .fillMaxWidth()
-                .background(Brush.verticalGradient(0.62f to pair.face, 1f to pair.deep))
-                .verticalScroll(rememberScrollState())
-                .padding(start = 18.dp, end = 16.dp, top = 12.dp, bottom = 20.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
-        ) {
-            if (error != null) Text(error, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodyMedium)
-            BasicTextField(
-                value = vm.title,
-                onValueChange = vm::changeTitle,
-                modifier = Modifier.fillMaxWidth().semantics { contentDescription = "Title" },
-                singleLine = true,
-                textStyle = DlTheme.type.noteTitle.copy(color = noteInk),
-                cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-                decorationBox = { inner ->
-                    Box {
-                        if (vm.title.isEmpty()) Text("Title", style = DlTheme.type.noteTitle, color = noteInkQuiet)
-                        inner()
-                    }
-                },
-            )
-            ColourPicker(vm.colour, vm::changeColour)
-            RichEditor(editor, colour = noteInk, label = "Discussion text", minHeight = 220.dp)
+        // web .dl-note-sheet: the note itself, pinned under the header, 24 dp down to the title.
+        Box(Modifier.weight(1f).fillMaxWidth()) {
+            Column(
+                Modifier
+                    .fillMaxSize()
+                    .shadow(4.dp)
+                    .background(Brush.verticalGradient(0.62f to pair.face, 1f to pair.deep))
+                    .verticalScroll(rememberScrollState())
+                    .padding(top = 24.dp, bottom = 20.dp),
+            ) {
+                if (error !=
+                    null
+                ) {
+                    Text(error, Modifier.padding(horizontal = 16.dp), color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodyMedium)
+                }
+                // web .dl-compose-title: Literata 20/700 written on the note, a soft rule under it.
+                val titleStyle = DlTheme.type.noteTitle.copy(fontSize = 20.sp, lineHeight = 26.sp, fontWeight = FontWeight.Bold)
+                val rule = if (DlTheme.isDark) Color(0x2EECE4D6) else Color(0x2E33323B)
+                BasicTextField(
+                    value = vm.title,
+                    onValueChange = vm::changeTitle,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .drawBehind { drawLine(rule, Offset(0f, size.height), Offset(size.width, size.height), 1.dp.toPx()) }
+                        .padding(start = 16.dp, end = 16.dp, top = 10.dp, bottom = 6.dp)
+                        .semantics { contentDescription = "Title" },
+                    singleLine = true,
+                    textStyle = titleStyle.copy(color = noteInk),
+                    cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                    decorationBox = { inner ->
+                        Box {
+                            if (vm.title.isEmpty()) Text("Title", style = titleStyle, color = noteInkQuiet.copy(alpha = 0.6f))
+                            inner()
+                        }
+                    },
+                )
+                ColourPicker(vm.colour, vm::changeColour)
+                Box(Modifier.padding(horizontal = 20.dp)) {
+                    RichEditor(editor, colour = noteInk, label = "Discussion text", minHeight = 220.dp)
+                }
+            }
+            Pin(20.dp, Modifier.align(Alignment.TopCenter).offset(y = (-17).dp))
         }
         AttachmentStrip(attachments = vm.attachments!!, onRemove = onRemove, voice = voice)
         EditorToolbar(editor, Modifier.background(DlTheme.colors.letterEnvelope)) { emojiOpen = true }
@@ -319,15 +346,34 @@ private fun Frame(
 /** The note colour (Materials story): six swatches as one radio group. */
 @Composable
 private fun ColourPicker(value: NoteColor, onChange: (NoteColor) -> Unit) {
-    Row(Modifier.semantics { contentDescription = "Note colour" }, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+    // web .dl-note-picker / .dl-note-swatch: 28 dp squares, 2 dp corners, a soft shadow; the chosen one ringed in ink.
+    val ink = MaterialTheme.colorScheme.onSurface
+    Row(
+        Modifier.padding(start = 20.dp, end = 20.dp, top = 10.dp, bottom = 8.dp).semantics { contentDescription = "Note colour" },
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
         PICKABLE_NOTES.forEach { c ->
             val pair = DlTheme.colors.notes.getValue(c)
             val on = c == value
+            val sq = RoundedCornerShape(2.dp)
             Box(
                 Modifier
-                    .size(32.dp)
-                    .background(pair.face, CircleShape)
-                    .border(if (on) 3.dp else 1.dp, if (on) MaterialTheme.colorScheme.primary else pair.deep, CircleShape)
+                    .size(28.dp)
+                    .drawBehind {
+                        if (on) {
+                            val o = 3.dp.toPx()
+                            drawRoundRect(
+                                ink,
+                                Offset(-o, -o),
+                                Size(size.width + 2 * o, size.height + 2 * o),
+                                CornerRadius(4.dp.toPx()),
+                                style = Stroke(2.dp.toPx()),
+                            )
+                        }
+                    }
+                    .shadow(1.5.dp, sq)
+                    .background(pair.face, sq)
+                    .border(1.dp, Color(0x4033323B), sq)
                     .clickable(role = Role.RadioButton) { onChange(c) }
                     .semantics {
                         contentDescription = c.name

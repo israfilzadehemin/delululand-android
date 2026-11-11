@@ -92,6 +92,7 @@ import com.delulutopia.core.ui.StampImage
 import com.delulutopia.core.ui.WaxSeal
 import com.delulutopia.core.ui.WriteRoute
 import com.delulutopia.core.ui.doodle.DoodlePad
+import com.delulutopia.core.ui.editingHead
 import com.delulutopia.core.ui.editor.EditorToolbar
 import com.delulutopia.core.ui.editor.RichEditor
 import com.delulutopia.core.ui.editor.RichEditorState
@@ -367,7 +368,7 @@ private fun WriteFrame(
     var doodleOpen by remember { mutableStateOf(false) }
     var emojiOpen by remember { mutableStateOf(false) }
     Column(Modifier.fillMaxSize().imePadding()) {
-        Row(Modifier.fillMaxWidth().height(64.dp).padding(horizontal = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+        Row(Modifier.fillMaxWidth().editingHead(editing).height(64.dp).padding(horizontal = 4.dp), verticalAlignment = Alignment.CenterVertically) {
             IconButton(onClick = onBack, enabled = backEnabled) { Icon(DlIcons.Back, backLabel) }
             Column(Modifier.weight(1f).padding(start = 4.dp)) {
                 Text(

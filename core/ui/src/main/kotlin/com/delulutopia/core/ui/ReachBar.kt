@@ -20,6 +20,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
@@ -81,4 +83,13 @@ fun ReachButton(text: String, modifier: Modifier = Modifier, padded: Boolean = f
     ) {
         Text(text, style = MaterialTheme.typography.labelLarge.copy(fontSize = 13.sp, fontWeight = FontWeight.SemiBold), color = seal)
     }
+}
+
+/** web .dl-write-head--editing: the seal tint under a header while composing or editing, a line below. */
+@Composable
+fun Modifier.editingHead(on: Boolean = true): Modifier {
+    if (!on) return this
+    val tint = MaterialTheme.colorScheme.primaryContainer
+    val line = if (DlTheme.isDark) Color(0xFF4B4670) else Color(0xFFC9BFE0)
+    return this.background(tint).drawBehind { drawLine(line, Offset(0f, size.height - 0.5f), Offset(size.width, size.height - 0.5f), 1.dp.toPx()) }
 }
