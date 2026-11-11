@@ -86,6 +86,7 @@ dependencies {
     implementation(projects.feature.home)
     implementation(projects.feature.letters)
     implementation(projects.feature.discussions)
+    implementation(projects.feature.emails)
     implementation(projects.core.ui)
     implementation(libs.coil.compose)
     implementation(libs.coil.network.okhttp)

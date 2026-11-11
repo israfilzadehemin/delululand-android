@@ -30,7 +30,6 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.delulutopia.app.R
 import com.delulutopia.core.data.HomeRepository
-import com.delulutopia.core.designsystem.component.DlFab
 import com.delulutopia.core.designsystem.component.DlNavigationBar
 import com.delulutopia.core.designsystem.component.DlNavigationItem
 import com.delulutopia.core.designsystem.component.DlNavigationYouItem
@@ -58,6 +57,7 @@ import com.delulutopia.core.ui.notify.rememberNotifyAccess
 import com.delulutopia.core.ui.reactions.LocalReactionsApi
 import com.delulutopia.core.ui.signatureOf
 import com.delulutopia.feature.discussions.discussionsGraph
+import com.delulutopia.feature.emails.emailsGraph
 import com.delulutopia.feature.home.HomeScreen
 import com.delulutopia.feature.letters.lettersGraph
 import kotlin.reflect.KClass
@@ -94,7 +94,7 @@ fun SignedInApp(
             composable<HomeRoute> { HomeScreen() }
             lettersGraph()
             discussionsGraph()
-            composable<EmailsRoute> { PlaceholderScreen() }
+            emailsGraph()
             composable<YouRoute> {
                 YouScreen(session = session, onOpenAppearance = { navController.navigate(AppearanceRoute) }, onLogout = onLogout)
             }
@@ -215,19 +215,6 @@ fun DelulutopiaApp(
                             }
                         }
                     }
-                }
-            },
-            floatingActionButton = {
-                when (top) {
-                    TopDestination.Letters -> DlFab(
-                        DlIcons.Pen,
-                        stringResource(R.string.fab_new_letter),
-                        { notice("Not built yet") },
-                        hasDraft =
-                        home?.me?.draftEmpty == false,
-                    )
-                    TopDestination.Emails -> DlFab(DlIcons.EnvelopePlus, stringResource(R.string.fab_new_email), { notice("Not built yet") })
-                    else -> Unit
                 }
             },
             snackbarHost = { DlSnackbarHost(snackbarHostState) },
