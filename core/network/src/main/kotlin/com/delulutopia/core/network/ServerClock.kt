@@ -22,7 +22,17 @@ class ServerClock @Inject constructor() {
         while (samples.size > 5) samples.removeFirst()
         val sorted = samples.sorted()
         offsetMs = sorted[sorted.size / 2]
+        ServerTime.offsetMs = offsetMs
     }
+
+    fun nowMs(): Long = System.currentTimeMillis() + offsetMs
+}
+
+/** The server-aligned clock for code without injection (countdowns in composables). */
+object ServerTime {
+    @Volatile
+    var offsetMs: Long = 0
+        internal set
 
     fun nowMs(): Long = System.currentTimeMillis() + offsetMs
 }

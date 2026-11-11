@@ -25,6 +25,7 @@ object NetworkModule {
     @Singleton
     fun json(): Json = Json {
         ignoreUnknownKeys = true
+        encodeDefaults = true
         explicitNulls = false
         coerceInputValues = true
     }

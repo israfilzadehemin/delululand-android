@@ -1,5 +1,6 @@
 import com.android.build.api.dsl.ApplicationExtension
 import com.delulutopia.buildlogic.intVersion
+import com.delulutopia.buildlogic.library
 import com.delulutopia.buildlogic.libs
 import org.gradle.api.JavaVersion
 import org.gradle.api.Plugin
@@ -7,6 +8,7 @@ import org.gradle.api.Project
 import org.gradle.api.tasks.testing.Test
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.kotlin.dsl.configure
+import org.gradle.kotlin.dsl.dependencies
 import org.gradle.kotlin.dsl.withType
 
 /** Android app module: SDK levels, Java 17 bytecode, tests on Robolectric. Kotlin is AGP 9's built-in support. */
@@ -25,6 +27,8 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
             compileOptions {
                 sourceCompatibility = JavaVersion.VERSION_17
                 targetCompatibility = JavaVersion.VERSION_17
+                // java.time on API 24–25 (instants, zones, durations).
+                isCoreLibraryDesugaringEnabled = true
             }
             testOptions {
                 unitTests.isIncludeAndroidResources = true
@@ -35,6 +39,7 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
                 checkDependencies = true
             }
         }
+        dependencies { add("coreLibraryDesugaring", libs.library("desugar-jdk-libs")) }
         tasks.withType<Test>().configureEach {
             // Robolectric's FileDescriptor interceptor needs JDK internals on JDK 21+.
             jvmArgs(

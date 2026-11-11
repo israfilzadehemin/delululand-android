@@ -12,6 +12,7 @@ dependencies {
     api(libs.okhttp)
     api(libs.kotlinx.serialization.json)
     implementation(libs.retrofit)
+    implementation(libs.okhttp.sse)
     implementation(libs.retrofit.kotlinx.serialization)
     implementation(libs.kotlinx.coroutines.android)
 
