@@ -1,6 +1,7 @@
 package com.delulutopia.core.ui.reactions
 
 import android.content.Context
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -11,11 +12,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -30,7 +31,18 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.StrokeJoin
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.scale
+import androidx.compose.ui.graphics.vector.PathParser
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -40,7 +52,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
 import com.delulutopia.core.data.Time
-import com.delulutopia.core.designsystem.icon.WebIcons
 import com.delulutopia.core.designsystem.theme.DlTheme
 import com.delulutopia.core.network.model.Citizen
 import com.delulutopia.core.network.model.Reaction
@@ -100,9 +111,15 @@ fun Reactions(
     friend: Citizen?,
     modifier: Modifier = Modifier,
     readOnly: Boolean = false,
-    chipColour: Color = DlTheme.colors.letterSlip,
+    chipColour: Color = MaterialTheme.colorScheme.background,
+    compact: Boolean = false,
     onChanged: () -> Unit = {},
 ) {
+    // web .dl-reaction: 30 dp chips (26 on a comment), 15 dp radius, 600 13 px count.
+    val chipH = if (compact) 26.dp else 30.dp
+    val chipMin = if (compact) 32.dp else 36.dp
+    val chipPad = if (compact) 7.dp else 9.dp
+    val chipShape = RoundedCornerShape(chipH / 2)
     val api = LocalReactionsApi.current
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -163,10 +180,11 @@ fun Reactions(
                 val who = names(c.userIds)
                 Row(
                     Modifier
-                        .heightIn(min = 32.dp)
-                        .clip(RoundedCornerShape(16.dp))
+                        .height(chipH)
+                        .widthIn(min = chipMin)
+                        .clip(chipShape)
                         .background(if (on) MaterialTheme.colorScheme.secondaryContainer else chipColour)
-                        .border(1.dp, if (on) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(16.dp))
+                        .border(1.dp, if (on) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant, chipShape)
                         .then(
                             if (readOnly) {
                                 Modifier
@@ -183,42 +201,60 @@ fun Reactions(
                                 ", tap to add yours"
                             }}"
                         }
-                        .padding(horizontal = 10.dp),
+                        .padding(horizontal = chipPad),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterHorizontally),
                 ) {
-                    Text(c.emoji, fontSize = 16.sp)
-                    if (c.userIds.size > 1) Text("${c.userIds.size}", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold))
+                    Text(c.emoji, fontSize = if (compact) 14.sp else 16.sp)
+                    if (c.userIds.size > 1) {
+                        Text(
+                            "${c.userIds.size}",
+                            style = MaterialTheme.typography.labelMedium.copy(fontSize = 13.sp, fontWeight = FontWeight.SemiBold, fontFeatureSettings = "tnum"),
+                        )
+                    }
                 }
             }
             if (!readOnly) {
                 Box {
+                    // web .dl-reaction--add: a dashed chip with the face-plus.
+                    val line = MaterialTheme.colorScheme.outlineVariant
+                    val quiet = MaterialTheme.colorScheme.onSurfaceVariant
                     Box(
                         Modifier
-                            .size(36.dp, 32.dp)
-                            .clip(RoundedCornerShape(16.dp))
-                            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(16.dp))
-                            .combinedClickable { quick = !quick }
+                            .size(chipMin, chipH)
+                            .clip(chipShape)
+                            .background(chipColour)
+                            .drawBehind {
+                                val w = 1.dp.toPx()
+                                drawRoundRect(
+                                    line,
+                                    topLeft = Offset(w / 2, w / 2),
+                                    size = Size(size.width - w, size.height - w),
+                                    cornerRadius = CornerRadius(size.height / 2),
+                                    style = Stroke(w, pathEffect = PathEffect.dashPathEffect(floatArrayOf(3.dp.toPx(), 2.dp.toPx()))),
+                                )
+                            }.combinedClickable { quick = !quick }
                             .semantics { contentDescription = "Add a reaction" },
                         contentAlignment = Alignment.Center,
                     ) {
-                        Icon(WebIcons.Emoji, null, Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                        FacePlus(quiet)
                     }
                     if (quick) {
                         Popup(alignment = Alignment.BottomStart, offset = IntOffset(0, -120), onDismissRequest = { quick = false }) {
                             Row(
                                 Modifier
-                                    .clip(RoundedCornerShape(24.dp))
-                                    .background(MaterialTheme.colorScheme.surfaceContainerHigh)
-                                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(24.dp))
+                                    .shadow(8.dp, RoundedCornerShape(22.dp))
+                                    .clip(RoundedCornerShape(22.dp))
+                                    .background(DlTheme.colors.letterEnvelope)
+                                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(22.dp))
                                     .padding(4.dp),
                                 horizontalArrangement = Arrangement.spacedBy(2.dp),
                             ) {
                                 readRecents(context).forEach { e ->
                                     Box(
                                         Modifier
-                                            .size(44.dp)
-                                            .clip(RoundedCornerShape(22.dp))
+                                            .size(38.dp)
+                                            .clip(RoundedCornerShape(19.dp))
                                             .background(if (mineOn(e)) MaterialTheme.colorScheme.secondaryContainer else Color.Transparent)
                                             .combinedClickable {
                                                 quick = false
@@ -229,15 +265,15 @@ fun Reactions(
                                 }
                                 Box(
                                     Modifier
-                                        .size(44.dp)
-                                        .clip(RoundedCornerShape(22.dp))
+                                        .size(38.dp)
+                                        .clip(RoundedCornerShape(19.dp))
                                         .combinedClickable {
                                             quick = false
                                             all = true
                                         }
                                         .semantics { contentDescription = "All emojis" },
                                     contentAlignment = Alignment.Center,
-                                ) { Text("⋯", fontSize = 20.sp) }
+                                ) { Text("⋯", fontSize = 18.sp, color = MaterialTheme.colorScheme.onSurfaceVariant) }
                             }
                         }
                     }
@@ -316,4 +352,17 @@ fun reactionWins(n: ReactionNotice?, count: Int, otherActivityAt: String?): Bool
     if (n == null || count == 0) return false
     val other = otherActivityAt?.let { Time.ms(it) } ?: return true
     return (Time.ms(n.at) ?: 0) > other
+}
+
+/** The add-a-reaction face with a plus (web Reactions.tsx svg, 16 px on a 24 grid). */
+@Composable
+private fun FacePlus(tint: Color) {
+    val path = remember { PathParser().parsePathString("M8 14s1 1.5 3 1.5 3-1.5 3-1.5M8.5 9.5h.01M13.5 9.5h.01M19 3v4M17 5h4").toPath() }
+    Canvas(Modifier.size(16.dp)) {
+        scale(size.width / 24f, pivot = Offset.Zero) {
+            val stroke = Stroke(2f, cap = StrokeCap.Round, join = StrokeJoin.Round)
+            drawCircle(tint, 8f, Offset(11f, 12f), style = stroke)
+            drawPath(path, tint, style = stroke)
+        }
+    }
 }

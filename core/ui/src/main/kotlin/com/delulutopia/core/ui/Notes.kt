@@ -6,6 +6,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
@@ -14,6 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
@@ -58,15 +60,18 @@ fun Note(
     unseen: Boolean = false,
     pin: Dp = 20.dp,
     tilt: Float = 0f,
+    fillHeight: Boolean = false,
     onClick: (() -> Unit)? = null,
     content: @Composable BoxScope.() -> Unit,
 ) {
     val pair = DlTheme.colors.notes.getValue(colour)
     val shape = RoundedCornerShape(2.dp)
-    Box(modifier.fillMaxWidth().rotate(tilt)) {
+    // A note still on its way is faded (web .dl-note--blank opacity 0.88).
+    Box(modifier.fillMaxWidth().rotate(tilt).alpha(if (colour == NoteColor.Blank) 0.88f else 1f)) {
         Box(
             Modifier
                 .fillMaxWidth()
+                .then(if (fillHeight) Modifier.fillMaxHeight() else Modifier)
                 .shadow(3.dp, shape)
                 .background(Brush.verticalGradient(0.62f to pair.face, 1f to pair.deep), shape)
                 .then(if (unseen) Modifier.border(1.5.dp, DlTheme.colors.markLine, shape) else Modifier)

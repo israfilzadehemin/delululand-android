@@ -51,6 +51,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
@@ -547,8 +548,8 @@ private val SheetShape = object : Shape {
 
 /** The folded corner's back: a triangle in the flap colour with a soft edge shadow. */
 @Composable
-private fun TileFold(flap: Color, modifier: Modifier) {
-    Canvas(modifier.size(FOLD)) {
+internal fun TileFold(flap: Color, modifier: Modifier, fold: Dp = FOLD) {
+    Canvas(modifier.size(fold)) {
         val s = size.width
         val back = Path().apply {
             moveTo(0f, 0f)

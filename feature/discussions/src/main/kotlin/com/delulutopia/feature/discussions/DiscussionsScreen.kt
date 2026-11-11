@@ -2,6 +2,8 @@ package com.delulutopia.feature.discussions
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,6 +12,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -20,17 +24,21 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.scale
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -45,6 +53,7 @@ import com.delulutopia.core.designsystem.component.DlFab
 import com.delulutopia.core.designsystem.component.DlFilledButton
 import com.delulutopia.core.designsystem.icon.DlIcons
 import com.delulutopia.core.designsystem.icon.WebIcons
+import com.delulutopia.core.designsystem.motion.pressScale
 import com.delulutopia.core.designsystem.motion.rememberPlayed
 import com.delulutopia.core.designsystem.motion.rowEnter
 import com.delulutopia.core.designsystem.theme.DlTheme
@@ -104,18 +113,20 @@ fun DiscussionsList(
     val draftEmpty = me?.discussionDraftEmpty ?: true
     val startLabel = if (draftEmpty) "Start a discussion" else "Continue your discussion draft"
     val bar: @Composable () -> Unit = {
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = if (archived) Arrangement.Start else Arrangement.End) {
+        // web .dl-list-bar--discussions: a quiet 36 dp link, pulled 6 dp into the gaps above and below.
+        Row(
+            Modifier.fillMaxWidth().layout { m, k ->
+                val p = m.measure(k)
+                val pull = 6.dp.roundToPx()
+                layout(p.width, p.height - 2 * pull) { p.place(0, -pull) }
+            },
+            horizontalArrangement = if (archived) Arrangement.Start else Arrangement.End,
+        ) {
             if (archived) {
-                TextButton(onClick = { nav.back() }, modifier = Modifier.semantics { contentDescription = "Back to Discussions" }) {
-                    Icon(WebIcons.Back, null, Modifier.size(18.dp))
-                    Text(" Discussions")
-                }
+                ArchivedLink(WebIcons.Back, "Discussions", "Back to Discussions", Modifier.offset(x = (-10).dp)) { nav.back() }
             } else {
-                TextButton(onClick = {
+                ArchivedLink(WebIcons.Archive, "Archived · $archivedCount", "Archived discussions: $archivedCount", Modifier.offset(x = 10.dp)) {
                     nav.open(ArchivedRoute)
-                }, modifier = Modifier.semantics { contentDescription = "Archived discussions: $archivedCount" }) {
-                    Icon(WebIcons.Archive, null, Modifier.size(18.dp))
-                    Text(" Archived · $archivedCount")
                 }
             }
         }
@@ -164,8 +175,9 @@ fun DiscussionsList(
         LazyColumn(
             Modifier.fillMaxSize(),
             state = list,
-            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 96.dp),
-            verticalArrangement = Arrangement.spacedBy(18.dp),
+            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 96.dp),
+            // web .dl-list gap 8 + the note's 6 px top margin.
+            verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
             item { bar() }
             items(rows, key = { it.id }) { r ->
@@ -183,15 +195,23 @@ fun DiscussionsList(
             }
             item {
                 Row(
-                    Modifier.fillMaxWidth().padding(vertical = 12.dp),
+                    Modifier.fillMaxWidth().heightIn(min = 40.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     if (hasMore) {
                         CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
-                        Text("Loading older discussions…", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(
+                            "Loading older discussions…",
+                            style = MaterialTheme.typography.bodySmall.copy(fontSize = 13.sp),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
                     } else {
-                        Text("That is everything", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(
+                            "That is everything",
+                            style = MaterialTheme.typography.bodySmall.copy(fontSize = 13.sp),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
                     }
                 }
             }
@@ -218,7 +238,6 @@ private fun NoteRow(r: DRow, nowMs: Long, authorName: String, friendName: String
     val reacted = r.unseenReactions
     val fresh = r.unseenComments + reacted
     val unseen = fresh > 0
-    val strong = r.isNew || unseen
     val comments = commentWords(r.commentCount)
     val lastActivity = r.lastCommentAt ?: if (r.mine) r.postedAt else r.arrivesAt
     val active = r.activityAt?.takeIf { (Time.ms(it) ?: 0) > (Time.ms(r.postedAt) ?: 0) }
@@ -254,9 +273,9 @@ private fun NoteRow(r: DRow, nowMs: Long, authorName: String, friendName: String
             onClick = { notice("Arrives at $arrives") },
         ) {
             Row(Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 26.dp, bottom = 18.dp), verticalAlignment = Alignment.CenterVertically) {
-                Column(Modifier.weight(1f)) {
-                    Text("A discussion is on its way", style = MaterialTheme.typography.bodyLarge.copy(fontSize = 15.sp), color = noteInkQuiet)
-                    Text("$authorName · arrives $arrives", style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp), color = noteInkQuiet)
+                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    Text("A discussion is on its way", style = NoteLine, color = noteInkQuiet, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    Text("$authorName · arrives $arrives", style = NoteMeta, color = noteInkQuiet)
                 }
                 chip()
             }
@@ -269,21 +288,18 @@ private fun NoteRow(r: DRow, nowMs: Long, authorName: String, friendName: String
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                // web .dl-list--discussions .dl-note .dl-row-line: Literata 17/18, 600, one line.
                 Text(
                     r.title.orEmpty(),
-                    style = DlTheme.type.noteTitle.copy(
-                        fontSize = 18.sp,
-                        lineHeight = 24.sp,
-                        fontWeight = if (strong) FontWeight.Bold else FontWeight.SemiBold,
-                    ),
+                    style = NoteLine,
                     color = noteInk,
-                    maxLines = 2,
+                    maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
                 Text(
                     meta,
-                    style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp),
+                    style = NoteMeta,
                     color = noteInkQuiet,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
@@ -311,5 +327,32 @@ private fun EmptyNotes() {
             drawPath(note, line, style = Stroke(1.5f))
             for (y in listOf(40f, 52f, 64f)) drawLine(line, Offset(40f, y), Offset(84f, y - 2f), 1.5f)
         }
+    }
+}
+
+private val NoteLine @Composable get() = DlTheme.type.noteTitle.copy(fontSize = 17.sp, lineHeight = 18.sp, fontWeight = FontWeight.SemiBold)
+private val NoteMeta @Composable get() = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp, lineHeight = 14.sp)
+
+/** web .dl-archived-link: icon and label in quiet ink, 600 13 px, a 36 dp pill on press. */
+@Composable
+private fun ArchivedLink(icon: ImageVector, text: String, description: String, modifier: Modifier, onClick: () -> Unit) {
+    val source = remember { MutableInteractionSource() }
+    Row(
+        modifier
+            .heightIn(min = 36.dp)
+            .pressScale(source)
+            .clip(RoundedCornerShape(18.dp))
+            .clickable(interactionSource = source, indication = ripple(), onClick = onClick)
+            .semantics(mergeDescendants = true) { contentDescription = description }
+            .padding(horizontal = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+    ) {
+        Icon(icon, null, Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(
+            text,
+            style = MaterialTheme.typography.labelLarge.copy(fontSize = 13.sp, fontWeight = FontWeight.SemiBold),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
     }
 }

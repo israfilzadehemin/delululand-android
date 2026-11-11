@@ -4,16 +4,18 @@ import android.content.Context
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
@@ -37,14 +39,23 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.vector.PathParser
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -55,6 +66,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
@@ -378,21 +390,58 @@ private fun WriteFrame(
         reference?.invoke()
         Box(Modifier.weight(1f).fillMaxWidth()) {
             Sheet(Modifier.fillMaxSize()) {
-                Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(start = 20.dp, end = 16.dp, top = 10.dp, bottom = 20.dp)) {
-                    if (error !=
-                        null
-                    ) {
-                        Text(error, Modifier.padding(bottom = 8.dp), color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodyMedium)
-                    }
-                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                        StampSlot(vm.stamp, enabled = !late) {
-                            vm.loadStamps()
-                            stampOpen = true
+                BoxWithConstraints(Modifier.fillMaxSize()) {
+                    val viewport = maxHeight
+                    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
+                        if (error != null) {
+                            Text(
+                                error,
+                                Modifier.padding(start = 20.dp, end = 16.dp, top = 8.dp),
+                                color = MaterialTheme.colorScheme.error,
+                                style = MaterialTheme.typography.bodyMedium,
+                            )
+                        }
+                        // web .dl-stamp-row: the stamp sits in the sheet's top-right corner.
+                        Row(Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 10.dp), horizontalArrangement = Arrangement.End) {
+                            StampSlot(vm.stamp, enabled = !late) {
+                                vm.loadStamps()
+                                stampOpen = true
+                            }
+                        }
+                        // web .dl-write-sheet .dl-editor: 28 dp rules from the first line to the foot of the sheet.
+                        val rule = DlTheme.colors.letterRule
+                        Box(
+                            Modifier
+                                .fillMaxWidth()
+                                .heightIn(min = (viewport - 81.dp).coerceAtLeast(200.dp))
+                                .drawBehind {
+                                    val step = 28.sp.toPx()
+                                    var y = 16.dp.toPx() + step - 1.dp.toPx()
+                                    while (y < size.height) {
+                                        drawLine(rule, Offset(0f, y), Offset(size.width, y), 1.dp.toPx())
+                                        y += step
+                                    }
+                                }.padding(start = 20.dp, end = 20.dp, top = 16.dp, bottom = 30.dp),
+                        ) {
+                            RichEditor(editor, enabled = !late, minHeight = 28.dp)
                         }
                     }
-                    RichEditor(editor, enabled = !late, minHeight = 280.dp)
                 }
             }
+            // The dog-ear (web .dl-paper-fold): the page cuts the corner, the fold lies on top.
+            val page = MaterialTheme.colorScheme.background
+            Canvas(Modifier.align(Alignment.BottomEnd).size(22.dp)) {
+                drawPath(
+                    Path().apply {
+                        moveTo(size.width, 0f)
+                        lineTo(size.width, size.height)
+                        lineTo(0f, size.height)
+                        close()
+                    },
+                    page,
+                )
+            }
+            TileFold(DlTheme.colors.letterFlap, Modifier.align(Alignment.BottomEnd), fold = 22.dp)
             if (sealing) Seal(sealColour)
         }
         if (!late) {
@@ -437,25 +486,33 @@ private fun Sheet(modifier: Modifier, content: @Composable () -> Unit) {
 @Composable
 private fun StampSlot(stamp: StampMark?, enabled: Boolean, onOpen: () -> Unit) {
     val c = DlTheme.colors
+    val quiet = MaterialTheme.colorScheme.onSurfaceVariant
     Box(
         Modifier
-            .border(1.dp, c.letterEdge, RoundedCornerShape(2.dp))
-            .background(if (stamp != null) c.letterFlap else Color.Transparent, RoundedCornerShape(2.dp))
+            .clip(RoundedCornerShape(6.dp))
             .clickable(enabled = enabled, onClick = onOpen)
-            .semantics { contentDescription = if (stamp != null) "Stamp: ${stamp.name}. Change it" else "Add a stamp" }
-            .padding(4.dp),
+            .alpha(if (enabled) 1f else 0.55f)
+            .semantics { contentDescription = if (stamp != null) "Stamp: ${stamp.name}. Change it" else "Add a stamp" },
         contentAlignment = Alignment.Center,
     ) {
         if (stamp != null) {
-            StampImage(stamp, width = 52.dp)
+            StampImage(stamp, width = 56.dp)
         } else {
+            // web .dl-stamp-empty: 56 x 71, 1.5 dp dashed line, a quiet plus.
             Box(
-                Modifier.size(52.dp, 65.dp).drawBehind {
-                    drawRect(c.letterEdge, style = Stroke(1.5.dp.toPx(), pathEffect = PathEffect.dashPathEffect(floatArrayOf(6f, 6f))))
+                Modifier.size(56.dp, 71.dp).drawBehind {
+                    val w = 1.5.dp.toPx()
+                    drawRoundRect(
+                        c.letterEdge,
+                        topLeft = Offset(w / 2, w / 2),
+                        size = Size(size.width - w, size.height - w),
+                        cornerRadius = CornerRadius(4.dp.toPx()),
+                        style = Stroke(w, pathEffect = PathEffect.dashPathEffect(floatArrayOf(4.dp.toPx(), 3.dp.toPx()))),
+                    )
                 },
                 contentAlignment = Alignment.Center,
             ) {
-                Text("+", fontSize = 26.sp, color = c.letterEdge)
+                Text("+", fontSize = 22.sp, color = quiet)
             }
         }
     }
@@ -597,7 +654,25 @@ private fun ReferencePanel(vm: WriteViewModel, friend: String) {
     LaunchedEffect(id, index, vm.receivedMore) { if (index == -1 && vm.receivedMore) vm.loadReceived() }
     LaunchedEffect(id, hidden) { if (!hidden) vm.loadReferenced(id) }
     if (hidden) {
-        TextButton(onClick = { setHidden(false) }, modifier = Modifier.padding(horizontal = 12.dp)) { Text("Show $friend's letter") }
+        // web .dl-ref-show: a small slip with the seal-hue edge.
+        val c0 = DlTheme.colors
+        Box(
+            Modifier
+                .padding(start = 16.dp, end = 16.dp, top = 2.dp, bottom = 8.dp)
+                .height(32.dp)
+                .shadow(1.dp, RefShape)
+                .background(c0.letterSlip, RefShape)
+                .drawBehind { drawRect(c0.userA, size = Size(3.dp.toPx(), size.height)) }
+                .clickable { setHidden(false) }
+                .padding(start = 15.dp, end = 12.dp),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text(
+                "Show $friend's letter",
+                style = MaterialTheme.typography.labelLarge.copy(fontSize = 13.sp, fontWeight = FontWeight.SemiBold),
+                color = MaterialTheme.colorScheme.primary,
+            )
+        }
         return
     }
     val olderId = rows.getOrNull(index + 1)?.id
@@ -613,27 +688,40 @@ private fun ReferencePanel(vm: WriteViewModel, friend: String) {
         }
     }
     val meta = listOfNotNull(friend, feeling?.let { "Feeling $it" }, l?.let { Time.clock(it.arrivesAt) }).joinToString(" · ")
-    Box(Modifier.padding(start = 14.dp, end = 12.dp, top = 10.dp)) {
+    // web .dl-ref: a note slip clipped to the sheet, overlapping its top edge by 8 dp.
+    Box(
+        Modifier
+            .zIndex(3f)
+            .layout { m, k ->
+                val p = m.measure(k)
+                layout(p.width, p.height - 8.dp.roundToPx()) { p.place(0, 0) }
+            }.padding(start = 16.dp, end = 16.dp, top = 2.dp)
+            .rotate(-0.4f),
+    ) {
         Column(
             Modifier
                 .fillMaxWidth()
-                .shadow(2.dp, RoundedCornerShape(bottomStart = 4.dp, bottomEnd = 4.dp))
-                .background(c.letterSlip)
-                .border(1.dp, c.letterEdge)
-                .padding(start = 16.dp, end = 10.dp, top = 10.dp, bottom = 12.dp)
+                .shadow(3.dp, RefShape)
+                .background(c.letterSlip, RefShape)
+                .drawBehind { drawRect(c.userA, size = Size(3.dp.toPx(), size.height)) }
+                .padding(start = 15.dp, end = 12.dp, top = 12.dp, bottom = 10.dp)
                 .semantics { contentDescription = "The letter you are answering" },
+            verticalArrangement = Arrangement.spacedBy(6.dp),
         ) {
-            Text(
-                "↰ REPLYING TO",
-                Modifier.padding(start = 14.dp),
-                style = MaterialTheme.typography.labelSmall.copy(fontSize = 11.sp, fontWeight = FontWeight.ExtraBold, letterSpacing = 0.07.em),
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+            Row(Modifier.padding(start = 18.dp), verticalAlignment = Alignment.CenterVertically) {
+                Icon(WebIcons.Reply, null, Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(
+                    "REPLYING TO",
+                    Modifier.padding(start = 6.dp),
+                    style = MaterialTheme.typography.labelSmall.copy(fontSize = 11.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.06.em),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
             Row(verticalAlignment = Alignment.CenterVertically) {
-                l?.stamp?.let { StampImage(it, width = 18.dp) }
+                l?.stamp?.let { StampImage(it, width = 28.dp) }
                 Text(
                     meta,
-                    Modifier.weight(1f).padding(start = 6.dp),
+                    Modifier.weight(1f).padding(start = 8.dp),
                     style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
@@ -649,12 +737,27 @@ private fun ReferencePanel(vm: WriteViewModel, friend: String) {
                 TextButton(onClick = { setHidden(true) }) { Text("Hide", style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold)) }
             }
             if (l != null) {
-                Box(Modifier.height(80.dp)) {
+                Box(Modifier.heightIn(max = 84.dp).verticalScroll(rememberScrollState())) {
                     LetterBody(l.body, style = DlTheme.type.letterBody.copy(fontSize = 14.sp, lineHeight = 20.sp))
                 }
             } else {
-                Box(Modifier.fillMaxWidth().height(40.dp))
+                Box(Modifier.fillMaxWidth().height(42.dp).background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(6.dp)))
             }
+        }
+        PaperClip(Modifier.offset(x = 14.dp, y = (-11).dp))
+    }
+}
+
+private val RefShape = RoundedCornerShape(topEnd = 8.dp, bottomEnd = 8.dp)
+
+/** The paper clip holding the slip to the sheet (web .dl-ref-clip). */
+@Composable
+private fun PaperClip(modifier: Modifier) {
+    val ink = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.75f)
+    val path = remember { PathParser().parsePathString("M4 10V5a3 3 0 0 1 6 0v18a5 5 0 0 1-10 0V8").toPath() }
+    Canvas(modifier.size(14.dp, 30.dp)) {
+        scale(density, pivot = Offset.Zero) {
+            drawPath(path, ink, style = Stroke(1.6f, cap = StrokeCap.Round))
         }
     }
 }

@@ -24,6 +24,7 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.delulutopia.core.designsystem.theme.DlTheme
 import com.delulutopia.core.network.model.BulletList
@@ -48,6 +49,7 @@ fun LetterBody(
     style: TextStyle = DlTheme.type.letterBody,
     colour: Color = DlTheme.colors.letterInk,
     reveal: Boolean = false,
+    paragraphGap: Dp = 0.dp,
 ) {
     val words = remember(doc) { countWords(doc) }
     val step = minOf(STEP_MAX_MS.toFloat(), REVEAL_MS.toFloat() / maxOf(1, words))
@@ -63,7 +65,13 @@ fun LetterBody(
                 is Paragraph -> {
                     val (text, n) = paragraphText(block, index, shown, colour)
                     index += n
-                    if (block.content.isNullOrEmpty()) Spacer(Modifier.height(style.lineHeight.value.dp * 0.45f)) else Text(text, style = style, color = colour)
+                    if (block.content.isNullOrEmpty()) {
+                        Spacer(
+                            Modifier.height(style.lineHeight.value.dp * 0.45f),
+                        )
+                    } else {
+                        Text(text, Modifier.padding(bottom = paragraphGap), style = style, color = colour)
+                    }
                 }
                 is BulletList -> Column(verticalArrangement = Arrangement.spacedBy(0.dp)) {
                     block.content.forEach { item ->

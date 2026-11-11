@@ -5,6 +5,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -32,12 +33,17 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -137,133 +143,181 @@ private fun Thread(d: DFull, me: Citizen?, friend: Citizen?, vm: DiscussionViewM
         else -> ""
     }
 
-    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(bottom = 24.dp)) {
-        if (inReach) {
-            Bar("${Time.countdown((Time.ms(d.windowEndsAt) ?: 0) - nowMs)} left to take it back") { DlOutlinedButton("Cancel", { askTakeBack = true }) }
-        }
-        if (archived) {
-            Bar("Archived${if (archivedBy.isNotEmpty()) " by $archivedBy" else ""} · ${Time.day(d.archivedAt)}") {
-                if (d.canUnarchive) DlOutlinedButton("Unarchive", { scope.launch { notice(vm.unarchive()) } })
-            }
-        }
-        Note(colour, Modifier.padding(horizontal = 12.dp, vertical = 12.dp), pin = 24.dp) {
-            Column(
-                Modifier.fillMaxWidth().padding(start = 18.dp, end = 12.dp, top = 28.dp, bottom = 18.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                Row(verticalAlignment = Alignment.Top) {
-                    Text(d.title, Modifier.weight(1f), style = DlTheme.type.noteTitle, color = noteInk)
-                    val items = buildList {
-                        if (d.canEdit) add("Edit")
-                        if (d.canArchive) add("Archive")
-                        if (d.canUnarchive) add("Unarchive")
-                        if (d.canDelete) add("Delete")
+    BoxWithConstraints(Modifier.fillMaxSize()) {
+        val viewport = maxHeight
+        Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
+            // The note grows to fill the screen; the comments follow it (web .dl-paper flex: 1).
+            Column(Modifier.fillMaxWidth().heightIn(min = viewport)) {
+                if (inReach) {
+                    Bar("${Time.countdown((Time.ms(d.windowEndsAt) ?: 0) - nowMs)} left to take it back") { DlOutlinedButton("Cancel", { askTakeBack = true }) }
+                }
+                if (archived) {
+                    Bar("Archived${if (archivedBy.isNotEmpty()) " by $archivedBy" else ""} · ${Time.day(d.archivedAt)}") {
+                        if (d.canUnarchive) DlOutlinedButton("Unarchive", { scope.launch { notice(vm.unarchive()) } })
                     }
-                    if (items.isNotEmpty()) {
-                        Box {
-                            Text(
-                                "⋯",
-                                Modifier.clip(RoundedCornerShape(20.dp)).clickable { menu = true }.padding(horizontal = 12.dp, vertical = 4.dp).semantics {
-                                    contentDescription =
-                                        "Discussion options"
-                                },
-                                fontSize = 22.sp,
-                                color = noteInk,
-                            )
-                            DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
-                                items.forEach { label ->
-                                    DropdownMenuItem(
-                                        text = {
-                                            Text(
-                                                label,
-                                                color = if (label ==
-                                                    "Delete"
-                                                ) {
-                                                    MaterialTheme.colorScheme.error
-                                                } else {
-                                                    MaterialTheme.colorScheme.onSurface
-                                                },
-                                            )
-                                        },
-                                        onClick = {
-                                            menu = false
-                                            when (label) {
-                                                "Edit" -> nav.open(EditDiscussionRoute(d.id))
-                                                "Archive" -> scope.launch { notice(vm.archive()) }
-                                                "Unarchive" -> scope.launch { notice(vm.unarchive()) }
-                                                "Delete" -> askDelete = true
-                                            }
-                                        },
+                }
+                val rule = if (DlTheme.isDark) Color(0x1FECE4D6) else Color(0x1F33323B)
+                val ruleTop = Modifier.drawBehind { drawLine(rule, Offset(0f, 0f), Offset(size.width, 0f), 1.dp.toPx()) }
+                Note(
+                    colour,
+                    Modifier.padding(start = 16.dp, end = 16.dp, top = 12.dp).weight(1f),
+                    pin = 20.dp,
+                    fillHeight = true,
+                ) {
+                    Column(Modifier.fillMaxSize()) {
+                        // web .dl-note--post .dl-discussion-title: Literata 22/1.3, 700.
+                        Text(
+                            d.title,
+                            Modifier.padding(start = 16.dp, end = 52.dp, top = 28.dp),
+                            style = DlTheme.type.noteTitle.copy(fontSize = 22.sp, lineHeight = 28.6.sp, fontWeight = FontWeight.Bold),
+                            color = noteInk,
+                        )
+                        // web .dl-paper-head: avatar 44, name 15/700, times 12; a soft rule under it.
+                        Row(
+                            Modifier
+                                .fillMaxWidth()
+                                .drawBehind { drawLine(rule, Offset(0f, size.height), Offset(size.width, size.height), 1.dp.toPx()) }
+                                .padding(start = 16.dp, end = 16.dp, top = 10.dp, bottom = 12.dp),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            if (author != null) {
+                                DlRemoteAvatar(
+                                    author.avatarUrl,
+                                    author.nickname,
+                                    tintOf(author.id),
+                                    size = 44.dp,
+                                    initials = author.initials(),
+                                    ring = signatureOf(author.id),
+                                )
+                            }
+                            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                                Text(
+                                    author?.nickname.orEmpty(),
+                                    style = MaterialTheme.typography.titleSmall.copy(fontSize = 15.sp, fontWeight = FontWeight.Bold),
+                                    color = noteInk,
+                                )
+                                Row {
+                                    Text(
+                                        "Posted ${Time.clock(d.postedAt, nowMs)} · ${if (arrived) "Arrived" else "Arrives"} ${Time.clock(d.arrivesAt, nowMs)}",
+                                        style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp),
+                                        color = noteInkQuiet,
                                     )
+                                    if (d.editedAt != null) {
+                                        val label = "Edited ${Time.clock(d.editedAt, nowMs)}"
+                                        Text(
+                                            " · ${if (showEditedAt) label else "Edited"}",
+                                            Modifier.clickable { showEditedAt = !showEditedAt }.semantics { contentDescription = label },
+                                            style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp),
+                                            color = noteInkQuiet,
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                        // web .dl-paper-body: 18/20 padding, letter type at 1.4, 0.35 em between paragraphs.
+                        Box(Modifier.weight(1f).fillMaxWidth().padding(horizontal = 20.dp, vertical = 18.dp)) {
+                            LetterBody(
+                                d.body,
+                                style = DlTheme.type.letterBody.copy(lineHeight = 23.8.sp),
+                                colour = noteInk,
+                                paragraphGap = 6.dp,
+                            )
+                        }
+                        if (photos.isNotEmpty() || audios.isNotEmpty() || !arrived) {
+                            // web .dl-paper-foot
+                            Column(
+                                Modifier.fillMaxWidth().then(ruleTop).padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 16.dp),
+                                verticalArrangement = Arrangement.spacedBy(10.dp),
+                            ) {
+                                if (photos.isNotEmpty()) {
+                                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                        photos.forEachIndexed { i, p ->
+                                            AsyncImage(
+                                                model = resolveMedia(base, p.thumbUrl ?: p.url),
+                                                contentDescription = "Photo ${i + 1} of ${photos.size}, open full size",
+                                                modifier = Modifier.size(64.dp).clip(RoundedCornerShape(8.dp)).clickable { photo = i },
+                                                contentScale = ContentScale.Crop,
+                                            )
+                                        }
+                                    }
+                                }
+                                audios.forEachIndexed { i, a ->
+                                    AudioPlayer(resolveMedia(base, a.url), a.durationMs, label = if (audios.size > 1) "voice note ${i + 1}" else "voice note")
+                                }
+                                if (!arrived) {
+                                    Text(
+                                        "Arrives for ${friend?.nickname ?: "your friend"} in ${Time.countdown((Time.ms(d.arrivesAt) ?: 0) - nowMs)}",
+                                        style = MaterialTheme.typography.labelMedium.copy(
+                                            fontSize = 13.sp,
+                                            fontWeight = FontWeight.SemiBold,
+                                            fontFeatureSettings = "tnum",
+                                        ),
+                                        color = noteInk,
+                                    )
+                                }
+                            }
+                        }
+                        // web .dl-paper-reactions
+                        Box(Modifier.fillMaxWidth().then(ruleTop).padding(start = 16.dp, end = 16.dp, top = 10.dp, bottom = 14.dp)) {
+                            Reactions("discussions", d.id, d.reactions, me, friend, readOnly = archived, onChanged = vm::reacted)
+                        }
+                    }
+                    Box(Modifier.align(Alignment.TopEnd).padding(top = 8.dp, end = 8.dp)) {
+                        val items = buildList {
+                            if (d.canEdit) add("Edit")
+                            if (d.canArchive) add("Archive")
+                            if (d.canUnarchive) add("Unarchive")
+                            if (d.canDelete) add("Delete")
+                        }
+                        if (items.isNotEmpty()) {
+                            Box {
+                                // web .dl-note-more-btn: 36 x 32, quiet ink, 8 dp radius.
+                                Box(
+                                    Modifier
+                                        .size(36.dp, 32.dp)
+                                        .clip(RoundedCornerShape(8.dp))
+                                        .background(if (menu) noteInk.copy(alpha = 0.08f) else Color.Transparent)
+                                        .clickable { menu = true }
+                                        .semantics { contentDescription = "Discussion options" },
+                                    contentAlignment = Alignment.Center,
+                                ) {
+                                    Text("⋯", fontSize = 20.sp, color = if (menu) noteInk else noteInkQuiet)
+                                }
+                                DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
+                                    items.forEach { label ->
+                                        DropdownMenuItem(
+                                            text = {
+                                                Text(
+                                                    label,
+                                                    color = if (label ==
+                                                        "Delete"
+                                                    ) {
+                                                        MaterialTheme.colorScheme.error
+                                                    } else {
+                                                        MaterialTheme.colorScheme.onSurface
+                                                    },
+                                                )
+                                            },
+                                            onClick = {
+                                                menu = false
+                                                when (label) {
+                                                    "Edit" -> nav.open(EditDiscussionRoute(d.id))
+                                                    "Archive" -> scope.launch { notice(vm.archive()) }
+                                                    "Unarchive" -> scope.launch { notice(vm.unarchive()) }
+                                                    "Delete" -> askDelete = true
+                                                }
+                                            },
+                                        )
+                                    }
                                 }
                             }
                         }
                     }
                 }
-                Row(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
-                    if (author !=
-                        null
-                    ) {
-                        DlRemoteAvatar(
-                            author.avatarUrl,
-                            author.nickname,
-                            tintOf(author.id),
-                            size = 44.dp,
-                            initials = author.initials(),
-                            ring = signatureOf(author.id),
-                        )
-                    }
-                    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                        Text(
-                            author?.nickname.orEmpty(),
-                            style = MaterialTheme.typography.titleSmall.copy(fontSize = 15.sp, fontWeight = FontWeight.Bold),
-                            color = noteInk,
-                        )
-                        Row {
-                            Text(
-                                "Posted ${Time.clock(d.postedAt, nowMs)} · ${if (arrived) "Arrived" else "Arrives"} ${Time.clock(d.arrivesAt, nowMs)}",
-                                style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp),
-                                color = noteInkQuiet,
-                            )
-                            if (d.editedAt != null) {
-                                val label = "Edited ${Time.clock(d.editedAt, nowMs)}"
-                                Text(
-                                    " · ${if (showEditedAt) label else "Edited"}",
-                                    Modifier.clickable { showEditedAt = !showEditedAt }.semantics { contentDescription = label },
-                                    style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp),
-                                    color = noteInkQuiet,
-                                )
-                            }
-                        }
-                    }
-                }
-                LetterBody(d.body, colour = noteInk)
-                if (photos.isNotEmpty()) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        photos.forEachIndexed { i, p ->
-                            AsyncImage(
-                                model = resolveMedia(base, p.thumbUrl ?: p.url),
-                                contentDescription = "Photo ${i + 1} of ${photos.size}, open full size",
-                                modifier = Modifier.size(64.dp).clip(RoundedCornerShape(4.dp)).clickable { photo = i },
-                                contentScale = ContentScale.Crop,
-                            )
-                        }
-                    }
-                }
-                audios.forEachIndexed { i, a ->
-                    AudioPlayer(resolveMedia(base, a.url), a.durationMs, label = if (audios.size > 1) "voice note ${i + 1}" else "voice note")
-                }
-                if (!arrived) {
-                    Text(
-                        "Arrives for ${friend?.nickname ?: "your friend"} in ${Time.countdown((Time.ms(d.arrivesAt) ?: 0) - nowMs)}",
-                        style = MaterialTheme.typography.labelMedium.copy(fontSize = 13.sp, fontWeight = FontWeight.SemiBold, fontFeatureSettings = "tnum"),
-                        color = noteInk,
-                    )
-                }
-                Reactions("discussions", d.id, d.reactions, me, friend, readOnly = archived, onChanged = vm::reacted)
+                Comments(d, me, friend, archived, nowMs, vm) { deletingComment = it }
             }
         }
-        Comments(d, me, friend, archived, nowMs, vm) { deletingComment = it }
     }
 
     if (photo >= 0 && photo < photos.size) Lightbox(photos, photo, { photo = it }, { photo = -1 })
@@ -354,19 +408,27 @@ private fun Comments(d: DFull, me: Citizen?, friend: Citizen?, readOnly: Boolean
     val total = d.commentCount ?: d.comments.items.size
     val count = if (cursor != null) maxOf(total, items.size) else items.size
     val colour = noteColorOf(d.color)
-    Column(Modifier.padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    // web .dl-comments: 12/16/16 margins, 10 dp between; the heading is a quiet 11 px label.
+    Column(Modifier.padding(start = 16.dp, end = 16.dp, top = 36.dp, bottom = 16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Text(
             when (count) {
                 0 -> "No comments yet"
                 1 -> "1 comment"
                 else -> "$count comments"
-            },
-            style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+            }.uppercase(),
+            style = MaterialTheme.typography.labelSmall.copy(fontSize = 11.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.08.em),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         if (cursor != null) {
             DlOutlinedButton(if (vm.loadingOlder) "Loading older comments…" else "See older comments", vm::seeOlder, enabled = !vm.loadingOlder)
         } else if (items.size > 5) {
-            Text("That is everything", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(
+                "That is everything",
+                Modifier.fillMaxWidth(),
+                style = MaterialTheme.typography.bodySmall.copy(fontSize = 13.sp),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+            )
         }
         if (vm.olderFailed) {
             Text(
@@ -375,7 +437,7 @@ private fun Comments(d: DFull, me: Citizen?, friend: Citizen?, readOnly: Boolean
                 style = MaterialTheme.typography.bodySmall,
             )
         }
-        items.forEach { c ->
+        items.forEachIndexed { i, c ->
             val person = if (c.authorId == me?.id) {
                 me
             } else if (c.authorId == friend?.id) {
@@ -383,16 +445,22 @@ private fun Comments(d: DFull, me: Citizen?, friend: Citizen?, readOnly: Boolean
             } else {
                 null
             }
-            CommentItem(c, person, mine = c.authorId == me?.id, readOnly, colour, nowMs, me, friend, vm, onDelete)
+            CommentItem(c, person, mine = c.authorId == me?.id, readOnly, colour, nowMs, me, friend, vm, if (i % 2 == 0) -0.5f else 0.4f, onDelete)
         }
         if (readOnly) {
-            Text("Archived. Unarchive it to comment.", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(
+                "Archived. Unarchive it to comment.",
+                Modifier.fillMaxWidth().padding(top = 8.dp).padding(12.dp),
+                style = MaterialTheme.typography.bodyMedium.copy(fontSize = 14.sp),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+            )
         } else {
             var text by rememberSaveable { mutableStateOf("") }
             var busy by remember { mutableStateOf(false) }
             var error by remember { mutableStateOf<String?>(null) }
-            Field(text, { text = it }, "Write a comment", enabled = !busy)
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End, verticalAlignment = Alignment.CenterVertically) {
+            Field(text, { text = it }, "Write a comment", enabled = !busy, modifier = Modifier.padding(top = 4.dp))
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.End), verticalAlignment = Alignment.CenterVertically) {
                 error?.let { Text(it, Modifier.weight(1f), color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall) }
                 DlFilledButton(
                     if (busy) "Posting…" else "Post",
@@ -424,27 +492,35 @@ private fun CommentItem(
     me: Citizen?,
     friend: Citizen?,
     vm: DiscussionViewModel,
+    tilt: Float,
     onDelete: (DComment) -> Unit,
 ) {
     val scope = rememberCoroutineScope()
     var editing by remember { mutableStateOf(false) }
     var showEditedAt by remember { mutableStateOf(false) }
     var menu by remember { mutableStateOf(false) }
-    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.Top) {
+    // web .dl-comment: a 24 dp avatar beside a small note, 10 dp apart.
+    Row(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.Top) {
         if (person != null) {
             DlRemoteAvatar(
                 person.avatarUrl,
                 person.nickname,
                 tintOf(person.id),
+                Modifier.padding(top = 2.dp),
                 size = 24.dp,
+                ringWidth = 1.5.dp,
                 initials = person.nickname.take(1).uppercase(),
                 ring = signatureOf(person.id),
             )
         }
-        Note(colour, Modifier.weight(1f), pin = 14.dp) {
-            Column(Modifier.fillMaxWidth().padding(start = 12.dp, end = 8.dp, top = 14.dp, bottom = 10.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Text(person?.nickname.orEmpty(), style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold), color = noteInk)
+        Note(colour, Modifier.weight(1f).padding(top = 6.dp), pin = 14.dp, tilt = tilt) {
+            Column(Modifier.fillMaxWidth().padding(start = 12.dp, end = 8.dp, top = 18.dp, bottom = 12.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(
+                        person?.nickname.orEmpty(),
+                        style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp, fontWeight = FontWeight.Bold),
+                        color = noteInk,
+                    )
                     Text(Time.clock(c.createdAt, nowMs), style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp), color = noteInkQuiet)
                     if (c.editedAt != null) {
                         val label = "Edited ${Time.clock(c.editedAt, nowMs)}"
@@ -508,9 +584,9 @@ private fun CommentItem(
                         )
                     }
                 } else {
-                    Text(c.text, style = MaterialTheme.typography.bodyLarge.copy(fontSize = 15.sp, lineHeight = 21.sp), color = noteInk)
+                    Text(c.text, style = MaterialTheme.typography.bodyLarge.copy(fontSize = 15.sp, lineHeight = 22.5.sp), color = noteInk)
                 }
-                Reactions("comments", c.id, c.reactions, me, friend, readOnly = readOnly, onChanged = vm::reacted)
+                Reactions("comments", c.id, c.reactions, me, friend, Modifier.padding(top = 6.dp), readOnly = readOnly, compact = true, onChanged = vm::reacted)
             }
         }
     }
@@ -518,24 +594,31 @@ private fun CommentItem(
 
 /** A plain multi-line field on the note (Enter is a line break). */
 @Composable
-private fun Field(value: String, onChange: (String) -> Unit, label: String, enabled: Boolean) {
+private fun Field(value: String, onChange: (String) -> Unit, label: String, enabled: Boolean, modifier: Modifier = Modifier) {
     val c = DlTheme.colors
+    // web .dl-composer-field: the letter surface, a 1 dp line, 12 dp radius, 15/1.5.
     BasicTextField(
         value = value,
         onValueChange = onChange,
         enabled = enabled,
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .heightIn(min = 56.dp)
-            .background(c.letterSlip, RoundedCornerShape(8.dp))
-            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp))
-            .padding(12.dp)
+            .background(c.letterEnvelope, RoundedCornerShape(12.dp))
+            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(12.dp))
+            .padding(horizontal = 12.dp, vertical = 10.dp)
             .semantics { contentDescription = label },
-        textStyle = MaterialTheme.typography.bodyLarge.copy(color = c.letterInk),
+        textStyle = MaterialTheme.typography.bodyLarge.copy(fontSize = 15.sp, lineHeight = 22.5.sp, color = MaterialTheme.colorScheme.onSurface),
         cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
         decorationBox = { inner ->
             Box {
-                if (value.isEmpty()) Text(label, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                if (value.isEmpty()) {
+                    Text(
+                        label,
+                        style = MaterialTheme.typography.bodyLarge.copy(fontSize = 15.sp, lineHeight = 22.5.sp),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
                 inner()
             }
         },
