@@ -69,7 +69,10 @@ class ApiCallerTest {
     @Test
     fun `401 NO_SESSION ends the session`() = runTest(UnconfinedTestDispatcher()) {
         var ended = false
-        val job = launch { events.sessionEnded.first(); ended = true }
+        val job = launch {
+            events.sessionEnded.first()
+            ended = true
+        }
         server.enqueue(MockResponse.Builder().code(401).body("""{"code":"NO_SESSION","message":"Log in."}""").build())
         runCatching { caller.call { api.homeSession() } }
         assertThat(ended).isTrue()

@@ -47,7 +47,11 @@ class SessionRepository @Inject constructor(
         _state.value = try {
             SessionState.SignedIn(caller.call { api.homeSession() })
         } catch (e: ApiException) {
-            if (e.status == 401) SessionState.SignedOut else if (_state.value is SessionState.SignedIn) _state.value else SessionState.Unreachable
+            when {
+                e.status == 401 -> SessionState.SignedOut
+                _state.value is SessionState.SignedIn -> _state.value
+                else -> SessionState.Unreachable
+            }
         }
     }
 

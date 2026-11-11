@@ -59,6 +59,7 @@ object DlIcons {
     val ChevronRight = line("chevron.right", THIN, "M9 6l6 6-6 6")
     val Bell = line("bell", THIN, "M6 16V11a6 6 0 0 1 12 0v5l2 2H4z", "M10 21a2 2 0 0 0 4 0")
     val Plane = line("plane", BOLD, "M3 11l18-8-7 18-3-7z")
+
     /** PIN pad fingerprint key (S-PIN). */
     val Fingerprint = line(
         "fingerprint",
