@@ -8,9 +8,13 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.delulutopia.app.navigation.AppearanceRoute
 import com.delulutopia.app.navigation.LettersRoute
+import com.delulutopia.app.navigation.YouRoute
 import com.delulutopia.app.ui.DelulutopiaApp
 import com.delulutopia.core.designsystem.theme.DelulutopiaTheme
 import com.delulutopia.core.designsystem.theme.ThemeMode
+import com.delulutopia.core.network.model.HomeSession
+import com.delulutopia.core.network.model.Person
+import com.delulutopia.core.network.model.UniverseInfo
 import com.github.takahirom.roborazzi.captureRoboImage
 import org.junit.Rule
 import org.junit.Test
@@ -32,7 +36,13 @@ class AppShellScreenshotTest {
     private fun Shell(dark: Boolean) {
         nav = rememberNavController()
         DelulutopiaTheme(darkTheme = dark) {
-            DelulutopiaApp(themeMode = if (dark) ThemeMode.Dark else ThemeMode.Light, onThemeModeChange = {}, navController = nav)
+            DelulutopiaApp(
+                session = SAMPLE,
+                themeMode = if (dark) ThemeMode.Dark else ThemeMode.Light,
+                onThemeModeChange = {},
+                onLogout = {},
+                navController = nav,
+            )
         }
     }
 
@@ -56,5 +66,15 @@ class AppShellScreenshotTest {
 
     @Test fun appearance_light() = capture("appearance_light", dark = false, start = AppearanceRoute)
 
+    @Test fun you_light() = capture("you_light", dark = false, start = YouRoute)
+
     @Test fun appearance_dark() = capture("appearance_dark", dark = true, start = AppearanceRoute)
+
+    private companion object {
+        val SAMPLE = HomeSession(
+            me = Person(1, "Emin"),
+            friend = Person(2, "Leyla"),
+            universe = UniverseInfo(1, "Delulutopia", isCreator = true),
+        )
+    }
 }

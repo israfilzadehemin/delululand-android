@@ -37,8 +37,7 @@ fun DlAvatar(
         modifier = modifier
             .size(size)
             .clip(CircleShape)
-            .background(signature)
-            .then(if (ring != null) Modifier.border(ringWidth, ring, CircleShape) else Modifier),
+            .background(signature),
         contentAlignment = Alignment.Center,
     ) {
         if (content != null) {
@@ -54,6 +53,8 @@ fun DlAvatar(
                 maxLines = 1,
             )
         }
+        // Drawn last so a photo never covers the signature ring.
+        if (ring != null) Box(Modifier.matchParentSize().border(ringWidth, ring, CircleShape))
     }
 }
 

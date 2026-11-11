@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Copy is the web's (delululand-web src/screens, src/universe). -->
+    <string name="brand">Delulutopia</string>
+    <string name="cant_reach">Can’t reach %1$s. Try again.</string>
+    <string name="try_again">Try again</string>
+    <string name="back">Back</string>
+    <string name="continue_">Continue</string>
+
+    <!-- Landing (UV-1, UV-2) -->
+    <string name="landing_line">Enter your universe’s key.</string>
+    <string name="key_label">Key</string>
+    <string name="key_wrong">That key doesn’t fit.</string>
+    <string name="enter">Enter</string>
+    <string name="have_invite">Have an invite?</string>
+    <string name="create_universe_link">Create a universe</string>
+
+    <!-- Welcome (UV-3) -->
+    <string name="welcome_to">Welcome to %1$s</string>
+    <string name="close">Close</string>
+
+    <!-- Cards (UV-4) -->
+    <string name="tap_to_enter">Tap to enter</string>
+    <string name="tap_to_set_pin">Tap to set your PIN</string>
+    <string name="join_universe">Join %1$s</string>
+    <string name="create_your_citizen">Create your citizen</string>
+    <string name="use_different_key">Use a different key</string>
+
+    <!-- PIN (FS-A3–A8) -->
+    <string name="pin_enter">Enter your PIN</string>
+    <string name="pin_create">Create your PIN</string>
+    <string name="pin_confirm">Confirm your PIN</string>
+    <string name="pin_wrong">Wrong PIN. Try again.</string>
+    <string name="pin_differ">PINs differ. Start again.</string>
+    <string name="pin_hint">Six digits. You will confirm it once.</string>
+    <string name="pin_dots">%1$s, %2$d of 6 digits entered</string>
+    <string name="pin_dots_pin">PIN</string>
+    <string name="pin_dots_new">New PIN</string>
+    <string name="pin_dots_confirm">Confirm PIN</string>
+    <string name="backspace">Backspace</string>
+
+    <!-- Create (C1–C5) -->
+    <string name="create_title">Create a universe</string>
+    <string name="invite_title">Your invite</string>
+    <string name="invite_text">A universe starts with an invite. Each invite makes one universe.</string>
+    <string name="invite_label">Invite</string>
+    <string name="invite_wrong">That invite doesn’t work.</string>
+    <string name="have_key_instead">Have a key instead?</string>
+    <string name="enter_it">Enter it</string>
+    <string name="universe_title">Your universe</string>
+    <string name="name_label">Name</string>
+    <string name="name_hint">2–12 letters or digits. Shown wherever the app’s name shows.</string>
+    <string name="name_rule">2–12 letters or digits</string>
+    <string name="welcome_label">Welcome message</string>
+    <string name="welcome_hint">Shown under “Welcome to %1$s” when a key is entered.</string>
+    <string name="welcome_follows">Shown under “Welcome to %1$s” when a key is entered. Follows the name until you edit it.</string>
+    <string name="your_universe_lower">your universe</string>
+    <string name="welcome_empty">Write a few words</string>
+    <string name="welcome_too_long">Up to 1,500 characters</string>
+    <string name="see_as_friend">See it as your friend will</string>
+    <string name="reset_original">Reset to the original</string>
+
+    <!-- Citizen (C3, J1) -->
+    <string name="citizen_title">Your citizen</string>
+    <string name="username_label">Username</string>
+    <string name="username_rule">3–16 letters or digits, no spaces</string>
+    <string name="username_taken">That username is taken</string>
+    <string name="timezone_label">Time zone</string>
+    <string name="timezone_hint">This device’s zone, picked for you.</string>
+    <string name="citizen_note">Name, surname, your photo and everything else can wait for Profile.</string>
+
+    <!-- Key reveal (C5) -->
+    <string name="key_reveal_title">This is %1$s’s key</string>
+    <string name="copy">Copy</string>
+    <string name="copied">Copied</string>
+    <string name="share">Share</string>
+    <string name="share_text">%1$s’s key: %2$s</string>
+    <string name="key_send">Send it to the one person you want here.</string>
+    <string name="key_warning">It’s shown only now. Lost it? Make a new one in You › Universe.</string>
+</resources>

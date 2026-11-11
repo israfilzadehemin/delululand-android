@@ -21,3 +21,6 @@ rootProject.name = "delulutopia"
 
 include(":app")
 include(":core:designsystem")
+include(":core:network")
+include(":core:data")
+include(":feature:start")

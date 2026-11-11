@@ -7,11 +7,18 @@ import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.delulutopia.app.ui.DelulutopiaApp
+import com.delulutopia.app.ui.StartApp
+import com.delulutopia.app.ui.UnreachableScreen
+import com.delulutopia.core.data.SessionState
+import com.delulutopia.core.designsystem.component.LocalServerBaseUrl
 import com.delulutopia.core.designsystem.theme.DelulutopiaTheme
 import com.delulutopia.core.designsystem.theme.isDark
 import dagger.hilt.android.AndroidEntryPoint
@@ -42,7 +49,20 @@ class MainActivity : ComponentActivity() {
             }
 
             DelulutopiaTheme(darkTheme = dark) {
-                DelulutopiaApp(themeMode = ready.themeMode, onThemeModeChange = viewModel::setThemeMode)
+                CompositionLocalProvider(LocalServerBaseUrl provides BuildConfig.BASE_URL) {
+                    Surface(color = MaterialTheme.colorScheme.surface) {
+                        when (val session = ready.session) {
+                            is SessionState.SignedIn -> DelulutopiaApp(
+                                session = session.session,
+                                themeMode = ready.themeMode,
+                                onThemeModeChange = viewModel::setThemeMode,
+                                onLogout = viewModel::logout,
+                            )
+                            SessionState.Unreachable -> UnreachableScreen(onRetry = viewModel::refreshSession)
+                            else -> StartApp()
+                        }
+                    }
+                }
             }
         }
     }

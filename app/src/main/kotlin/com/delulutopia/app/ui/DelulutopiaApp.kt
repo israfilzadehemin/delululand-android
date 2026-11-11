@@ -28,16 +28,17 @@ import com.delulutopia.app.navigation.HomeRoute
 import com.delulutopia.app.navigation.LettersRoute
 import com.delulutopia.app.navigation.TopDestination
 import com.delulutopia.app.navigation.YouRoute
-import com.delulutopia.core.designsystem.component.DlAvatar
 import com.delulutopia.core.designsystem.component.DlFab
 import com.delulutopia.core.designsystem.component.DlNavigationBar
 import com.delulutopia.core.designsystem.component.DlNavigationItem
 import com.delulutopia.core.designsystem.component.DlNavigationYouItem
+import com.delulutopia.core.designsystem.component.DlRemoteAvatar
 import com.delulutopia.core.designsystem.component.DlSnackbarHost
 import com.delulutopia.core.designsystem.component.DlTopAppBar
 import com.delulutopia.core.designsystem.icon.DlIcons
 import com.delulutopia.core.designsystem.theme.DlTheme
 import com.delulutopia.core.designsystem.theme.ThemeMode
+import com.delulutopia.core.network.model.HomeSession
 import kotlin.reflect.KClass
 import kotlinx.coroutines.launch
 
@@ -47,8 +48,10 @@ import kotlinx.coroutines.launch
  */
 @Composable
 fun DelulutopiaApp(
+    session: HomeSession,
     themeMode: ThemeMode,
     onThemeModeChange: (ThemeMode) -> Unit,
+    onLogout: () -> Unit,
     navController: NavHostController = rememberNavController(),
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
@@ -63,8 +66,8 @@ fun DelulutopiaApp(
     Scaffold(
         topBar = {
             when {
-                // Home's title is the universe's name; the session arrives in P1.
-                top == TopDestination.Home -> DlTopAppBar(title = "Delulutopia")
+                // Home's title is the universe's name (Universe §4).
+                top == TopDestination.Home -> DlTopAppBar(title = session.universe.name)
                 top != null -> DlTopAppBar(title = stringResource(top.label))
                 destination.isOn(AppearanceRoute::class) -> DlTopAppBar(
                     title = stringResource(R.string.appearance_title),
@@ -81,7 +84,13 @@ fun DelulutopiaApp(
                         val open = { navController.navigateToTop(item) }
                         if (item == TopDestination.You) {
                             DlNavigationYouItem(selected = selected, onClick = open, label = stringResource(item.label)) {
-                                DlAvatar(initials = "Y", signature = DlTheme.colors.userA, size = 24.dp)
+                                DlRemoteAvatar(
+                                    avatarUrl = session.me.avatarUrl,
+                                    name = session.me.nickname,
+                                    initials = session.me.nickname.take(1).uppercase(),
+                                    signature = signatureOfMe(session),
+                                    size = 24.dp,
+                                )
                             }
                         } else {
                             DlNavigationItem(
@@ -112,7 +121,9 @@ fun DelulutopiaApp(
             composable<LettersRoute> { PlaceholderScreen() }
             composable<DiscussionsRoute> { PlaceholderScreen() }
             composable<EmailsRoute> { PlaceholderScreen() }
-            composable<YouRoute> { YouScreen(onOpenAppearance = { navController.navigate(AppearanceRoute) }) }
+            composable<YouRoute> {
+                YouScreen(session = session, onOpenAppearance = { navController.navigate(AppearanceRoute) }, onLogout = onLogout)
+            }
             composable<AppearanceRoute> { AppearanceScreen(themeMode, onThemeModeChange) }
         }
     }
@@ -128,3 +139,8 @@ private fun NavHostController.navigateToTop(destination: TopDestination) {
         restoreState = true
     }
 }
+
+/** The first citizen (lower id) wears terracotta, the second sage. */
+@Composable
+internal fun signatureOfMe(session: HomeSession) =
+    if (session.friend == null || session.me.id < session.friend!!.id) DlTheme.colors.userA else DlTheme.colors.userB

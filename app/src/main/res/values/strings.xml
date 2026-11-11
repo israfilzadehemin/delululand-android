@@ -20,6 +20,7 @@
     <!-- Placeholder destinations until their phase lands -->
     <string name="placeholder_title">Coming next</string>
     <string name="placeholder_body">This screen is built in a later step of the Android app.</string>
+    <string name="you_signed_in">Signed in to %1$s</string>
     <string name="placeholder_snackbar">Not built yet</string>
 
     <!-- You and Appearance (F-Menu, F-Appearance) -->
@@ -31,4 +32,11 @@
     <string name="appearance_system">Match device</string>
     <string name="appearance_saved_note">Saved on this phone.</string>
     <string name="back">Back</string>
+    <string name="brand">Delulutopia</string>
+    <string name="cant_reach_brand">Can’t reach Delulutopia. Try again.</string>
+    <string name="try_again">Try again</string>
+    <string name="you_log_out">Log out</string>
+    <string name="logout_title">Log out of %1$s?</string>
+    <string name="logout_text">Your letters and drafts stay safe. You’ll need your PIN to come back on this device.</string>
+    <string name="cancel">Cancel</string>
 </resources>
