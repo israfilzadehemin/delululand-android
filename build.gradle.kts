@@ -9,3 +9,12 @@ plugins {
     alias(libs.plugins.roborazzi) apply false
     alias(libs.plugins.ktlint) apply false
 }
+
+// One ktlint for CI and local runs (the same release as the standalone binary).
+subprojects {
+    plugins.withId("org.jlleitschuh.gradle.ktlint") {
+        extensions.configure<org.jlleitschuh.gradle.ktlint.KtlintExtension> {
+            version.set("1.7.1")
+        }
+    }
+}

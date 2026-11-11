@@ -5,16 +5,24 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onRoot
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.delulutopia.app.navigation.AppearanceRoute
-import com.delulutopia.app.navigation.LettersRoute
-import com.delulutopia.app.navigation.YouRoute
+import com.delulutopia.app.ui.AppearanceScreen
 import com.delulutopia.app.ui.DelulutopiaApp
+import com.delulutopia.app.ui.PlaceholderScreen
+import com.delulutopia.app.ui.YouScreen
+import com.delulutopia.core.data.HomeRepository
 import com.delulutopia.core.designsystem.theme.DelulutopiaTheme
 import com.delulutopia.core.designsystem.theme.ThemeMode
 import com.delulutopia.core.network.model.HomeSession
 import com.delulutopia.core.network.model.Person
 import com.delulutopia.core.network.model.UniverseInfo
+import com.delulutopia.core.ui.AppearanceRoute
+import com.delulutopia.core.ui.DiscussionsRoute
+import com.delulutopia.core.ui.EmailsRoute
+import com.delulutopia.core.ui.HomeRoute
+import com.delulutopia.core.ui.LettersRoute
+import com.delulutopia.core.ui.YouRoute
 import com.github.takahirom.roborazzi.captureRoboImage
 import org.junit.Rule
 import org.junit.Test
@@ -36,13 +44,14 @@ class AppShellScreenshotTest {
     private fun Shell(dark: Boolean) {
         nav = rememberNavController()
         DelulutopiaTheme(darkTheme = dark) {
-            DelulutopiaApp(
-                session = SAMPLE,
-                themeMode = if (dark) ThemeMode.Dark else ThemeMode.Light,
-                onThemeModeChange = {},
-                onLogout = {},
-                navController = nav,
-            )
+            DelulutopiaApp(session = SAMPLE, state = HomeRepository.State(), navController = nav) { navController ->
+                composable<HomeRoute> { PlaceholderScreen() }
+                composable<LettersRoute> { PlaceholderScreen() }
+                composable<DiscussionsRoute> { PlaceholderScreen() }
+                composable<EmailsRoute> { PlaceholderScreen() }
+                composable<YouRoute> { YouScreen(session = SAMPLE, onOpenAppearance = { navController.navigate(AppearanceRoute) }, onLogout = {}) }
+                composable<AppearanceRoute> { AppearanceScreen(if (dark) ThemeMode.Dark else ThemeMode.Light) {} }
+            }
         }
     }
 

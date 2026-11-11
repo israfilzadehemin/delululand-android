@@ -36,6 +36,9 @@ fun DlTextField(
     centeredMono: Boolean = false,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     keyboardActions: KeyboardActions = KeyboardActions.Default,
+    /** Shown at the end of the supporting line in place of the length count ("12/16"). */
+    counter: String? = null,
+    minLines: Int = 1,
 ) {
     val isError = errorText != null
     val colors = MaterialTheme.colorScheme
@@ -50,6 +53,7 @@ fun DlTextField(
         modifier = modifier.fillMaxWidth(),
         enabled = enabled,
         singleLine = singleLine,
+        minLines = minLines,
         textStyle = textStyle,
         isError = isError,
         shape = DlShape.textField,
@@ -63,11 +67,12 @@ fun DlTextField(
                 modifier = if (centeredMono) Modifier.fillMaxWidth() else Modifier,
             )
         },
-        supportingText = if (supportingText != null || errorText != null || maxLength != null) {
+        supportingText = if (supportingText != null || errorText != null || maxLength != null || counter != null) {
             {
                 Row(Modifier.fillMaxWidth()) {
                     Text(errorText ?: supportingText.orEmpty(), modifier = Modifier.weight(1f))
-                    if (maxLength != null) Text("${value.length}/$maxLength", style = TextStyle(fontFeatureSettings = "tnum"))
+                    val count = counter ?: maxLength?.let { "${value.length}/$it" }
+                    if (count != null) Text(count, style = TextStyle(fontFeatureSettings = "tnum"))
                 }
             }
         } else {

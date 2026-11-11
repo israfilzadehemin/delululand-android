@@ -46,7 +46,12 @@ object WebIcons {
             "IconPhoto",
             24f,
             24f,
-            E("M5.0 5.0h14.0a2.0 2.0 0 0 1 2.0 2.0v10.0a2.0 2.0 0 0 1 -2.0 2.0h-14.0a2.0 2.0 0 0 1 -2.0 -2.0v-10.0a2.0 2.0 0 0 1 2.0 -2.0z", fill = false, stroke = true, width = 1.75f),
+            E(
+                "M5.0 5.0h14.0a2.0 2.0 0 0 1 2.0 2.0v10.0a2.0 2.0 0 0 1 -2.0 2.0h-14.0a2.0 2.0 0 0 1 -2.0 -2.0v-10.0a2.0 2.0 0 0 1 2.0 -2.0z",
+                fill = false,
+                stroke = true,
+                width = 1.75f,
+            ),
             E("M7.0 10.0a2.0 2.0 0 1 0 4.0 0a2.0 2.0 0 1 0 -4.0 0z", fill = false, stroke = true, width = 1.75f),
             E("M21 16l-5-5-8 8", fill = false, stroke = true, width = 1.75f),
         )
@@ -57,7 +62,12 @@ object WebIcons {
             "IconMic",
             24f,
             24f,
-            E("M12.0 3.0h0.0a3.0 3.0 0 0 1 3.0 3.0v5.0a3.0 3.0 0 0 1 -3.0 3.0h-0.0a3.0 3.0 0 0 1 -3.0 -3.0v-5.0a3.0 3.0 0 0 1 3.0 -3.0z", fill = false, stroke = true, width = 1.75f),
+            E(
+                "M12.0 3.0h0.0a3.0 3.0 0 0 1 3.0 3.0v5.0a3.0 3.0 0 0 1 -3.0 3.0h-0.0a3.0 3.0 0 0 1 -3.0 -3.0v-5.0a3.0 3.0 0 0 1 3.0 -3.0z",
+                fill = false,
+                stroke = true,
+                width = 1.75f,
+            ),
             E("M5 11a7 7 0 0 0 14 0M12 18v3", fill = false, stroke = true, width = 1.75f),
         )
     }
@@ -149,7 +159,12 @@ object WebIcons {
             "IconLetters",
             24f,
             24f,
-            E("M5.0 6.0h14.0a2.0 2.0 0 0 1 2.0 2.0v9.0a2.0 2.0 0 0 1 -2.0 2.0h-14.0a2.0 2.0 0 0 1 -2.0 -2.0v-9.0a2.0 2.0 0 0 1 2.0 -2.0z", fill = false, stroke = true, width = 1.75f),
+            E(
+                "M5.0 6.0h14.0a2.0 2.0 0 0 1 2.0 2.0v9.0a2.0 2.0 0 0 1 -2.0 2.0h-14.0a2.0 2.0 0 0 1 -2.0 -2.0v-9.0a2.0 2.0 0 0 1 2.0 -2.0z",
+                fill = false,
+                stroke = true,
+                width = 1.75f,
+            ),
             E("M3 9l9 6 9-6", fill = false, stroke = true, width = 1.75f),
         )
     }
@@ -191,7 +206,12 @@ object WebIcons {
             "IconEmails",
             24f,
             24f,
-            E("M5.0 5.0h14.0a2.0 2.0 0 0 1 2.0 2.0v10.0a2.0 2.0 0 0 1 -2.0 2.0h-14.0a2.0 2.0 0 0 1 -2.0 -2.0v-10.0a2.0 2.0 0 0 1 2.0 -2.0z", fill = false, stroke = true, width = 1.75f),
+            E(
+                "M5.0 5.0h14.0a2.0 2.0 0 0 1 2.0 2.0v10.0a2.0 2.0 0 0 1 -2.0 2.0h-14.0a2.0 2.0 0 0 1 -2.0 -2.0v-10.0a2.0 2.0 0 0 1 2.0 -2.0z",
+                fill = false,
+                stroke = true,
+                width = 1.75f,
+            ),
             E("M3.5 6.5l8.5 6 8.5-6", fill = false, stroke = true, width = 1.75f),
         )
     }
@@ -201,7 +221,12 @@ object WebIcons {
             "IconVideo",
             24f,
             24f,
-            E("M5.0 6.0h9.0a2.0 2.0 0 0 1 2.0 2.0v8.0a2.0 2.0 0 0 1 -2.0 2.0h-9.0a2.0 2.0 0 0 1 -2.0 -2.0v-8.0a2.0 2.0 0 0 1 2.0 -2.0z", fill = false, stroke = true, width = 1.75f),
+            E(
+                "M5.0 6.0h9.0a2.0 2.0 0 0 1 2.0 2.0v8.0a2.0 2.0 0 0 1 -2.0 2.0h-9.0a2.0 2.0 0 0 1 -2.0 -2.0v-8.0a2.0 2.0 0 0 1 2.0 -2.0z",
+                fill = false,
+                stroke = true,
+                width = 1.75f,
+            ),
             E("M16 10l5-3v10l-5-3z", fill = false, stroke = true, width = 1.75f),
         )
     }
@@ -230,7 +255,12 @@ object WebIcons {
             "IconEnvelope",
             56f,
             44f,
-            E("M5.0 9.0h46.0a4.0 4.0 0 0 1 4.0 4.0v26.0a4.0 4.0 0 0 1 -4.0 4.0h-46.0a4.0 4.0 0 0 1 -4.0 -4.0v-26.0a4.0 4.0 0 0 1 4.0 -4.0z", fill = true, stroke = true, width = 1.5f),
+            E(
+                "M5.0 9.0h46.0a4.0 4.0 0 0 1 4.0 4.0v26.0a4.0 4.0 0 0 1 -4.0 4.0h-46.0a4.0 4.0 0 0 1 -4.0 -4.0v-26.0a4.0 4.0 0 0 1 4.0 -4.0z",
+                fill = true,
+                stroke = true,
+                width = 1.5f,
+            ),
             E("M1 13l27 18L55 13", fill = false, stroke = true, width = 1.5f),
             E("M30 10l18-8-7 18-3-7z", fill = true, stroke = true, width = 1.5f),
         )
@@ -317,7 +347,12 @@ object WebIcons {
             "IconAddSquare",
             24f,
             24f,
-            E("M7.0 4.0h10.0a3.0 3.0 0 0 1 3.0 3.0v10.0a3.0 3.0 0 0 1 -3.0 3.0h-10.0a3.0 3.0 0 0 1 -3.0 -3.0v-10.0a3.0 3.0 0 0 1 3.0 -3.0z", fill = false, stroke = true, width = 1.75f),
+            E(
+                "M7.0 4.0h10.0a3.0 3.0 0 0 1 3.0 3.0v10.0a3.0 3.0 0 0 1 -3.0 3.0h-10.0a3.0 3.0 0 0 1 -3.0 -3.0v-10.0a3.0 3.0 0 0 1 3.0 -3.0z",
+                fill = false,
+                stroke = true,
+                width = 1.75f,
+            ),
             E("M12 8v8M8 12h8", fill = false, stroke = true, width = 1.75f),
         )
     }
@@ -327,10 +362,30 @@ object WebIcons {
             "IconGrid",
             24f,
             24f,
-            E("M5.5 4.0h4.0a1.5 1.5 0 0 1 1.5 1.5v4.0a1.5 1.5 0 0 1 -1.5 1.5h-4.0a1.5 1.5 0 0 1 -1.5 -1.5v-4.0a1.5 1.5 0 0 1 1.5 -1.5z", fill = false, stroke = true, width = 1.75f),
-            E("M14.5 4.0h4.0a1.5 1.5 0 0 1 1.5 1.5v4.0a1.5 1.5 0 0 1 -1.5 1.5h-4.0a1.5 1.5 0 0 1 -1.5 -1.5v-4.0a1.5 1.5 0 0 1 1.5 -1.5z", fill = false, stroke = true, width = 1.75f),
-            E("M5.5 13.0h4.0a1.5 1.5 0 0 1 1.5 1.5v4.0a1.5 1.5 0 0 1 -1.5 1.5h-4.0a1.5 1.5 0 0 1 -1.5 -1.5v-4.0a1.5 1.5 0 0 1 1.5 -1.5z", fill = false, stroke = true, width = 1.75f),
-            E("M14.5 13.0h4.0a1.5 1.5 0 0 1 1.5 1.5v4.0a1.5 1.5 0 0 1 -1.5 1.5h-4.0a1.5 1.5 0 0 1 -1.5 -1.5v-4.0a1.5 1.5 0 0 1 1.5 -1.5z", fill = false, stroke = true, width = 1.75f),
+            E(
+                "M5.5 4.0h4.0a1.5 1.5 0 0 1 1.5 1.5v4.0a1.5 1.5 0 0 1 -1.5 1.5h-4.0a1.5 1.5 0 0 1 -1.5 -1.5v-4.0a1.5 1.5 0 0 1 1.5 -1.5z",
+                fill = false,
+                stroke = true,
+                width = 1.75f,
+            ),
+            E(
+                "M14.5 4.0h4.0a1.5 1.5 0 0 1 1.5 1.5v4.0a1.5 1.5 0 0 1 -1.5 1.5h-4.0a1.5 1.5 0 0 1 -1.5 -1.5v-4.0a1.5 1.5 0 0 1 1.5 -1.5z",
+                fill = false,
+                stroke = true,
+                width = 1.75f,
+            ),
+            E(
+                "M5.5 13.0h4.0a1.5 1.5 0 0 1 1.5 1.5v4.0a1.5 1.5 0 0 1 -1.5 1.5h-4.0a1.5 1.5 0 0 1 -1.5 -1.5v-4.0a1.5 1.5 0 0 1 1.5 -1.5z",
+                fill = false,
+                stroke = true,
+                width = 1.75f,
+            ),
+            E(
+                "M14.5 13.0h4.0a1.5 1.5 0 0 1 1.5 1.5v4.0a1.5 1.5 0 0 1 -1.5 1.5h-4.0a1.5 1.5 0 0 1 -1.5 -1.5v-4.0a1.5 1.5 0 0 1 1.5 -1.5z",
+                fill = false,
+                stroke = true,
+                width = 1.75f,
+            ),
         )
     }
 
@@ -339,7 +394,12 @@ object WebIcons {
             "IconPhotoSmall",
             24f,
             24f,
-            E("M5.0 5.0h14.0a2.0 2.0 0 0 1 2.0 2.0v10.0a2.0 2.0 0 0 1 -2.0 2.0h-14.0a2.0 2.0 0 0 1 -2.0 -2.0v-10.0a2.0 2.0 0 0 1 2.0 -2.0z", fill = false, stroke = true, width = 2.0f),
+            E(
+                "M5.0 5.0h14.0a2.0 2.0 0 0 1 2.0 2.0v10.0a2.0 2.0 0 0 1 -2.0 2.0h-14.0a2.0 2.0 0 0 1 -2.0 -2.0v-10.0a2.0 2.0 0 0 1 2.0 -2.0z",
+                fill = false,
+                stroke = true,
+                width = 2.0f,
+            ),
             E("M7.0 10.0a2.0 2.0 0 1 0 4.0 0a2.0 2.0 0 1 0 -4.0 0z", fill = false, stroke = true, width = 2.0f),
             E("M21 16l-5-5-8 8", fill = false, stroke = true, width = 2.0f),
         )
@@ -350,7 +410,12 @@ object WebIcons {
             "IconMicSmall",
             24f,
             24f,
-            E("M12.0 3.0h0.0a3.0 3.0 0 0 1 3.0 3.0v5.0a3.0 3.0 0 0 1 -3.0 3.0h-0.0a3.0 3.0 0 0 1 -3.0 -3.0v-5.0a3.0 3.0 0 0 1 3.0 -3.0z", fill = false, stroke = true, width = 2.0f),
+            E(
+                "M12.0 3.0h0.0a3.0 3.0 0 0 1 3.0 3.0v5.0a3.0 3.0 0 0 1 -3.0 3.0h-0.0a3.0 3.0 0 0 1 -3.0 -3.0v-5.0a3.0 3.0 0 0 1 3.0 -3.0z",
+                fill = false,
+                stroke = true,
+                width = 2.0f,
+            ),
             E("M5 11a7 7 0 0 0 14 0M12 18v3", fill = false, stroke = true, width = 2.0f),
         )
     }
@@ -440,7 +505,12 @@ object WebIcons {
             "IconArchive",
             24f,
             24f,
-            E("M4.0 4.0h16.0a1.0 1.0 0 0 1 1.0 1.0v3.0a1.0 1.0 0 0 1 -1.0 1.0h-16.0a1.0 1.0 0 0 1 -1.0 -1.0v-3.0a1.0 1.0 0 0 1 1.0 -1.0z", fill = false, stroke = true, width = 1.75f),
+            E(
+                "M4.0 4.0h16.0a1.0 1.0 0 0 1 1.0 1.0v3.0a1.0 1.0 0 0 1 -1.0 1.0h-16.0a1.0 1.0 0 0 1 -1.0 -1.0v-3.0a1.0 1.0 0 0 1 1.0 -1.0z",
+                fill = false,
+                stroke = true,
+                width = 1.75f,
+            ),
             E("M5 9v9a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V9M10 13h4", fill = false, stroke = true, width = 1.75f),
         )
     }

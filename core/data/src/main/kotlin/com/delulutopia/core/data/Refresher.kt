@@ -29,7 +29,10 @@ class Refresher(
 
     fun start(): Refresher {
         scope.launch {
-            live.signals.filter { it.name == Signal.READY || it.name in signals }.collect { reload(); armDeadline() }
+            live.signals.filter { it.name == Signal.READY || it.name in signals }.collect {
+                reload()
+                armDeadline()
+            }
         }
         scope.launch {
             live.live.collectLatest { isLive ->

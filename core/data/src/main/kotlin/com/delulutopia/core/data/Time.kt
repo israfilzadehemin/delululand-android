@@ -7,7 +7,7 @@ import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-/** Instants and clock text (web src/clock/*): the viewer's zone, 24-hour, en-GB. */
+/** Instants and clock text (web src/clock): the viewer's zone, 24-hour, en-GB. */
 object Time {
     fun ms(iso: String?): Long? = iso?.let { runCatching { Instant.parse(it).toEpochMilli() }.getOrNull() }
 

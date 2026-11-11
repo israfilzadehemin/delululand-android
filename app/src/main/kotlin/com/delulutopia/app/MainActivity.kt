@@ -14,7 +14,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.delulutopia.app.ui.DelulutopiaApp
+import com.delulutopia.app.ui.SignedInApp
 import com.delulutopia.app.ui.StartApp
 import com.delulutopia.app.ui.UnreachableScreen
 import com.delulutopia.core.data.SessionState
@@ -52,7 +52,7 @@ class MainActivity : ComponentActivity() {
                 CompositionLocalProvider(LocalServerBaseUrl provides BuildConfig.BASE_URL) {
                     Surface(color = MaterialTheme.colorScheme.surface) {
                         when (val session = ready.session) {
-                            is SessionState.SignedIn -> DelulutopiaApp(
+                            is SessionState.SignedIn -> SignedInApp(
                                 session = session.session,
                                 themeMode = ready.themeMode,
                                 onThemeModeChange = viewModel::setThemeMode,

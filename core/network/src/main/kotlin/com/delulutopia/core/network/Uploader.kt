@@ -76,7 +76,9 @@ class Uploader @Inject constructor(
             object : Callback {
                 override fun onFailure(call: Call, e: IOException) {
                     val timedOut = e is java.io.InterruptedIOException
-                    cont.resumeWithException(ApiException(0, if (timedOut) "TIMEOUT" else "NETWORK", if (timedOut) UPLOAD_TIMED_OUT else UPLOAD_FAILED, cause = e))
+                    cont.resumeWithException(
+                        ApiException(0, if (timedOut) "TIMEOUT" else "NETWORK", if (timedOut) UPLOAD_TIMED_OUT else UPLOAD_FAILED, cause = e),
+                    )
                 }
 
                 override fun onResponse(call: Call, response: Response) {

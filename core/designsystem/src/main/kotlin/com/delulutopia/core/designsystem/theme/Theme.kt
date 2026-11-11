@@ -19,6 +19,7 @@ fun ThemeMode.isDark(): Boolean = when (this) {
 
 private val LocalDlColors = staticCompositionLocalOf { LightDlColors }
 private val LocalDlType = staticCompositionLocalOf { DefaultDlType }
+private val LocalDlDark = staticCompositionLocalOf { false }
 
 /**
  * Brand on Material 3 (decision A1): the Delulutopia palette and type on M3 structure. Dynamic
@@ -32,6 +33,7 @@ fun DelulutopiaTheme(
     CompositionLocalProvider(
         LocalDlColors provides if (darkTheme) DarkDlColors else LightDlColors,
         LocalDlType provides DefaultDlType,
+        LocalDlDark provides darkTheme,
     ) {
         MaterialTheme(
             colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme,
@@ -51,4 +53,9 @@ object DlTheme {
     val type: DlType
         @Composable @ReadOnlyComposable
         get() = LocalDlType.current
+
+    /** Whether the dark theme is showing (a few materials keep their own dark tones). */
+    val isDark: Boolean
+        @Composable @ReadOnlyComposable
+        get() = LocalDlDark.current
 }

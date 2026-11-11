@@ -25,7 +25,14 @@ import kotlinx.coroutines.sync.withLock
  */
 @Singleton
 class HomeRepository @Inject constructor(private val backend: Backend) {
-    data class State(val home: Home? = null, val offline: Boolean = false, val moods: List<Mood> = Moods.DEFAULTS, val moodLimit: Int = Moods.LIMIT)
+    data class State(
+        val home: Home? = null,
+        val offline: Boolean = false,
+        val moods: List<Mood> = Moods.DEFAULTS,
+        val moodLimit: Int = Moods.LIMIT,
+        /** The universe's own list arrived (custom moods can be added). */
+        val moodsLoaded: Boolean = false,
+    )
 
     private val _state = MutableStateFlow(State())
     val state: StateFlow<State> = _state.asStateFlow()
@@ -67,7 +74,7 @@ class HomeRepository @Inject constructor(private val backend: Backend) {
     }
 
     suspend fun loadMoods() {
-        runCatching { backend.run { moods() } }.onSuccess { c -> _state.update { it.copy(moods = c.moods, moodLimit = c.limit) } }
+        runCatching { backend.run { moods() } }.onSuccess { c -> _state.update { it.copy(moods = c.moods, moodLimit = c.limit, moodsLoaded = true) } }
     }
 
     /** Local patch after a write that answers with the new value (mood, board). */

@@ -74,7 +74,7 @@ import retrofit2.http.Path
 import retrofit2.http.Query
 
 /**
- * The API, one function per endpoint (Technical Design §5.2 and the story docs; web src/api/*.ts).
+ * The API, one function per endpoint (Technical Design §5.2 and the story docs; web src/api).
  * Attachment uploads with progress go through [Uploader] instead.
  */
 interface DelulutopiaApi {
@@ -214,7 +214,12 @@ interface DelulutopiaApi {
     suspend fun discussion(@Path("id") id: Long): DFull
 
     @GET("api/discussions/{id}/comments")
-    suspend fun comments(@Path("id") id: Long, @Query("cursor") cursor: String? = null, @Query("limit") limit: Int? = null, @Query("from") from: String? = null): DComments
+    suspend fun comments(
+        @Path("id") id: Long,
+        @Query("cursor") cursor: String? = null,
+        @Query("limit") limit: Int? = null,
+        @Query("from") from: String? = null,
+    ): DComments
 
     @POST("api/discussions/{id}/comments")
     suspend fun comment(@Path("id") id: Long, @Body body: TextBody): DComment

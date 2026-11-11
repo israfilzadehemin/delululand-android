@@ -137,7 +137,13 @@ data class Home(
 }
 
 @Serializable
-data class HomeCounts(val unreadCount: Int = 0, val discussionsUnseen: Int = 0, val emailsUnread: Int = 0, val emailsReacted: Int = 0, val boardNew: Boolean = false)
+data class HomeCounts(
+    val unreadCount: Int = 0,
+    val discussionsUnseen: Int = 0,
+    val emailsUnread: Int = 0,
+    val emailsReacted: Int = 0,
+    val boardNew: Boolean = false,
+)
 
 // Board (doc "Delululand — Board" §3)
 
@@ -207,7 +213,13 @@ data class ThreadFull(val thread: ThreadRow, val emails: EmailList)
 data class EmailSent(val thread: ThreadRow, val email: Email, val credits: EmailCredits)
 
 @Serializable
-data class EmailDraft(val subject: String = "", val text: String = "", val attachments: List<Att> = emptyList(), val version: Int = 0, val savedAt: String? = null)
+data class EmailDraft(
+    val subject: String = "",
+    val text: String = "",
+    val attachments: List<Att> = emptyList(),
+    val version: Int = 0,
+    val savedAt: String? = null,
+)
 
 // Reactions (doc "Delululand — Reactions")
 

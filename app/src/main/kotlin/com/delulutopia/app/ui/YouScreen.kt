@@ -28,6 +28,7 @@ import com.delulutopia.core.designsystem.component.DlListItem
 import com.delulutopia.core.designsystem.component.DlRemoteAvatar
 import com.delulutopia.core.designsystem.icon.DlIcons
 import com.delulutopia.core.network.model.HomeSession
+import com.delulutopia.core.ui.signatureOf
 
 /**
  * The You destination (Y-A3). P1 carries the profile card, Appearance and Log out; Profile, Universe,
@@ -56,7 +57,7 @@ fun YouScreen(session: HomeSession, onOpenAppearance: () -> Unit, onLogout: () -
                 avatarUrl = session.me.avatarUrl,
                 name = session.me.nickname,
                 initials = session.me.nickname.take(1).uppercase(),
-                signature = signatureOfMe(session),
+                signature = signatureOf(session.me.id),
                 size = 56.dp,
             )
             Column {
