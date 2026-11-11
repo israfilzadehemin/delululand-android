@@ -2,11 +2,12 @@ package com.delulutopia.feature.you
 
 import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,6 +20,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -28,6 +30,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -35,20 +39,23 @@ import androidx.compose.ui.graphics.vector.group
 import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.delulutopia.core.designsystem.component.DlDialog
+import com.delulutopia.core.designsystem.component.DlGroupCard
 import com.delulutopia.core.designsystem.component.DlListItem
 import com.delulutopia.core.designsystem.component.DlRemoteAvatar
-import com.delulutopia.core.designsystem.component.DlSectionLabel
 import com.delulutopia.core.designsystem.component.DlSwitch
 import com.delulutopia.core.designsystem.component.Zones
 import com.delulutopia.core.designsystem.icon.DlIcons
 import com.delulutopia.core.designsystem.icon.WebIcons
+import com.delulutopia.core.designsystem.motion.pressScale
 import com.delulutopia.core.designsystem.theme.ThemeMode
 import com.delulutopia.core.network.model.NotifySettings
 import com.delulutopia.core.ui.AppearanceRoute
@@ -128,36 +135,53 @@ fun YouScreen(themeMode: ThemeMode, onLogout: () -> Unit, vm: YouViewModel = hil
     val wanted = homeState.home?.notifyPrefs?.let { it.enabled.isNotEmpty() } ?: true
     val attention = wanted && device.permission != NotifyPermission.Granted
 
-    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    // web .dl-you .dl-sub-main: 4/20/24 padding, 16 dp between blocks.
+    Column(
+        Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(start = 20.dp, end = 20.dp, top = 4.dp, bottom = 24.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
         if (me != null) {
             val fullName = listOfNotNull(me.firstName, me.lastName).filter { it.isNotBlank() }.joinToString(" ")
             val place = me.timezone?.let { Zones.cityOf(it) }.orEmpty()
             val details = listOf(fullName, place).filter { it.isNotEmpty() }.joinToString(" · ")
+            // web .dl-you-card: 14 dp padding, 6 dp corners, a line and a soft shadow.
+            val shape = RoundedCornerShape(6.dp)
+            val press = remember { MutableInteractionSource() }
             Row(
                 Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(16.dp))
+                    .pressScale(press, 0.98f)
+                    .shadow(2.dp, shape)
+                    .clip(shape)
                     .background(MaterialTheme.colorScheme.surfaceContainerHigh)
-                    .clickable { nav.open(ProfileRoute) }
-                    .padding(16.dp),
+                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, shape)
+                    .clickable(interactionSource = press, indication = ripple()) { nav.open(ProfileRoute) }
+                    .padding(14.dp),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                horizontalArrangement = Arrangement.spacedBy(14.dp),
             ) {
-                DlRemoteAvatar(me.avatarUrl, me.nickname, tintOf(me.id), size = 64.dp, initials = me.initials(), ring = signatureOf(me.id))
-                Column(Modifier.weight(1f)) {
-                    Text(me.nickname, fontSize = 18.sp, fontWeight = FontWeight.Bold)
-                    if (details.isNotEmpty()) Text(details, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                DlRemoteAvatar(me.avatarUrl, me.nickname, tintOf(me.id), size = 64.dp, initials = me.initials(), ring = signatureOf(me.id), ringWidth = 3.dp)
+                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                    Text(me.nickname, fontSize = 18.sp, lineHeight = 23.sp, fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    if (details.isNotEmpty()) {
+                        Text(
+                            details,
+                            style = MaterialTheme.typography.bodySmall.copy(fontSize = 13.sp, lineHeight = 18.sp),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    }
                     Text(
                         "View profile",
-                        style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.SemiBold),
+                        style = MaterialTheme.typography.bodySmall.copy(fontSize = 13.sp, lineHeight = 18.sp, fontWeight = FontWeight.Bold),
                         color = MaterialTheme.colorScheme.primary,
                     )
                 }
                 Icon(DlIcons.ChevronRight, null, Modifier.size(20.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
-        DlSectionLabel("Settings", Modifier.padding(start = 4.dp, top = 8.dp))
-        Card {
+        Group("Settings") {
             DlListItem("Universe", supporting = "$brand · name, welcome, key", icon = UniverseIcon, onClick = { nav.open(UniverseRoute) })
             DlListItem(
                 "Appearance",
@@ -172,14 +196,13 @@ fun YouScreen(themeMode: ThemeMode, onLogout: () -> Unit, vm: YouViewModel = hil
                 onClick = { nav.open(NotificationsRoute) },
                 trailing = {
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        if (attention) Box(Modifier.size(8.dp).background(MaterialTheme.colorScheme.error, CircleShape))
+                        if (attention) Box(Modifier.size(9.dp).background(MaterialTheme.colorScheme.error, CircleShape))
                         Icon(DlIcons.ChevronRight, null, Modifier.size(20.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 },
             )
         }
-        DlSectionLabel("Account", Modifier.padding(start = 4.dp, top = 8.dp))
-        Card {
+        Group("Account") {
             DlListItem("Change PIN", icon = WebIcons.Key, showChevron = false, onClick = { changePin = true })
             if (me != null && activity != null && Fingerprint.available(context)) {
                 DlListItem(
@@ -200,7 +223,7 @@ fun YouScreen(themeMode: ThemeMode, onLogout: () -> Unit, vm: YouViewModel = hil
             DlListItem("About", icon = WebIcons.Info, enabled = false, showChevron = false, trailing = { SoonChip() })
         }
         Card {
-            DlListItem("Log out", icon = DlIcons.LogOut, showChevron = false, onClick = { confirmLogout = true })
+            DlListItem("Log out", icon = DlIcons.LogOut, showChevron = false, destructive = true, onClick = { confirmLogout = true })
         }
     }
 
@@ -243,17 +266,35 @@ fun YouScreen(themeMode: ThemeMode, onLogout: () -> Unit, vm: YouViewModel = hil
 }
 
 @Composable
-internal fun Card(content: @Composable ColumnScope.() -> Unit) {
-    Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(MaterialTheme.colorScheme.surfaceContainerHigh), content = content)
+internal fun Card(background: Color = MaterialTheme.colorScheme.surfaceContainerHigh, content: @Composable () -> Unit) {
+    DlGroupCard(background = background, content = content)
 }
 
-/** Menu Q12: shown, greyed, not tappable, with a "Soon" chip. */
+/** A titled group (web section > h2.dl-set-group + .dl-set-card). */
+@Composable
+private fun Group(title: String, content: @Composable () -> Unit) {
+    Column {
+        // web .dl-set-group: 11/700, 0.08 em, 4 dp in, 6 dp above the card.
+        Text(
+            title.uppercase(),
+            Modifier.padding(start = 4.dp, end = 4.dp, bottom = 6.dp),
+            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, letterSpacing = 0.08.em),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Card(content = content)
+    }
+}
+
+/** Menu Q12: shown, greyed, not tappable, with a "Soon" chip (web .dl-set-soon-chip). */
 @Composable
 private fun SoonChip() {
     Text(
-        "Soon",
-        Modifier.background(MaterialTheme.colorScheme.surfaceContainerHighest, RoundedCornerShape(50)).padding(horizontal = 10.dp, vertical = 2.dp),
-        style = MaterialTheme.typography.labelSmall,
+        "SOON",
+        Modifier
+            .background(MaterialTheme.colorScheme.background, RoundedCornerShape(8.dp))
+            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp))
+            .padding(horizontal = 8.dp, vertical = 3.dp),
+        style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp, lineHeight = 12.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.08.em),
         color = MaterialTheme.colorScheme.onSurfaceVariant,
     )
 }

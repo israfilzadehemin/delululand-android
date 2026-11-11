@@ -1,6 +1,7 @@
 package com.delulutopia.feature.you
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -28,16 +29,22 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.delulutopia.core.designsystem.component.DlDialog
 import com.delulutopia.core.designsystem.component.DlFilledButton
-import com.delulutopia.core.designsystem.component.DlOutlinedButton
+import com.delulutopia.core.designsystem.component.DlGhostButton
 import com.delulutopia.core.designsystem.component.DlRemoteAvatar
 import com.delulutopia.core.designsystem.component.DlSectionLabel
 import com.delulutopia.core.designsystem.component.DlTextButton
@@ -47,7 +54,6 @@ import com.delulutopia.core.designsystem.component.DlTopAppBar
 import com.delulutopia.core.designsystem.component.Zones
 import com.delulutopia.core.designsystem.icon.DlIcons
 import com.delulutopia.core.designsystem.icon.WebIcons
-import com.delulutopia.core.designsystem.theme.DlShape
 import com.delulutopia.core.ui.LocalAppNav
 import com.delulutopia.core.ui.LocalNotice
 import com.delulutopia.core.ui.ageWords
@@ -84,8 +90,17 @@ fun ProfileScreen(vm: ProfileViewModel = hiltViewModel()) {
         val errors = form.problems() + vm.serverError
         val canSave = form != vm.saved && form.problems().isEmpty() && !vm.busy
         val zone = Zones.option(form.timezone, nowMs)
-        Column(Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+        // web .dl-sub-main.dl-profile: 4/20/24 padding, 14 dp between fields.
+        Column(
+            Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(start = 20.dp, end = 20.dp, top = 4.dp, bottom = 24.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp),
+        ) {
+            // web .dl-profile-photo: the 96 dp picture centred, its two buttons under it.
+            Column(
+                Modifier.fillMaxWidth().padding(top = 4.dp, bottom = 2.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
                 Box(contentAlignment = Alignment.Center) {
                     DlRemoteAvatar(
                         profile.avatarUrl,
@@ -98,10 +113,10 @@ fun ProfileScreen(vm: ProfileViewModel = hiltViewModel()) {
                     )
                     if (vm.photoBusy) CircularProgressIndicator(Modifier.size(32.dp))
                 }
-                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    DlOutlinedButton("Change photo", { source = true }, icon = WebIcons.Camera, enabled = !vm.photoBusy)
+                Row(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
+                    DlGhostButton("Change photo", { source = true }, icon = WebIcons.Camera, enabled = !vm.photoBusy)
                     if (profile.avatarUrl != null) {
-                        DlTextButton("Remove", { confirmRemove = true }, destructive = true, enabled = !vm.photoBusy)
+                        DlTextButton("Remove", { confirmRemove = true }, destructive = true, enabled = !vm.photoBusy, icon = WebIcons.Trash)
                     }
                 }
             }
@@ -116,36 +131,62 @@ fun ProfileScreen(vm: ProfileViewModel = hiltViewModel()) {
             )
             DlTextField(value = form.firstName, onValueChange = { vm.set("firstName", it) }, label = "Name", errorText = errors["firstName"], maxLength = 60)
             DlTextField(value = form.lastName, onValueChange = { vm.set("lastName", it) }, label = "Surname", errorText = errors["lastName"], maxLength = 60)
-            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            // web .dl-field with .dl-field-picker: label above, a 48 dp box; the time in the seal.
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                Text(
+                    "TIME ZONE",
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        fontSize = 12.sp,
+                        lineHeight = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 0.06.em,
+                    ),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                val shape = RoundedCornerShape(8.dp)
                 Row(
                     Modifier
                         .fillMaxWidth()
-                        .heightIn(min = 56.dp)
-                        .background(MaterialTheme.colorScheme.surfaceContainerHigh, DlShape.textField)
+                        .heightIn(min = 48.dp)
+                        .clip(shape)
+                        .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                        .border(1.dp, MaterialTheme.colorScheme.outlineVariant, shape)
                         .clickable(role = Role.Button) { zonePicker = true }
-                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                        .padding(start = 14.dp, end = 10.dp),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
                 ) {
-                    Column(Modifier.weight(1f)) {
-                        Text("TIME ZONE", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        Text("${zone.city} · ${form.timezone}", style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Medium), maxLines = 1)
-                    }
-                    Text(zone.time, style = MaterialTheme.typography.bodyMedium.copy(fontFeatureSettings = "tnum"))
+                    Text(
+                        buildAnnotatedString {
+                            append(zone.city)
+                            withStyle(SpanStyle(fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)) { append(" · ${form.timezone}") }
+                        },
+                        Modifier.weight(1f),
+                        style = MaterialTheme.typography.bodyLarge.copy(fontSize = 16.sp, fontWeight = FontWeight.Medium),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                    Text(
+                        zone.time,
+                        style = MaterialTheme.typography.bodyMedium.copy(fontSize = 14.sp, fontWeight = FontWeight.SemiBold, fontFeatureSettings = "tnum"),
+                        color = MaterialTheme.colorScheme.primary,
+                    )
                     Icon(DlIcons.ChevronRight, null, Modifier.size(20.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
-                errors["timezone"]?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error) }
+                errors["timezone"]?.let { Text(it, style = MaterialTheme.typography.bodySmall.copy(fontSize = 13.sp), color = MaterialTheme.colorScheme.error) }
             }
             Text(
                 "Your username is what $friend sees everywhere. Name and surname show only on your profiles. Your time zone sets your clock on Home.",
-                style = MaterialTheme.typography.bodySmall,
+                Modifier.padding(horizontal = 4.dp),
+                style = MaterialTheme.typography.bodySmall.copy(fontSize = 13.sp, lineHeight = 19.sp),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
+        // web .dl-sub-foot: 8/20/12 around a full-width Save.
         DlFilledButton(
             if (vm.busy) "Saving…" else "Save",
             { vm.save { it?.let(notice) } },
-            Modifier.fillMaxWidth().padding(16.dp),
+            Modifier.fillMaxWidth().padding(start = 20.dp, end = 20.dp, top = 8.dp, bottom = 12.dp),
             enabled = canSave,
         )
         if (confirmRemove) {

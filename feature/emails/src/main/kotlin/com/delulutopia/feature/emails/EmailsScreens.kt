@@ -13,7 +13,9 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -37,10 +39,14 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -50,6 +56,7 @@ import coil3.compose.AsyncImage
 import com.delulutopia.core.data.Time
 import com.delulutopia.core.designsystem.component.DlFab
 import com.delulutopia.core.designsystem.component.DlFilledButton
+import com.delulutopia.core.designsystem.component.DlGhostButton
 import com.delulutopia.core.designsystem.component.DlMailPill
 import com.delulutopia.core.designsystem.component.DlOutlinedButton
 import com.delulutopia.core.designsystem.component.DlRemoteAvatar
@@ -141,14 +148,15 @@ fun EmailsList(rows: List<ThreadRow>?, hasMore: Boolean, draftEmpty: Boolean, ho
         LazyColumn(
             Modifier.fillMaxSize(),
             state = list,
-            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 96.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
+            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 96.dp),
+            // web .dl-list: 8 dp between cards.
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             if (line != null) {
                 item {
                     Text(
                         line,
-                        Modifier.padding(vertical = 4.dp),
+                        Modifier.padding(bottom = 4.dp),
                         style = MaterialTheme.typography.bodySmall.copy(fontSize = 13.sp),
                         color = if (credits?.left == 0) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -158,12 +166,24 @@ fun EmailsList(rows: List<ThreadRow>?, hasMore: Boolean, draftEmpty: Boolean, ho
                 Box(Modifier.animateItem().rowEnter(i, played, it.id).leafSurface("/emails/${it.id}")) { ThreadCard(it, nowMs, home) }
             }
             item {
-                Row(Modifier.fillMaxWidth().padding(vertical = 12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally)) {
+                Row(
+                    Modifier.fillMaxWidth().heightIn(min = 40.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
                     if (hasMore) {
                         CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
-                        Text("Loading older threads…", style = MaterialTheme.typography.bodySmall)
+                        Text(
+                            "Loading older threads…",
+                            style = MaterialTheme.typography.bodySmall.copy(fontSize = 13.sp),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
                     } else {
-                        Text("That is everything", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(
+                            "That is everything",
+                            style = MaterialTheme.typography.bodySmall.copy(fontSize = 13.sp),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
                     }
                 }
             }
@@ -191,36 +211,49 @@ private fun ThreadCard(row: ThreadRow, nowMs: Long, home: Home?) {
     }
     val fresh = row.unread + reacted
     val unread = fresh > 0
+    // web .dl-row.dl-mail: a 10 dp mail card, 10/12 padding; unread is tinted with a 3 dp blue edge.
+    val shape = RoundedCornerShape(10.dp)
     Row(
         Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
+            .shadow(1.dp, shape)
+            .clip(shape)
             .background(if (unread) c.mailUnread else c.mailBackground)
-            .border(1.dp, c.mailLine, RoundedCornerShape(12.dp))
+            .drawBehind { if (unread) drawRect(c.mailBlue, size = Size(3.dp.toPx(), size.height)) }
+            .border(1.dp, c.mailLine, shape)
             .clickable { nav.open(ThreadRoute(row.id)) }
-            .padding(12.dp),
+            .padding(horizontal = 12.dp, vertical = 10.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(Modifier.size(36.dp).background(c.mailBlue.copy(alpha = 0.12f), CircleShape), contentAlignment = Alignment.Center) {
-            Icon(WebIcons.Emails, null, Modifier.size(20.dp), tint = c.mailBlue)
+            Icon(WebIcons.Emails, null, Modifier.size(18.dp), tint = c.mailBlue)
         }
-        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 if (unread) Box(Modifier.size(8.dp).background(c.mailBlue, CircleShape))
                 Text(
                     row.subject,
-                    style = MaterialTheme.typography.bodyLarge.copy(fontSize = 15.sp, fontWeight = if (unread) FontWeight.Bold else FontWeight.Medium),
+                    style = MaterialTheme.typography.bodyLarge.copy(
+                        fontSize = 15.sp,
+                        lineHeight = 18.sp,
+                        fontWeight = if (unread) FontWeight.SemiBold else FontWeight.Normal,
+                    ),
                     color = c.mailInk,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
             }
-            Text(meta, style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp), color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
+            Text(
+                meta,
+                style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp, lineHeight = 14.sp),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+            )
             if (snippet.isNotEmpty()) {
                 Text(
                     snippet,
-                    style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp),
+                    style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp, lineHeight = 14.sp),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
@@ -256,7 +289,13 @@ fun ThreadScreen(id: Long) {
                 }
             }
             is ThreadViewModel.Ui.Shown -> {
-                DlTopAppBar(title = ui.t.thread.subject, onBack = { nav.back() }, backDescription = "Back to Emails")
+                // web .dl-ethread-subject: Literata 18/700.
+                DlTopAppBar(
+                    title = ui.t.thread.subject,
+                    onBack = { nav.back() },
+                    backDescription = "Back to Emails",
+                    titleStyle = DlTheme.type.noteTitle.copy(fontSize = 18.sp, lineHeight = 23.sp, fontWeight = FontWeight.Bold),
+                )
                 ThreadBody(vm, home?.me, home?.friend, home)
             }
         }
@@ -271,10 +310,13 @@ private fun ThreadBody(vm: ThreadViewModel, me: Citizen?, friend: Citizen?, home
     var toggled by remember { mutableStateOf(setOf<Long>()) }
     var photo by remember { mutableStateOf<Pair<List<Att>, Int>?>(null) }
     val myNewest = items.firstOrNull { it.senderId == me?.id }
-    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 12.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        ComposerView(vm.composer, home?.emailCredits) { sent ->
-            toggled = emptySet()
-            vm.sent(sent.email)
+    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        // web .dl-ethread-reply: 4/16/12 around the reply composer.
+        Box(Modifier.padding(top = 4.dp, bottom = 4.dp)) {
+            ComposerView(vm.composer, home?.emailCredits) { sent ->
+                toggled = emptySet()
+                vm.sent(sent.email)
+            }
         }
         items.forEach { e ->
             val open = (e.id == newestId) != (e.id in toggled)
@@ -286,23 +328,32 @@ private fun ThreadBody(vm: ThreadViewModel, me: Citizen?, friend: Citizen?, home
                 } else {
                     toggled + e.id
                 }
-            }, onPhoto = { list, i -> photo = list to i }, onReacted = vm::reacted)
-            if (e.id == myNewest?.id && e.readAt != null) {
+            }, onPhoto = { list, i -> photo = list to i }, onReacted = vm::reacted, seen = e.readAt?.takeIf { e.id == myNewest?.id })
+        }
+        // web .dl-emails-end: centred, 12 dp around.
+        Column(
+            Modifier.fillMaxWidth().padding(vertical = 4.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            if (vm.cursor != null) {
+                DlGhostButton(if (vm.loadingOlder) "Loading older emails…" else "See older", vm::seeOlder, enabled = !vm.loadingOlder)
+            } else if (items.size > 20) {
                 Text(
-                    "Seen ${Time.clock(e.readAt, nowMs)}",
-                    Modifier.padding(start = 8.dp),
-                    style = MaterialTheme.typography.bodySmall,
+                    "That is everything",
+                    style = MaterialTheme.typography.bodySmall.copy(fontSize = 13.sp),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
+            if (vm.olderFailed) {
+                Text(
+                    "Couldn't load older emails. Try again.",
+                    style = MaterialTheme.typography.bodySmall.copy(fontSize = 13.sp),
+                    color = MaterialTheme.colorScheme.error,
+                )
+            }
         }
-        if (vm.cursor != null) {
-            DlOutlinedButton(if (vm.loadingOlder) "Loading older emails…" else "See older", vm::seeOlder, Modifier.fillMaxWidth(), enabled = !vm.loadingOlder)
-        } else if (items.size > 20) {
-            Text("That is everything", style = MaterialTheme.typography.bodySmall)
-        }
-        if (vm.olderFailed) Text("Couldn't load older emails. Try again.", color = MaterialTheme.colorScheme.error)
-        Box(Modifier.height(24.dp))
+        Box(Modifier.height(96.dp))
     }
     photo?.let { (list, i) -> Lightbox(list, i, { photo = list to it }, { photo = null }) }
 }
@@ -317,6 +368,7 @@ private fun EmailCard(
     onToggle: () -> Unit,
     onPhoto: (List<Att>, Int) -> Unit,
     onReacted: () -> Unit,
+    seen: String? = null,
 ) {
     val c = DlTheme.colors
     val base = LocalServerBaseUrl.current
@@ -331,17 +383,25 @@ private fun EmailCard(
     val photos = e.attachments.filter { it.kind == "photo" }
     val audios = e.attachments.filter { it.kind == "audio" }
     val video = e.attachments.firstOrNull { it.kind == "video" }
+    // web .dl-email.dl-mail: a 10 dp mail card; mine in the grey-blue.
+    val shape = RoundedCornerShape(10.dp)
     Column(
         Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
+            .shadow(1.dp, shape)
+            .clip(shape)
             .background(if (mine) c.mailMine else c.mailBackground)
-            .border(1.dp, c.mailLine, RoundedCornerShape(12.dp))
+            .border(1.dp, c.mailLine, shape)
             // Fold & open (Motion doc): the card's height eases instead of jumping.
             .animateContentSize(tween(260)),
     ) {
         Row(
-            Modifier.fillMaxWidth().clickable(onClick = onToggle).padding(12.dp).semantics { contentDescription = if (open) "Fold" else "Unfold" },
+            Modifier
+                .fillMaxWidth()
+                .heightIn(min = 44.dp)
+                .clickable(onClick = onToggle)
+                .padding(horizontal = 12.dp, vertical = 8.dp)
+                .semantics { contentDescription = if (open) "Fold" else "Unfold" },
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
@@ -353,16 +413,21 @@ private fun EmailCard(
                     person.nickname,
                     tintOf(person.id),
                     size = 24.dp,
+                    ringWidth = 1.5.dp,
                     initials = person.nickname.take(1).uppercase(),
                     ring = signatureOf(person.id),
                 )
             }
-            Text(person?.nickname.orEmpty(), style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold), color = c.mailInk)
+            Text(
+                person?.nickname.orEmpty(),
+                if (open) Modifier.weight(1f) else Modifier,
+                style = MaterialTheme.typography.labelLarge.copy(fontSize = 13.sp, fontWeight = FontWeight.Bold),
+                color = c.mailInk,
+            )
             if (open) {
                 Text(
                     "to ${if (mine) friend?.nickname.orEmpty() else me?.nickname.orEmpty()}",
-                    Modifier.weight(1f),
-                    style = MaterialTheme.typography.bodySmall,
+                    style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             } else {
@@ -371,7 +436,7 @@ private fun EmailCard(
                 Text(
                     snippet,
                     Modifier.weight(1f),
-                    style = MaterialTheme.typography.bodySmall,
+                    style = MaterialTheme.typography.bodySmall.copy(fontSize = 13.sp),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
@@ -384,11 +449,22 @@ private fun EmailCard(
                 if (icons.isNotEmpty()) Text(icons.joinToString(" "), fontSize = 12.sp)
                 ReactionSummary(e.reactions)
             }
-            Text(Time.clock(e.sentAt, nowMs), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(
+                Time.clock(e.sentAt, nowMs),
+                style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp, fontFeatureSettings = "tnum"),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
         }
         if (open) {
-            Column(Modifier.padding(start = 12.dp, end = 12.dp, bottom = 12.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                if (e.text.isNotEmpty()) Text(e.text, style = MaterialTheme.typography.bodyLarge, color = c.mailInk)
+            // web .dl-email-body: indented to the name (44 dp), 15/1.55 text.
+            Column(Modifier.padding(start = 44.dp, end = 12.dp, bottom = 12.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                if (e.text.isNotEmpty()) {
+                    Text(
+                        e.text,
+                        style = MaterialTheme.typography.bodyLarge.copy(fontSize = 15.sp, lineHeight = 23.25.sp),
+                        color = c.mailInk,
+                    )
+                }
                 video?.let { v -> VideoPlayer(resolveMedia(base, v.url), v.thumbUrl?.let { resolveMedia(base, it) }, v.durationMs, v.width, v.height) }
                 if (photos.isNotEmpty()) {
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -396,7 +472,7 @@ private fun EmailCard(
                             AsyncImage(
                                 model = resolveMedia(base, p.thumbUrl ?: p.url),
                                 contentDescription = "Photo ${i + 1} of ${photos.size}, open full size",
-                                modifier = Modifier.size(64.dp).clip(RoundedCornerShape(4.dp)).clickable { onPhoto(photos, i) },
+                                modifier = Modifier.size(64.dp).clip(RoundedCornerShape(8.dp)).clickable { onPhoto(photos, i) },
                                 contentScale = ContentScale.Crop,
                             )
                         }
@@ -418,6 +494,15 @@ private fun EmailCard(
                 Reactions("emails", e.id, e.reactions, me, friend, chipColour = c.mailBackground, onChanged = onReacted)
             }
         }
+        seen?.let {
+            Text(
+                "Seen ${Time.clock(it, nowMs)}",
+                Modifier.fillMaxWidth().padding(start = 12.dp, end = 12.dp, bottom = 8.dp).offset(y = (-4).dp),
+                style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.End,
+            )
+        }
     }
 }
 
@@ -428,7 +513,7 @@ fun NewEmailScreen(vm: NewEmailViewModel = hiltViewModel()) {
     val home by vm.home.collectAsStateWithLifecycle()
     Column(Modifier.fillMaxSize().imePadding()) {
         DlTopAppBar(title = "New email", onBack = { nav.back() }, backDescription = "Back to Emails")
-        Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(12.dp)) {
+        Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 16.dp, vertical = 4.dp)) {
             ComposerView(vm.composer, home.home?.emailCredits) { sent ->
                 nav.replace(ThreadRoute(sent.thread.id))
             }

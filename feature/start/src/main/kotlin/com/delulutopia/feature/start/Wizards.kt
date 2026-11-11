@@ -103,6 +103,7 @@ fun CreateUniverseRoute(onLeave: () -> Unit, viewModel: CreateUniverseViewModel 
                     supportingText = stringResource(R.string.name_hint),
                     errorText = nameError,
                     maxLength = 12,
+                    counter = "${s.name.trim().codePointCount(0, s.name.trim().length)}/12",
                     keyboardOptions = KeyboardOptions(autoCorrectEnabled = false),
                 )
                 val shownName = typed.ifEmpty { stringResource(R.string.your_universe_lower) }

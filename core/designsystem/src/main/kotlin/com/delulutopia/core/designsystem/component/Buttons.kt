@@ -86,6 +86,33 @@ fun DlTonalButton(
     ) { ButtonContent(text, icon) }
 }
 
+/** web .dl-btn--ghost: the letter surface with a 1 dp line, ink label: See older, Back. */
+@Composable
+fun DlGhostButton(
+    text: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    icon: ImageVector? = null,
+    enabled: Boolean = true,
+) {
+    val press = remember { MutableInteractionSource() }
+    Button(
+        onClick = onClick,
+        modifier = modifier.pressScale(press, 0.97f).defaultMinSize(minHeight = ButtonHeight),
+        interactionSource = press,
+        enabled = enabled,
+        shape = DlShape.button,
+        contentPadding = ContentPadding,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = DlTheme.colors.letterEnvelope,
+            contentColor = MaterialTheme.colorScheme.onSurface,
+            disabledContainerColor = DlTheme.colors.letterEnvelope,
+            disabledContentColor = DlTheme.colors.inkDisabled,
+        ),
+    ) { ButtonContent(text, icon) }
+}
+
 /** Outline border, navy label: Edit, Remove reaction, Unarchive. */
 @Composable
 fun DlOutlinedButton(
@@ -119,6 +146,7 @@ fun DlTextButton(
     modifier: Modifier = Modifier,
     destructive: Boolean = false,
     enabled: Boolean = true,
+    icon: ImageVector? = null,
 ) {
     val press = remember { MutableInteractionSource() }
     TextButton(
@@ -132,7 +160,7 @@ fun DlTextButton(
             contentColor = if (destructive) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
             disabledContentColor = DlTheme.colors.inkDisabled,
         ),
-    ) { Text(text, style = MaterialTheme.typography.labelLarge) }
+    ) { ButtonContent(text, icon) }
 }
 
 @Composable

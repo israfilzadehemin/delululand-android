@@ -9,6 +9,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
@@ -26,6 +27,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.contentDescription
@@ -72,7 +74,6 @@ internal fun ComposerView(composer: EmailComposer, credits: EmailCredits?, onSen
         Box(Modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
         return
     }
-    val c = DlTheme.colors
     val saveState by composer.saver.state.collectAsStateWithLifecycle()
     LifecycleEventEffect(Lifecycle.Event.ON_STOP) { composer.saver.flushOnHide() }
     var sending by remember { mutableStateOf(false) }
@@ -99,17 +100,17 @@ internal fun ComposerView(composer: EmailComposer, credits: EmailCredits?, onSen
             "Draft saved ${Time.time(saveState.savedAt)}"
         else -> ""
     }
-    val field = MaterialTheme.typography.bodyLarge.copy(color = c.mailInk)
-    Column(
-        Modifier
-            .fillMaxWidth()
-            .background(c.mailBackground, RoundedCornerShape(12.dp))
-            .border(1.dp, c.mailLine, RoundedCornerShape(12.dp))
-            .padding(12.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
+    // web .dl-ecompose: the fields sit on the page, no card; 8 dp between.
+    val field = MaterialTheme.typography.bodyLarge.copy(fontSize = 15.sp, lineHeight = 22.5.sp, color = MaterialTheme.colorScheme.onSurface)
+    Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         if (composer.withSubject) {
-            Input(composer.subject, composer::changeSubject, "Subject", field.copy(fontWeight = FontWeight.SemiBold), single = true)
+            Input(
+                composer.subject,
+                composer::changeSubject,
+                "Subject",
+                DlTheme.type.noteTitle.copy(fontSize = 17.sp, lineHeight = 25.5.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface),
+                single = true,
+            )
         }
         Input(
             composer.text,
@@ -117,17 +118,21 @@ internal fun ComposerView(composer: EmailComposer, credits: EmailCredits?, onSen
             if (composer.withSubject) "Write an email" else "Write a reply",
             field,
             single = false,
-            minHeight = if (composer.withSubject) 180.dp else 72.dp,
+            minHeight = if (composer.withSubject) 200.dp else 88.dp,
         )
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Text(
                 "$length / $EMAIL_MAX",
-                style = MaterialTheme.typography.labelSmall.copy(fontFeatureSettings = "tnum"),
+                style = MaterialTheme.typography.bodySmall.copy(
+                    fontSize = 12.sp,
+                    fontWeight = if (length >= EMAIL_MAX) FontWeight.Bold else FontWeight.Normal,
+                    fontFeatureSettings = "tnum",
+                ),
                 color = if (length >= EMAIL_MAX) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Text(
                 saved,
-                style = MaterialTheme.typography.labelSmall,
+                style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp),
                 color = if (saveState.status ==
                     DraftSaver.Status.Error
                 ) {
@@ -146,6 +151,8 @@ internal fun ComposerView(composer: EmailComposer, credits: EmailCredits?, onSen
             },
             voice = voice,
             video = VideoAdd(full = atts.has("video"), onRecord = { recorderOpen = true }, onPick = { addVideo(it, null) }),
+            background = Color.Transparent,
+            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
         )
         videoError?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error) }
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
@@ -202,16 +209,24 @@ internal fun ComposerView(composer: EmailComposer, credits: EmailCredits?, onSen
 
 @Composable
 private fun Input(value: String, onChange: (String) -> Unit, label: String, style: TextStyle, single: Boolean, minHeight: Dp = 0.dp) {
+    // web .dl-ecompose-subject / -text: the letter surface, 1 dp line, 12 dp radius, 10/12 padding.
+    val shape = RoundedCornerShape(12.dp)
     BasicTextField(
         value = value,
         onValueChange = onChange,
-        modifier = Modifier.fillMaxWidth().heightIn(min = minHeight).semantics { contentDescription = label },
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(min = minHeight)
+            .background(DlTheme.colors.letterEnvelope, shape)
+            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, shape)
+            .padding(horizontal = 12.dp, vertical = 10.dp)
+            .semantics { contentDescription = label },
         singleLine = single,
         textStyle = style,
         cursorBrush = SolidColor(DlTheme.colors.mailBlue),
         decorationBox = { inner ->
             Box {
-                if (value.isEmpty()) Text(label, style = style, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                if (value.isEmpty()) Text(label, style = style, color = DlTheme.colors.inkDisabled)
                 inner()
             }
         },
