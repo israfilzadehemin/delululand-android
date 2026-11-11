@@ -90,6 +90,8 @@ import com.delulutopia.core.ui.Lightbox
 import com.delulutopia.core.ui.LocalAppNav
 import com.delulutopia.core.ui.LocalBrand
 import com.delulutopia.core.ui.LocalNotice
+import com.delulutopia.core.ui.ReachBar
+import com.delulutopia.core.ui.ReachButton
 import com.delulutopia.core.ui.StampImage
 import com.delulutopia.core.ui.TakeBackDialog
 import com.delulutopia.core.ui.WaxSeal
@@ -230,23 +232,12 @@ private fun LetterContent(letter: LetterFull, home: Home?, swiped: Boolean, vm: 
             val pageHeight = maxHeight
             Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
                 if (inReach) {
-                    Row(
-                        Modifier
-                            .padding(start = 12.dp, end = 12.dp, bottom = 10.dp)
-                            .fillMaxWidth()
-                            .background(MaterialTheme.colorScheme.primaryContainer, RoundedCornerShape(12.dp))
-                            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(12.dp))
-                            .padding(start = 14.dp, end = 8.dp, top = 8.dp, bottom = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ReachBar(
+                        "${Time.countdown((Time.ms(letter.windowEndsAt) ?: 0) - nowMs)} left to edit or cancel",
+                        Modifier.padding(start = 16.dp, end = 16.dp, bottom = 10.dp),
                     ) {
-                        Text(
-                            "${Time.countdown((Time.ms(letter.windowEndsAt) ?: 0) - nowMs)} left to edit or cancel",
-                            Modifier.weight(1f),
-                            style = MaterialTheme.typography.labelMedium.copy(fontSize = 13.sp, fontWeight = FontWeight.SemiBold, fontFeatureSettings = "tnum"),
-                        )
-                        DlOutlinedButton("Edit", { nav.open(WriteRoute(editId = letter.id)) })
-                        DlOutlinedButton("Cancel", { askCancel = true })
+                        ReachButton("Edit", padded = true) { nav.open(WriteRoute(editId = letter.id)) }
+                        ReachButton("Cancel", padded = true) { askCancel = true }
                     }
                 }
                 Box(Modifier.padding(horizontal = 16.dp).padding(bottom = if (sent) 24.dp else 12.dp)) {

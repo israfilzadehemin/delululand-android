@@ -34,9 +34,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -69,11 +73,14 @@ import com.delulutopia.core.ui.LocalAppNav
 import com.delulutopia.core.ui.LocalBrand
 import com.delulutopia.core.ui.LocalNotice
 import com.delulutopia.core.ui.Note
+import com.delulutopia.core.ui.ReachBar
+import com.delulutopia.core.ui.ReachButton
 import com.delulutopia.core.ui.initials
 import com.delulutopia.core.ui.media.AudioPlayer
 import com.delulutopia.core.ui.noteColorOf
 import com.delulutopia.core.ui.noteInk
 import com.delulutopia.core.ui.noteInkQuiet
+import com.delulutopia.core.ui.reactions.ReactionSurface
 import com.delulutopia.core.ui.reactions.Reactions
 import com.delulutopia.core.ui.rememberNow
 import com.delulutopia.core.ui.signatureOf
@@ -149,11 +156,16 @@ private fun Thread(d: DFull, me: Citizen?, friend: Citizen?, vm: DiscussionViewM
             // The note grows to fill the screen; the comments follow it (web .dl-paper flex: 1).
             Column(Modifier.fillMaxWidth().heightIn(min = viewport)) {
                 if (inReach) {
-                    Bar("${Time.countdown((Time.ms(d.windowEndsAt) ?: 0) - nowMs)} left to take it back") { DlOutlinedButton("Cancel", { askTakeBack = true }) }
+                    ReachBar(
+                        "${Time.countdown((Time.ms(d.windowEndsAt) ?: 0) - nowMs)} left to take it back",
+                        Modifier.padding(start = 16.dp, end = 16.dp, bottom = 10.dp),
+                    ) {
+                        ReachButton("Cancel", padded = true) { askTakeBack = true }
+                    }
                 }
                 if (archived) {
                     Bar("Archived${if (archivedBy.isNotEmpty()) " by $archivedBy" else ""} · ${Time.day(d.archivedAt)}") {
-                        if (d.canUnarchive) DlOutlinedButton("Unarchive", { scope.launch { notice(vm.unarchive()) } })
+                        if (d.canUnarchive) ReachButton("Unarchive", padded = true) { scope.launch { notice(vm.unarchive()) } }
                     }
                 }
                 val rule = if (DlTheme.isDark) Color(0x1FECE4D6) else Color(0x1F33323B)
@@ -260,7 +272,16 @@ private fun Thread(d: DFull, me: Citizen?, friend: Citizen?, vm: DiscussionViewM
                         }
                         // web .dl-paper-reactions
                         Box(Modifier.fillMaxWidth().then(ruleTop).padding(start = 16.dp, end = 16.dp, top = 10.dp, bottom = 14.dp)) {
-                            Reactions("discussions", d.id, d.reactions, me, friend, readOnly = archived, onChanged = vm::reacted)
+                            Reactions(
+                                "discussions",
+                                d.id,
+                                d.reactions,
+                                me,
+                                friend,
+                                readOnly = archived,
+                                surface = ReactionSurface.Paper,
+                                onChanged = vm::reacted,
+                            )
                         }
                     }
                     Box(Modifier.align(Alignment.TopEnd).padding(top = 8.dp, end = 8.dp)) {
@@ -381,20 +402,28 @@ private fun Thread(d: DFull, me: Citizen?, friend: Citizen?, vm: DiscussionViewM
 
 @Composable
 private fun Bar(text: String, action: @Composable () -> Unit) {
+    // web .dl-archived-bar: the page colour, a dashed line, 12 dp corners, quiet 14 px.
+    val line = MaterialTheme.colorScheme.outlineVariant
     Row(
         Modifier
-            .padding(start = 12.dp, end = 12.dp, top = 4.dp)
+            .padding(start = 16.dp, end = 16.dp, bottom = 10.dp)
             .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.primaryContainer, RoundedCornerShape(12.dp))
-            .padding(start = 14.dp, end = 8.dp, top = 8.dp, bottom = 8.dp),
+            .clip(RoundedCornerShape(12.dp))
+            .background(MaterialTheme.colorScheme.background)
+            .drawBehind {
+                val w = 1.dp.toPx()
+                drawRoundRect(
+                    line,
+                    topLeft = Offset(w / 2, w / 2),
+                    size = Size(size.width - w, size.height - w),
+                    cornerRadius = CornerRadius(12.dp.toPx()),
+                    style = Stroke(w, pathEffect = PathEffect.dashPathEffect(floatArrayOf(4.dp.toPx(), 3.dp.toPx()))),
+                )
+            }.padding(horizontal = 12.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
-        Text(
-            text,
-            Modifier.weight(1f),
-            style = MaterialTheme.typography.labelMedium.copy(fontSize = 13.sp, fontWeight = FontWeight.SemiBold, fontFeatureSettings = "tnum"),
-        )
+        Text(text, Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium.copy(fontSize = 14.sp), color = MaterialTheme.colorScheme.onSurfaceVariant)
         action()
     }
 }
@@ -586,7 +615,13 @@ private fun CommentItem(
                 } else {
                     Text(c.text, style = MaterialTheme.typography.bodyLarge.copy(fontSize = 15.sp, lineHeight = 22.5.sp), color = noteInk)
                 }
-                Reactions("comments", c.id, c.reactions, me, friend, Modifier.padding(top = 6.dp), readOnly = readOnly, compact = true, onChanged = vm::reacted)
+                Reactions(
+                    "comments", c.id, c.reactions, me, friend,
+                    Modifier.padding(
+                        top = 6.dp,
+                    ),
+                    readOnly = readOnly, compact = true, surface = ReactionSurface.Paper, onChanged = vm::reacted,
+                )
             }
         }
     }

@@ -115,6 +115,10 @@ class ParityScreensTest {
         tapLabel("Continue your draft")
         waitFor("the trains are booked")
         shot("write", 1200)
+        back(act)
+        tap("Saturday works for me")
+        waitFor("left to edit or cancel")
+        shot("letter_mine", 1500)
     }
 
     @Test fun discussions() = app { act ->
@@ -128,6 +132,10 @@ class ParityScreensTest {
         tap("Books for the winter")
         waitFor("A list, in no order")
         shot("discussion_mine", 1200)
+        back(act)
+        tapLabel("Start a discussion")
+        tapLabel("Continue your discussion draft")
+        shot("compose", 1200)
     }
 
     @Test fun emails() = app { act ->
@@ -144,6 +152,7 @@ class ParityScreensTest {
 
     @Test fun you() = app { act ->
         tap("You")
+        waitFor("of 8 on")
         waitFor("View profile")
         shot("you")
         tap("View profile")

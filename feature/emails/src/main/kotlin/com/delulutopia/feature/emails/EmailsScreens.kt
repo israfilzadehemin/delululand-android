@@ -86,6 +86,7 @@ import com.delulutopia.core.ui.leaves.leafSurface
 import com.delulutopia.core.ui.media.AudioPlayer
 import com.delulutopia.core.ui.media.VideoPlayer
 import com.delulutopia.core.ui.reactions.ReactionSummary
+import com.delulutopia.core.ui.reactions.ReactionSurface
 import com.delulutopia.core.ui.reactions.Reactions
 import com.delulutopia.core.ui.reactions.noticeLine
 import com.delulutopia.core.ui.reactions.reactionWins
@@ -491,7 +492,7 @@ private fun EmailCard(
                         },
                     )
                 }
-                Reactions("emails", e.id, e.reactions, me, friend, chipColour = c.mailBackground, onChanged = onReacted)
+                Reactions("emails", e.id, e.reactions, me, friend, chipColour = c.mailBackground, surface = ReactionSurface.Mail, onChanged = onReacted)
             }
         }
         seen?.let {

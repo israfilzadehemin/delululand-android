@@ -113,8 +113,17 @@ fun Reactions(
     readOnly: Boolean = false,
     chipColour: Color = MaterialTheme.colorScheme.background,
     compact: Boolean = false,
+    surface: ReactionSurface = ReactionSurface.Page,
     onChanged: () -> Unit = {},
 ) {
+    // My chip: seal tint on the page; terracotta mark on paper and notes; mail blue on a mail card.
+    val c = DlTheme.colors
+    val (mineFill, mineLine) = when (surface) {
+        ReactionSurface.Page -> MaterialTheme.colorScheme.primaryContainer to MaterialTheme.colorScheme.primary
+        ReactionSurface.Paper -> c.markContainer to c.reactLine
+        ReactionSurface.Mail -> c.mailUnread to c.mailBlue
+    }
+    val chipLine = if (surface == ReactionSurface.Mail) c.mailLine else MaterialTheme.colorScheme.outlineVariant
     // web .dl-reaction: 30 dp chips (26 on a comment), 15 dp radius, 600 13 px count.
     val chipH = if (compact) 26.dp else 30.dp
     val chipMin = if (compact) 32.dp else 36.dp
@@ -183,8 +192,8 @@ fun Reactions(
                         .height(chipH)
                         .widthIn(min = chipMin)
                         .clip(chipShape)
-                        .background(if (on) MaterialTheme.colorScheme.primaryContainer else chipColour)
-                        .border(1.dp, if (on) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant, chipShape)
+                        .background(if (on) mineFill else chipColour)
+                        .border(1.dp, if (on) mineLine else chipLine, chipShape)
                         .then(
                             if (readOnly) {
                                 Modifier
@@ -217,7 +226,7 @@ fun Reactions(
             if (!readOnly) {
                 Box {
                     // web .dl-reaction--add: a dashed chip with the face-plus.
-                    val line = MaterialTheme.colorScheme.outlineVariant
+                    val line = chipLine
                     val quiet = MaterialTheme.colorScheme.onSurfaceVariant
                     Box(
                         Modifier
@@ -366,3 +375,6 @@ private fun FacePlus(tint: Color) {
         }
     }
 }
+
+/** Where a chip row sits: it decides how my own reaction is marked (web reactions.css, paper.css, materials.css). */
+enum class ReactionSurface { Page, Paper, Mail }

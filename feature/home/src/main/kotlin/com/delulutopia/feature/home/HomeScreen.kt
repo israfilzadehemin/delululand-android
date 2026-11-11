@@ -1,11 +1,9 @@
 package com.delulutopia.feature.home
 
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -44,7 +42,6 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.drawscope.scale
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
@@ -64,13 +61,11 @@ import com.delulutopia.core.data.LetterActions
 import com.delulutopia.core.data.LetterState
 import com.delulutopia.core.data.Time
 import com.delulutopia.core.designsystem.component.DlFilledButton
-import com.delulutopia.core.designsystem.component.DlOutlinedButton
 import com.delulutopia.core.designsystem.component.DlRemoteAvatar
 import com.delulutopia.core.designsystem.icon.WebIcons
 import com.delulutopia.core.designsystem.motion.Enter
 import com.delulutopia.core.designsystem.motion.enter
 import com.delulutopia.core.designsystem.motion.float
-import com.delulutopia.core.designsystem.motion.pressScale
 import com.delulutopia.core.designsystem.motion.rememberPlayed
 import com.delulutopia.core.designsystem.motion.rowEnter
 import com.delulutopia.core.designsystem.theme.DlTheme
@@ -86,6 +81,7 @@ import com.delulutopia.core.ui.LocalAppNav
 import com.delulutopia.core.ui.LocalNotice
 import com.delulutopia.core.ui.NewChip
 import com.delulutopia.core.ui.OfflineBanner
+import com.delulutopia.core.ui.ReachButton
 import com.delulutopia.core.ui.StampImage
 import com.delulutopia.core.ui.TakeBackDialog
 import com.delulutopia.core.ui.TileShape
@@ -574,23 +570,4 @@ private fun Modifier.dashed(colour: Color, radius: Dp, width: Dp = 1.dp): Modifi
         cornerRadius = CornerRadius(radius.toPx()),
         style = Stroke(w, pathEffect = PathEffect.dashPathEffect(floatArrayOf(6.dp.toPx(), 4.dp.toPx()))),
     )
-}
-
-/** The in-reach row's Edit and Cancel (web .dl-outline-btn): 36 dp, navy outline on the row's paper, 13/600. */
-@Composable
-private fun ReachButton(text: String, modifier: Modifier, onClick: () -> Unit) {
-    val seal = MaterialTheme.colorScheme.primary
-    val press = remember { MutableInteractionSource() }
-    Box(
-        modifier
-            .pressScale(press)
-            .height(36.dp)
-            .clip(RoundedCornerShape(18.dp))
-            .background(DlTheme.colors.letterEnvelope)
-            .border(1.dp, seal, RoundedCornerShape(18.dp))
-            .clickable(interactionSource = press, indication = LocalIndication.current, role = Role.Button, onClick = onClick),
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(text, style = MaterialTheme.typography.labelLarge.copy(fontSize = 13.sp, fontWeight = FontWeight.SemiBold), color = seal)
-    }
 }
