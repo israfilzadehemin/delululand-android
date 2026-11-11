@@ -461,7 +461,7 @@ private fun ToRow(row: LetterRow, nowMs: Long, who: Who, onCancel: () -> Unit) {
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     ReachButton("Edit", Modifier.weight(1f)) { nav.open(WriteRoute(editId = row.id)) }
-                    ReachButton("Cancel", Modifier.weight(1f), onCancel)
+                    ReachButton("Cancel", Modifier.weight(1f), onClick = onCancel)
                 }
             }
         }
