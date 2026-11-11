@@ -56,6 +56,7 @@ import com.delulutopia.core.ui.moodText
 import com.delulutopia.core.ui.photo.PhotoChooser
 import com.delulutopia.core.ui.rememberNow
 import com.delulutopia.core.ui.signatureOf
+import com.delulutopia.core.ui.tintOf
 
 /**
  * Profile (doc "Delululand — Menu, Profile & Settings" §3): the photo (choose or take, crop,
@@ -89,10 +90,11 @@ fun ProfileScreen(vm: ProfileViewModel = hiltViewModel()) {
                     DlRemoteAvatar(
                         profile.avatarUrl,
                         "Your photo",
-                        signatureOf(profile.id),
+                        tintOf(profile.id),
                         Modifier.alpha(if (vm.photoBusy) 0.5f else 1f),
                         size = 96.dp,
                         initials = form.initials(),
+                        ring = signatureOf(profile.id),
                     )
                     if (vm.photoBusy) CircularProgressIndicator(Modifier.size(32.dp))
                 }
@@ -192,7 +194,7 @@ fun FriendScreen(vm: YouViewModel = hiltViewModel()) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            DlRemoteAvatar(friend.avatarUrl, friend.nickname, signatureOf(friend.id), size = 96.dp, initials = friend.initials())
+            DlRemoteAvatar(friend.avatarUrl, friend.nickname, tintOf(friend.id), size = 96.dp, initials = friend.initials(), ring = signatureOf(friend.id))
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(friend.nickname, fontSize = 20.sp, fontWeight = FontWeight.Bold)
                 Text(fullName.ifEmpty { "No name added" }, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)

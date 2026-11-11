@@ -163,11 +163,12 @@ internal fun BoardTile(home: Home, nowMs: Long, vm: HomeActions) {
                             .semantics { contentDescription = "Board: ${if (board.authorId == home.me.id) "your" else "$friend's"} doodle" },
                     ) {
                         BoardImage(board, base)
-                        if (ribbon == board.version) NewChip(Modifier.padding(8.dp))
+                        if (ribbon == board.version) NewChip(Modifier.padding(8.dp), paper = false)
                     }
                     Corner(board, canReact, mark, drawn, friend, Modifier.align(Alignment.TopEnd).padding(6.dp)) { picking = true }
                 }
                 BoardNote(board, home, vm)
+                // The status line on its own row, the actions under it at the end (web .dl-board-meta wraps).
                 Row(
                     Modifier.fillMaxWidth().padding(start = 2.dp),
                     verticalAlignment = Alignment.CenterVertically,
@@ -187,9 +188,15 @@ internal fun BoardTile(home: Home, nowMs: Long, vm: HomeActions) {
                             append(" ${didWhat(board)} · ${ageWords(board.createdAt, nowMs)}$reacted")
                         },
                         Modifier.weight(1f),
-                        style = MaterialTheme.typography.bodyMedium,
+                        style = MaterialTheme.typography.bodyMedium.copy(fontSize = 13.sp, lineHeight = 17.sp),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
+                }
+                Row(
+                    Modifier.fillMaxWidth().offset(x = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
+                ) {
                     DrawButton(WebIcons.Doodle, "Edit", "Edit $whose") { drawing = "edit" }
                     DrawButton(WebIcons.Write, "Draw", null) { drawing = "new" }
                     IconButton(onClick = { vm.setBoardMini(true) }) { Icon(WebIcons.ChevronUp, "Fold the board") }
@@ -397,7 +404,7 @@ private fun Corner(board: Board, canReact: Boolean, mark: BoardReaction?, drawn:
             if (mark != null) {
                 HandReaction(mark, 64.dp, tilt = 8f, draw = drawn == "${board.version}:${mark.key}")
             } else {
-                ReactSlot(Color(0xFF33323B), Color(0xFF202B45))
+                ReactSlot(Color(0xFF48536C).copy(alpha = 0.55f), Color(0xFF202B45))
             }
         }
     } else if (mark != null) {

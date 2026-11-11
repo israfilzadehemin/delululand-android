@@ -7,6 +7,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
@@ -42,6 +43,7 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathEffect
@@ -98,6 +100,7 @@ import com.delulutopia.core.ui.media.AudioPlayer
 import com.delulutopia.core.ui.rememberNow
 import com.delulutopia.core.ui.signature
 import com.delulutopia.core.ui.signatureOf
+import com.delulutopia.core.ui.tintOf
 import com.delulutopia.core.ui.whoOf
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -221,132 +224,194 @@ private fun LetterContent(letter: LetterFull, home: Home?, swiped: Boolean, vm: 
         }
     }
 
-    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
-        if (inReach) {
-            Row(
-                Modifier
-                    .padding(start = 12.dp, end = 12.dp, bottom = 10.dp)
-                    .fillMaxWidth()
-                    .background(MaterialTheme.colorScheme.secondaryContainer, RoundedCornerShape(12.dp))
-                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(12.dp))
-                    .padding(start = 14.dp, end = 8.dp, top = 8.dp, bottom = 8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                Text(
-                    "${Time.countdown((Time.ms(letter.windowEndsAt) ?: 0) - nowMs)} left to edit or cancel",
-                    Modifier.weight(1f),
-                    style = MaterialTheme.typography.labelMedium.copy(fontSize = 13.sp, fontWeight = FontWeight.SemiBold, fontFeatureSettings = "tnum"),
-                )
-                DlOutlinedButton("Edit", { nav.open(WriteRoute(editId = letter.id)) })
-                DlOutlinedButton("Cancel", { askCancel = true })
-            }
-        }
-        Box(Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
-            // The sheet settles in (dl-paper-in); out of a NEW letter's envelope it waits for the envelope.
-            Paper(
-                Modifier.enter(Enter.Paper, if (fresh && !swiped) 620 else 40, if (fresh && !swiped) 520 else 480, key = letter.id)
-                    .clickable(enabled = reveal) { reveal = false },
-            ) {
-                Row(
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(end = if (letter.stamp != null) 56.dp else 0.dp, bottom = 10.dp),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp),
-                ) {
-                    if (sender != null) {
-                        DlRemoteAvatar(
-                            sender.avatarUrl,
-                            sender.nickname,
-                            signatureOf(sender.id),
-                            size = 40.dp,
-                            initials = sender.initials(),
-                            ring = signatureOf(sender.id),
-                        )
-                    }
-                    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+    Column(Modifier.fillMaxSize()) {
+        // The sheet fills the page (web .dl-paper flex: 1): its rules run to the bottom; Reply stays under it.
+        BoxWithConstraints(Modifier.weight(1f)) {
+            val pageHeight = maxHeight
+            Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
+                if (inReach) {
+                    Row(
+                        Modifier
+                            .padding(start = 12.dp, end = 12.dp, bottom = 10.dp)
+                            .fillMaxWidth()
+                            .background(MaterialTheme.colorScheme.secondaryContainer, RoundedCornerShape(12.dp))
+                            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(12.dp))
+                            .padding(start = 14.dp, end = 8.dp, top = 8.dp, bottom = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
                         Text(
-                            buildAnnotatedString {
-                                withStyle(SpanStyle(fontWeight = FontWeight.Bold)) { append(sender?.nickname.orEmpty()) }
-                                if (feeling !=
-                                    null
-                                ) {
-                                    withStyle(SpanStyle(color = DlTheme.colors.letterInk.copy(alpha = 0.75f))) { append(" · Feeling $feeling") }
-                                }
-                            },
-                            style = MaterialTheme.typography.bodyLarge.copy(fontSize = 15.sp),
-                            color = DlTheme.colors.letterInk,
+                            "${Time.countdown((Time.ms(letter.windowEndsAt) ?: 0) - nowMs)} left to edit or cancel",
+                            Modifier.weight(1f),
+                            style = MaterialTheme.typography.labelMedium.copy(fontSize = 13.sp, fontWeight = FontWeight.SemiBold, fontFeatureSettings = "tnum"),
                         )
-                        Text(
-                            "Sent ${Time.clock(letter.sentAt, nowMs)} · ${if (arrived) "Arrived" else "Arrives"} ${Time.clock(letter.arrivesAt, nowMs)}",
-                            style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp, fontFeatureSettings = "tnum"),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
+                        DlOutlinedButton("Edit", { nav.open(WriteRoute(editId = letter.id)) })
+                        DlOutlinedButton("Cancel", { askCancel = true })
                     }
                 }
-                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    letter.replyTo?.let { ReplyQuote(it, friend?.nickname ?: "Friend", nowMs) { nav.open(LetterRoute(it.id)) } }
-                    Ruled { LetterBody(letter.body, reveal = reveal && !opening) }
-                    doodle?.let { d ->
-                        AsyncImage(
-                            model = resolveMedia(base, d.url),
-                            contentDescription = "Doodle, open full size",
-                            modifier = Modifier.fillMaxWidth().aspectRatio(1f).clip(RoundedCornerShape(2.dp)).clickable { doodleOpen = true },
-                            contentScale = ContentScale.Fit,
-                        )
-                    }
-                    if (photos.isNotEmpty() || audios.isNotEmpty()) {
-                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                            if (photos.isNotEmpty()) {
-                                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                    photos.forEachIndexed { i, p ->
-                                        AsyncImage(
-                                            model = resolveMedia(base, p.thumbUrl ?: p.url),
-                                            contentDescription = "Photo ${i + 1} of ${photos.size}, open full size",
-                                            modifier = Modifier.enter(Enter.PopIn, mediaDelay, 300).size(64.dp).clip(RoundedCornerShape(4.dp)).clickable {
-                                                photo =
-                                                    i
-                                            },
-                                            contentScale = ContentScale.Crop,
-                                        )
+                Box(Modifier.padding(horizontal = 16.dp).padding(bottom = if (sent) 24.dp else 12.dp)) {
+                    // The sheet settles in (dl-paper-in); out of a NEW letter's envelope it waits for the envelope.
+                    Paper(
+                        Modifier
+                            .heightIn(min = pageHeight - if (sent) 24.dp else 12.dp)
+                            .enter(Enter.Paper, if (fresh && !swiped) 620 else 40, if (fresh && !swiped) 520 else 480, key = letter.id)
+                            .clickable(enabled = reveal) { reveal = false },
+                    ) {
+                        // Head, quote and body on top; the foot at the bottom. The body's rules run on behind the gap.
+                        Column {
+                            // Head: who, feeling, times; a double rule under it (web .dl-paper--sheet .dl-paper-head).
+                            val rule = DlTheme.colors.letterRule
+                            Row(
+                                Modifier
+                                    .fillMaxWidth()
+                                    .drawBehind {
+                                        drawLine(rule, Offset(0f, size.height - 3.dp.toPx()), Offset(size.width, size.height - 3.dp.toPx()), 1.dp.toPx())
+                                        drawLine(rule, Offset(0f, size.height - 0.5.dp.toPx()), Offset(size.width, size.height - 0.5.dp.toPx()), 1.dp.toPx())
                                     }
+                                    .padding(start = 16.dp, top = 16.dp, end = if (letter.stamp != null) 84.dp else 16.dp, bottom = 15.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                            ) {
+                                if (sender != null) {
+                                    DlRemoteAvatar(
+                                        sender.avatarUrl,
+                                        sender.nickname,
+                                        tintOf(sender.id),
+                                        size = 40.dp,
+                                        initials = sender.initials(),
+                                        ring = signatureOf(sender.id),
+                                    )
+                                }
+                                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                                    Text(
+                                        buildAnnotatedString {
+                                            withStyle(SpanStyle(fontWeight = FontWeight.Bold)) { append(sender?.nickname.orEmpty()) }
+                                            if (feeling != null) {
+                                                withStyle(SpanStyle(fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.onSurfaceVariant)) {
+                                                    append(" · Feeling $feeling")
+                                                }
+                                            }
+                                        },
+                                        style = MaterialTheme.typography.bodyLarge.copy(fontSize = 15.sp),
+                                        color = DlTheme.colors.letterInk,
+                                    )
+                                    Text(
+                                        "Sent ${Time.clock(
+                                            letter.sentAt,
+                                            nowMs,
+                                        )} · ${if (arrived) "Arrived" else "Arrives"} ${Time.clock(letter.arrivesAt, nowMs)}",
+                                        style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp, fontFeatureSettings = "tnum"),
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    )
                                 }
                             }
-                            audios.forEachIndexed { i, a ->
-                                AudioPlayer(
-                                    resolveMedia(base, a.url),
-                                    a.durationMs,
-                                    Modifier.enter(Enter.PopIn, mediaDelay, 300),
-                                    label = if (audios.size > 1) "voice note ${i + 1}" else "voice note",
-                                )
+                            letter.replyTo?.let {
+                                Box(Modifier.padding(start = 20.dp, end = 20.dp, top = 14.dp)) {
+                                    ReplyQuote(it, friend?.nickname ?: "Friend", nowMs) { nav.open(LetterRoute(it.id)) }
+                                }
+                            }
+                            // Body: 17/28 Literata on 28 dp rules, down to the foot.
+                            Box(
+                                Modifier.fillMaxWidth().padding(
+                                    start = 20.dp,
+                                    end = 20.dp,
+                                    top = if (letter.replyTo !=
+                                        null
+                                    ) {
+                                        12.dp
+                                    } else {
+                                        18.dp
+                                    },
+                                    bottom = 18.dp,
+                                ),
+                            ) {
+                                Ruled(runOn = true) { LetterBody(letter.body, reveal = reveal && !opening) }
                             }
                         }
+                        val sheet = DlTheme.colors.letterSheet
+                        val margin = DlTheme.colors.letterMargin
+                        Column(
+                            Modifier.fillMaxWidth().drawBehind {
+                                drawRect(sheet)
+                                drawLine(margin, Offset(11.dp.toPx(), 0f), Offset(11.dp.toPx(), size.height), 1.dp.toPx())
+                            },
+                        ) {
+                            val hasMedia = doodle != null || photos.isNotEmpty() || audios.isNotEmpty()
+                            if (hasMedia || sent) {
+                                // Foot: a perforated edge, then the doodle, prints, players and the status line.
+                                val line = MaterialTheme.colorScheme.outlineVariant
+                                Column(
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .drawBehind {
+                                            drawLine(
+                                                line,
+                                                Offset.Zero,
+                                                Offset(size.width, 0f),
+                                                1.5.dp.toPx(),
+                                                pathEffect = PathEffect.dashPathEffect(floatArrayOf(5.dp.toPx(), 3.dp.toPx())),
+                                            )
+                                        }
+                                        .padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 16.dp),
+                                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                                ) {
+                                    doodle?.let { d ->
+                                        AsyncImage(
+                                            model = resolveMedia(base, d.url),
+                                            contentDescription = "Doodle, open full size",
+                                            modifier = Modifier.fillMaxWidth().aspectRatio(1f).rotate(0.3f).border(1.dp, line).clickable { doodleOpen = true },
+                                            contentScale = ContentScale.Fit,
+                                        )
+                                    }
+                                    if (photos.isNotEmpty()) {
+                                        Row(Modifier.padding(top = 4.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                                            photos.forEachIndexed { i, p ->
+                                                Print(
+                                                    resolveMedia(base, p.thumbUrl ?: p.url),
+                                                    "Photo ${i + 1} of ${photos.size}, open full size",
+                                                    if (i % 2 == 0) -1.5f else 1.2f,
+                                                    Modifier.enter(Enter.PopIn, mediaDelay, 300),
+                                                ) { photo = i }
+                                            }
+                                        }
+                                    }
+                                    audios.forEachIndexed { i, a ->
+                                        AudioPlayer(
+                                            resolveMedia(base, a.url),
+                                            a.durationMs,
+                                            Modifier.enter(Enter.PopIn, mediaDelay, 300),
+                                            label = if (audios.size > 1) "voice note ${i + 1}" else "voice note",
+                                        )
+                                    }
+                                    if (sent) StatusLine(letter, state, nowMs)
+                                }
+                            }
+                            Spacer(Modifier.height(20.dp))
+                        }
                     }
-                    if (sent) StatusLine(letter, state, nowMs)
+                    // The stamp takes the corner, as on an envelope (FS-ST6; web 72 px).
+                    letter.stamp?.let {
+                        StampImage(
+                            it,
+                            Modifier.align(Alignment.TopEnd).padding(top = 10.dp, end = 10.dp)
+                                .enter(Enter.Stamp, if (fresh && !swiped) 1040 else 380, key = letter.id).rotate(2f),
+                            width = 64.dp,
+                        )
+                    }
+                    if (opening) EnvelopeOpening(whoOf(sender?.id).signature()) { opening = false }
                 }
             }
-            // The stamp takes the corner, as on an envelope (FS-ST6).
-            letter.stamp?.let {
-                StampImage(
-                    it,
-                    Modifier.align(Alignment.TopEnd).padding(top = 14.dp, end = 14.dp)
-                        .enter(Enter.Stamp, if (fresh && !swiped) 1040 else 380, key = letter.id).rotate(2f),
-                    width = 46.dp,
-                )
-            }
-            if (opening) EnvelopeOpening(whoOf(sender?.id).signature()) { opening = false }
         }
         if (!sent) {
-            // Full-width Reply under the sheet (canvas C-Letter-received).
+            // Reply under the sheet, full width (web .dl-letter-actions).
             DlFilledButton(
                 "Reply",
                 { nav.open(WriteRoute(replyTo = letter.id)) },
-                Modifier.fillMaxWidth().padding(start = 12.dp, end = 12.dp, top = 12.dp, bottom = 8.dp).enter(Enter.Rise, 300, 340),
+                Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 0.dp, bottom = 24.dp).enter(Enter.Rise, 300, 340),
                 icon = WebIcons.Reply,
                 height = 48.dp,
             )
         }
-        Spacer(Modifier.height(24.dp))
     }
 
     if (photo >= 0 && photo < photos.size) Lightbox(photos, photo, { photo = it }, { photo = -1 })
@@ -384,12 +449,11 @@ private fun Paper(modifier: Modifier = Modifier, content: @Composable ColumnScop
         Column(
             modifier
                 .fillMaxWidth()
-                .heightIn(min = 480.dp)
-                .shadow(1.dp, shape)
+                .shadow(2.dp, shape)
+                .clip(shape)
                 .background(c.letterSheet, shape)
-                .drawBehind { drawLine(c.letterMargin, Offset(11.dp.toPx(), 0f), Offset(11.dp.toPx(), size.height), 1.dp.toPx()) }
-                .padding(start = 22.dp, end = 16.dp, top = 14.dp, bottom = 26.dp),
-            verticalArrangement = Arrangement.spacedBy(0.dp),
+                .drawBehind { drawLine(c.letterMargin, Offset(11.dp.toPx(), 0f), Offset(11.dp.toPx(), size.height), 1.dp.toPx()) },
+            verticalArrangement = Arrangement.SpaceBetween,
             content = content,
         )
         val ground = MaterialTheme.colorScheme.surface
@@ -421,18 +485,43 @@ private fun Paper(modifier: Modifier = Modifier, content: @Composable ColumnScop
 
 /** Ruled paper under the body: one rule per 28 sp line. */
 @Composable
-private fun Ruled(content: @Composable () -> Unit) {
+private fun Ruled(runOn: Boolean = false, content: @Composable () -> Unit) {
     val rule = DlTheme.colors.letterRule
     Box(
         Modifier.fillMaxWidth().heightIn(min = 196.dp).drawBehind {
             val step = 28.sp.toPx()
             var y = step - 1.dp.toPx()
-            while (y < size.height) {
+            // On a letter the rules carry on down the sheet; the sheet clips them and the foot covers them.
+            val end = if (runOn) size.height + 4000f else size.height
+            while (y < end) {
                 drawLine(rule, Offset(0f, y), Offset(size.width, y), 1.dp.toPx())
                 y += step
             }
         },
     ) { content() }
+}
+
+private val QuoteShape = RoundedCornerShape(topEnd = 8.dp, bottomEnd = 8.dp)
+
+/** A photo print taped onto the sheet (web .dl-paper--sheet .dl-paper-thumb): 3 dp white border, tilt, tape. */
+@Composable
+private fun Print(url: String, description: String, tilt: Float, modifier: Modifier, onOpen: () -> Unit) {
+    val c = DlTheme.colors
+    Box(modifier.rotate(tilt)) {
+        AsyncImage(
+            model = url,
+            contentDescription = description,
+            modifier = Modifier
+                .size(64.dp)
+                .shadow(2.dp, RoundedCornerShape(2.dp))
+                .background(c.letterPrint, RoundedCornerShape(2.dp))
+                .padding(3.dp)
+                .clip(RoundedCornerShape(1.dp))
+                .clickable(onClick = onOpen),
+            contentScale = ContentScale.Crop,
+        )
+        Box(Modifier.align(Alignment.TopCenter).offset(y = (-5).dp).size(22.dp, 9.dp).rotate(-4f).background(c.letterTape))
+    }
 }
 
 /** Replies B1: the letter this one answers, clipped above the text. Opens that letter. */
@@ -445,12 +534,14 @@ private fun ReplyQuote(reply: ReplyRef, friendName: String, nowMs: Long, onOpen:
         Column(
             Modifier
                 .fillMaxWidth()
-                .shadow(1.dp, RoundedCornerShape(2.dp))
-                .background(c.letterSlip, RoundedCornerShape(2.dp))
-                .border(1.dp, c.letterEdge, RoundedCornerShape(2.dp))
+                .rotate(-0.4f)
+                .shadow(1.dp, QuoteShape)
+                .background(c.letterSlip, QuoteShape)
+                .drawBehind { drawRect(c.userA, size = Size(3.dp.toPx(), size.height)) }
                 .clickable(onClick = onOpen)
                 .semantics { contentDescription = "In reply to $whose of ${Time.clock(reply.sentAt, nowMs)}. Open it" }
-                .padding(start = 14.dp, end = 12.dp, top = 10.dp, bottom = 10.dp),
+                .padding(start = 15.dp, end = 12.dp, top = 12.dp, bottom = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
             Row(Modifier.padding(start = 12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                 Icon(WebIcons.Reply, null, Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)

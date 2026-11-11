@@ -1,9 +1,11 @@
 package com.delulutopia.feature.home
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -42,6 +44,7 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.drawscope.scale
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
@@ -67,6 +70,7 @@ import com.delulutopia.core.designsystem.icon.WebIcons
 import com.delulutopia.core.designsystem.motion.Enter
 import com.delulutopia.core.designsystem.motion.enter
 import com.delulutopia.core.designsystem.motion.float
+import com.delulutopia.core.designsystem.motion.pressScale
 import com.delulutopia.core.designsystem.motion.rememberPlayed
 import com.delulutopia.core.designsystem.motion.rowEnter
 import com.delulutopia.core.designsystem.theme.DlTheme
@@ -238,7 +242,7 @@ private fun progressAt(row: LetterRow, nowMs: Long): Float {
 private fun MyMood(me: Citizen, nowMs: Long, onOpen: () -> Unit) {
     val mood = me.moodText()
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-        DlRemoteAvatar(me.avatarUrl, me.nickname, signatureOf(me.id), size = 40.dp, initials = me.initials(), ring = signatureOf(me.id))
+        DlRemoteAvatar(me.avatarUrl, me.nickname, tintOf(me.id), size = 40.dp, initials = me.initials(), ring = signatureOf(me.id))
         val shape = RoundedCornerShape(20.dp)
         Row(
             Modifier
@@ -285,7 +289,7 @@ private fun FriendCard(friend: Citizen, nowMs: Long, onOpen: () -> Unit) {
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         Box(Modifier.clip(CircleShape).clickable(onClickLabel = "${friend.nickname}'s profile", onClick = onOpen)) {
-            DlRemoteAvatar(friend.avatarUrl, friend.nickname, signatureOf(friend.id), size = 48.dp, initials = friend.initials(), ring = signatureOf(friend.id))
+            DlRemoteAvatar(friend.avatarUrl, friend.nickname, tintOf(friend.id), size = 48.dp, initials = friend.initials(), ring = signatureOf(friend.id))
         }
         Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
             Text(friend.nickname, style = MaterialTheme.typography.titleSmall.copy(fontSize = 15.sp, fontWeight = FontWeight.SemiBold))
@@ -460,8 +464,8 @@ private fun ToRow(row: LetterRow, nowMs: Long, who: Who, onCancel: () -> Unit) {
                     row.stamp?.let { StampImage(it) }
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    DlOutlinedButton("Edit", { nav.open(WriteRoute(editId = row.id)) }, Modifier.weight(1f))
-                    DlOutlinedButton("Cancel", onCancel, Modifier.weight(1f))
+                    ReachButton("Edit", Modifier.weight(1f)) { nav.open(WriteRoute(editId = row.id)) }
+                    ReachButton("Cancel", Modifier.weight(1f), onCancel)
                 }
             }
         }
@@ -570,4 +574,23 @@ private fun Modifier.dashed(colour: Color, radius: Dp, width: Dp = 1.dp): Modifi
         cornerRadius = CornerRadius(radius.toPx()),
         style = Stroke(w, pathEffect = PathEffect.dashPathEffect(floatArrayOf(6.dp.toPx(), 4.dp.toPx()))),
     )
+}
+
+/** The in-reach row's Edit and Cancel (web .dl-outline-btn): 36 dp, navy outline on the row's paper, 13/600. */
+@Composable
+private fun ReachButton(text: String, modifier: Modifier, onClick: () -> Unit) {
+    val seal = MaterialTheme.colorScheme.primary
+    val press = remember { MutableInteractionSource() }
+    Box(
+        modifier
+            .pressScale(press)
+            .height(36.dp)
+            .clip(RoundedCornerShape(18.dp))
+            .background(DlTheme.colors.letterEnvelope)
+            .border(1.dp, seal, RoundedCornerShape(18.dp))
+            .clickable(interactionSource = press, indication = LocalIndication.current, role = Role.Button, onClick = onClick),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(text, style = MaterialTheme.typography.labelLarge.copy(fontSize = 13.sp, fontWeight = FontWeight.SemiBold), color = seal)
+    }
 }

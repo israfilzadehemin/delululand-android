@@ -194,7 +194,7 @@ fun Arc(target: Float, who: Who, modifier: Modifier = Modifier) {
                     stroke,
                     pathEffect = PathEffect.dashPathEffect(floatArrayOf(stroke, stroke * 1.6f)),
                 )
-                drawLine(seal, Offset(0f, y), Offset(size.width * progress.coerceIn(0f, 1f), y), stroke)
+                drawLine(c.userA, Offset(0f, y), Offset(size.width * progress.coerceIn(0f, 1f), y), stroke)
             },
         )
         BoxWithConstraints(Modifier.fillMaxWidth()) {
@@ -218,12 +218,14 @@ fun StampImage(stamp: StampMark, modifier: Modifier = Modifier, width: Dp = 28.d
 
 /** The seal-coloured NEW chip on letter tiles and notes. */
 @Composable
-fun NewChip(modifier: Modifier = Modifier, text: String = "NEW") {
+fun NewChip(modifier: Modifier = Modifier, text: String = "NEW", paper: Boolean = true) {
+    // On letters and notes the chip is terracotta; elsewhere (the board) it is the navy seal (web .dl-chip-new).
     val c = DlTheme.colors
     Box(
-        modifier.enter(Enter.Pop, 160).height(22.dp).background(c.newBadge, RoundedCornerShape(11.dp)).padding(horizontal = 9.dp),
+        modifier.enter(Enter.Pop, 160).height(22.dp)
+            .background(if (paper) c.newBadge else MaterialTheme.colorScheme.primary, RoundedCornerShape(11.dp)).padding(horizontal = 9.dp),
         contentAlignment = Alignment.Center,
     ) {
-        Text(text, style = DlTheme.type.pill, color = c.onNewBadge)
+        Text(text, style = DlTheme.type.pill, color = if (paper) c.onNewBadge else MaterialTheme.colorScheme.onPrimary)
     }
 }

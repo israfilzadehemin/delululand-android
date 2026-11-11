@@ -41,6 +41,7 @@ import com.delulutopia.core.network.model.UniverseView
 import com.delulutopia.core.ui.LocalAppNav
 import com.delulutopia.core.ui.LocalNotice
 import com.delulutopia.core.ui.signatureOf
+import com.delulutopia.core.ui.tintOf
 import com.delulutopia.feature.start.KeyReveal
 import com.delulutopia.feature.start.Rules
 import com.delulutopia.feature.start.WelcomeDialog
@@ -176,7 +177,14 @@ private fun ReadOnly(vm: UniverseViewModel, view: UniverseView) {
             DlSectionLabel("Created by")
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 val photo = if (friend != null && friend.id == creator.id) friend.avatarUrl else null
-                DlRemoteAvatar(photo, creator.username, signatureOf(creator.id), size = 32.dp, initials = creator.username.take(1).uppercase())
+                DlRemoteAvatar(
+                    photo,
+                    creator.username,
+                    tintOf(creator.id),
+                    size = 32.dp,
+                    initials = creator.username.take(1).uppercase(),
+                    ring = signatureOf(creator.id),
+                )
                 Text(creator.username, fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
             }
         }

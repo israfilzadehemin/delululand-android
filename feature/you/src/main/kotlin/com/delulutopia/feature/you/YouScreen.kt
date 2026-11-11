@@ -63,6 +63,7 @@ import com.delulutopia.core.ui.initials
 import com.delulutopia.core.ui.notify.NotifyPermission
 import com.delulutopia.core.ui.notify.rememberNotifyAccess
 import com.delulutopia.core.ui.signatureOf
+import com.delulutopia.core.ui.tintOf
 
 val THEME_WORDS = mapOf(ThemeMode.Light to "Light", ThemeMode.Dark to "Dark", ThemeMode.System to "Match device")
 
@@ -142,7 +143,7 @@ fun YouScreen(themeMode: ThemeMode, onLogout: () -> Unit, vm: YouViewModel = hil
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
             ) {
-                DlRemoteAvatar(me.avatarUrl, me.nickname, signatureOf(me.id), size = 64.dp, initials = me.initials())
+                DlRemoteAvatar(me.avatarUrl, me.nickname, tintOf(me.id), size = 64.dp, initials = me.initials(), ring = signatureOf(me.id))
                 Column(Modifier.weight(1f)) {
                     Text(me.nickname, fontSize = 18.sp, fontWeight = FontWeight.Bold)
                     if (details.isNotEmpty()) Text(details, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)

@@ -62,12 +62,6 @@ jobs:
       - name: Unit and screenshot tests
         run: ./gradlew testProdDebugUnitTest :core:designsystem:testDebugUnitTest :core:network:testDebugUnitTest :feature:start:testDebugUnitTest :core:ui:testDebugUnitTest :feature:home:testDebugUnitTest :feature:letters:testDebugUnitTest :feature:emails:testDebugUnitTest :feature:you:testDebugUnitTest -Proborazzi.test.record=true --continue
 
-      - name: Lint
-        run: ./gradlew :app:lintProdDebug
-
-      - name: Build APKs and bundle
-        run: ./gradlew assembleStagingDebug assembleProdDebug assembleStagingRelease assembleProdRelease bundleProdRelease
-
       - name: Screenshots
         if: always()
         uses: actions/upload-artifact@v4
@@ -96,6 +90,12 @@ jobs:
           git add -A
           git -c user.name="ci" -c user.email="ci@users.noreply.github.com" commit -qm "Screenshots for ${BRANCH_DIR} @ ${GITHUB_SHA::7}" || exit 0
           git push -q origin ci-screenshots
+
+      - name: Lint
+        run: ./gradlew :app:lintProdDebug
+
+      - name: Build APKs and bundle
+        run: ./gradlew assembleStagingDebug assembleProdDebug assembleStagingRelease assembleProdRelease bundleProdRelease
 
       - name: Reports
         if: failure()

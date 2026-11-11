@@ -71,6 +71,7 @@ import com.delulutopia.core.ui.noteInkQuiet
 import com.delulutopia.core.ui.reactions.Reactions
 import com.delulutopia.core.ui.rememberNow
 import com.delulutopia.core.ui.signatureOf
+import com.delulutopia.core.ui.tintOf
 import kotlinx.coroutines.launch
 
 /**
@@ -206,7 +207,7 @@ private fun Thread(d: DFull, me: Citizen?, friend: Citizen?, vm: DiscussionViewM
                         DlRemoteAvatar(
                             author.avatarUrl,
                             author.nickname,
-                            signatureOf(author.id),
+                            tintOf(author.id),
                             size = 44.dp,
                             initials = author.initials(),
                             ring = signatureOf(author.id),
@@ -434,7 +435,7 @@ private fun CommentItem(
             DlRemoteAvatar(
                 person.avatarUrl,
                 person.nickname,
-                signatureOf(person.id),
+                tintOf(person.id),
                 size = 24.dp,
                 initials = person.nickname.take(1).uppercase(),
                 ring = signatureOf(person.id),

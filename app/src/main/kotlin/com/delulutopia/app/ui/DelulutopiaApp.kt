@@ -94,6 +94,7 @@ import com.delulutopia.core.ui.notify.NotifyPermission
 import com.delulutopia.core.ui.notify.rememberNotifyAccess
 import com.delulutopia.core.ui.reactions.LocalReactionsApi
 import com.delulutopia.core.ui.signatureOf
+import com.delulutopia.core.ui.tintOf
 import com.delulutopia.feature.discussions.discussionsGraph
 import com.delulutopia.feature.emails.emailsGraph
 import com.delulutopia.feature.home.HomeScreen
@@ -316,7 +317,7 @@ fun DelulutopiaApp(
                                         avatarUrl = me?.avatarUrl ?: session.me.avatarUrl,
                                         name = me?.nickname ?: session.me.nickname,
                                         initials = me?.initials() ?: session.me.nickname.take(1).uppercase(),
-                                        signature = signatureOf(session.me.id),
+                                        signature = tintOf(session.me.id),
                                         size = 24.dp,
                                     )
                                 }

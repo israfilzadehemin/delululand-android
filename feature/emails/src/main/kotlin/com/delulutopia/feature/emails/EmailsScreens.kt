@@ -84,6 +84,7 @@ import com.delulutopia.core.ui.reactions.noticeLine
 import com.delulutopia.core.ui.reactions.reactionWins
 import com.delulutopia.core.ui.rememberNow
 import com.delulutopia.core.ui.signatureOf
+import com.delulutopia.core.ui.tintOf
 
 /** S13 Emails (web emails/EmailsScreen.tsx; canvas E-Emails, E-Emails-empty, E-No-credits). */
 @Composable
@@ -350,7 +351,7 @@ private fun EmailCard(
                 DlRemoteAvatar(
                     person.avatarUrl,
                     person.nickname,
-                    signatureOf(person.id),
+                    tintOf(person.id),
                     size = 24.dp,
                     initials = person.nickname.take(1).uppercase(),
                     ring = signatureOf(person.id),
