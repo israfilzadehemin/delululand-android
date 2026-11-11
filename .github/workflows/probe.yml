@@ -9,16 +9,16 @@ jobs:
           g() { curl -s "https://dl.google.com/android/maven2/$1/maven-metadata.xml" | grep -oP '(?<=<version>)[^<]+' | grep -viE 'alpha|beta|rc|dev|eap' | tail -1; }
           m() { curl -s "https://repo1.maven.org/maven2/$1/maven-metadata.xml" | grep -oP '(?<=<version>)[^<]+' | grep -viE 'alpha|beta|rc|dev|eap|m[0-9]' | sort -V | tail -1; }
           p() { curl -s "https://plugins.gradle.org/m2/$1/maven-metadata.xml" | grep -oP '(?<=<version>)[^<]+' | grep -viE 'alpha|beta|rc|dev|eap' | sort -V | tail -1; }
-          for host in delulutopia.com test.delulutopia.com; do
-            echo "=== $host"
-            curl -s https://$host/ -o idx.html; grep -o 'assets/[^"]*\.js' idx.html | sort -u > js.txt; cat js.txt | head -3
-            rm -f all.js; for f in $(cat js.txt); do curl -s https://$host/$f >> all.js; done
-            # lazy chunks referenced from the entry
-            for f in $(grep -o 'assets/[A-Za-z0-9_.-]*\.js' all.js | sort -u); do curl -s https://$host/$f >> all.js; done
-            wc -c all.js
-            for s in "Archived" "Delete this discussion" "New mood" "48 of 48" "Falling leaves" "Continue your" "Start a discussion" "Use a different key" "Create a universe" "Remove reaction" "Make a new key" "api/events" "Keep text in draft" "Doodle" "Notifications"; do
-              printf "%-26s %s\n" "$s" "$(grep -c -F "$s" all.js)"
-            done
-          done
+          echo "desugar $(g com/android/tools/desugar_jdk_libs)"
+          echo "emojipicker $(g androidx/emoji2/emoji2-emojipicker)"
+          echo "emoji2 $(g androidx/emoji2/emoji2)"
+          echo "media3 $(g androidx/media3/media3-exoplayer)"
+          echo "media3ui $(g androidx/media3/media3-ui-compose)"
+          echo "camerax $(g androidx/camera/camera-video)"
+          echo "exif $(g androidx/exifinterface/exifinterface)"
+          echo "composeFoundation $(g androidx/compose/foundation/foundation)"
+          echo "graphicsShapes $(g androidx/graphics/graphics-shapes)"
+          echo "workRuntime $(g androidx/work/work-runtime-ktx)"
+          echo "appcompat $(g androidx/appcompat/appcompat)"
           echo "--- AGP 9.x Gradle requirement"
           curl -s https://developer.android.com/build/releases/gradle-plugin | grep -oP 'Gradle</td>\s*<td>[0-9.]+' | head -3 || true
