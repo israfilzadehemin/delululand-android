@@ -9,17 +9,16 @@ jobs:
           g() { curl -s "https://dl.google.com/android/maven2/$1/maven-metadata.xml" | grep -oP '(?<=<version>)[^<]+' | grep -viE 'alpha|beta|rc|dev|eap' | tail -1; }
           m() { curl -s "https://repo1.maven.org/maven2/$1/maven-metadata.xml" | grep -oP '(?<=<version>)[^<]+' | grep -viE 'alpha|beta|rc|dev|eap|m[0-9]' | sort -V | tail -1; }
           p() { curl -s "https://plugins.gradle.org/m2/$1/maven-metadata.xml" | grep -oP '(?<=<version>)[^<]+' | grep -viE 'alpha|beta|rc|dev|eap' | sort -V | tail -1; }
-          echo "desugar $(m com/android/tools/desugar_jdk_libs)"
-          echo "retrofitKx $(m com/squareup/retrofit2/converter-kotlinx-serialization)"
-          echo "okhttpSse $(m com/squareup/okhttp3/okhttp-sse)"
-          echo "okhttpMock $(m com/squareup/okhttp3/mockwebserver3)"
-          echo "coilOkhttp $(m io/coil-kt/coil3/coil-network-okhttp)"
-          echo "coilCompose $(m io/coil-kt/coil3/coil-compose)"
-          echo "lifecycle $(g androidx/lifecycle/lifecycle-runtime-compose)"
-          echo "hiltNav $(g androidx/hilt/hilt-navigation-compose)"
-          echo "--- reach test server"
-          curl -s -o /dev/null -w "test /api/config %{http_code}\n" https://test.delulutopia.com/api/config || true
-          curl -s https://test.delulutopia.com/api/config | head -c 400; echo
-          curl -s -o /dev/null -w "prod /api/config %{http_code}\n" https://delulutopia.com/api/config || true
+          for host in delulutopia.com test.delulutopia.com; do
+            echo "=== $host"
+            curl -s https://$host/ -o idx.html; grep -o 'assets/[^"]*\.js' idx.html | sort -u > js.txt; cat js.txt | head -3
+            rm -f all.js; for f in $(cat js.txt); do curl -s https://$host/$f >> all.js; done
+            # lazy chunks referenced from the entry
+            for f in $(grep -o 'assets/[A-Za-z0-9_.-]*\.js' all.js | sort -u); do curl -s https://$host/$f >> all.js; done
+            wc -c all.js
+            for s in "Archived" "Delete this discussion" "New mood" "48 of 48" "Falling leaves" "Continue your" "Start a discussion" "Use a different key" "Create a universe" "Remove reaction" "Make a new key" "api/events" "Keep text in draft" "Doodle" "Notifications"; do
+              printf "%-26s %s\n" "$s" "$(grep -c -F "$s" all.js)"
+            done
+          done
           echo "--- AGP 9.x Gradle requirement"
           curl -s https://developer.android.com/build/releases/gradle-plugin | grep -oP 'Gradle</td>\s*<td>[0-9.]+' | head -3 || true
