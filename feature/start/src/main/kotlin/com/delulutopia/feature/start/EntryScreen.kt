@@ -36,6 +36,8 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.delulutopia.core.designsystem.component.DlFilledButton
 import com.delulutopia.core.designsystem.component.DlTextField
+import com.delulutopia.core.designsystem.motion.Enter
+import com.delulutopia.core.designsystem.motion.enter
 
 @Composable
 fun EntryRoute(
@@ -97,7 +99,7 @@ private fun Landing(state: EntryViewModel.Content.Landing, onKeyChange: (String)
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         Column(
-            Modifier.fillMaxWidth().padding(top = 32.dp),
+            Modifier.fillMaxWidth().padding(top = 32.dp).enter(Enter.Rise, durationMs = 420),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(6.dp),
         ) {
@@ -146,9 +148,10 @@ private fun Cards(state: EntryViewModel.Content.Cards, onOpenPin: (Int) -> Unit,
             .padding(start = 16.dp, end = 16.dp, top = 56.dp, bottom = 24.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp),
     ) {
-        UniverseTitle(state.view.name, Modifier.padding(bottom = 22.dp))
-        state.view.users.forEachIndexed { i, u -> UserCardRow(u, i) { onOpenPin(u.id) } }
-        if (state.view.canJoin) JoinCardRow(state.view.name, onJoin)
+        UniverseTitle(state.view.name, Modifier.padding(bottom = 22.dp).enter(Enter.Rise, durationMs = 420))
+        // The cards rise in turn (web .dl-entry-cards: 120 ms, 200 ms).
+        state.view.users.forEachIndexed { i, u -> Box(Modifier.enter(Enter.Rise, 120 + 80 * i, 380)) { UserCardRow(u, i) { onOpenPin(u.id) } } }
+        if (state.view.canJoin) Box(Modifier.enter(Enter.Rise, 120 + 80 * state.view.users.size, 380)) { JoinCardRow(state.view.name, onJoin) }
         Spacer(Modifier.weight(1f))
         TextButton(onClick = onForget, modifier = Modifier.align(Alignment.CenterHorizontally)) {
             StrongLink(stringResource(R.string.use_different_key))

@@ -1,8 +1,10 @@
 package com.delulutopia.feature.start
 
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -22,8 +24,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
@@ -39,6 +43,10 @@ import com.delulutopia.core.designsystem.component.DlPinDots
 import com.delulutopia.core.designsystem.component.DlPinPad
 import com.delulutopia.core.designsystem.component.DlRemoteAvatar
 import com.delulutopia.core.designsystem.icon.DlIcons
+import com.delulutopia.core.designsystem.motion.Enter
+import com.delulutopia.core.designsystem.motion.enter
+import com.delulutopia.core.designsystem.motion.pressScale
+import com.delulutopia.core.designsystem.motion.shake
 import com.delulutopia.core.designsystem.theme.DlTheme
 import com.delulutopia.core.designsystem.theme.Literata
 import com.delulutopia.core.network.model.UserCard
@@ -129,12 +137,15 @@ private fun Modifier.drawDashedCircle(color: Color) = drawBehind {
 
 @Composable
 private fun CardFrame(onClick: () -> Unit, content: @Composable () -> Unit) {
+    val press = remember { MutableInteractionSource() }
     Row(
         Modifier
             .fillMaxWidth()
+            .pressScale(press, 0.98f)
+            .clip(RoundedCornerShape(12.dp))
             .background(MaterialTheme.colorScheme.surfaceContainerHigh, RoundedCornerShape(12.dp))
             .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(12.dp))
-            .clickable(role = Role.Button, onClick = onClick)
+            .clickable(interactionSource = press, indication = LocalIndication.current, role = Role.Button, onClick = onClick)
             .padding(horizontal = 16.dp, vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(16.dp),
@@ -179,7 +190,7 @@ internal fun ColumnScope.PinPanel(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
-        header()
+        Box(Modifier.enter(Enter.Rise, 60, 340)) { header() }
         Text(
             prompt,
             fontSize = 15.sp,
@@ -187,10 +198,11 @@ internal fun ColumnScope.PinPanel(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(top = 2.dp, bottom = 8.dp),
         )
-        DlPinDots(count = digits.length, label = dotsLabel, error = error != null)
+        // A wrong PIN shakes the dots (dl-shake); the line under them fades in.
+        DlPinDots(count = digits.length, label = dotsLabel, error = error != null, modifier = Modifier.shake(error))
         Text(
             error ?: hint.orEmpty(),
-            modifier = Modifier.heightIn(min = 20.dp).padding(top = 4.dp),
+            modifier = Modifier.heightIn(min = 20.dp).padding(top = 4.dp).enter(Enter.Fade, durationMs = 200, key = error ?: hint),
             fontSize = 14.sp,
             fontWeight = FontWeight.SemiBold,
             color = if (error != null) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,

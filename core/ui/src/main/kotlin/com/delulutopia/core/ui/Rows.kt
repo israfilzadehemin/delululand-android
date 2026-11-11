@@ -21,6 +21,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.delulutopia.core.data.LetterState
 import com.delulutopia.core.designsystem.icon.WebIcons
+import com.delulutopia.core.designsystem.motion.Enter
+import com.delulutopia.core.designsystem.motion.enter
 import com.delulutopia.core.network.model.LetterMedia
 import com.delulutopia.core.network.model.Row as LetterRow
 
@@ -51,6 +53,7 @@ fun OfflineBanner(modifier: Modifier = Modifier, brand: String = LocalBrand.curr
     val c = MaterialTheme.colorScheme
     Row(
         modifier
+            .enter(Enter.Drop, durationMs = 280)
             .fillMaxWidth()
             .background(c.errorContainer, RoundedCornerShape(12.dp))
             .border(1.dp, c.error.copy(alpha = 0.35f), RoundedCornerShape(12.dp))

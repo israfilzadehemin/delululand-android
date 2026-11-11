@@ -19,7 +19,6 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -65,6 +64,11 @@ import com.delulutopia.core.designsystem.component.DlFab
 import com.delulutopia.core.designsystem.component.DlFilledButton
 import com.delulutopia.core.designsystem.icon.DlIcons
 import com.delulutopia.core.designsystem.icon.WebIcons
+import com.delulutopia.core.designsystem.motion.Enter
+import com.delulutopia.core.designsystem.motion.enter
+import com.delulutopia.core.designsystem.motion.float
+import com.delulutopia.core.designsystem.motion.rememberPlayed
+import com.delulutopia.core.designsystem.motion.rowEnter
 import com.delulutopia.core.designsystem.theme.DlTheme
 import com.delulutopia.core.network.model.Citizen
 import com.delulutopia.core.network.model.Row as LetterRow
@@ -138,6 +142,7 @@ fun LettersList(
     }
     val friendName = friend?.nickname ?: "Friend"
     val senderOf = { row: LetterRow -> if (row.direction == "to") me?.id ?: 1 else friend?.id ?: 2 }
+    val played = rememberPlayed()
     Box(Modifier.fillMaxSize()) {
         // Thumbnails sit in a two-column grid whose tiles share their row's height (web .dl-ltiles: CSS grid stretch).
         LazyColumn(
@@ -148,8 +153,10 @@ fun LettersList(
         ) {
             item(key = "bar") { LayoutBar(list, onLayout) }
             if (list) {
-                items(rows, key = { it.id }) { row ->
-                    Box(Modifier.animateItem().leafSurface("/letters/${row.id}")) { ListRow(row, nowMs, friendName, whoOf(senderOf(row))) }
+                itemsIndexed(rows, key = { _, it -> it.id }) { i, row ->
+                    Box(Modifier.animateItem().rowEnter(i, played, row.id).leafSurface("/letters/${row.id}")) {
+                        ListRow(row, nowMs, friendName, whoOf(senderOf(row)))
+                    }
                 }
             } else {
                 val pairs = rows.chunked(2)
@@ -159,7 +166,7 @@ fun LettersList(
                         horizontalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
                         pair.forEachIndexed { j, row ->
-                            Box(Modifier.weight(1f).fillMaxHeight().leafSurface("/letters/${row.id}")) {
+                            Box(Modifier.weight(1f).fillMaxHeight().rowEnter(i * 2 + j, played, row.id).leafSurface("/letters/${row.id}")) {
                                 Thumb(row, nowMs, friendName, whoOf(senderOf(row)), i * 2 + j)
                             }
                         }
@@ -169,7 +176,7 @@ fun LettersList(
             }
             item(key = "end") {
                 Row(
-                    Modifier.fillMaxWidth().heightIn(min = 40.dp),
+                    Modifier.fillMaxWidth().heightIn(min = 40.dp).enter(Enter.Fade, durationMs = 300),
                     horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
@@ -221,7 +228,7 @@ private fun EmptyLetters(draft: Boolean, onWrite: () -> Unit) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
     ) {
-        Canvas(Modifier.size(120.dp, 96.dp)) {
+        Canvas(Modifier.enter(Enter.Rise, durationMs = 400).float(400).size(120.dp, 96.dp)) {
             scale(size.width / 120f, size.height / 96f, pivot = Offset.Zero) {
                 drawRoundRect(letter, Offset(14f, 30f), Size(92f, 58f), CornerRadius(6f))
                 drawRoundRect(line, Offset(14f, 30f), Size(92f, 58f), CornerRadius(6f), style = Stroke(1.5f))
@@ -245,7 +252,7 @@ private fun EmptyLetters(draft: Boolean, onWrite: () -> Unit) {
                 drawPath(plane, seal, style = Stroke(1.5f))
             }
         }
-        Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Column(Modifier.enter(Enter.Rise, 80, 400), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text("No letters yet.", style = MaterialTheme.typography.titleMedium)
             Text("Write the first one.", style = MaterialTheme.typography.bodyLarge.copy(fontSize = 15.sp), color = MaterialTheme.colorScheme.onSurfaceVariant)
         }

@@ -45,6 +45,8 @@ import com.delulutopia.core.designsystem.component.DlFab
 import com.delulutopia.core.designsystem.component.DlFilledButton
 import com.delulutopia.core.designsystem.icon.DlIcons
 import com.delulutopia.core.designsystem.icon.WebIcons
+import com.delulutopia.core.designsystem.motion.rememberPlayed
+import com.delulutopia.core.designsystem.motion.rowEnter
 import com.delulutopia.core.designsystem.theme.DlTheme
 import com.delulutopia.core.designsystem.theme.NoteColor
 import com.delulutopia.core.network.model.Citizen
@@ -152,6 +154,7 @@ fun DiscussionsList(
         return
     }
     val list = rememberLazyListState()
+    val played = rememberPlayed()
     LaunchedEffect(list, hasMore) {
         snapshotFlow { list.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0 }.collect { last ->
             if (hasMore && last >= list.layoutInfo.totalItemsCount - 3) onMore()
@@ -167,7 +170,7 @@ fun DiscussionsList(
             item { bar() }
             items(rows, key = { it.id }) { r ->
                 val index = rows.indexOf(r)
-                Box(Modifier.animateItem().leafSurface("/discussions/${r.id}")) {
+                Box(Modifier.animateItem().rowEnter(index, played, r.id, r.state).leafSurface("/discussions/${r.id}")) {
                     NoteRow(
                         r,
                         nowMs,

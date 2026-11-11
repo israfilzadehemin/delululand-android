@@ -50,6 +50,8 @@ import com.delulutopia.core.designsystem.component.DlFilledButton
 import com.delulutopia.core.designsystem.component.DlTextButton
 import com.delulutopia.core.designsystem.component.DlTextField
 import com.delulutopia.core.designsystem.icon.WebIcons
+import com.delulutopia.core.designsystem.motion.Enter
+import com.delulutopia.core.designsystem.motion.enter
 import com.delulutopia.core.designsystem.theme.DlTheme
 import com.delulutopia.core.network.model.Mood
 import com.delulutopia.core.ui.EmojiPickerSheet
@@ -102,10 +104,11 @@ internal fun MoodSheet(
                 )
                 HorizontalPager(pager, Modifier.fillMaxWidth()) { p ->
                     Column(Modifier.padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        pages[p].chunked(4).forEach { row ->
+                        pages[p].chunked(4).forEachIndexed { r, row ->
                             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                row.forEach { m ->
-                                    Box(Modifier.weight(1f)) {
+                                row.forEachIndexed { k, m ->
+                                    // The grid pops in tile by tile (web .dl-mood-grid: 80 ms, 20 ms apart, capped at 220 ms).
+                                    Box(Modifier.weight(1f).enter(Enter.PopIn, (80 + 20 * (r * 4 + k)).coerceAtMost(220), 260)) {
                                         if (m == null) {
                                             NewMoodTile(enabled = !busy && !full) { view = MoodView.New }
                                         } else {

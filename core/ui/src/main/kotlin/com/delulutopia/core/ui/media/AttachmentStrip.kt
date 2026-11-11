@@ -53,6 +53,9 @@ import coil3.compose.AsyncImage
 import com.delulutopia.core.designsystem.component.LocalServerBaseUrl
 import com.delulutopia.core.designsystem.component.resolveMedia
 import com.delulutopia.core.designsystem.icon.WebIcons
+import com.delulutopia.core.designsystem.motion.Enter
+import com.delulutopia.core.designsystem.motion.Motion
+import com.delulutopia.core.designsystem.motion.enter
 import com.delulutopia.core.designsystem.theme.DlTheme
 import com.delulutopia.core.network.Uploader
 
@@ -185,7 +188,8 @@ private fun AddButton(icon: ImageVector, label: String, enabled: Boolean, onClic
 private fun Print(item: Item, label: String, removeLabel: String, length: Long? = null, onRemove: () -> Unit) {
     val base = LocalServerBaseUrl.current
     val model: Any? = item.att?.let { a -> (a.thumbUrl ?: a.url.takeIf { a.kind != "video" })?.let { resolveMedia(base, it) } } ?: item.local
-    Box(Modifier.size(60.dp)) {
+    // A new tile or pill pops in with a little spring (web .dl-tile, .dl-pill).
+    Box(Modifier.enter(Enter.PopIn, durationMs = 280, easing = Motion.Spring).size(60.dp)) {
         AsyncImage(
             model = model,
             contentDescription = label,
@@ -256,6 +260,7 @@ private fun VoicePill(item: Item, onRemove: () -> Unit) {
     val playing = url != null && OnePlayer.url == url && OnePlayer.playing
     Row(
         Modifier
+            .enter(Enter.PopIn, durationMs = 280, easing = Motion.Spring)
             .height(36.dp)
             .clip(RoundedCornerShape(18.dp))
             .background(DlTheme.colors.letterEnvelope)

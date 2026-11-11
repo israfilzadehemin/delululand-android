@@ -1,5 +1,8 @@
 package com.delulutopia.core.ui
 
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -19,6 +22,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -38,6 +42,9 @@ import coil3.compose.AsyncImage
 import com.delulutopia.core.designsystem.component.LocalServerBaseUrl
 import com.delulutopia.core.designsystem.component.resolveMedia
 import com.delulutopia.core.designsystem.icon.WebIcons
+import com.delulutopia.core.designsystem.motion.Enter
+import com.delulutopia.core.designsystem.motion.bob
+import com.delulutopia.core.designsystem.motion.enter
 import com.delulutopia.core.designsystem.theme.DlTheme
 import com.delulutopia.core.network.model.StampMark
 
@@ -169,7 +176,9 @@ private fun Fold(flap: Color, modifier: Modifier) {
  * The incoming arc (UX S2): a dotted path, the travelled part in the seal colour, a plane on it.
  */
 @Composable
-fun Arc(progress: Float, who: Who, modifier: Modifier = Modifier) {
+fun Arc(target: Float, who: Who, modifier: Modifier = Modifier) {
+    // The arc and plane move every second; a one-second linear glide makes it continuous (web .dl-arc-done).
+    val progress by animateFloatAsState(target, tween(1000, easing = LinearEasing), label = "arc")
     val c = DlTheme.colors
     val seal = who.signature()
     val density = LocalDensity.current
@@ -190,7 +199,7 @@ fun Arc(progress: Float, who: Who, modifier: Modifier = Modifier) {
         )
         BoxWithConstraints(Modifier.fillMaxWidth()) {
             val x = with(density) { (constraints.maxWidth * progress.coerceIn(0f, 1f)).toDp() } - 7.dp
-            Icon(WebIcons.PlaneSmall, null, Modifier.offset(x = x).size(14.dp), tint = c.letterInk)
+            Icon(WebIcons.PlaneSmall, null, Modifier.offset(x = x).bob().size(14.dp), tint = c.letterInk)
         }
     }
 }
@@ -212,7 +221,7 @@ fun StampImage(stamp: StampMark, modifier: Modifier = Modifier, width: Dp = 28.d
 fun NewChip(modifier: Modifier = Modifier, text: String = "NEW") {
     val c = DlTheme.colors
     Box(
-        modifier.height(22.dp).background(c.newBadge, RoundedCornerShape(11.dp)).padding(horizontal = 9.dp),
+        modifier.enter(Enter.Pop, 160).height(22.dp).background(c.newBadge, RoundedCornerShape(11.dp)).padding(horizontal = 9.dp),
         contentAlignment = Alignment.Center,
     ) {
         Text(text, style = DlTheme.type.pill, color = c.onNewBadge)

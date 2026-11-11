@@ -49,6 +49,7 @@ class ParityScreensTest {
     private fun prepare(signedIn: Boolean) {
         assumeTrue("parity fixture not running", up())
         System.setProperty("dl.baseUrl", server)
+        System.setProperty("dl.motion", "off")
         mock(if (signedIn) "auth=1" else "auth=0")
         val context = ApplicationProvider.getApplicationContext<Context>()
         // Static frames: no falling leaves, no first-run notification ask.
@@ -56,7 +57,7 @@ class ParityScreensTest {
     }
 
     private fun ComposeUiTest.waitFor(text: String, substring: Boolean = true) {
-        runCatching { waitUntil(20_000) { onAllNodes(hasText(text, substring = substring)).fetchSemanticsNodes().isNotEmpty() } }
+        runCatching { waitUntil(timeoutMillis = 20_000) { onAllNodes(hasText(text, substring = substring)).fetchSemanticsNodes().isNotEmpty() } }
             .onFailure { println("parity: never saw \"$text\"") }
         waitForIdle()
     }

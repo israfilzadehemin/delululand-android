@@ -31,6 +31,8 @@ import coil3.compose.AsyncImage
 import com.delulutopia.core.designsystem.component.LocalServerBaseUrl
 import com.delulutopia.core.designsystem.component.resolveMedia
 import com.delulutopia.core.designsystem.icon.WebIcons
+import com.delulutopia.core.designsystem.motion.Enter
+import com.delulutopia.core.designsystem.motion.enter
 import com.delulutopia.core.designsystem.theme.DlTheme
 import com.delulutopia.core.network.model.Att
 
@@ -46,7 +48,7 @@ fun Lightbox(photos: List<Att>, index: Int, onIndex: (Int) -> Unit, onClose: () 
     LaunchedEffect(pager) { snapshotFlow { pager.currentPage }.collect { if (it != index) onIndex(it) } }
     LaunchedEffect(index) { if (pager.currentPage != index) pager.scrollToPage(index) }
     Dialog(onDismissRequest = onClose, properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false)) {
-        Column(Modifier.fillMaxSize().background(c.lightbox).statusBarsPadding().navigationBarsPadding()) {
+        Column(Modifier.enter(Enter.Fade, durationMs = 200).fillMaxSize().background(c.lightbox).statusBarsPadding().navigationBarsPadding()) {
             Row(Modifier.fillMaxWidth().padding(start = 16.dp, end = 4.dp, top = 4.dp), verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     title ?: "Photo ${pager.currentPage + 1} of ${photos.size}",
@@ -60,7 +62,7 @@ fun Lightbox(photos: List<Att>, index: Int, onIndex: (Int) -> Unit, onClose: () 
                 AsyncImage(
                     model = resolveMedia(base, photos[i].url),
                     contentDescription = title ?: "Photo ${i + 1} of ${photos.size}",
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier.enter(Enter.Zoom, durationMs = 300).fillMaxSize(),
                     contentScale = ContentScale.Fit,
                 )
             }

@@ -4,6 +4,7 @@ import android.view.HapticFeedbackConstants
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,6 +20,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -29,6 +31,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.delulutopia.core.designsystem.icon.DlIcons
+import com.delulutopia.core.designsystem.motion.dotFill
+import com.delulutopia.core.designsystem.motion.pressScale
 import com.delulutopia.core.designsystem.theme.Manrope
 
 const val PIN_LENGTH = 6
@@ -41,6 +45,7 @@ fun DlPinDots(count: Int, label: String, modifier: Modifier = Modifier, error: B
         repeat(PIN_LENGTH) { i ->
             Box(
                 Modifier
+                    .dotFill(i < count && !error)
                     .size(14.dp)
                     .border(1.5.dp, ink, CircleShape)
                     .background(if (i < count && !error) ink else Color.Transparent, CircleShape),
@@ -123,10 +128,13 @@ private fun PinKey(
     description: String? = null,
     content: @Composable () -> Unit,
 ) {
+    val press = remember { MutableInteractionSource() }
     Surface(
         onClick = onClick,
         enabled = enabled,
+        interactionSource = press,
         modifier = modifier
+            .pressScale(press, 0.9f)
             .height(56.dp)
             .then(if (description != null) Modifier.semantics { contentDescription = description } else Modifier),
         shape = RoundedCornerShape(10.dp),

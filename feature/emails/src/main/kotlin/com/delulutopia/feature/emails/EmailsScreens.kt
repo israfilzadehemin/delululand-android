@@ -17,7 +17,7 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -58,6 +58,11 @@ import com.delulutopia.core.designsystem.component.LocalServerBaseUrl
 import com.delulutopia.core.designsystem.component.resolveMedia
 import com.delulutopia.core.designsystem.icon.DlIcons
 import com.delulutopia.core.designsystem.icon.WebIcons
+import com.delulutopia.core.designsystem.motion.Enter
+import com.delulutopia.core.designsystem.motion.enter
+import com.delulutopia.core.designsystem.motion.float
+import com.delulutopia.core.designsystem.motion.rememberPlayed
+import com.delulutopia.core.designsystem.motion.rowEnter
 import com.delulutopia.core.designsystem.theme.DlTheme
 import com.delulutopia.core.network.model.Att
 import com.delulutopia.core.network.model.Citizen
@@ -106,7 +111,7 @@ fun EmailsList(rows: List<ThreadRow>?, hasMore: Boolean, draftEmpty: Boolean, ho
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
         ) {
-            Icon(WebIcons.Emails, null, Modifier.size(64.dp), tint = MaterialTheme.colorScheme.outlineVariant)
+            Icon(WebIcons.Emails, null, Modifier.enter(Enter.Rise, durationMs = 400).float(400).size(64.dp), tint = MaterialTheme.colorScheme.outlineVariant)
             Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text("No emails yet.", style = MaterialTheme.typography.titleMedium)
                 Text(
@@ -121,6 +126,7 @@ fun EmailsList(rows: List<ThreadRow>?, hasMore: Boolean, draftEmpty: Boolean, ho
         return
     }
     val list = rememberLazyListState()
+    val played = rememberPlayed()
     LaunchedEffect(list, hasMore) {
         snapshotFlow { list.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0 }.collect {
             if (hasMore &&
@@ -147,7 +153,9 @@ fun EmailsList(rows: List<ThreadRow>?, hasMore: Boolean, draftEmpty: Boolean, ho
                     )
                 }
             }
-            items(rows, key = { it.id }) { Box(Modifier.animateItem().leafSurface("/emails/${it.id}")) { ThreadCard(it, nowMs, home) } }
+            itemsIndexed(rows, key = { _, it -> it.id }) { i, it ->
+                Box(Modifier.animateItem().rowEnter(i, played, it.id).leafSurface("/emails/${it.id}")) { ThreadCard(it, nowMs, home) }
+            }
             item {
                 Row(Modifier.fillMaxWidth().padding(vertical = 12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally)) {
                     if (hasMore) {

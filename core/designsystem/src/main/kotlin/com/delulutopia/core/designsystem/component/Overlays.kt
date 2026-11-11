@@ -15,6 +15,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.delulutopia.core.designsystem.motion.Enter
+import com.delulutopia.core.designsystem.motion.enter
 import com.delulutopia.core.designsystem.theme.DlShape
 
 /**
@@ -39,8 +41,10 @@ fun DlBottomSheet(
         scrimColor = MaterialTheme.colorScheme.scrim,
         tonalElevation = BottomSheetDefaults.Elevation,
         dragHandle = { BottomSheetDefaults.DragHandle(color = MaterialTheme.colorScheme.outline) },
-        content = content,
-    )
+    ) {
+        // The sheet's contents rise a beat after the sheet (web .dl-sheet > *: 320 ms at 70 ms).
+        Column(Modifier.enter(Enter.Rise, 70, 320), content = content)
+    }
 }
 
 /**

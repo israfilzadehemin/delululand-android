@@ -73,6 +73,9 @@ import com.delulutopia.core.designsystem.component.DlTopAppBar
 import com.delulutopia.core.designsystem.component.LocalServerBaseUrl
 import com.delulutopia.core.designsystem.component.resolveMedia
 import com.delulutopia.core.designsystem.icon.WebIcons
+import com.delulutopia.core.designsystem.motion.Enter
+import com.delulutopia.core.designsystem.motion.Motion
+import com.delulutopia.core.designsystem.motion.enter
 import com.delulutopia.core.designsystem.theme.DlTheme
 import com.delulutopia.core.network.model.Citizen
 import com.delulutopia.core.network.model.Home
@@ -209,6 +212,8 @@ private fun LetterContent(letter: LetterFull, home: Home?, swiped: Boolean, vm: 
     val fresh = !sent && (letter.readAt == null || Time.now() - (Time.ms(letter.readAt) ?: 0) < 30_000)
     var reveal by rememberSaveable(letter.id) { mutableStateOf(fresh) }
     var opening by rememberSaveable(letter.id) { mutableStateOf(fresh && !swiped) }
+    // Thumbnails and players pop in after the sheet (web: 260 ms, or 1000 ms out of an envelope).
+    val mediaDelay = if (fresh && !swiped) 1000 else 260
     LaunchedEffect(opening) {
         if (opening) {
             delay(OPEN_MS.toLong())
@@ -238,8 +243,10 @@ private fun LetterContent(letter: LetterFull, home: Home?, swiped: Boolean, vm: 
             }
         }
         Box(Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
+            // The sheet settles in (dl-paper-in); out of a NEW letter's envelope it waits for the envelope.
             Paper(
-                Modifier.clickable(enabled = reveal) { reveal = false },
+                Modifier.enter(Enter.Paper, if (fresh && !swiped) 620 else 40, if (fresh && !swiped) 520 else 480, key = letter.id)
+                    .clickable(enabled = reveal) { reveal = false },
             ) {
                 Row(
                     Modifier
@@ -296,14 +303,22 @@ private fun LetterContent(letter: LetterFull, home: Home?, swiped: Boolean, vm: 
                                         AsyncImage(
                                             model = resolveMedia(base, p.thumbUrl ?: p.url),
                                             contentDescription = "Photo ${i + 1} of ${photos.size}, open full size",
-                                            modifier = Modifier.size(64.dp).clip(RoundedCornerShape(4.dp)).clickable { photo = i },
+                                            modifier = Modifier.enter(Enter.PopIn, mediaDelay, 300).size(64.dp).clip(RoundedCornerShape(4.dp)).clickable {
+                                                photo =
+                                                    i
+                                            },
                                             contentScale = ContentScale.Crop,
                                         )
                                     }
                                 }
                             }
                             audios.forEachIndexed { i, a ->
-                                AudioPlayer(resolveMedia(base, a.url), a.durationMs, label = if (audios.size > 1) "voice note ${i + 1}" else "voice note")
+                                AudioPlayer(
+                                    resolveMedia(base, a.url),
+                                    a.durationMs,
+                                    Modifier.enter(Enter.PopIn, mediaDelay, 300),
+                                    label = if (audios.size > 1) "voice note ${i + 1}" else "voice note",
+                                )
                             }
                         }
                     }
@@ -311,11 +326,18 @@ private fun LetterContent(letter: LetterFull, home: Home?, swiped: Boolean, vm: 
                 }
             }
             // The stamp takes the corner, as on an envelope (FS-ST6).
-            letter.stamp?.let { StampImage(it, Modifier.align(Alignment.TopEnd).padding(top = 14.dp, end = 14.dp).rotate(2f), width = 46.dp) }
+            letter.stamp?.let {
+                StampImage(
+                    it,
+                    Modifier.align(Alignment.TopEnd).padding(top = 14.dp, end = 14.dp)
+                        .enter(Enter.Stamp, if (fresh && !swiped) 1040 else 380, key = letter.id).rotate(2f),
+                    width = 46.dp,
+                )
+            }
             if (opening) EnvelopeOpening(whoOf(sender?.id).signature()) { opening = false }
         }
         if (!sent) {
-            Row(Modifier.fillMaxWidth().padding(16.dp), horizontalArrangement = Arrangement.Center) {
+            Row(Modifier.fillMaxWidth().padding(16.dp).enter(Enter.Rise, 300, 340), horizontalArrangement = Arrangement.Center) {
                 DlFilledButton("Reply", { nav.open(WriteRoute(replyTo = letter.id)) }, icon = WebIcons.Reply)
             }
         }
@@ -496,7 +518,7 @@ private fun Step(label: String, time: String, done: Boolean, double: Boolean) {
     val colour = if (done) DlTheme.colors.letterInk else MaterialTheme.colorScheme.onSurfaceVariant
     Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-            if (done) Icon(if (double) WebIcons.DoubleCheck else WebIcons.Check, null, Modifier.size(12.dp), tint = colour)
+            if (done) Icon(if (double) WebIcons.DoubleCheck else WebIcons.Check, null, Modifier.enter(Enter.Pop, durationMs = 380).size(12.dp), tint = colour)
             Text(
                 label,
                 style = MaterialTheme.typography.labelSmall.copy(fontSize = 11.sp, fontWeight = FontWeight.ExtraBold, letterSpacing = 0.07.em),
@@ -516,17 +538,24 @@ private fun EnvelopeOpening(seal: Color, onSkip: () -> Unit) {
     val c = DlTheme.colors
     val flap = remember { Animatable(0f) }
     val drop = remember { Animatable(0f) }
+    // Web timeline (OPEN_MS 1100): flap lifts 360–640 ms, the seal gives 380–620 ms, the envelope drops 600–1080 ms.
     LaunchedEffect(Unit) {
-        flap.animateTo(1f, tween(450))
-        drop.animateTo(1f, tween(550))
+        launch {
+            delay(360)
+            flap.animateTo(1f, tween(280, easing = Motion.EaseOut))
+        }
+        delay(600)
+        drop.animateTo(1f, tween(480, easing = Motion.EaseIn))
     }
     Box(
         Modifier
             .fillMaxWidth()
             .height(260.dp)
             .graphicsLayer {
-                translationY = drop.value * size.height * 1.2f
-                alpha = 1f - drop.value * 0.9f
+                translationY = drop.value * 70.dp.toPx()
+                scaleX = 1f - 0.04f * drop.value
+                scaleY = scaleX
+                alpha = 1f - drop.value
             }
             .clickable(onClick = onSkip)
             .background(c.letterEnvelope, RoundedCornerShape(4.dp)),
@@ -536,7 +565,8 @@ private fun EnvelopeOpening(seal: Color, onSkip: () -> Unit) {
                 .fillMaxWidth()
                 .height(150.dp)
                 .graphicsLayer {
-                    rotationX = flap.value * 170f
+                    rotationX = flap.value * 88f
+                    alpha = 1f - flap.value
                     transformOrigin = TransformOrigin(0.5f, 0f)
                     cameraDistance = 24f * density
                 }
@@ -554,6 +584,14 @@ private fun EnvelopeOpening(seal: Color, onSkip: () -> Unit) {
                     drawPath(p, c.letterEdge, style = Stroke(1.dp.toPx(), pathEffect = PathEffect.cornerPathEffect(2f)))
                 },
         )
-        WaxSeal(seal, Modifier.align(Alignment.TopCenter).offset(y = 118.dp).graphicsLayer { alpha = 1f - flap.value }, size = 30.dp)
+        WaxSeal(
+            seal,
+            Modifier.align(Alignment.TopCenter).offset(y = 118.dp).graphicsLayer {
+                alpha = 1f - flap.value
+                scaleX = 1f - 0.4f * flap.value
+                scaleY = scaleX
+            },
+            size = 30.dp,
+        )
     }
 }

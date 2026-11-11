@@ -16,7 +16,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
@@ -64,6 +64,11 @@ import com.delulutopia.core.designsystem.component.DlFilledButton
 import com.delulutopia.core.designsystem.component.DlOutlinedButton
 import com.delulutopia.core.designsystem.component.DlRemoteAvatar
 import com.delulutopia.core.designsystem.icon.WebIcons
+import com.delulutopia.core.designsystem.motion.Enter
+import com.delulutopia.core.designsystem.motion.enter
+import com.delulutopia.core.designsystem.motion.float
+import com.delulutopia.core.designsystem.motion.rememberPlayed
+import com.delulutopia.core.designsystem.motion.rowEnter
 import com.delulutopia.core.designsystem.theme.DlTheme
 import com.delulutopia.core.network.model.Citizen
 import com.delulutopia.core.network.model.Home
@@ -137,6 +142,7 @@ private fun HomeContent(home: Home, stale: Boolean, moods: List<Mood>, moodLimit
 
     val friend = home.friend
     val empty = home.from.isEmpty() && home.to.isEmpty()
+    val played = rememberPlayed()
 
     LazyColumn(
         Modifier.fillMaxSize(),
@@ -146,10 +152,11 @@ private fun HomeContent(home: Home, stale: Boolean, moods: List<Mood>, moodLimit
         if (stale) item(key = "offline") { OfflineBanner() }
         item(key = "board") { Box(Modifier.leafSurface("board")) { BoardTile(home, nowMs, vm) } }
         item(key = "moods") {
+            // The moods rise one after another (web .dl-moods: 0, 50, 100 ms); the hint fades in last.
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Box(Modifier.leafSurface("me")) { MyMood(home.me, nowMs) { moodOpen = true } }
-                if (friend != null) Box(Modifier.leafSurface("friend")) { FriendCard(friend, nowMs) { nav.open(FriendRoute) } }
-                NotificationHint()
+                Box(Modifier.enter(Enter.Rise, 0, 340).leafSurface("me")) { MyMood(home.me, nowMs) { moodOpen = true } }
+                if (friend != null) Box(Modifier.enter(Enter.Rise, 50, 340).leafSurface("friend")) { FriendCard(friend, nowMs) { nav.open(FriendRoute) } }
+                Box(Modifier.enter(Enter.Fade, 200, 300)) { NotificationHint() }
             }
         }
         if (friend == null) {
@@ -163,14 +170,16 @@ private fun HomeContent(home: Home, stale: Boolean, moods: List<Mood>, moodLimit
         } else if (friend != null) {
             if (home.from.isNotEmpty()) {
                 item(key = "from-h") { GroupHeading("From ${friend.nickname}", whoOf(friend.id)) }
-                items(home.from, key = {
-                    "from-${it.id}"
-                }) { row -> Box(Modifier.animateItem().leafSurface("/letters/${row.id}")) { FromRow(row, nowMs, whoOf(friend.id)) } }
+                itemsIndexed(home.from, key = { _, it -> "from-${it.id}" }) { i, row ->
+                    Box(Modifier.animateItem().rowEnter(i, played, "from-${row.id}", stateAt(row, nowMs)).leafSurface("/letters/${row.id}")) {
+                        FromRow(row, nowMs, whoOf(friend.id))
+                    }
+                }
             }
             if (home.to.isNotEmpty()) {
                 item(key = "to-h") { GroupHeading("To ${friend.nickname}", whoOf(home.me.id)) }
-                items(home.to, key = { "to-${it.id}" }) { row ->
-                    Box(Modifier.animateItem().leafSurface("/letters/${row.id}")) {
+                itemsIndexed(home.to, key = { _, it -> "to-${it.id}" }) { i, row ->
+                    Box(Modifier.animateItem().rowEnter(i, played, "to-${row.id}", stateAt(row, nowMs)).leafSurface("/letters/${row.id}")) {
                         ToRow(row, nowMs, whoOf(home.me.id)) {
                             cancelId =
                                 row.id
@@ -376,7 +385,7 @@ private fun ZoneClock(person: Citizen, nowMs: Long, modifier: Modifier) {
 private fun GroupHeading(text: String, who: Who) {
     Text(
         text.uppercase(),
-        Modifier.padding(top = 4.dp, start = 2.dp).semantics { heading() },
+        Modifier.enter(Enter.Fade, 60, 300).padding(top = 4.dp, start = 2.dp).semantics { heading() },
         style = MaterialTheme.typography.labelSmall.copy(fontSize = 11.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.08.em),
         color = if (who == Who.A) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
     )
@@ -515,7 +524,7 @@ private fun EmptyPost() {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        Canvas(Modifier.size(96.dp, 72.dp)) {
+        Canvas(Modifier.enter(Enter.Rise, durationMs = 400).float(400).size(96.dp, 72.dp)) {
             scale(size.width / 96f, size.height / 72f, pivot = Offset.Zero) {
                 drawRoundRect(letter, Offset(8f, 14f), Size(80f, 50f), CornerRadius(6f))
                 drawRoundRect(line, Offset(8f, 14f), Size(80f, 50f), CornerRadius(6f), style = Stroke(1.5f))
@@ -527,7 +536,12 @@ private fun EmptyPost() {
                 drawLine(hue, Offset(73f, 18f), Offset(83f, 18f), 1.5f)
             }
         }
-        Text("Nothing in the post yet", style = MaterialTheme.typography.bodyLarge.copy(fontSize = 15.sp), color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(
+            "Nothing in the post yet",
+            Modifier.enter(Enter.Rise, 80, 400),
+            style = MaterialTheme.typography.bodyLarge.copy(fontSize = 15.sp),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
     }
 }
 

@@ -37,6 +37,9 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.delulutopia.core.designsystem.motion.Enter
+import com.delulutopia.core.designsystem.motion.enter
+import com.delulutopia.core.designsystem.motion.tabPop
 
 /*
  * Navigation bar (Y-A1): Home · Letters · Discussions · Emails · You. Paper background with a 1 dp
@@ -87,13 +90,14 @@ fun RowScope.DlNavigationItem(
 ) {
     NavItemFrame(selected, onClick, label, modifier, newDescription.takeIf { hasNew }) { tint ->
         Box {
-            Icon(if (selected) activeIcon else icon, contentDescription = null, tint = tint, modifier = Modifier.size(24.dp))
+            Icon(if (selected) activeIcon else icon, contentDescription = null, tint = tint, modifier = Modifier.tabPop(selected).size(24.dp))
         }
         if (hasNew) {
             Box(
                 Modifier
                     .align(Alignment.TopEnd)
                     .offset(x = (-16).dp, y = 2.dp)
+                    .enter(Enter.Pop, durationMs = 360)
                     .size(8.dp)
                     .background(MaterialTheme.colorScheme.primary, CircleShape),
             )
@@ -122,6 +126,7 @@ fun RowScope.DlNavigationYouItem(
         Box {
             Box(
                 Modifier
+                    .tabPop(selected)
                     .size(24.dp + ringWidth * 2)
                     .border(ringWidth, ring, CircleShape)
                     .padding(ringWidth),
