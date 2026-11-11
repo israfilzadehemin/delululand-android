@@ -6,9 +6,11 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -16,11 +18,10 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.GridItemSpan
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.itemsIndexed
-import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -40,13 +41,18 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
@@ -124,40 +130,62 @@ fun LettersList(
         EmptyLetters(draft) { nav.open(WriteRoute()) }
         return
     }
-    val grid = rememberLazyGridState()
-    LaunchedEffect(grid, state.hasMore) {
-        snapshotFlow { grid.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0 }.collect { last ->
-            if (state.hasMore && last >= grid.layoutInfo.totalItemsCount - 3) onMore()
+    val listState = rememberLazyListState()
+    LaunchedEffect(listState, state.hasMore) {
+        snapshotFlow { listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0 }.collect { last ->
+            if (state.hasMore && last >= listState.layoutInfo.totalItemsCount - 3) onMore()
         }
     }
     val friendName = friend?.nickname ?: "Friend"
+    val senderOf = { row: LetterRow -> if (row.direction == "to") me?.id ?: 1 else friend?.id ?: 2 }
     Box(Modifier.fillMaxSize()) {
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(if (list) 1 else 2),
-            state = grid,
+        // Thumbnails sit in a two-column grid whose tiles share their row's height (web .dl-ltiles: CSS grid stretch).
+        LazyColumn(
+            state = listState,
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 0.dp, bottom = 96.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalArrangement = Arrangement.spacedBy(if (list) 10.dp else 14.dp),
+            verticalArrangement = Arrangement.spacedBy(if (list) 8.dp else 14.dp),
         ) {
-            item(span = { GridItemSpan(maxLineSpan) }) { LayoutBar(list, onLayout) }
-            itemsIndexed(rows, key = { _, r -> r.id }) { i, row ->
-                val sender = if (row.direction == "to") me?.id ?: 1 else friend?.id ?: 2
-                Box(Modifier.animateItem().leafSurface("/letters/${row.id}")) {
-                    if (list) ListRow(row, nowMs, friendName, whoOf(sender)) else Thumb(row, nowMs, friendName, whoOf(sender), i)
+            item(key = "bar") { LayoutBar(list, onLayout) }
+            if (list) {
+                items(rows, key = { it.id }) { row ->
+                    Box(Modifier.animateItem().leafSurface("/letters/${row.id}")) { ListRow(row, nowMs, friendName, whoOf(senderOf(row))) }
+                }
+            } else {
+                val pairs = rows.chunked(2)
+                itemsIndexed(pairs, key = { _, p -> p.first().id }) { i, pair ->
+                    Row(
+                        Modifier.animateItem().fillMaxWidth().height(IntrinsicSize.Max).padding(horizontal = 2.dp),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    ) {
+                        pair.forEachIndexed { j, row ->
+                            Box(Modifier.weight(1f).fillMaxHeight().leafSurface("/letters/${row.id}")) {
+                                Thumb(row, nowMs, friendName, whoOf(senderOf(row)), i * 2 + j)
+                            }
+                        }
+                        if (pair.size == 1) Spacer(Modifier.weight(1f))
+                    }
                 }
             }
-            item(span = { GridItemSpan(maxLineSpan) }) {
+            item(key = "end") {
                 Row(
-                    Modifier.fillMaxWidth().padding(vertical = 12.dp),
+                    Modifier.fillMaxWidth().heightIn(min = 40.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     if (state.hasMore) {
                         CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
-                        Text("Loading older letters…", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(
+                            "Loading older letters…",
+                            style = MaterialTheme.typography.bodySmall.copy(fontSize = 13.sp),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
                     } else {
-                        Text("That is everything", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(
+                            "That is everything",
+                            style = MaterialTheme.typography.bodySmall.copy(fontSize = 13.sp),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
                     }
                 }
             }
@@ -342,141 +370,186 @@ private fun Thumb(row: LetterRow, nowMs: Long, friendName: String, who: Who, ind
     val isNew = !to && state == LetterState.DELIVERED
     val shape = tileShapeOf(row, state)
     val media = if (incoming) null else row.media
-    val shapeR = RoundedCornerShape(4.dp)
+    // A sheet's bottom-right corner is folded away (web .dl-ltile-fold, 18 px).
+    val shapeR = if (shape == TileShape.Sheet) SheetShape else RoundedCornerShape(4.dp)
     val seal = who.signature()
     val hue = c.postmarkHue
-    Column(
-        Modifier
-            .fillMaxWidth()
-            .heightIn(min = 176.dp)
-            .rotate(TILT[index % 4])
-            .shadow(2.dp, shapeR)
-            .clip(shapeR)
-            .background(if (shape == TileShape.Envelope) c.letterEnvelope else c.letterSheet)
-            .then(
-                if (shape == TileShape.Sheet) {
-                    Modifier.drawBehind {
-                        drawLine(c.letterMargin, Offset(7.dp.toPx(), 0f), Offset(7.dp.toPx(), size.height), 1.dp.toPx())
-                    }
-                } else {
-                    Modifier
-                },
-            )
-            .clickable { if (incoming) notice("Arrives at ${Time.clock(row.arrivesAt, nowMs)}") else nav.open(LetterRoute(row.id)) }
-            .padding(start = 12.dp, end = 10.dp, top = if (shape == TileShape.Envelope) 0.dp else 10.dp, bottom = 12.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        if (shape == TileShape.Envelope) {
-            Box(Modifier.fillMaxWidth().height(78.dp)) {
-                Canvas(Modifier.padding(start = 0.dp).fillMaxWidth().height(62.dp).offset(x = (-12).dp)) {
-                    val w = size.width + 22.dp.toPx()
-                    val h = size.height
-                    val flap = Path().apply {
-                        moveTo(0f, 0f)
-                        lineTo(w, 0f)
-                        lineTo(w * 0.57f, h * 0.86f)
-                        quadraticTo(w * 0.5f, h * 0.99f, w * 0.43f, h * 0.86f)
-                        close()
-                    }
-                    drawPath(flap, c.letterFlap)
-                    drawPath(flap, c.letterEdge, style = Stroke(1.dp.toPx()))
-                }
-                WaxSeal(seal, Modifier.align(Alignment.TopCenter).offset(y = 44.dp), size = 26.dp)
-                row.stamp?.let {
-                    StampImage(it, Modifier.align(Alignment.TopEnd).offset(y = 8.dp).rotate(2f))
-                    Canvas(Modifier.align(Alignment.TopEnd).offset(x = (-22).dp, y = 18.dp).size(48.dp, 30.dp)) {
-                        scale(size.width / 48f, size.height / 30f, pivot = Offset.Zero) {
-                            val st = Stroke(1.4f)
-                            drawCircle(hue.copy(alpha = 0.7f), 12f, Offset(15f, 15f), style = st)
-                            drawCircle(hue.copy(alpha = 0.7f), 8.5f, Offset(15f, 15f), style = st)
-                            for (y in listOf(9f, 15f, 21f)) {
-                                drawPath(
-                                    Path().apply {
-                                        moveTo(27f, y)
-                                        quadraticTo(31.25f, y - 3f, 35.5f, y)
-                                        quadraticTo(39.75f, y + 3f, 44f, y)
-                                    },
-                                    hue.copy(alpha = 0.7f),
-                                    style = st,
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-            Direction(if (to) "→ To $friendName" else "← From $friendName", who)
-        } else {
-            Row(Modifier.fillMaxWidth().heightIn(min = 36.dp), horizontalArrangement = Arrangement.SpaceBetween) {
-                Box(Modifier.weight(1f).padding(top = 2.dp)) { Direction(if (to) "→ To $friendName" else "← From $friendName", who) }
-                row.stamp?.let { StampImage(it) }
-            }
-        }
-        val rule = c.letterRule
-        Row(
+    Box(Modifier.fillMaxWidth().fillMaxHeight().heightIn(min = 176.dp).rotate(TILT[index % 4])) {
+        Column(
             Modifier
                 .fillMaxWidth()
+                .fillMaxHeight()
+                .shadow(2.dp, shapeR)
+                .clip(shapeR)
+                .background(if (shape == TileShape.Envelope) c.letterEnvelope else c.letterSheet)
                 .then(
                     if (shape == TileShape.Sheet) {
-                        Modifier.heightIn(min = 76.dp).drawBehind {
-                            val step = 19.sp.toPx()
-                            var y = 18.sp.toPx()
-                            while (y < size.height) {
-                                drawLine(rule, Offset(0f, y), Offset(size.width, y), 1.dp.toPx())
-                                y += step
-                            }
+                        Modifier.drawBehind {
+                            drawLine(c.letterMargin, Offset(7.dp.toPx(), 0f), Offset(7.dp.toPx(), size.height), 1.dp.toPx())
                         }
                     } else {
                         Modifier
                     },
-                ),
+                )
+                .clickable { if (incoming) notice("Arrives at ${Time.clock(row.arrivesAt, nowMs)}") else nav.open(LetterRoute(row.id)) }
+                .padding(start = 12.dp, end = 10.dp, top = if (shape == TileShape.Envelope) 0.dp else 10.dp, bottom = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            if (!incoming && row.replyToId != null) ReplyMark()
-            Text(
-                if (incoming) "On its way" else firstLineOf(row),
-                style = if (incoming) {
-                    MaterialTheme.typography.bodyMedium.copy(fontSize = 14.sp, lineHeight = 19.sp)
-                } else {
-                    DlTheme.type.letterBody.copy(fontSize = 14.sp, lineHeight = 19.sp, fontWeight = if (isNew) FontWeight.SemiBold else FontWeight.Normal)
-                },
-                color = if (incoming) MaterialTheme.colorScheme.onSurfaceVariant else c.letterInk,
-                maxLines = if (shape == TileShape.Envelope) 2 else 4,
-                overflow = TextOverflow.Ellipsis,
-            )
-        }
-        if (media != null && (media.photos > 0 || media.audios > 0 || media.doodles > 0)) {
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
-                val quiet = MaterialTheme.colorScheme.onSurfaceVariant
-                val small = MaterialTheme.typography.labelSmall.copy(fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
-                if (media.photos > 0) {
-                    Row(
-                        Modifier.semantics {
-                            contentDescription = if (media.photos ==
-                                1
-                            ) {
-                                "1 photo"
-                            } else {
-                                "${media.photos} photos"
+            if (shape == TileShape.Envelope) {
+                Box(Modifier.fillMaxWidth().height(78.dp)) {
+                    Canvas(Modifier.padding(start = 0.dp).fillMaxWidth().height(62.dp).offset(x = (-12).dp)) {
+                        val w = size.width + 22.dp.toPx()
+                        val h = size.height
+                        val flap = Path().apply {
+                            moveTo(0f, 0f)
+                            lineTo(w, 0f)
+                            lineTo(w * 0.57f, h * 0.86f)
+                            quadraticTo(w * 0.5f, h * 0.99f, w * 0.43f, h * 0.86f)
+                            close()
+                        }
+                        drawPath(flap, c.letterFlap)
+                        drawPath(flap, c.letterEdge, style = Stroke(1.dp.toPx()))
+                    }
+                    WaxSeal(seal, Modifier.align(Alignment.TopCenter).offset(y = 44.dp), size = 26.dp)
+                    row.stamp?.let {
+                        StampImage(it, Modifier.align(Alignment.TopEnd).offset(y = 8.dp).rotate(2f))
+                        Canvas(Modifier.align(Alignment.TopEnd).offset(x = (-22).dp, y = 18.dp).size(48.dp, 30.dp)) {
+                            scale(size.width / 48f, size.height / 30f, pivot = Offset.Zero) {
+                                val st = Stroke(1.4f)
+                                drawCircle(hue.copy(alpha = 0.7f), 12f, Offset(15f, 15f), style = st)
+                                drawCircle(hue.copy(alpha = 0.7f), 8.5f, Offset(15f, 15f), style = st)
+                                for (y in listOf(9f, 15f, 21f)) {
+                                    drawPath(
+                                        Path().apply {
+                                            moveTo(27f, y)
+                                            quadraticTo(31.25f, y - 3f, 35.5f, y)
+                                            quadraticTo(39.75f, y + 3f, 44f, y)
+                                        },
+                                        hue.copy(alpha = 0.7f),
+                                        style = st,
+                                    )
+                                }
                             }
-                        },
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(3.dp),
-                    ) {
-                        Icon(WebIcons.PhotoSmall, null, Modifier.size(14.dp), tint = quiet)
-                        Text("${media.photos}", style = small, color = quiet)
+                        }
                     }
                 }
-                if (media.audios > 0) Icon(WebIcons.MicSmall, "Voice note", Modifier.size(14.dp), tint = quiet)
-                if (media.doodles > 0) Icon(WebIcons.DoodleSmall, "Doodle", Modifier.size(14.dp), tint = quiet)
+                Direction(if (to) "→ To $friendName" else "← From $friendName", who)
+            } else {
+                Row(Modifier.fillMaxWidth().heightIn(min = 36.dp), horizontalArrangement = Arrangement.SpaceBetween) {
+                    Box(Modifier.weight(1f).padding(top = 2.dp)) { Direction(if (to) "→ To $friendName" else "← From $friendName", who) }
+                    row.stamp?.let { StampImage(it) }
+                }
+            }
+            val rule = c.letterRule
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .then(
+                        if (shape == TileShape.Sheet) {
+                            Modifier.heightIn(min = 76.dp).drawBehind {
+                                val step = 19.sp.toPx()
+                                var y = 18.sp.toPx()
+                                while (y < size.height) {
+                                    drawLine(rule, Offset(0f, y), Offset(size.width, y), 1.dp.toPx())
+                                    y += step
+                                }
+                            }
+                        } else {
+                            Modifier
+                        },
+                    ),
+            ) {
+                if (!incoming && row.replyToId != null) ReplyMark()
+                Text(
+                    if (incoming) "On its way" else firstLineOf(row),
+                    style = if (incoming) {
+                        MaterialTheme.typography.bodyMedium.copy(fontSize = 14.sp, lineHeight = 19.sp)
+                    } else {
+                        DlTheme.type.letterBody.copy(fontSize = 14.sp, lineHeight = 19.sp, fontWeight = if (isNew) FontWeight.SemiBold else FontWeight.Normal)
+                    },
+                    color = if (incoming) MaterialTheme.colorScheme.onSurfaceVariant else c.letterInk,
+                    maxLines = if (shape == TileShape.Envelope) 2 else 4,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+            if (media != null && (media.photos > 0 || media.audios > 0 || media.doodles > 0)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
+                    val quiet = MaterialTheme.colorScheme.onSurfaceVariant
+                    val small = MaterialTheme.typography.labelSmall.copy(fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+                    if (media.photos > 0) {
+                        Row(
+                            Modifier.semantics {
+                                contentDescription = if (media.photos ==
+                                    1
+                                ) {
+                                    "1 photo"
+                                } else {
+                                    "${media.photos} photos"
+                                }
+                            },
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(3.dp),
+                        ) {
+                            Icon(WebIcons.PhotoSmall, null, Modifier.size(14.dp), tint = quiet)
+                            Text("${media.photos}", style = small, color = quiet)
+                        }
+                    }
+                    if (media.audios > 0) Icon(WebIcons.MicSmall, "Voice note", Modifier.size(14.dp), tint = quiet)
+                    if (media.doodles > 0) Icon(WebIcons.DoodleSmall, "Doodle", Modifier.size(14.dp), tint = quiet)
+                }
+            }
+            Spacer(Modifier.weight(1f))
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(
+                    "Sent ${Time.clock(row.sentAt, nowMs)}",
+                    style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                StatusChip(row, state, nowMs)
             }
         }
-        Spacer(Modifier.weight(1f, fill = false))
-        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text(
-                "Sent ${Time.clock(row.sentAt, nowMs)}",
-                style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp),
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            StatusChip(row, state, nowMs)
+        if (shape == TileShape.Sheet) TileFold(c.letterFlap, Modifier.align(Alignment.BottomEnd))
+    }
+}
+
+private val FOLD = 18.dp
+
+/** The sheet tile: 3 dp corners, the bottom-right one folded away. */
+private val SheetShape = object : Shape {
+    override fun createOutline(size: Size, layoutDirection: LayoutDirection, density: Density): Outline {
+        val f = with(density) { FOLD.toPx() }
+        val r = with(density) { 3.dp.toPx() }
+        val w = size.width
+        val h = size.height
+        return Outline.Generic(
+            Path().apply {
+                moveTo(r, 0f)
+                lineTo(w - r, 0f)
+                quadraticTo(w, 0f, w, r)
+                lineTo(w, h - f)
+                lineTo(w - f, h)
+                lineTo(r, h)
+                quadraticTo(0f, h, 0f, h - r)
+                lineTo(0f, r)
+                quadraticTo(0f, 0f, r, 0f)
+                close()
+            },
+        )
+    }
+}
+
+/** The folded corner's back: a triangle in the flap colour with a soft edge shadow. */
+@Composable
+private fun TileFold(flap: Color, modifier: Modifier) {
+    Canvas(modifier.size(FOLD)) {
+        val s = size.width
+        val back = Path().apply {
+            moveTo(0f, 0f)
+            lineTo(s, 0f)
+            lineTo(0f, s)
+            close()
         }
+        drawPath(back, Color(0x1F202B45), style = Stroke(2.dp.toPx()))
+        drawPath(back, flap)
     }
 }

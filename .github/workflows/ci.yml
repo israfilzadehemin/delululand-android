@@ -56,6 +56,9 @@ jobs:
       - name: Code style
         run: ./gradlew ktlintCheck --continue
 
+      - name: Parity fixture API
+        run: nohup node tools/parity/server.mjs > parity-server.log 2>&1 &
+
       - name: Unit and screenshot tests
         run: ./gradlew testProdDebugUnitTest :core:designsystem:testDebugUnitTest :core:network:testDebugUnitTest :feature:start:testDebugUnitTest :core:ui:testDebugUnitTest :feature:home:testDebugUnitTest :feature:letters:testDebugUnitTest :feature:emails:testDebugUnitTest :feature:you:testDebugUnitTest -Proborazzi.test.record=true --continue
 

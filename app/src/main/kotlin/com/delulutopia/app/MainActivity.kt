@@ -68,7 +68,7 @@ class MainActivity : FragmentActivity() {
             }
 
             DelulutopiaTheme(darkTheme = dark) {
-                CompositionLocalProvider(LocalServerBaseUrl provides BuildConfig.BASE_URL) {
+                CompositionLocalProvider(LocalServerBaseUrl provides serverUrl()) {
                     Surface(color = MaterialTheme.colorScheme.surface) {
                         Column {
                             viewModel.testBanner?.let { TestBanner(it) }
