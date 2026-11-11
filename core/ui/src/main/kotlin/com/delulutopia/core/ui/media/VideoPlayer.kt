@@ -116,7 +116,9 @@ fun VideoPlayer(url: String, posterUrl: String?, durationMs: Long?, width: Int?,
             if (durationMs != null && durationMs > 0) {
                 Text(
                     mmss(durationMs),
-                    Modifier.align(Alignment.BottomEnd).padding(8.dp).background(DlTheme.colors.lightbox.copy(alpha = 0.7f), RoundedCornerShape(4.dp)).padding(horizontal = 6.dp),
+                    Modifier.align(
+                        Alignment.BottomEnd,
+                    ).padding(8.dp).background(DlTheme.colors.lightbox.copy(alpha = 0.7f), RoundedCornerShape(4.dp)).padding(horizontal = 6.dp),
                     style = MaterialTheme.typography.labelSmall,
                     color = DlTheme.colors.onLightbox,
                 )

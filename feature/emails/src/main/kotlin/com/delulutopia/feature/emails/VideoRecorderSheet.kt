@@ -127,7 +127,9 @@ internal fun VideoRecorderSheet(onUse: (Uri, Long) -> Unit, onPick: () -> Unit, 
                 }
                 else -> {
                     Box(Modifier.fillMaxWidth().aspectRatio(3f / 4f).clip(RoundedCornerShape(12.dp))) {
-                        AndroidView(factory = { PreviewView(it).apply { this.controller = controller } }, modifier = Modifier.fillMaxWidth().aspectRatio(3f / 4f))
+                        AndroidView(factory = {
+                            PreviewView(it).apply { this.controller = controller }
+                        }, modifier = Modifier.fillMaxWidth().aspectRatio(3f / 4f))
                     }
                     Text(
                         "${mmss(elapsed)} / ${mmss(MAX_VIDEO_MS)}",
@@ -138,7 +140,14 @@ internal fun VideoRecorderSheet(onUse: (Uri, Long) -> Unit, onPick: () -> Unit, 
                         DlOutlinedButton(
                             "Flip",
                             {
-                                controller.cameraSelector = if (controller.cameraSelector == CameraSelector.DEFAULT_FRONT_CAMERA) CameraSelector.DEFAULT_BACK_CAMERA else CameraSelector.DEFAULT_FRONT_CAMERA
+                                controller.cameraSelector =
+                                    if (controller.cameraSelector ==
+                                        CameraSelector.DEFAULT_FRONT_CAMERA
+                                    ) {
+                                        CameraSelector.DEFAULT_BACK_CAMERA
+                                    } else {
+                                        CameraSelector.DEFAULT_FRONT_CAMERA
+                                    }
                             },
                             Modifier.weight(1f),
                             enabled = recording == null,

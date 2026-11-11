@@ -94,7 +94,8 @@ internal fun ComposerView(composer: EmailComposer, credits: EmailCredits?, onSen
     val canSend = (!composer.withSubject || composer.subject.isNotBlank()) && something && !atts.uploading && !voice.recording && !outOfCredits && !sending
     val saved = when {
         saveState.status == DraftSaver.Status.Error -> "Couldn't save your draft"
-        saveState.savedAt != null && saveState.status != DraftSaver.Status.Conflict && (composer.text.isNotBlank() || composer.subject.isNotBlank() || atts.items.isNotEmpty()) ->
+        saveState.savedAt != null && saveState.status != DraftSaver.Status.Conflict &&
+            (composer.text.isNotBlank() || composer.subject.isNotBlank() || atts.items.isNotEmpty()) ->
             "Draft saved ${Time.time(saveState.savedAt)}"
         else -> ""
     }
@@ -110,14 +111,31 @@ internal fun ComposerView(composer: EmailComposer, credits: EmailCredits?, onSen
         if (composer.withSubject) {
             Input(composer.subject, composer::changeSubject, "Subject", field.copy(fontWeight = FontWeight.SemiBold), single = true)
         }
-        Input(composer.text, composer::changeText, if (composer.withSubject) "Write an email" else "Write a reply", field, single = false, minHeight = if (composer.withSubject) 180.dp else 72.dp)
+        Input(
+            composer.text,
+            composer::changeText,
+            if (composer.withSubject) "Write an email" else "Write a reply",
+            field,
+            single = false,
+            minHeight = if (composer.withSubject) 180.dp else 72.dp,
+        )
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Text(
                 "$length / $EMAIL_MAX",
                 style = MaterialTheme.typography.labelSmall.copy(fontFeatureSettings = "tnum"),
                 color = if (length >= EMAIL_MAX) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
             )
-            Text(saved, style = MaterialTheme.typography.labelSmall, color = if (saveState.status == DraftSaver.Status.Error) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(
+                saved,
+                style = MaterialTheme.typography.labelSmall,
+                color = if (saveState.status ==
+                    DraftSaver.Status.Error
+                ) {
+                    MaterialTheme.colorScheme.error
+                } else {
+                    MaterialTheme.colorScheme.onSurfaceVariant
+                },
+            )
         }
         if (composer.trimmed) Text(TRIMMED, style = MaterialTheme.typography.bodySmall)
         AttachmentStrip(

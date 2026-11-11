@@ -40,7 +40,11 @@ class EmailsViewModel @Inject constructor(private val backend: Backend, home: Ho
             val fresh = head.orEmpty()
             val seen = fresh.map { it.id }.toSet()
             val oldest = fresh.lastOrNull()
-            return fresh + older.filter { it.id !in seen }.filter { r -> oldest == null || r.lastEmailAt < oldest.lastEmailAt || (r.lastEmailAt == oldest.lastEmailAt && r.id < oldest.id) }
+            return fresh +
+                older.filter { it.id !in seen }.filter { r ->
+                    oldest == null || r.lastEmailAt < oldest.lastEmailAt ||
+                        (r.lastEmailAt == oldest.lastEmailAt && r.id < oldest.id)
+                }
         }
 
     init {
