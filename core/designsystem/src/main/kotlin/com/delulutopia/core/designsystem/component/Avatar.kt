@@ -31,6 +31,7 @@ fun DlAvatar(
     size: Dp = 40.dp,
     ring: Color? = null,
     ringWidth: Dp = 2.dp,
+    initialsColor: Color = InitialsInk,
     content: (@Composable () -> Unit)? = null,
 ) {
     Box(
@@ -45,7 +46,7 @@ fun DlAvatar(
         } else {
             Text(
                 text = initials,
-                color = InitialsInk,
+                color = initialsColor,
                 fontFamily = Manrope,
                 fontWeight = FontWeight.ExtraBold,
                 fontSize = (size.value * 0.375f).sp,

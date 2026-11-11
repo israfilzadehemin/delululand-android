@@ -83,6 +83,7 @@ internal fun UserCardRow(user: UserCard, index: Int, onClick: () -> Unit) {
             name = user.nickname,
             initials = user.nickname.take(1).uppercase(),
             signature = signatureTintOf(index),
+            initialsColor = MaterialTheme.colorScheme.onSurface,
             ring = signatureOf(index),
             size = 88.dp,
         )

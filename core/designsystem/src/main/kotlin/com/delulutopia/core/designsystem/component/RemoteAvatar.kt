@@ -30,6 +30,7 @@ fun DlRemoteAvatar(
     ring: Color? = null,
     ringWidth: Dp = 2.dp,
     initials: String = initialsOf(name),
+    initialsColor: Color = Color(0xFF202B45),
 ) {
     val base = LocalServerBaseUrl.current
     DlAvatar(
@@ -39,6 +40,7 @@ fun DlRemoteAvatar(
         size = size,
         ring = ring,
         ringWidth = ringWidth,
+        initialsColor = initialsColor,
         content = if (avatarUrl.isNullOrBlank()) {
             null
         } else {
@@ -47,8 +49,8 @@ fun DlRemoteAvatar(
                     model = resolveMedia(base, avatarUrl),
                     contentDescription = null,
                     contentScale = ContentScale.Crop,
-                    loading = { DlAvatar(initials, signature, size = size) },
-                    error = { DlAvatar(initials, signature, size = size) },
+                    loading = { DlAvatar(initials, signature, size = size, initialsColor = initialsColor) },
+                    error = { DlAvatar(initials, signature, size = size, initialsColor = initialsColor) },
                 )
             }
         },

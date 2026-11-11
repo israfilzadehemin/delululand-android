@@ -3,6 +3,7 @@ package com.delulutopia.feature.start
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -38,6 +39,7 @@ fun PinScreen(state: PinViewModel.UiState, onBack: () -> Unit, onDigits: (String
                         avatarUrl = user.avatarUrl,
                         name = user.nickname,
                         initials = user.nickname.take(1).uppercase(),
+                        initialsColor = MaterialTheme.colorScheme.onSurface,
                         signature = signatureTintOf(state.index),
                         ring = signatureOf(state.index),
                         ringWidth = 3.dp,
