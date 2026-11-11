@@ -62,7 +62,7 @@ fun UniverseScreen(vm: UniverseViewModel = hiltViewModel()) {
         if (code != null && v != null) {
             DlTopAppBar(title = "New key", onBack = { vm.revealed = null })
             Column(Modifier.verticalScroll(rememberScrollState()).padding(24.dp)) {
-                KeyReveal(v.name, code, { vm.revealed = null }, continueLabel = "Done")
+                KeyReveal(v.name, code, continueLabel = "Done") { vm.revealed = null }
             }
             return@Column
         }

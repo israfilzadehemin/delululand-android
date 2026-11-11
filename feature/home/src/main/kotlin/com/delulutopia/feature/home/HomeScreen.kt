@@ -86,6 +86,7 @@ import com.delulutopia.core.ui.WriteRoute
 import com.delulutopia.core.ui.ageWords
 import com.delulutopia.core.ui.firstLineOf
 import com.delulutopia.core.ui.initials
+import com.delulutopia.core.ui.leaves.leafSurface
 import com.delulutopia.core.ui.moodText
 import com.delulutopia.core.ui.notify.NotificationHint
 import com.delulutopia.core.ui.rememberNow
@@ -143,28 +144,37 @@ private fun HomeContent(home: Home, stale: Boolean, moods: List<Mood>, moodLimit
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         if (stale) item(key = "offline") { OfflineBanner() }
-        item(key = "board") { BoardTile(home, nowMs, vm) }
+        item(key = "board") { Box(Modifier.leafSurface("board")) { BoardTile(home, nowMs, vm) } }
         item(key = "moods") {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                MyMood(home.me, nowMs) { moodOpen = true }
-                if (friend != null) FriendCard(friend, nowMs) { nav.open(FriendRoute) }
+                Box(Modifier.leafSurface("me")) { MyMood(home.me, nowMs) { moodOpen = true } }
+                if (friend != null) Box(Modifier.leafSurface("friend")) { FriendCard(friend, nowMs) { nav.open(FriendRoute) } }
                 NotificationHint()
             }
         }
         if (friend == null) {
-            item(key = "waiting") { WaitingCard(home.universe.name, home.universe.isCreator) { nav.open(UniverseRoute) } }
+            item(key = "waiting") {
+                Box(Modifier.leafSurface("waiting")) { WaitingCard(home.universe.name, home.universe.isCreator) { nav.open(UniverseRoute) } }
+            }
         }
-        item(key = "clocks") { HomeClocks(home.me, friend, nowMs) }
+        item(key = "clocks") { Box(Modifier.leafSurface("clocks")) { HomeClocks(home.me, friend, nowMs) } }
         if (empty) {
             item(key = "empty") { EmptyPost() }
         } else if (friend != null) {
             if (home.from.isNotEmpty()) {
                 item(key = "from-h") { GroupHeading("From ${friend.nickname}", whoOf(friend.id)) }
-                items(home.from, key = { "from-${it.id}" }) { row -> FromRow(row, nowMs, whoOf(friend.id)) }
+                items(home.from, key = { "from-${it.id}" }) { row -> Box(Modifier.leafSurface("/letters/${row.id}")) { FromRow(row, nowMs, whoOf(friend.id)) } }
             }
             if (home.to.isNotEmpty()) {
                 item(key = "to-h") { GroupHeading("To ${friend.nickname}", whoOf(home.me.id)) }
-                items(home.to, key = { "to-${it.id}" }) { row -> ToRow(row, nowMs, whoOf(home.me.id)) { cancelId = row.id } }
+                items(home.to, key = { "to-${it.id}" }) { row ->
+                    Box(Modifier.leafSurface("/letters/${row.id}")) {
+                        ToRow(row, nowMs, whoOf(home.me.id)) {
+                            cancelId =
+                                row.id
+                        }
+                    }
+                }
             }
         }
     }

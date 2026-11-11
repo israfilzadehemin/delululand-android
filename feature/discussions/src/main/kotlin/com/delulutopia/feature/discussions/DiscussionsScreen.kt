@@ -56,6 +56,8 @@ import com.delulutopia.core.ui.LocalAppNav
 import com.delulutopia.core.ui.LocalNotice
 import com.delulutopia.core.ui.NewChip
 import com.delulutopia.core.ui.Note
+import com.delulutopia.core.ui.leaves.SurfaceKind
+import com.delulutopia.core.ui.leaves.leafSurface
 import com.delulutopia.core.ui.noteColorOf
 import com.delulutopia.core.ui.noteInk
 import com.delulutopia.core.ui.noteInkQuiet
@@ -165,14 +167,16 @@ fun DiscussionsList(
             item { bar() }
             items(rows, key = { it.id }) { r ->
                 val index = rows.indexOf(r)
-                NoteRow(
-                    r,
-                    nowMs,
-                    authorName = if (r.mine) me?.nickname ?: "Me" else friend?.nickname ?: "Friend",
-                    friendName = friend?.nickname ?: "Friend",
-                    tilt = if (index % 2 == 0) -0.6f else 0.5f,
-                    archived = archived,
-                )
+                Box(Modifier.leafSurface("/discussions/${r.id}")) {
+                    NoteRow(
+                        r,
+                        nowMs,
+                        authorName = if (r.mine) me?.nickname ?: "Me" else friend?.nickname ?: "Friend",
+                        friendName = friend?.nickname ?: "Friend",
+                        tilt = if (index % 2 == 0) -0.6f else 0.5f,
+                        archived = archived,
+                    )
+                }
             }
             item {
                 Row(
@@ -192,7 +196,7 @@ fun DiscussionsList(
         if (!archived) {
             DlFab(DlIcons.NotePlus, startLabel, {
                 nav.open(ComposeDiscussionRoute)
-            }, Modifier.align(Alignment.BottomEnd).padding(16.dp), hasDraft = !draftEmpty)
+            }, Modifier.align(Alignment.BottomEnd).padding(16.dp).leafSurface(kind = SurfaceKind.Round), hasDraft = !draftEmpty)
         }
     }
 }

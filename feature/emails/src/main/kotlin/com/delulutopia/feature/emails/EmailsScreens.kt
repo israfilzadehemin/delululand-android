@@ -67,6 +67,8 @@ import com.delulutopia.core.ui.LocalAppNav
 import com.delulutopia.core.ui.LocalBrand
 import com.delulutopia.core.ui.NewEmailRoute
 import com.delulutopia.core.ui.ThreadRoute
+import com.delulutopia.core.ui.leaves.SurfaceKind
+import com.delulutopia.core.ui.leaves.leafSurface
 import com.delulutopia.core.ui.media.AudioPlayer
 import com.delulutopia.core.ui.media.VideoPlayer
 import com.delulutopia.core.ui.reactions.ReactionSummary
@@ -143,7 +145,7 @@ fun EmailsList(rows: List<ThreadRow>?, hasMore: Boolean, draftEmpty: Boolean, ho
                     )
                 }
             }
-            items(rows, key = { it.id }) { ThreadCard(it, nowMs, home) }
+            items(rows, key = { it.id }) { Box(Modifier.leafSurface("/emails/${it.id}")) { ThreadCard(it, nowMs, home) } }
             item {
                 Row(Modifier.fillMaxWidth().padding(vertical = 12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally)) {
                     if (hasMore) {
@@ -155,7 +157,9 @@ fun EmailsList(rows: List<ThreadRow>?, hasMore: Boolean, draftEmpty: Boolean, ho
                 }
             }
         }
-        DlFab(DlIcons.EnvelopePlus, newLabel, { nav.open(NewEmailRoute) }, Modifier.align(Alignment.BottomEnd).padding(16.dp), hasDraft = !draftEmpty)
+        DlFab(DlIcons.EnvelopePlus, newLabel, {
+            nav.open(NewEmailRoute)
+        }, Modifier.align(Alignment.BottomEnd).padding(16.dp).leafSurface(kind = SurfaceKind.Round), hasDraft = !draftEmpty)
     }
 }
 

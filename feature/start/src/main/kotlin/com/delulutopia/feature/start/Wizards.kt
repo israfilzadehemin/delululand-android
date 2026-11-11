@@ -154,7 +154,7 @@ fun CreateUniverseRoute(onLeave: () -> Unit, viewModel: CreateUniverseViewModel 
                 onDigits = viewModel::onPinDigits,
                 onComplete = viewModel::onPinComplete,
             )
-            5 -> s.created?.let { c -> FormColumn { KeyReveal(c.name, c.code, viewModel::finish) } }
+            5 -> s.created?.let { c -> FormColumn { KeyReveal(c.name, c.code, onContinue = viewModel::finish) } }
         }
     }
 }

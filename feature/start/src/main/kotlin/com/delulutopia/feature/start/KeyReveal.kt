@@ -40,7 +40,7 @@ import kotlinx.coroutines.launch
  * either, or after three seconds, so nobody leaves without at least seeing it.
  */
 @Composable
-fun KeyReveal(name: String, code: String, onContinue: () -> Unit, continueLabel: String? = null) {
+fun KeyReveal(name: String, code: String, continueLabel: String? = null, onContinue: () -> Unit) {
     val context = LocalContext.current
     val clipboard = LocalClipboard.current
     val scope = rememberCoroutineScope()

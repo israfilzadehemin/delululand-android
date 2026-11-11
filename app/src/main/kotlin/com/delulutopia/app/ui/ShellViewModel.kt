@@ -2,6 +2,7 @@ package com.delulutopia.app.ui
 
 import androidx.lifecycle.ViewModel
 import com.delulutopia.core.data.Backend
+import com.delulutopia.core.data.DevicePrefs
 import com.delulutopia.core.data.HomeRepository
 import com.delulutopia.core.data.LettersRepository
 import com.delulutopia.core.network.LiveUpdates
@@ -20,9 +21,13 @@ class ShellViewModel @Inject constructor(
     private val home: HomeRepository,
     private val live: LiveUpdates,
     private val letters: LettersRepository,
+    prefs: DevicePrefs,
     backend: Backend,
 ) : ViewModel() {
     val state: StateFlow<HomeRepository.State> = home.state
+
+    /** Settings › Appearance › Seasonal effects (L6). */
+    val leaves: StateFlow<Boolean> = prefs.leaves
 
     /** Reactions on discussions, comments and emails (doc "Delululand — Reactions"). */
     val reactions = ReactionsApi { target, id, emoji, add ->

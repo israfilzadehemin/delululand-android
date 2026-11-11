@@ -73,6 +73,8 @@ import com.delulutopia.core.ui.WaxSeal
 import com.delulutopia.core.ui.Who
 import com.delulutopia.core.ui.WriteRoute
 import com.delulutopia.core.ui.firstLineOf
+import com.delulutopia.core.ui.leaves.SurfaceKind
+import com.delulutopia.core.ui.leaves.leafSurface
 import com.delulutopia.core.ui.rememberNow
 import com.delulutopia.core.ui.signature
 import com.delulutopia.core.ui.tileShapeOf
@@ -141,7 +143,9 @@ fun LettersList(
             item(span = { GridItemSpan(maxLineSpan) }) { LayoutBar(list, onLayout) }
             itemsIndexed(rows, key = { _, r -> r.id }) { i, row ->
                 val sender = if (row.direction == "to") me?.id ?: 1 else friend?.id ?: 2
-                if (list) ListRow(row, nowMs, friendName, whoOf(sender)) else Thumb(row, nowMs, friendName, whoOf(sender), i)
+                Box(Modifier.leafSurface("/letters/${row.id}")) {
+                    if (list) ListRow(row, nowMs, friendName, whoOf(sender)) else Thumb(row, nowMs, friendName, whoOf(sender), i)
+                }
             }
             item(span = { GridItemSpan(maxLineSpan) }) {
                 Row(
@@ -162,7 +166,7 @@ fun LettersList(
             DlIcons.Pen,
             if (draft) "Continue your draft" else "Write a letter",
             { nav.open(WriteRoute()) },
-            Modifier.align(Alignment.BottomEnd).padding(16.dp),
+            Modifier.align(Alignment.BottomEnd).padding(16.dp).leafSurface(kind = SurfaceKind.Round),
             hasDraft = draft,
         )
     }

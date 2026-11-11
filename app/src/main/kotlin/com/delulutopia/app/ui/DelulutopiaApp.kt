@@ -61,6 +61,12 @@ import com.delulutopia.core.ui.LocalNoticeAction
 import com.delulutopia.core.ui.YouRoute
 import com.delulutopia.core.ui.fingerprint.Fingerprint
 import com.delulutopia.core.ui.initials
+import com.delulutopia.core.ui.leaves.LeafLayer
+import com.delulutopia.core.ui.leaves.LeafSurfaces
+import com.delulutopia.core.ui.leaves.LocalLeafSurfaces
+import com.delulutopia.core.ui.leaves.SurfaceKind
+import com.delulutopia.core.ui.leaves.leafCeiling
+import com.delulutopia.core.ui.leaves.leafSurface
 import com.delulutopia.core.ui.notify.NotifyPermission
 import com.delulutopia.core.ui.notify.rememberNotifyAccess
 import com.delulutopia.core.ui.reactions.LocalReactionsApi
@@ -95,13 +101,14 @@ fun SignedInApp(
     shell: ShellViewModel = hiltViewModel(),
 ) {
     val state by shell.state.collectAsStateWithLifecycle()
+    val leaves by shell.leaves.collectAsStateWithLifecycle()
     val currentTheme by rememberUpdatedState(themeMode)
     LifecycleStartEffect(Unit) {
         shell.foreground()
         onStopOrDispose { shell.background() }
     }
     CompositionLocalProvider(LocalReactionsApi provides shell.reactions) {
-        DelulutopiaApp(session, state, overlay = { AfterPin() }) {
+        DelulutopiaApp(session, state, leaves = leaves, overlay = { AfterPin() }) {
             composable<HomeRoute> { HomeScreen() }
             lettersGraph()
             discussionsGraph()
@@ -159,6 +166,7 @@ fun DelulutopiaApp(
     session: HomeSession,
     state: HomeRepository.State,
     navController: NavHostController = rememberNavController(),
+    leaves: Boolean = false,
     overlay: @Composable () -> Unit = {},
     graph: NavGraphBuilder.(NavHostController) -> Unit,
 ) {
@@ -201,6 +209,7 @@ fun DelulutopiaApp(
     val brand = home?.universe?.name ?: session.universe.name
     val firstCitizen = home?.let { h -> listOfNotNull(h.me.id, h.friend?.id).min() } ?: listOfNotNull(session.me.id, session.friend?.id).min()
     val notify = rememberNotifyAccess()
+    val leafSurfaces = remember { LeafSurfaces() }
 
     CompositionLocalProvider(
         LocalAppNav provides nav,
@@ -208,18 +217,19 @@ fun DelulutopiaApp(
         LocalNoticeAction provides noticeAction,
         LocalBrand provides brand,
         LocalFirstCitizen provides firstCitizen,
+        LocalLeafSurfaces provides leafSurfaces,
     ) {
         Scaffold(
             topBar = {
                 when {
                     // Home's title is the universe's name (Universe §4).
-                    top == TopDestination.Home -> DlTopAppBar(title = brand)
-                    top != null -> DlTopAppBar(title = stringResource(top.label))
+                    top == TopDestination.Home -> DlTopAppBar(title = brand, modifier = Modifier.leafCeiling())
+                    top != null -> DlTopAppBar(title = stringResource(top.label), modifier = Modifier.leafCeiling())
                 }
             },
             bottomBar = {
                 if (top != null) {
-                    DlNavigationBar {
+                    DlNavigationBar(Modifier.leafSurface(kind = SurfaceKind.Ground)) {
                         TopDestination.entries.forEach { item ->
                             val selected = item == top
                             val open = { navController.navigateToTop(item.route) }
@@ -270,6 +280,8 @@ fun DelulutopiaApp(
                 graph(navController)
             }
         }
+        // L1: Home and the three lists; the You tab and every opened item have none.
+        LeafLayer(leafSurfaces, enabled = leaves, active = top != null && top != TopDestination.You)
         overlay()
     }
 }
