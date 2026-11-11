@@ -337,9 +337,14 @@ private fun LetterContent(letter: LetterFull, home: Home?, swiped: Boolean, vm: 
             if (opening) EnvelopeOpening(whoOf(sender?.id).signature()) { opening = false }
         }
         if (!sent) {
-            Row(Modifier.fillMaxWidth().padding(16.dp).enter(Enter.Rise, 300, 340), horizontalArrangement = Arrangement.Center) {
-                DlFilledButton("Reply", { nav.open(WriteRoute(replyTo = letter.id)) }, icon = WebIcons.Reply)
-            }
+            // Full-width Reply under the sheet (canvas C-Letter-received).
+            DlFilledButton(
+                "Reply",
+                { nav.open(WriteRoute(replyTo = letter.id)) },
+                Modifier.fillMaxWidth().padding(start = 12.dp, end = 12.dp, top = 12.dp, bottom = 8.dp).enter(Enter.Rise, 300, 340),
+                icon = WebIcons.Reply,
+                height = 48.dp,
+            )
         }
         Spacer(Modifier.height(24.dp))
     }

@@ -12,6 +12,7 @@ import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.sp
 import com.delulutopia.core.designsystem.icon.DlIcons
 
 /**
@@ -29,7 +30,15 @@ fun DlTopAppBar(
     actions: @Composable RowScope.() -> Unit = {},
 ) {
     TopAppBar(
-        title = { Text(title, style = MaterialTheme.typography.titleLarge, maxLines = 1, overflow = TextOverflow.Ellipsis) },
+        // Destinations 22/700; a sub-screen (with ←) 18/700 (canvas C-Letter-received, F-Profile).
+        title = {
+            Text(
+                title,
+                style = if (onBack == null) MaterialTheme.typography.titleLarge else MaterialTheme.typography.titleLarge.copy(fontSize = 18.sp),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        },
         modifier = modifier,
         navigationIcon = {
             if (onBack != null) {

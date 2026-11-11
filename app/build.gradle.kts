@@ -116,3 +116,8 @@ dependencies {
     testImplementation(libs.roborazzi.compose)
     testImplementation(libs.roborazzi.junit.rule)
 }
+
+// The parity run (ParityScreensTest) walks the real app; a screen can take longer than runTest's minute.
+tasks.withType<Test>().configureEach {
+    systemProperty("kotlinx.coroutines.test.default_timeout", "5m")
+}

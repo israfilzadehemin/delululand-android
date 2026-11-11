@@ -87,77 +87,79 @@ class ParityScreensTest {
         waitForIdle()
     }
 
-    @Test fun signedIn() {
+    private fun app(block: ComposeUiTest.(() -> MainActivity) -> Unit) {
         prepare(signedIn = true)
         runAndroidComposeUiTest<MainActivity> {
-            val act = { activity!! }
             waitFor("FROM LEYLA")
-            shot("home", 1500)
-
-            tap("Letters")
-            waitFor("That is everything")
-            shot("letters")
-            tapLabel("Show as list")
-            shot("letterlist")
-            tapLabel("Show as thumbnails")
-
-            tap("Dear Emin, the week")
-            waitFor("Write soon")
-            shot("letter_from", 1500)
-            back(act)
-
-            tapLabel("Continue your draft")
-            waitFor("the trains are booked")
-            shot("write", 1200)
-            back(act)
-
-            tap("Discussions")
-            waitFor("Weekend in Zakopane")
-            shot("discussions")
-            tap("Weekend in Zakopane")
-            waitFor("The 7:10 one")
-            shot("discussion", 1200)
-            back(act)
-            tap("Books for the winter")
-            waitFor("A list, in no order")
-            shot("discussion_mine", 1200)
-            back(act)
-
-            tap("Emails")
-            waitFor("Tickets for Saturday")
-            shot("emails")
-            tap("Tickets for Saturday")
-            waitFor("Row 7, seats 12")
-            shot("thread", 1200)
-            back(act)
-            tapLabel("New email")
-            shot("newemail", 1200)
-            back(act)
-
-            tap("You")
-            waitFor("View profile")
-            shot("you")
-            tap("View profile")
-            waitFor("Israfilzade")
-            shot("profile")
-            back(act)
-            tap("Appearance")
-            shot("appearance")
-            back(act)
-            tap("Notifications")
-            waitFor("Pause all")
-            shot("notifications")
-            back(act)
-            tap("Universe")
-            waitFor("Welcome message")
-            shot("universe")
-            back(act)
-
-            tap("Home")
-            waitFor("FROM LEYLA")
-            tap("Happy")
-            shot("mood", 1200)
+            block { activity!! }
         }
+    }
+
+    @Test fun home() = app {
+        shot("home", 1500)
+        tap("Happy")
+        shot("mood", 1200)
+    }
+
+    @Test fun letters() = app { act ->
+        tap("Letters")
+        waitFor("That is everything")
+        shot("letters")
+        tapLabel("Show as list")
+        shot("letterlist")
+        tapLabel("Show as thumbnails")
+        tap("Dear Emin, the week")
+        waitFor("Write soon")
+        shot("letter_from", 1500)
+        back(act)
+        tapLabel("Continue your draft")
+        waitFor("the trains are booked")
+        shot("write", 1200)
+    }
+
+    @Test fun discussions() = app { act ->
+        tap("Discussions")
+        waitFor("Weekend in Zakopane")
+        shot("discussions")
+        tap("Weekend in Zakopane")
+        waitFor("The 7:10 one")
+        shot("discussion", 1200)
+        back(act)
+        tap("Books for the winter")
+        waitFor("A list, in no order")
+        shot("discussion_mine", 1200)
+    }
+
+    @Test fun emails() = app { act ->
+        tap("Emails")
+        waitFor("Tickets for Saturday")
+        shot("emails")
+        tap("Tickets for Saturday")
+        waitFor("Row 7, seats 12")
+        shot("thread", 1200)
+        back(act)
+        tapLabel("New email")
+        shot("newemail", 1200)
+    }
+
+    @Test fun you() = app { act ->
+        tap("You")
+        waitFor("View profile")
+        shot("you")
+        tap("View profile")
+        waitFor("Israfilzade")
+        shot("profile")
+        back(act)
+        tap("Appearance")
+        shot("appearance")
+        back(act)
+        tap("Notifications")
+        waitFor("Pause all")
+        shot("notifications")
+        back(act)
+        tap("Universe")
+        waitFor("Welcome message")
+        shot("universe")
     }
 
     @Test fun signedOut() {

@@ -145,10 +145,11 @@ private fun Cards(state: EntryViewModel.Content.Cards, onOpenPin: (Int) -> Unit,
         Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(start = 16.dp, end = 16.dp, top = 56.dp, bottom = 24.dp),
-        verticalArrangement = Arrangement.spacedBy(14.dp),
+            .padding(start = 24.dp, end = 24.dp, top = 96.dp, bottom = 24.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        UniverseTitle(state.view.name, Modifier.padding(bottom = 22.dp).enter(Enter.Rise, durationMs = 420))
+        // Web .dl-entry: 96 px from the top, 40 px to the cards, cards 16 px apart.
+        UniverseTitle(state.view.name, Modifier.padding(bottom = 24.dp).enter(Enter.Rise, durationMs = 420))
         // The cards rise in turn (web .dl-entry-cards: 120 ms, 200 ms).
         state.view.users.forEachIndexed { i, u -> Box(Modifier.enter(Enter.Rise, 120 + 80 * i, 380)) { UserCardRow(u, i) { onOpenPin(u.id) } } }
         if (state.view.canJoin) Box(Modifier.enter(Enter.Rise, 120 + 80 * state.view.users.size, 380)) { JoinCardRow(state.view.name, onJoin) }

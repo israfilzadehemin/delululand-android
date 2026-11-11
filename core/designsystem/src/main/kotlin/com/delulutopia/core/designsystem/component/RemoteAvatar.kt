@@ -1,5 +1,6 @@
 package com.delulutopia.core.designsystem.component
 
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
@@ -48,6 +49,8 @@ fun DlRemoteAvatar(
                 SubcomposeAsyncImage(
                     model = resolveMedia(base, avatarUrl),
                     contentDescription = null,
+                    // Fill the circle: a small file must not sit as a stamp in the middle of it.
+                    modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop,
                     loading = { DlAvatar(initials, signature, size = size, initialsColor = initialsColor) },
                     error = { DlAvatar(initials, signature, size = size, initialsColor = initialsColor) },

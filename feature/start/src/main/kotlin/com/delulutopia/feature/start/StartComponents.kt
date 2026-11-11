@@ -95,11 +95,11 @@ internal fun UserCardRow(user: UserCard, index: Int, onClick: () -> Unit) {
             ring = signatureOf(index),
             size = 88.dp,
         )
-        Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            Text(user.nickname, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text(user.nickname, fontSize = 20.sp, fontWeight = FontWeight.SemiBold)
             Text(
                 stringResource(if (user.hasPin) R.string.tap_to_enter else R.string.tap_to_set_pin),
-                style = MaterialTheme.typography.bodySmall,
+                style = MaterialTheme.typography.bodySmall.copy(fontSize = 13.sp),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
@@ -146,9 +146,9 @@ private fun CardFrame(onClick: () -> Unit, content: @Composable () -> Unit) {
             .background(MaterialTheme.colorScheme.surfaceContainerHigh, RoundedCornerShape(12.dp))
             .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(12.dp))
             .clickable(interactionSource = press, indication = LocalIndication.current, role = Role.Button, onClick = onClick)
-            .padding(horizontal = 16.dp, vertical = 14.dp),
+            .padding(20.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        horizontalArrangement = Arrangement.spacedBy(20.dp),
     ) { content() }
 }
 
@@ -190,7 +190,9 @@ internal fun ColumnScope.PinPanel(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
-        Box(Modifier.enter(Enter.Rise, 60, 340)) { header() }
+        Column(Modifier.enter(Enter.Rise, 60, 340), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            header()
+        }
         Text(
             prompt,
             fontSize = 15.sp,
