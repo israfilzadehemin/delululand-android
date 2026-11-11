@@ -163,12 +163,14 @@ private fun HomeContent(home: Home, stale: Boolean, moods: List<Mood>, moodLimit
         } else if (friend != null) {
             if (home.from.isNotEmpty()) {
                 item(key = "from-h") { GroupHeading("From ${friend.nickname}", whoOf(friend.id)) }
-                items(home.from, key = { "from-${it.id}" }) { row -> Box(Modifier.leafSurface("/letters/${row.id}")) { FromRow(row, nowMs, whoOf(friend.id)) } }
+                items(home.from, key = {
+                    "from-${it.id}"
+                }) { row -> Box(Modifier.animateItem().leafSurface("/letters/${row.id}")) { FromRow(row, nowMs, whoOf(friend.id)) } }
             }
             if (home.to.isNotEmpty()) {
                 item(key = "to-h") { GroupHeading("To ${friend.nickname}", whoOf(home.me.id)) }
                 items(home.to, key = { "to-${it.id}" }) { row ->
-                    Box(Modifier.leafSurface("/letters/${row.id}")) {
+                    Box(Modifier.animateItem().leafSurface("/letters/${row.id}")) {
                         ToRow(row, nowMs, whoOf(home.me.id)) {
                             cancelId =
                                 row.id

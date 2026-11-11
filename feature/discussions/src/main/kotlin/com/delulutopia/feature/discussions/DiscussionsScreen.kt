@@ -167,7 +167,7 @@ fun DiscussionsList(
             item { bar() }
             items(rows, key = { it.id }) { r ->
                 val index = rows.indexOf(r)
-                Box(Modifier.leafSurface("/discussions/${r.id}")) {
+                Box(Modifier.animateItem().leafSurface("/discussions/${r.id}")) {
                     NoteRow(
                         r,
                         nowMs,

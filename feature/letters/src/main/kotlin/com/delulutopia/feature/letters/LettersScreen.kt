@@ -143,7 +143,7 @@ fun LettersList(
             item(span = { GridItemSpan(maxLineSpan) }) { LayoutBar(list, onLayout) }
             itemsIndexed(rows, key = { _, r -> r.id }) { i, row ->
                 val sender = if (row.direction == "to") me?.id ?: 1 else friend?.id ?: 2
-                Box(Modifier.leafSurface("/letters/${row.id}")) {
+                Box(Modifier.animateItem().leafSurface("/letters/${row.id}")) {
                     if (list) ListRow(row, nowMs, friendName, whoOf(sender)) else Thumb(row, nowMs, friendName, whoOf(sender), i)
                 }
             }

@@ -1,6 +1,8 @@
 package com.delulutopia.app.ui
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.delulutopia.app.notify.Arrivals
 import com.delulutopia.core.data.Backend
 import com.delulutopia.core.data.DevicePrefs
 import com.delulutopia.core.data.HomeRepository
@@ -11,6 +13,8 @@ import com.delulutopia.core.ui.reactions.ReactionsApi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.mapNotNull
+import kotlinx.coroutines.launch
 
 /**
  * Everything behind the PIN shares Home (badges, draft dots, the universe's name) and one live
@@ -23,6 +27,7 @@ class ShellViewModel @Inject constructor(
     private val letters: LettersRepository,
     prefs: DevicePrefs,
     backend: Backend,
+    arrivals: Arrivals,
 ) : ViewModel() {
     val state: StateFlow<HomeRepository.State> = home.state
 
@@ -36,6 +41,7 @@ class ShellViewModel @Inject constructor(
 
     init {
         home.start()
+        viewModelScope.launch { home.state.mapNotNull { it.home }.collect { arrivals.announce(it) } }
     }
 
     fun foreground() {

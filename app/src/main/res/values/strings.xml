@@ -26,6 +26,11 @@
     <string name="try_again">Try again</string>
     <string name="cancel">Cancel</string>
     <string name="not_now">Not now</string>
+    <string name="allow">Allow</string>
+    <string name="your_friend">your friend</string>
+    <string name="notify_ask_title">Know the moment a letter arrives</string>
+    <string name="notify_ask_text">A notification when %1$s’s letter, discussion or email reaches you. Choose exactly which in You › Notifications.</string>
+    <string name="notify_ask_quiet">If you say no, Home still shows every letter on its way.</string>
     <string name="fingerprint_offer_title">Unlock with your fingerprint?</string>
     <string name="fingerprint_offer_text">Next time, touch the sensor instead of typing your PIN. Your PIN stays on this phone, opened only by your fingerprint. You can turn it off in You.</string>
     <string name="fingerprint_offer_yes">Use fingerprint</string>

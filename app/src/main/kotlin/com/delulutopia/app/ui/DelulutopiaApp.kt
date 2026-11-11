@@ -1,12 +1,26 @@
 package com.delulutopia.app.ui
 
+import android.content.Context
 import androidx.activity.compose.LocalActivity
 import androidx.annotation.StringRes
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.core.CubicBezierEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideIn
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -16,10 +30,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -36,11 +52,15 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.delulutopia.app.R
+import com.delulutopia.app.notify.PendingOpen
 import com.delulutopia.core.data.HomeRepository
+import com.delulutopia.core.designsystem.component.DlBottomSheet
 import com.delulutopia.core.designsystem.component.DlDialog
+import com.delulutopia.core.designsystem.component.DlFilledButton
 import com.delulutopia.core.designsystem.component.DlNavigationBar
 import com.delulutopia.core.designsystem.component.DlNavigationItem
 import com.delulutopia.core.designsystem.component.DlNavigationYouItem
+import com.delulutopia.core.designsystem.component.DlOutlinedButton
 import com.delulutopia.core.designsystem.component.DlRemoteAvatar
 import com.delulutopia.core.designsystem.component.DlSnackbarHost
 import com.delulutopia.core.designsystem.component.DlTopAppBar
@@ -49,15 +69,18 @@ import com.delulutopia.core.designsystem.theme.ThemeMode
 import com.delulutopia.core.network.model.HomeSession
 import com.delulutopia.core.ui.AfterStart
 import com.delulutopia.core.ui.AppNav
+import com.delulutopia.core.ui.DiscussionRoute
 import com.delulutopia.core.ui.DiscussionsRoute
 import com.delulutopia.core.ui.EmailsRoute
 import com.delulutopia.core.ui.HomeRoute
+import com.delulutopia.core.ui.LetterRoute
 import com.delulutopia.core.ui.LettersRoute
 import com.delulutopia.core.ui.LocalAppNav
 import com.delulutopia.core.ui.LocalBrand
 import com.delulutopia.core.ui.LocalFirstCitizen
 import com.delulutopia.core.ui.LocalNotice
 import com.delulutopia.core.ui.LocalNoticeAction
+import com.delulutopia.core.ui.ThreadRoute
 import com.delulutopia.core.ui.YouRoute
 import com.delulutopia.core.ui.fingerprint.Fingerprint
 import com.delulutopia.core.ui.initials
@@ -108,7 +131,7 @@ fun SignedInApp(
         onStopOrDispose { shell.background() }
     }
     CompositionLocalProvider(LocalReactionsApi provides shell.reactions) {
-        DelulutopiaApp(session, state, leaves = leaves, overlay = { AfterPin() }) {
+        DelulutopiaApp(session, state, leaves = leaves, overlay = { AfterPin(state.home?.friend?.nickname) }) {
             composable<HomeRoute> { HomeScreen() }
             lettersGraph()
             discussionsGraph()
@@ -119,17 +142,23 @@ fun SignedInApp(
 }
 
 /**
- * What follows a PIN entry once Home is up: X1's one-time fingerprint offer, and U9's word when the
- * citizen photo could not be uploaded.
+ * What follows a PIN entry once Home is up: S9's notification ask (FS-A14, once per phone), then
+ * X1's one-time fingerprint offer; and U9's word when the citizen photo could not be uploaded.
  */
 @Composable
-private fun AfterPin() {
+private fun AfterPin(friend: String?) {
     val context = LocalContext.current
     val activity = LocalActivity.current as? FragmentActivity
     val notice = LocalNotice.current
-    var offer by remember {
-        val entered = Fingerprint.justEntered
+    val access = rememberNotifyAccess()
+    val entered = remember {
+        val e = Fingerprint.justEntered
         Fingerprint.justEntered = null
+        e
+    }
+    val device = remember { context.getSharedPreferences("device", Context.MODE_PRIVATE) }
+    var ask by remember { mutableStateOf(entered != null && access.permission == NotifyPermission.Default && !device.getBoolean("notifyAsked", false)) }
+    var offer by remember {
         mutableStateOf(
             entered?.takeIf { (id, _) ->
                 activity != null && Fingerprint.available(context) && !Fingerprint.offered(context, id) && !Fingerprint.isOn(context, id)
@@ -141,6 +170,20 @@ private fun AfterPin() {
             AfterStart.photoFailed = false
             notice("Couldn't add your photo. You can add it in Profile.")
         }
+    }
+    if (ask) {
+        NotifyAsk(
+            friend = friend,
+            onAllow = {
+                ask = false
+                access.allow()
+            },
+            onNotNow = {
+                ask = false
+                device.edit().putBoolean("notifyAsked", true).apply()
+            },
+        )
+        return
     }
     val pending = offer ?: return
     val close = {
@@ -158,6 +201,23 @@ private fun AfterPin() {
         dismissLabel = stringResource(R.string.not_now),
         onDismiss = close,
     )
+}
+
+/** S9 with the Android copy (design §7): Allow asks the system; Not now is remembered on this phone. */
+@Composable
+private fun NotifyAsk(friend: String?, onAllow: () -> Unit, onNotNow: () -> Unit) {
+    DlBottomSheet(onDismissRequest = onNotNow) {
+        Column(Modifier.fillMaxWidth().padding(horizontal = 24.dp).padding(bottom = 24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Icon(DlIcons.Bell, null, Modifier.size(28.dp), tint = MaterialTheme.colorScheme.primary)
+            Text(stringResource(R.string.notify_ask_title), style = MaterialTheme.typography.titleLarge)
+            Text(stringResource(R.string.notify_ask_text, friend ?: stringResource(R.string.your_friend)), style = MaterialTheme.typography.bodyMedium)
+            Text(stringResource(R.string.notify_ask_quiet), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.End)) {
+                DlOutlinedButton(stringResource(R.string.not_now), onNotNow)
+                DlFilledButton(stringResource(R.string.allow), onAllow)
+            }
+        }
+    }
 }
 
 /** The shell itself, stateless: [state] is Home's, [graph] the screens (tests pass their own). */
@@ -210,6 +270,12 @@ fun DelulutopiaApp(
     val firstCitizen = home?.let { h -> listOfNotNull(h.me.id, h.friend?.id).min() } ?: listOfNotNull(session.me.id, session.friend?.id).min()
     val notify = rememberNotifyAccess()
     val leafSurfaces = remember { LeafSurfaces() }
+    val pendingOpen by PendingOpen.path.collectAsStateWithLifecycle()
+    LaunchedEffect(pendingOpen) {
+        val path = pendingOpen ?: return@LaunchedEffect
+        PendingOpen.path.value = null
+        routeOf(path)?.let { navController.navigate(it) }
+    }
 
     CompositionLocalProvider(
         LocalAppNav provides nav,
@@ -276,7 +342,28 @@ fun DelulutopiaApp(
             snackbarHost = { DlSnackbarHost(snackbarHostState) },
             containerColor = MaterialTheme.colorScheme.surface,
         ) { padding ->
-            NavHost(navController, startDestination = HomeRoute, modifier = Modifier.padding(padding)) {
+            // Motion: forward slides in from the right, back from the left, a tab switch rises a little.
+            val isTop: (NavDestination) -> Boolean = { d -> TopDestination.entries.any { d.isOn(it.route::class) } }
+            NavHost(
+                navController,
+                startDestination = HomeRoute,
+                modifier = Modifier.padding(padding),
+                enterTransition = {
+                    pageIn(
+                        if (isTop(initialState.destination) &&
+                            isTop(targetState.destination)
+                        ) {
+                            0
+                        } else {
+                            32
+                        },
+                        if (isTop(targetState.destination) && isTop(initialState.destination)) 8 else 0,
+                    )
+                },
+                exitTransition = { fadeOut(tween(PAGE_MS / 2)) },
+                popEnterTransition = { pageIn(-32, 0) },
+                popExitTransition = { fadeOut(tween(PAGE_MS / 2)) },
+            ) {
                 graph(navController)
             }
         }
@@ -295,4 +382,29 @@ private fun NavHostController.navigateToTop(route: Any) {
         launchSingleTop = true
         restoreState = true
     }
+}
+
+/** "/letters/12", "/discussions/3", "/emails/7" (the push's click targets) as routes. */
+internal fun routeOf(path: String): Any? {
+    val parts = path.trim('/').split('/')
+    val id = parts.getOrNull(1)?.toLongOrNull() ?: return null
+    return when (parts[0]) {
+        "letters" -> LetterRoute(id)
+        "discussions" -> DiscussionRoute(id)
+        "emails" -> ThreadRoute(id)
+        else -> null
+    }
+}
+
+private const val PAGE_MS = 300
+private val EASE_OUT = CubicBezierEasing(0.2f, 0.8f, 0.2f, 1f)
+
+/** dl-page-in: fade in while moving from [dx], [dy] (dp) to rest. */
+private fun pageIn(dx: Int, dy: Int): EnterTransition = fadeIn(tween(PAGE_MS, easing = EASE_OUT)) +
+    slide(dx, dy)
+
+private fun slide(dx: Int, dy: Int): EnterTransition = slideIn(tween(PAGE_MS, easing = EASE_OUT)) { full ->
+    // dp of the 412 dp canvas phone, scaled to this window.
+    val k = full.width / 412f
+    IntOffset((dx * k).toInt(), (dy * k).toInt())
 }

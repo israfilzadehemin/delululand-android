@@ -1,5 +1,7 @@
 package com.delulutopia.feature.emails
 
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -145,7 +147,7 @@ fun EmailsList(rows: List<ThreadRow>?, hasMore: Boolean, draftEmpty: Boolean, ho
                     )
                 }
             }
-            items(rows, key = { it.id }) { Box(Modifier.leafSurface("/emails/${it.id}")) { ThreadCard(it, nowMs, home) } }
+            items(rows, key = { it.id }) { Box(Modifier.animateItem().leafSurface("/emails/${it.id}")) { ThreadCard(it, nowMs, home) } }
             item {
                 Row(Modifier.fillMaxWidth().padding(vertical = 12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally)) {
                     if (hasMore) {
@@ -325,7 +327,9 @@ private fun EmailCard(
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
             .background(if (mine) c.mailMine else c.mailBackground)
-            .border(1.dp, c.mailLine, RoundedCornerShape(12.dp)),
+            .border(1.dp, c.mailLine, RoundedCornerShape(12.dp))
+            // Fold & open (Motion doc): the card's height eases instead of jumping.
+            .animateContentSize(tween(260)),
     ) {
         Row(
             Modifier.fillMaxWidth().clickable(onClick = onToggle).padding(12.dp).semantics { contentDescription = if (open) "Fold" else "Unfold" },
