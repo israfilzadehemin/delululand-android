@@ -46,6 +46,7 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.scale
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -211,7 +212,15 @@ fun LettersList(
 /** The layout toggle at the list's top-right; its icon shows the layout it switches to. */
 @Composable
 private fun LayoutBar(list: Boolean, onLayout: (Boolean) -> Unit) {
-    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+    // web .dl-list-bar: margin -6 -10 -6 0, so the bar costs no more than the button.
+    Row(
+        Modifier.fillMaxWidth().offset(x = 10.dp).layout { m, k ->
+            val p = m.measure(k)
+            val pull = 6.dp.roundToPx()
+            layout(p.width, p.height - 2 * pull) { p.place(0, -pull) }
+        },
+        horizontalArrangement = Arrangement.End,
+    ) {
         IconButton(onClick = { onLayout(!list) }) {
             Icon(if (list) WebIcons.Grid else WebIcons.List, if (list) "Show as thumbnails" else "Show as list")
         }
@@ -404,44 +413,47 @@ private fun Thumb(row: LetterRow, nowMs: Long, friendName: String, who: Who, ind
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             if (shape == TileShape.Envelope) {
-                Box(Modifier.fillMaxWidth().height(78.dp)) {
-                    Canvas(Modifier.padding(start = 0.dp).fillMaxWidth().height(62.dp).offset(x = (-12).dp)) {
-                        val w = size.width + 22.dp.toPx()
-                        val h = size.height
-                        val flap = Path().apply {
-                            moveTo(0f, 0f)
-                            lineTo(w, 0f)
-                            lineTo(w * 0.57f, h * 0.86f)
-                            quadraticTo(w * 0.5f, h * 0.99f, w * 0.43f, h * 0.86f)
-                            close()
+                // web .dl-ltile--envelope .dl-ltile-head: the direction sits right under the 78 dp flap, no gap.
+                Column {
+                    Box(Modifier.fillMaxWidth().height(78.dp)) {
+                        Canvas(Modifier.padding(start = 0.dp).fillMaxWidth().height(62.dp).offset(x = (-12).dp)) {
+                            val w = size.width + 22.dp.toPx()
+                            val h = size.height
+                            val flap = Path().apply {
+                                moveTo(0f, 0f)
+                                lineTo(w, 0f)
+                                lineTo(w * 0.57f, h * 0.86f)
+                                quadraticTo(w * 0.5f, h * 0.99f, w * 0.43f, h * 0.86f)
+                                close()
+                            }
+                            drawPath(flap, c.letterFlap)
+                            drawPath(flap, c.letterEdge, style = Stroke(1.dp.toPx()))
                         }
-                        drawPath(flap, c.letterFlap)
-                        drawPath(flap, c.letterEdge, style = Stroke(1.dp.toPx()))
-                    }
-                    WaxSeal(seal, Modifier.align(Alignment.TopCenter).offset(y = 44.dp), size = 26.dp)
-                    row.stamp?.let {
-                        StampImage(it, Modifier.align(Alignment.TopEnd).offset(y = 8.dp).rotate(2f))
-                        Canvas(Modifier.align(Alignment.TopEnd).offset(x = (-22).dp, y = 18.dp).size(48.dp, 30.dp)) {
-                            scale(size.width / 48f, size.height / 30f, pivot = Offset.Zero) {
-                                val st = Stroke(1.4f)
-                                drawCircle(hue.copy(alpha = 0.7f), 12f, Offset(15f, 15f), style = st)
-                                drawCircle(hue.copy(alpha = 0.7f), 8.5f, Offset(15f, 15f), style = st)
-                                for (y in listOf(9f, 15f, 21f)) {
-                                    drawPath(
-                                        Path().apply {
-                                            moveTo(27f, y)
-                                            quadraticTo(31.25f, y - 3f, 35.5f, y)
-                                            quadraticTo(39.75f, y + 3f, 44f, y)
-                                        },
-                                        hue.copy(alpha = 0.7f),
-                                        style = st,
-                                    )
+                        WaxSeal(seal, Modifier.align(Alignment.TopCenter).offset(y = 44.dp), size = 26.dp)
+                        row.stamp?.let {
+                            StampImage(it, Modifier.align(Alignment.TopEnd).offset(y = 8.dp).rotate(2f))
+                            Canvas(Modifier.align(Alignment.TopEnd).offset(x = (-22).dp, y = 18.dp).size(48.dp, 30.dp)) {
+                                scale(size.width / 48f, size.height / 30f, pivot = Offset.Zero) {
+                                    val st = Stroke(1.4f)
+                                    drawCircle(hue.copy(alpha = 0.7f), 12f, Offset(15f, 15f), style = st)
+                                    drawCircle(hue.copy(alpha = 0.7f), 8.5f, Offset(15f, 15f), style = st)
+                                    for (y in listOf(9f, 15f, 21f)) {
+                                        drawPath(
+                                            Path().apply {
+                                                moveTo(27f, y)
+                                                quadraticTo(31.25f, y - 3f, 35.5f, y)
+                                                quadraticTo(39.75f, y + 3f, 44f, y)
+                                            },
+                                            hue.copy(alpha = 0.7f),
+                                            style = st,
+                                        )
+                                    }
                                 }
                             }
                         }
                     }
+                    Direction(if (to) "→ To $friendName" else "← From $friendName", who)
                 }
-                Direction(if (to) "→ To $friendName" else "← From $friendName", who)
             } else {
                 Row(Modifier.fillMaxWidth().heightIn(min = 36.dp), horizontalArrangement = Arrangement.SpaceBetween) {
                     Box(Modifier.weight(1f).padding(top = 2.dp)) { Direction(if (to) "→ To $friendName" else "← From $friendName", who) }
