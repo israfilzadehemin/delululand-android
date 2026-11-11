@@ -2,10 +2,13 @@ package com.delulutopia.core.network
 
 import com.delulutopia.core.network.model.EnterRequest
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeout
 import kotlinx.serialization.json.Json
 import mockwebserver3.MockResponse
 import mockwebserver3.MockWebServer
@@ -67,16 +70,11 @@ class ApiCallerTest {
     }
 
     @Test
-    fun `401 NO_SESSION ends the session`() = runTest(UnconfinedTestDispatcher()) {
-        var ended = false
-        val job = launch {
-            events.sessionEnded.first()
-            ended = true
-        }
+    fun `401 NO_SESSION ends the session`() = runTest {
+        val ended = async(Dispatchers.Default, start = CoroutineStart.UNDISPATCHED) { events.sessionEnded.first() }
         server.enqueue(MockResponse.Builder().code(401).body("""{"code":"NO_SESSION","message":"Log in."}""").build())
         runCatching { caller.call { api.homeSession() } }
-        assertThat(ended).isTrue()
-        job.cancel()
+        withContext(Dispatchers.Default) { withTimeout(2_000) { ended.await() } }
     }
 
     @Test
