@@ -120,4 +120,6 @@ dependencies {
 // The parity run (ParityScreensTest) walks the real app; a screen can take longer than runTest's minute.
 tasks.withType<Test>().configureEach {
     systemProperty("kotlinx.coroutines.test.default_timeout", "5m")
+    // The end-to-end cases (e2e/FlowsE2ETest) run only when CI's e2e job passes the API's URL.
+    providers.gradleProperty("dl.e2e").orNull?.let { systemProperty("dl.e2e", it) }
 }
