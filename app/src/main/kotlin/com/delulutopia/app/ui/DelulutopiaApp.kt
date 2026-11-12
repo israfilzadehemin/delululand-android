@@ -219,7 +219,7 @@ private fun NotifyAsk(friend: String?, onAllow: () -> Unit, onNotNow: () -> Unit
         Column(Modifier.fillMaxWidth().padding(horizontal = 24.dp).padding(bottom = 24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Icon(DlIcons.Bell, null, Modifier.size(28.dp), tint = MaterialTheme.colorScheme.primary)
             Text(t("notify.knowTheMomentALetter"), style = MaterialTheme.typography.titleLarge)
-            Text(t("notify.askTextPhone", "friend" to friend ?: t("settings.yourFriend")), style = MaterialTheme.typography.bodyMedium)
+            Text(t("notify.askTextPhone", "friend" to (friend ?: t("settings.yourFriend"))), style = MaterialTheme.typography.bodyMedium)
             Text(t("notify.askQuiet"), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.End)) {
                 DlOutlinedButton(t("notify.notNow"), onNotNow)
