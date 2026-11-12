@@ -163,7 +163,7 @@ internal fun BoardTile(home: Home, nowMs: Long, vm: HomeActions) {
 
     Column(Modifier.fillMaxWidth().animateContentSize(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
         when {
-            mini -> Strip(home, board, nowMs, base, nameOf) { vm.setBoardMini(false) }
+            mini -> Strip(home, board, nowMs, base) { vm.setBoardMini(false) }
             board != null -> {
                 Box(Modifier.fillMaxWidth()) {
                     Frame(
@@ -383,7 +383,7 @@ private fun BoardImage(board: Board, base: String) {
 
 /** §9: the folded strip, with NEW while unseen. */
 @Composable
-private fun Strip(home: Home, board: Board?, nowMs: Long, base: String, nameOf: (Int) -> String, onUnfold: () -> Unit) {
+private fun Strip(home: Home, board: Board?, nowMs: Long, base: String, onUnfold: () -> Unit) {
     val c = DlTheme.colors
     Row(
         Modifier
@@ -404,10 +404,9 @@ private fun Strip(home: Home, board: Board?, nowMs: Long, base: String, nameOf: 
                 if (home.boardNew && board != null) NewChip()
             }
             Text(
-                if (board !=
-                    null
-                ) {
+                if (board != null) {
                     val age = ageWords(board.createdAt, nowMs)
+                    val friend = home.friendName
                     when {
                         board.authorId == home.me.id && board.editedFrom == null -> t("board.strip.meDrew", "age" to age)
                         board.authorId == home.me.id -> t("board.strip.meEdited", "age" to age)
