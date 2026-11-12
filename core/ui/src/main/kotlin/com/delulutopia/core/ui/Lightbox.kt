@@ -34,6 +34,7 @@ import com.delulutopia.core.designsystem.icon.WebIcons
 import com.delulutopia.core.designsystem.motion.Enter
 import com.delulutopia.core.designsystem.motion.enter
 import com.delulutopia.core.designsystem.theme.DlTheme
+import com.delulutopia.core.i18n.t
 import com.delulutopia.core.network.model.Att
 
 /**
@@ -51,17 +52,17 @@ fun Lightbox(photos: List<Att>, index: Int, onIndex: (Int) -> Unit, onClose: () 
         Column(Modifier.enter(Enter.Fade, durationMs = 200).fillMaxSize().background(c.lightbox).statusBarsPadding().navigationBarsPadding()) {
             Row(Modifier.fillMaxWidth().padding(start = 16.dp, end = 4.dp, top = 4.dp), verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    title ?: "Photo ${pager.currentPage + 1} of ${photos.size}",
+                    title ?: t("letters.photoOf", "n" to pager.currentPage + 1, "count" to photos.size),
                     Modifier.weight(1f),
                     style = MaterialTheme.typography.titleSmall,
                     color = c.onLightbox,
                 )
-                IconButton(onClick = onClose) { Icon(WebIcons.Close, "Close", tint = c.onLightbox) }
+                IconButton(onClick = onClose) { Icon(WebIcons.Close, t("common.close"), tint = c.onLightbox) }
             }
             HorizontalPager(pager, Modifier.weight(1f).fillMaxWidth(), beyondViewportPageCount = 1) { i ->
                 AsyncImage(
                     model = resolveMedia(base, photos[i].url),
-                    contentDescription = title ?: "Photo ${i + 1} of ${photos.size}",
+                    contentDescription = title ?: t("letters.photoOf", "n" to i + 1, "count" to photos.size),
                     modifier = Modifier.enter(Enter.Zoom, durationMs = 300).fillMaxSize(),
                     contentScale = ContentScale.Fit,
                 )

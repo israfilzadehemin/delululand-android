@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.absolutePadding
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -36,6 +37,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.AbsoluteAlignment
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -81,6 +83,7 @@ import com.delulutopia.core.designsystem.motion.Enter
 import com.delulutopia.core.designsystem.motion.Motion
 import com.delulutopia.core.designsystem.motion.enter
 import com.delulutopia.core.designsystem.theme.DlTheme
+import com.delulutopia.core.i18n.t
 import com.delulutopia.core.network.model.Citizen
 import com.delulutopia.core.network.model.Home
 import com.delulutopia.core.network.model.LetterFull
@@ -151,24 +154,24 @@ fun LetterScreen(id: Long, vm: LettersViewModel = hiltViewModel()) {
     // Coming back from Edit (or from another app): the letter as it is now, not as it was opened.
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { vm.refresh(current) }
     val shownLetter = (letters[current] as? LetterUi.Shown)?.letter
-    val friend = home?.friend?.nickname ?: "Friend"
+    val friend = home?.friend?.nickname ?: t("common.friend")
     Column(Modifier.fillMaxSize()) {
         DlTopAppBar(
             title = when {
-                shownLetter != null -> "${if (shownLetter.direction == "to") "To" else "From"} $friend"
+                shownLetter != null -> if (shownLetter.direction == "to") t("letters.to", "friend" to friend) else t("letters.from", "friend" to friend)
                 letters[current] is LetterUi.Loading || letters[current] == null -> ""
-                else -> "From $friend"
+                else -> t("letters.from", "friend" to friend)
             },
             onBack = { nav.back() },
-            backDescription = "Back",
+            backDescription = t("letters.back"),
         )
         HorizontalPager(pager, Modifier.weight(1f).fillMaxWidth(), key = { ids[it] }) { page ->
             val letterId = ids[page]
             when (val ui = letters[letterId]) {
                 is LetterUi.Shown -> LetterContent(ui.letter, home, swiped = letterId != id, vm = vm)
-                is LetterUi.NotArrived -> Gone("Arrives at ${Time.clock(ui.arrivesAt)}") { nav.back() }
-                LetterUi.Gone -> Gone("This letter isn't here anymore.") { nav.back() }
-                LetterUi.Unreachable -> Gone("Can't reach ${LocalBrand.current}. Try again.") { nav.back() }
+                is LetterUi.NotArrived -> Gone(t("letters.arrivesAt", "time" to Time.clock(ui.arrivesAt))) { nav.back() }
+                LetterUi.Gone -> Gone(t("letters.thisLetterIsntHereAnymore")) { nav.back() }
+                LetterUi.Unreachable -> Gone(t("letters.cantReachTryAgain", "brand" to LocalBrand.current)) { nav.back() }
                 else -> Box(Modifier.fillMaxSize())
             }
         }
@@ -183,7 +186,7 @@ private fun Gone(text: String, onBack: () -> Unit) {
         verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
     ) {
         Text(text, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        DlOutlinedButton("Back", onBack)
+        DlOutlinedButton(t("letters.back"), onBack)
     }
 }
 
@@ -237,11 +240,11 @@ private fun LetterContent(letter: LetterFull, home: Home?, swiped: Boolean, vm: 
             Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
                 if (inReach) {
                     ReachBar(
-                        "${Time.countdown((Time.ms(letter.windowEndsAt) ?: 0) - nowMs)} left to edit or cancel",
+                        t("letters.leftToEditOrCancel", "countdown" to Time.countdown((Time.ms(letter.windowEndsAt) ?: 0) - nowMs)),
                         Modifier.padding(start = 16.dp, end = 16.dp, bottom = 10.dp),
                     ) {
-                        ReachButton("Edit", padded = true) { nav.open(WriteRoute(editId = letter.id)) }
-                        ReachButton("Cancel", padded = true) { askCancel = true }
+                        ReachButton(t("letters.edit"), padded = true) { nav.open(WriteRoute(editId = letter.id)) }
+                        ReachButton(t("letters.cancel"), padded = true) { askCancel = true }
                     }
                 }
                 Box(Modifier.padding(horizontal = 16.dp).padding(bottom = if (sent) 24.dp else 12.dp)) {
@@ -283,7 +286,7 @@ private fun LetterContent(letter: LetterFull, home: Home?, swiped: Boolean, vm: 
                                             withStyle(SpanStyle(fontWeight = FontWeight.Bold)) { append(sender?.nickname.orEmpty()) }
                                             if (feeling != null) {
                                                 withStyle(SpanStyle(fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.onSurfaceVariant)) {
-                                                    append(" · Feeling $feeling")
+                                                    append(" " + t("letters.feeling", "feeling" to feeling))
                                                 }
                                             }
                                         },
@@ -291,10 +294,12 @@ private fun LetterContent(letter: LetterFull, home: Home?, swiped: Boolean, vm: 
                                         color = DlTheme.colors.letterInk,
                                     )
                                     Text(
-                                        "Sent ${Time.clock(
-                                            letter.sentAt,
-                                            nowMs,
-                                        )} · ${if (arrived) "Arrived" else "Arrives"} ${Time.clock(letter.arrivesAt, nowMs)}",
+                                        t(
+                                            if (arrived) "letters.timesArrived" else "letters.timesArrives",
+                                            "sent" to Time.clock(letter.sentAt, nowMs),
+                                            "arrived" to Time.clock(letter.arrivesAt, nowMs),
+                                            "arrives" to Time.clock(letter.arrivesAt, nowMs),
+                                        ),
                                         style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp, fontFeatureSettings = "tnum"),
                                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     )
@@ -302,7 +307,7 @@ private fun LetterContent(letter: LetterFull, home: Home?, swiped: Boolean, vm: 
                             }
                             letter.replyTo?.let {
                                 Box(Modifier.padding(start = 20.dp, end = 20.dp, top = 14.dp)) {
-                                    ReplyQuote(it, friend?.nickname ?: "Friend", nowMs) { nav.open(LetterRoute(it.id)) }
+                                    ReplyQuote(it, friend?.nickname ?: t("common.friend"), nowMs) { nav.open(LetterRoute(it.id)) }
                                 }
                             }
                             // Body: 17/28 Literata on 28 dp rules, down to the foot.
@@ -353,7 +358,7 @@ private fun LetterContent(letter: LetterFull, home: Home?, swiped: Boolean, vm: 
                                     doodle?.let { d ->
                                         AsyncImage(
                                             model = resolveMedia(base, d.url),
-                                            contentDescription = "Doodle, open full size",
+                                            contentDescription = t("letters.doodleOpenFullSize"),
                                             modifier = Modifier.fillMaxWidth().aspectRatio(1f).rotate(0.3f).border(1.dp, line).clickable { doodleOpen = true },
                                             contentScale = ContentScale.Fit,
                                         )
@@ -363,7 +368,7 @@ private fun LetterContent(letter: LetterFull, home: Home?, swiped: Boolean, vm: 
                                             photos.forEachIndexed { i, p ->
                                                 Print(
                                                     resolveMedia(base, p.thumbUrl ?: p.url),
-                                                    "Photo ${i + 1} of ${photos.size}, open full size",
+                                                    t("letters.photoOfOpenFullSize", "n" to i + 1, "count" to photos.size),
                                                     if (i % 2 == 0) -1.5f else 1.2f,
                                                     Modifier.enter(Enter.PopIn, mediaDelay, 300),
                                                 ) { photo = i }
@@ -375,7 +380,7 @@ private fun LetterContent(letter: LetterFull, home: Home?, swiped: Boolean, vm: 
                                             resolveMedia(base, a.url),
                                             a.durationMs,
                                             Modifier.enter(Enter.PopIn, mediaDelay, 300),
-                                            label = if (audios.size > 1) "voice note ${i + 1}" else "voice note",
+                                            label = if (audios.size > 1) t("letters.voiceNoteN", "n" to i + 1) else t("letters.voiceNoteLower"),
                                         )
                                     }
                                     if (sent) StatusLine(letter, state, nowMs)
@@ -388,7 +393,8 @@ private fun LetterContent(letter: LetterFull, home: Home?, swiped: Boolean, vm: 
                     letter.stamp?.let {
                         StampImage(
                             it,
-                            Modifier.align(Alignment.TopEnd).padding(top = 10.dp, end = 10.dp)
+                            // L3: the postal corner stays top-right in Persian too.
+                            Modifier.align(AbsoluteAlignment.TopRight).padding(top = 10.dp).absolutePadding(right = 10.dp)
                                 .enter(Enter.Stamp, if (fresh && !swiped) 1040 else 380, key = letter.id).rotate(2f),
                             width = 64.dp,
                         )
@@ -400,7 +406,7 @@ private fun LetterContent(letter: LetterFull, home: Home?, swiped: Boolean, vm: 
         if (!sent) {
             // Reply under the sheet, full width (web .dl-letter-actions).
             DlFilledButton(
-                "Reply",
+                t("letters.reply"),
                 { nav.open(WriteRoute(replyTo = letter.id)) },
                 Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 0.dp, bottom = 24.dp).enter(Enter.Rise, 300, 340),
                 icon = WebIcons.Reply,
@@ -410,10 +416,10 @@ private fun LetterContent(letter: LetterFull, home: Home?, swiped: Boolean, vm: 
     }
 
     if (photo >= 0 && photo < photos.size) Lightbox(photos, photo, { photo = it }, { photo = -1 })
-    if (doodleOpen && doodle != null) Lightbox(listOf(doodle), 0, {}, { doodleOpen = false }, title = "Doodle")
+    if (doodleOpen && doodle != null) Lightbox(listOf(doodle), 0, {}, { doodleOpen = false }, title = t("letters.doodle"))
     if (askCancel) {
         TakeBackDialog(
-            friend = friend?.nickname ?: "Friend",
+            friend = friend?.nickname ?: t("common.friend"),
             draftEmpty = me?.draftEmpty != false,
             busy = cancelling,
             onYes = {
@@ -453,7 +459,7 @@ private fun Paper(modifier: Modifier = Modifier, content: @Composable ColumnScop
         )
         val ground = MaterialTheme.colorScheme.surface
         Box(
-            Modifier.align(Alignment.BottomEnd).size(26.dp).drawBehind {
+            Modifier.align(AbsoluteAlignment.BottomRight).size(26.dp).drawBehind {
                 val s = size.width
                 drawPath(
                     Path().apply {
@@ -523,7 +529,8 @@ private fun Print(url: String, description: String, tilt: Float, modifier: Modif
 @Composable
 private fun ReplyQuote(reply: ReplyRef, friendName: String, nowMs: Long, onOpen: () -> Unit) {
     val c = DlTheme.colors
-    val whose = if (reply.direction == "to") "your letter" else "$friendName's letter"
+    val mine = reply.direction == "to"
+    val sentAt = Time.clock(reply.sentAt, nowMs)
     val line = firstLineOf(reply.firstLine, reply.media)
     Box(Modifier.padding(top = 12.dp)) {
         Column(
@@ -534,14 +541,20 @@ private fun ReplyQuote(reply: ReplyRef, friendName: String, nowMs: Long, onOpen:
                 .background(c.letterSlip, QuoteShape)
                 .drawBehind { drawRect(c.userA, size = Size(3.dp.toPx(), size.height)) }
                 .clickable(onClick = onOpen)
-                .semantics { contentDescription = "In reply to $whose of ${Time.clock(reply.sentAt, nowMs)}. Open it" }
+                .semantics {
+                    contentDescription = if (mine) {
+                        t("letters.inReplyToMineOpen", "time" to sentAt)
+                    } else {
+                        t("letters.inReplyToFriendsOpen", "friend" to friendName, "time" to sentAt)
+                    }
+                }
                 .padding(start = 15.dp, end = 12.dp, top = 12.dp, bottom = 8.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
             Row(Modifier.padding(start = 12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                 Icon(WebIcons.Reply, null, Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
                 Text(
-                    "In reply to $whose · ${Time.clock(reply.sentAt, nowMs)}",
+                    if (mine) t("letters.inReplyToMine", "time" to sentAt) else t("letters.inReplyToFriends", "friend" to friendName, "time" to sentAt),
                     style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -582,9 +595,9 @@ private fun StatusLine(letter: LetterFull, state: String, nowMs: Long) {
     val delivered = state == LetterState.DELIVERED || state == LetterState.READ
     val read = state == LetterState.READ
     val label = when {
-        read -> "Status: read"
-        delivered -> "Status: delivered, not read yet"
-        else -> "Status: sent, not yet delivered"
+        read -> t("letters.status.read")
+        delivered -> t("letters.status.delivered")
+        else -> t("letters.status.sent")
     }
     Column(Modifier.padding(top = 12.dp).semantics { contentDescription = label }, verticalArrangement = Arrangement.spacedBy(6.dp)) {
         Row(verticalAlignment = Alignment.Top, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -596,7 +609,7 @@ private fun StatusLine(letter: LetterFull, state: String, nowMs: Long) {
         }
         if (!delivered) {
             Text(
-                "Arrives in ${Time.countdown((Time.ms(letter.arrivesAt) ?: 0) - nowMs)}",
+                t("letters.arrivesIn", "countdown" to Time.countdown((Time.ms(letter.arrivesAt) ?: 0) - nowMs)),
                 style = MaterialTheme.typography.labelMedium.copy(fontSize = 13.sp, fontWeight = FontWeight.SemiBold, fontFeatureSettings = "tnum"),
                 color = DlTheme.colors.letterInk,
             )

@@ -23,6 +23,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.AbsoluteAlignment
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -46,6 +47,7 @@ import com.delulutopia.core.designsystem.motion.Enter
 import com.delulutopia.core.designsystem.motion.bob
 import com.delulutopia.core.designsystem.motion.enter
 import com.delulutopia.core.designsystem.theme.DlTheme
+import com.delulutopia.core.i18n.t
 import com.delulutopia.core.network.model.StampMark
 
 /*
@@ -106,7 +108,7 @@ fun LetterTile(
             },
         ) {
             Column(Modifier.padding(start = 18.dp, end = 14.dp, top = 12.dp, bottom = 14.dp), content = content)
-            Fold(flap, Modifier.align(Alignment.BottomEnd))
+            Fold(flap, Modifier.align(AbsoluteAlignment.BottomRight))
         }
     }
 }
@@ -210,7 +212,7 @@ fun StampImage(stamp: StampMark, modifier: Modifier = Modifier, width: Dp = 28.d
     val base = LocalServerBaseUrl.current
     AsyncImage(
         model = resolveMedia(base, stamp.imageUrl),
-        contentDescription = "Stamp: ${stamp.name}",
+        contentDescription = t("stamps.stamp", "name" to stamp.name),
         modifier = modifier.size(width, width * (380f / 300f)),
         contentScale = ContentScale.Fit,
     )
@@ -218,7 +220,7 @@ fun StampImage(stamp: StampMark, modifier: Modifier = Modifier, width: Dp = 28.d
 
 /** The seal-coloured NEW chip on letter tiles and notes. */
 @Composable
-fun NewChip(modifier: Modifier = Modifier, text: String = "NEW", paper: Boolean = true) {
+fun NewChip(modifier: Modifier = Modifier, text: String = t("board.new"), paper: Boolean = true) {
     // On letters and notes the chip is terracotta; elsewhere (the board) it is the navy seal (web .dl-chip-new).
     val c = DlTheme.colors
     Box(

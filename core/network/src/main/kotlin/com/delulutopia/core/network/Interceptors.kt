@@ -1,5 +1,6 @@
 package com.delulutopia.core.network
 
+import com.delulutopia.core.i18n.I18n
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -21,6 +22,8 @@ class ApiHeadersInterceptor(
         val request = chain.request().newBuilder()
             .header("X-Requested-With", "delululand")
             .header("User-Agent", userAgent)
+            // L6: errors and server-worded texts come in the language in force (the saved one wins once signed in).
+            .header("Accept-Language", I18n.lang.tag)
             .build()
         val response = chain.proceed(request)
         response.header("X-Server-Time")?.toLongOrNull()?.let(clock::record)

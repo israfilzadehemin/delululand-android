@@ -10,6 +10,7 @@ import com.delulutopia.core.data.Backend
 import com.delulutopia.core.data.DevicePrefs
 import com.delulutopia.core.data.HomeRepository
 import com.delulutopia.core.data.SessionRepository
+import com.delulutopia.core.i18n.t
 import com.delulutopia.core.network.ApiException
 import com.delulutopia.core.network.model.NotifyChange
 import com.delulutopia.core.network.model.NotifySettings
@@ -148,14 +149,14 @@ class ProfileViewModel @Inject constructor(
                 val p = backend.run { saveProfile(ProfileBody(f.username, f.firstName.trim(), f.lastName.trim(), f.timezone)) }
                 refresh(p)
                 show(p)
-                onDone("Profile saved")
+                onDone(t("profile.saved"))
             } catch (e: ApiException) {
                 when (e.code) {
-                    "USERNAME_TAKEN" -> serverError = serverError + ("username" to "That username is taken")
-                    "USERNAME_INVALID" -> serverError = serverError + ("username" to "3–16 letters or digits, no spaces")
-                    "TIMEZONE_INVALID" -> serverError = serverError + ("timezone" to "Pick a time zone from the list")
-                    "NAME_INVALID" -> serverError = serverError + ("lastName" to "Letters, spaces, - and ’ only")
-                    else -> onDone("Couldn't save. Try again.")
+                    "USERNAME_TAKEN" -> serverError = serverError + ("username" to t("profile.usernameTaken"))
+                    "USERNAME_INVALID" -> serverError = serverError + ("username" to t("profile.316LettersOrDigits"))
+                    "TIMEZONE_INVALID" -> serverError = serverError + ("timezone" to t("profile.pickTimeZone"))
+                    "NAME_INVALID" -> serverError = serverError + ("lastName" to t("profile.nameRule"))
+                    else -> onDone(t("common.couldntSave"))
                 }
             } finally {
                 busy = false
@@ -169,7 +170,7 @@ class ProfileViewModel @Inject constructor(
             try {
                 refresh(account.uploadAvatar(jpeg))
             } catch (e: ApiException) {
-                onFail(if (!e.isOffline) e.message else "Couldn't update your photo. Try again.")
+                onFail(if (!e.isOffline) e.message else t("profile.photoNotUpdated"))
             } finally {
                 photoBusy = false
             }
@@ -182,7 +183,7 @@ class ProfileViewModel @Inject constructor(
             try {
                 refresh(account.removeAvatar())
             } catch (_: ApiException) {
-                onFail("Couldn't remove your photo. Try again.")
+                onFail(t("profile.photoNotRemoved"))
             } finally {
                 photoBusy = false
             }
@@ -242,9 +243,9 @@ class UniverseViewModel @Inject constructor(
                 show(backend.run { updateUniverse(UniverseUpdate(name.trim(), welcome)) })
                 home.load()
                 session.refresh()
-                notice("Universe saved")
+                notice(t("settings.universeSaved"))
             } catch (e: ApiException) {
-                if (e.code == "UNIVERSE_NAME_INVALID") serverError = e.message else notice(if (e.status in 1..499) e.message else "Couldn't save. Try again.")
+                if (e.code == "UNIVERSE_NAME_INVALID") serverError = e.message else notice(if (e.status in 1..499) e.message else t("common.couldntSave"))
             } finally {
                 busy = false
             }
@@ -257,7 +258,7 @@ class UniverseViewModel @Inject constructor(
                 revealed = backend.run { rotateKey() }.code
                 runCatching { view = backend.run { universe() } }
             } catch (_: ApiException) {
-                notice("Couldn't make a new key. Try again.")
+                notice(t("settings.keyNotMade"))
             }
         }
     }
@@ -298,7 +299,7 @@ class ChangePinViewModel @Inject constructor(private val account: AccountReposit
             else -> if (pin != values[1]) {
                 values = listOf(values[0], "", "")
                 step = 1
-                error = "PINs differ. Start again."
+                error = t("common.pinsDiffer")
             } else {
                 submit(values[0], pin, brand, onChanged)
             }
@@ -317,10 +318,10 @@ class ChangePinViewModel @Inject constructor(private val account: AccountReposit
                 values = listOf("", "", "")
                 step = 0
                 error = when {
-                    e.code == "WRONG_PIN" || e.code == "PIN_THROTTLED" -> "Wrong PIN. Try again."
+                    e.code == "WRONG_PIN" || e.code == "PIN_THROTTLED" -> t("common.wrongPin")
                     // A refusal with its own words (a malformed PIN) is not "can't reach".
                     !e.isOffline -> e.message
-                    else -> "Can't reach $brand. Try again."
+                    else -> t("common.cantReachTryAgain", "brand" to brand)
                 }
             } finally {
                 busy = false
@@ -346,7 +347,7 @@ class FingerprintPinViewModel @Inject constructor(private val account: AccountRe
                 onOk(pin)
             } catch (e: ApiException) {
                 digits = ""
-                error = if (e.code == "WRONG_PIN" || e.code == "PIN_THROTTLED") "Wrong PIN. Try again." else "Can't reach $brand. Try again."
+                error = if (e.code == "WRONG_PIN" || e.code == "PIN_THROTTLED") t("common.wrongPin") else t("common.cantReachTryAgain", "brand" to brand)
             } finally {
                 busy = false
             }

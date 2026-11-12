@@ -1,5 +1,6 @@
 package com.delulutopia.core.ui.doodle
 
+import com.delulutopia.core.i18n.t
 import kotlin.math.hypot
 import kotlin.math.roundToInt
 
@@ -22,19 +23,19 @@ object Surfaces {
 }
 
 /** Q4 Standard: 8 palette colours. */
-val COLOURS: List<Pair<String, Int>> = listOf(
-    "Ink" to 0xFF33323B.toInt(),
-    "Navy" to 0xFF202B45.toInt(),
-    "Terracotta" to 0xFFC96F52.toInt(),
-    "Red" to 0xFFB23A3A.toInt(),
-    "Mustard" to 0xFFD4A24C.toInt(),
-    "Sage" to 0xFF5F8A7D.toInt(),
-    "Sky" to 0xFF5B8FC7.toInt(),
-    "Lavender" to 0xFF8A7BC0.toInt(),
+val COLOURS: List<Pair<String, Int>> get() = listOf(
+    t("doodle.colour.ink") to 0xFF33323B.toInt(),
+    t("doodle.colour.navy") to 0xFF202B45.toInt(),
+    t("doodle.colour.terracotta") to 0xFFC96F52.toInt(),
+    t("doodle.colour.red") to 0xFFB23A3A.toInt(),
+    t("doodle.colour.mustard") to 0xFFD4A24C.toInt(),
+    t("doodle.colour.sage") to 0xFF5F8A7D.toInt(),
+    t("doodle.colour.sky") to 0xFF5B8FC7.toInt(),
+    t("doodle.colour.lavender") to 0xFF8A7BC0.toInt(),
 )
 
 /** Q4 Standard: 3 brush sizes, in canvas pixels. */
-val SIZES: List<Pair<String, Float>> = listOf("Fine" to 6f, "Medium" to 14f, "Bold" to 32f)
+val SIZES: List<Pair<String, Float>> get() = listOf(t("doodle.size.fine") to 6f, t("doodle.size.medium") to 14f, t("doodle.size.bold") to 32f)
 
 /** The eraser is wider than the brush it follows, as on paper. */
 const val ERASER_FACTOR = 2.5f

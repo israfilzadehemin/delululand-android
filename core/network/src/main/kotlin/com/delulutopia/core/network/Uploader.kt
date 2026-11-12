@@ -1,5 +1,6 @@
 package com.delulutopia.core.network
 
+import com.delulutopia.core.i18n.t
 import com.delulutopia.core.network.model.Att
 import java.io.IOException
 import java.util.concurrent.TimeUnit
@@ -138,12 +139,12 @@ class Uploader @Inject constructor(
         const val AUDIO_MAX = 60L * 1024 * 1024
         const val VIDEO_MAX = 100L * 1024 * 1024
         const val DOODLE_MAX = 2L * 1024 * 1024
-        const val PHOTO_TOO_LARGE = "This photo is larger than 10 MB"
-        const val AUDIO_TOO_LARGE = "This audio file is larger than 60 MB"
-        const val VIDEO_TOO_LARGE = "This video is larger than 100 MB"
-        const val DOODLE_TOO_LARGE = "This doodle is larger than 2 MB"
-        const val UPLOAD_FAILED = "Upload failed. Try again."
-        const val UPLOAD_TIMED_OUT = "The upload took too long. Try again."
+        val PHOTO_TOO_LARGE: String get() = t("media.photoTooLarge")
+        val AUDIO_TOO_LARGE: String get() = t("media.audioTooLarge")
+        val VIDEO_TOO_LARGE: String get() = t("media.videoTooLarge")
+        val DOODLE_TOO_LARGE: String get() = t("media.doodleTooLarge")
+        val UPLOAD_FAILED: String get() = t("media.uploadFailed")
+        val UPLOAD_TIMED_OUT: String get() = t("media.uploadTimedOut")
 
         /** The refusal the user sees before any byte leaves the phone, or null (O4). */
         fun precheck(kind: Kind, size: Long): String? = when {

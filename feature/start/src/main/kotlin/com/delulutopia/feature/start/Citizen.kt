@@ -26,7 +26,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -41,6 +40,7 @@ import com.delulutopia.core.designsystem.component.Zones
 import com.delulutopia.core.designsystem.icon.DlIcons
 import com.delulutopia.core.designsystem.icon.WebIcons
 import com.delulutopia.core.designsystem.theme.DlShape
+import com.delulutopia.core.i18n.t
 import com.delulutopia.core.network.ApiException
 import com.delulutopia.core.ui.AfterStart
 import com.delulutopia.core.ui.photo.PhotoChooser
@@ -57,8 +57,8 @@ data class Citizen(val username: String = "", val timezone: String = Zones.devic
 internal fun usernameProblem(username: String, taken: List<String>, serverError: String?): String? = when {
     serverError != null -> serverError
     username.isEmpty() -> null
-    !Rules.usernameOk(username) -> stringResource(R.string.username_rule)
-    Rules.usernameTaken(username, taken) -> stringResource(R.string.username_taken)
+    !Rules.usernameOk(username) -> t("universe.316LettersOrDigits")
+    Rules.usernameTaken(username, taken) -> t("profile.usernameTaken")
     else -> null
 }
 
@@ -77,27 +77,27 @@ internal fun CitizenStep(value: Citizen, onChange: (Citizen) -> Unit, taken: Lis
                 ring = signatureOf(signature),
                 size = 96.dp,
                 initialsColor = MaterialTheme.colorScheme.onSurface,
-                content = preview?.let { p -> { Image(p, stringResource(R.string.your_photo), Modifier.fillMaxSize(), contentScale = ContentScale.Crop) } },
+                content = preview?.let { p -> { Image(p, t("universe.yourPhoto"), Modifier.fillMaxSize(), contentScale = ContentScale.Crop) } },
             )
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 DlOutlinedButton(
-                    stringResource(if (value.photo != null) R.string.change_photo else R.string.add_photo),
+                    t(if (value.photo != null) "universe.changePhoto" else "universe.addPhoto"),
                     { source = true },
                     icon = WebIcons.Camera,
                 )
                 Text(
-                    stringResource(if (value.photo != null) R.string.photo_after else R.string.photo_optional),
+                    t(if (value.photo != null) "universe.photoHintSet" else "universe.photoHint"),
                     style = MaterialTheme.typography.bodySmall,
                     color = if (tooBig) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
                 )
-                if (tooBig) Text(stringResource(R.string.photo_too_big), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)
+                if (tooBig) Text(t("media.photoTooLarge"), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)
             }
         }
         DlTextField(
             value = value.username,
             onValueChange = { onChange(value.copy(username = it.filterNot(Char::isWhitespace))) },
-            label = stringResource(R.string.username_label),
-            supportingText = stringResource(R.string.username_rule),
+            label = t("universe.username"),
+            supportingText = t("universe.316LettersOrDigits"),
             errorText = usernameProblem(value.username, taken, serverError),
             maxLength = 32,
             keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.None, autoCorrectEnabled = false),
@@ -115,13 +115,13 @@ internal fun CitizenStep(value: Citizen, onChange: (Citizen) -> Unit, taken: Lis
             ) {
                 Column(Modifier.weight(1f)) {
                     Text(
-                        stringResource(R.string.timezone_label),
+                        t("universe.timeZone"),
                         fontSize = 12.sp,
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                     Text(
-                        "${zone.city} · ${value.timezone}",
+                        t("profile.moodSince", "mood" to zone.city, "age" to value.timezone),
                         style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Medium),
                         maxLines = 1,
                     )
@@ -131,13 +131,13 @@ internal fun CitizenStep(value: Citizen, onChange: (Citizen) -> Unit, taken: Lis
             }
             HorizontalDivider(color = MaterialTheme.colorScheme.outline)
             Text(
-                stringResource(R.string.timezone_hint),
+                t("universe.thisDevicesZonePickedFor"),
                 modifier = Modifier.padding(horizontal = 16.dp),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
-        Text(stringResource(R.string.citizen_note), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(t("universe.nameSurnameAndEverythingElse"), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
     PhotoChooser(
         sheet = source,

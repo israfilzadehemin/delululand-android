@@ -23,15 +23,16 @@ import com.delulutopia.core.data.LetterState
 import com.delulutopia.core.designsystem.icon.WebIcons
 import com.delulutopia.core.designsystem.motion.Enter
 import com.delulutopia.core.designsystem.motion.enter
+import com.delulutopia.core.i18n.t
 import com.delulutopia.core.network.model.LetterMedia
 import com.delulutopia.core.network.model.Row as LetterRow
 
 /** What a row says when there is no text (FS-R12). */
 fun firstLineOf(firstLine: String?, media: LetterMedia?): String = when {
     !firstLine.isNullOrEmpty() -> firstLine
-    media != null && media.photos > 0 -> "Photo"
-    media != null && media.audios > 0 -> "Voice note"
-    media != null && media.doodles > 0 -> "Doodle"
+    media != null && media.photos > 0 -> t("emails.media.photo")
+    media != null && media.audios > 0 -> t("emails.media.voiceNote")
+    media != null && media.doodles > 0 -> t("doodle.doodle")
     else -> ""
 }
 
@@ -63,7 +64,7 @@ fun OfflineBanner(modifier: Modifier = Modifier, brand: String = LocalBrand.curr
         horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         Icon(WebIcons.Offline, null, Modifier.size(18.dp), tint = c.error)
-        Text("Can't reach $brand. Showing what we had.", style = MaterialTheme.typography.bodyMedium, color = c.onErrorContainer)
+        Text(t("home.cantReachShowingWhatWe", "brand" to brand), style = MaterialTheme.typography.bodyMedium, color = c.onErrorContainer)
     }
 }
 

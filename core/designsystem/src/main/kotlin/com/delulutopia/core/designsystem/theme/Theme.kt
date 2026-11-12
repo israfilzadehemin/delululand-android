@@ -6,6 +6,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.unit.LayoutDirection
+import com.delulutopia.core.i18n.I18n
 
 /** Settings › Appearance (A4): Light, Dark or Match device. Saved per device. */
 enum class ThemeMode { Light, Dark, System }
@@ -34,6 +37,8 @@ fun DelulutopiaTheme(
         LocalDlColors provides if (darkTheme) DarkDlColors else LightDlColors,
         LocalDlType provides DefaultDlType,
         LocalDlDark provides darkTheme,
+        // L3: Persian lays out right to left; a language switch re-lays every screen at once.
+        LocalLayoutDirection provides if (I18n.lang.rtl) LayoutDirection.Rtl else LayoutDirection.Ltr,
     ) {
         MaterialTheme(
             colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme,

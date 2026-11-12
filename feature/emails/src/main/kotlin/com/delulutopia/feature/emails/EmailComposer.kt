@@ -8,6 +8,7 @@ import androidx.compose.runtime.setValue
 import com.delulutopia.core.data.Backend
 import com.delulutopia.core.data.DraftSaver
 import com.delulutopia.core.data.HomeRepository
+import com.delulutopia.core.i18n.t
 import com.delulutopia.core.network.ApiException
 import com.delulutopia.core.network.model.DraftVersionBody
 import com.delulutopia.core.network.model.EmailDraft
@@ -109,7 +110,7 @@ class EmailComposer(
         } catch (_: DraftSaver.ConflictException) {
             return SendResult.Conflict
         } catch (_: Exception) {
-            return SendResult.Failed("Not sent. Try again.")
+            return SendResult.Failed(t("common.notSent"))
         }
         return try {
             val sent = backend.run { if (key == "new") sendNewEmail(DraftVersionBody(version)) else reply(key.toLong(), DraftVersionBody(version)) }
@@ -125,7 +126,7 @@ class EmailComposer(
                     SendResult.Failed(creditsLine(home.state.value.home?.emailCredits?.copy(left = 0)) ?: e.message)
                 }
                 e.status == 422 || e.code == "VIDEO_LIMIT" -> SendResult.Failed(e.message)
-                else -> SendResult.Failed("Not sent. Try again.")
+                else -> SendResult.Failed(t("common.notSent"))
             }
         }
     }

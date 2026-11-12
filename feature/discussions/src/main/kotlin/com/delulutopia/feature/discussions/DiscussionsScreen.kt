@@ -58,6 +58,7 @@ import com.delulutopia.core.designsystem.motion.rememberPlayed
 import com.delulutopia.core.designsystem.motion.rowEnter
 import com.delulutopia.core.designsystem.theme.DlTheme
 import com.delulutopia.core.designsystem.theme.NoteColor
+import com.delulutopia.core.i18n.t
 import com.delulutopia.core.network.model.Citizen
 import com.delulutopia.core.network.model.DRow
 import com.delulutopia.core.ui.ArchivedRoute
@@ -111,7 +112,7 @@ fun DiscussionsList(
     val nav = LocalAppNav.current
     val nowMs = rememberNow()
     val draftEmpty = me?.discussionDraftEmpty ?: true
-    val startLabel = if (draftEmpty) "Start a discussion" else "Continue your discussion draft"
+    val startLabel = if (draftEmpty) t("discussions.startADiscussion") else t("discussions.continueDraft")
     val bar: @Composable () -> Unit = {
         // web .dl-list-bar--discussions: a quiet 36 dp link, pulled 6 dp into the gaps above and below.
         Row(
@@ -123,9 +124,17 @@ fun DiscussionsList(
             horizontalArrangement = if (archived) Arrangement.Start else Arrangement.End,
         ) {
             if (archived) {
-                ArchivedLink(WebIcons.Back, "Discussions", "Back to Discussions", Modifier.offset(x = (-10).dp)) { nav.back() }
+                ArchivedLink(WebIcons.Back, t("discussions.discussions"), t("discussions.backToDiscussions"), Modifier.offset(x = (-10).dp)) { nav.back() }
             } else {
-                ArchivedLink(WebIcons.Archive, "Archived · $archivedCount", "Archived discussions: $archivedCount", Modifier.offset(x = 10.dp)) {
+                ArchivedLink(
+                    WebIcons.Archive,
+                    t("discussions.archivedCount", "count" to archivedCount),
+                    t(
+                        "discussions.archivedDiscussions",
+                        "archivedCount" to archivedCount,
+                    ),
+                    Modifier.offset(x = 10.dp),
+                ) {
                     nav.open(ArchivedRoute)
                 }
             }
@@ -148,12 +157,12 @@ fun DiscussionsList(
             ) {
                 EmptyNotes()
                 if (archived) {
-                    Text("Nothing archived yet.", style = MaterialTheme.typography.titleMedium)
+                    Text(t("discussions.nothingArchivedYet"), style = MaterialTheme.typography.titleMedium)
                 } else {
                     Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                        Text("No discussions yet.", style = MaterialTheme.typography.titleMedium)
+                        Text(t("discussions.noDiscussionsYet"), style = MaterialTheme.typography.titleMedium)
                         Text(
-                            "Start the first one.",
+                            t("discussions.startTheFirstOne"),
                             style = MaterialTheme.typography.bodyLarge.copy(fontSize = 15.sp),
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
@@ -186,8 +195,8 @@ fun DiscussionsList(
                     NoteRow(
                         r,
                         nowMs,
-                        authorName = if (r.mine) me?.nickname ?: "Me" else friend?.nickname ?: "Friend",
-                        friendName = friend?.nickname ?: "Friend",
+                        authorName = if (r.mine) me?.nickname ?: t("common.me") else friend?.nickname ?: t("common.friend"),
+                        friendName = friend?.nickname ?: t("common.friend"),
                         tilt = if (index % 2 == 0) -0.6f else 0.5f,
                         archived = archived,
                     )
@@ -202,13 +211,13 @@ fun DiscussionsList(
                     if (hasMore) {
                         CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
                         Text(
-                            "Loading older discussions…",
+                            t("discussions.loadingOlder"),
                             style = MaterialTheme.typography.bodySmall.copy(fontSize = 13.sp),
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     } else {
                         Text(
-                            "That is everything",
+                            t("discussions.thatIsEverything"),
                             style = MaterialTheme.typography.bodySmall.copy(fontSize = 13.sp),
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
@@ -241,11 +250,17 @@ private fun NoteRow(r: DRow, nowMs: Long, authorName: String, friendName: String
     val comments = commentWords(r.commentCount)
     val lastActivity = r.lastCommentAt ?: if (r.mine) r.postedAt else r.arrivesAt
     val active = r.activityAt?.takeIf { (Time.ms(it) ?: 0) > (Time.ms(r.postedAt) ?: 0) }
-    val whenText = if (active != null) "Active ${Time.clock(active, nowMs)}" else "Posted ${Time.clock(r.postedAt, nowMs)}"
+    val whenText = if (active !=
+        null
+    ) {
+        t("discussions.activeAt", "time" to Time.clock(active, nowMs))
+    } else {
+        t("discussions.postedAt", "time" to Time.clock(r.postedAt, nowMs))
+    }
     val meta = if (reactionWins(r.lastReaction, reacted, lastActivity)) {
         noticeLine(r.lastReaction!!, reacted, friendName)
     } else {
-        "$authorName · $whenText${if (r.editedAt != null) " · edited" else ""}${if (comments.isNotEmpty()) " · $comments" else ""}"
+        "$authorName · $whenText${if (r.editedAt != null) t("discussions.metaEdited") else ""}${if (comments.isNotEmpty()) " · $comments" else ""}"
     }
     val chip: @Composable () -> Unit = {
         when {
@@ -254,28 +269,28 @@ private fun NoteRow(r: DRow, nowMs: Long, authorName: String, friendName: String
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
-                    "${Time.countdown((Time.ms(r.windowEndsAt) ?: 0) - nowMs)} to take back",
+                    t("discussions.toTakeBack", "countdown" to Time.countdown((Time.ms(r.windowEndsAt) ?: 0) - nowMs)),
                     style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold, fontFeatureSettings = "tnum"),
                     color = DlTheme.colors.letterInk,
                 )
             }
             !arrived -> Text(Time.countdown((Time.ms(r.arrivesAt) ?: 0) - nowMs), style = DlTheme.type.countdown.copy(fontSize = 16.sp), color = noteInk)
             r.isNew -> NewChip()
-            unseen -> NewChip(text = "$fresh new")
+            unseen -> NewChip(text = t("discussions.new2", "fresh" to fresh))
         }
     }
     if (hidden) {
         val arrives = Time.clock(r.arrivesAt, nowMs)
         Note(
             NoteColor.Blank,
-            Modifier.semantics { contentDescription = "A discussion is on its way, arrives $arrives" },
+            Modifier.semantics { contentDescription = t("discussions.aDiscussionIsOnIts2", "arrives" to arrives) },
             tilt = tilt,
-            onClick = { notice("Arrives at $arrives") },
+            onClick = { notice(t("discussions.arrivesAt", "time" to arrives)) },
         ) {
             Row(Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 26.dp, bottom = 18.dp), verticalAlignment = Alignment.CenterVertically) {
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                    Text("A discussion is on its way", style = NoteLine, color = noteInkQuiet, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                    Text("$authorName · arrives $arrives", style = NoteMeta, color = noteInkQuiet)
+                    Text(t("discussions.aDiscussionIsOnIts"), style = NoteLine, color = noteInkQuiet, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    Text(t("discussions.arrives", "authorName" to authorName, "arrives" to arrives), style = NoteMeta, color = noteInkQuiet)
                 }
                 chip()
             }

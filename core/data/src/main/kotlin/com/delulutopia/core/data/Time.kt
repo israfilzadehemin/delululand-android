@@ -1,52 +1,51 @@
 package com.delulutopia.core.data
 
+import com.delulutopia.core.i18n.Dates
+import com.delulutopia.core.i18n.localDigits
+import com.delulutopia.core.i18n.t
 import com.delulutopia.core.network.ServerTime
 import java.time.Instant
 import java.time.ZoneId
 import java.time.ZonedDateTime
-import java.time.format.DateTimeFormatter
-import java.util.Locale
 
-/** Instants and clock text (web src/clock): the viewer's zone, 24-hour, en-GB. */
+/** Instants and clock text (web src/clock): the viewer's zone, 24-hour, in the language in force. */
 object Time {
     fun ms(iso: String?): Long? = iso?.let { runCatching { Instant.parse(it).toEpochMilli() }.getOrNull() }
 
     fun now(): Long = ServerTime.nowMs()
 
-    private val TIME = DateTimeFormatter.ofPattern("HH:mm", Locale.UK)
-    private val DAY = DateTimeFormatter.ofPattern("d MMM", Locale.UK)
-    private val DAY_YEAR = DateTimeFormatter.ofPattern("d MMM yyyy", Locale.UK)
-
     private fun zoned(ms: Long, zone: ZoneId = ZoneId.systemDefault()) = ZonedDateTime.ofInstant(Instant.ofEpochMilli(ms), zone)
 
-    /** FS-T6: `HH:MM` today; `27 Oct, 21:10` another day this year; `27 Oct 2025, 21:10` in another year. */
+    /**
+     * FS-T6: `HH:MM` today; `27 Oct, 21:10` another day this year; `27 Oct 2025, 21:10` in another year. In the
+     * language in force (L4): Azerbaijani month names; Persian solar dates and digits.
+     */
     fun clock(iso: String?, nowMs: Long = now()): String {
         val ms = ms(iso) ?: return ""
         val d = zoned(ms)
         val today = zoned(nowMs)
-        val time = d.format(TIME)
+        val time = Dates.time(d)
         return when {
             d.toLocalDate() == today.toLocalDate() -> time
-            d.year == today.year -> "${d.format(DAY)}, $time"
-            else -> "${d.format(DAY_YEAR)}, $time"
+            else -> t("common.dayTime", "day" to Dates.day(d, year = !Dates.sameYear(d, today)), "time" to time)
         }
     }
 
     /** `HH:MM` only (S5, the edit header). */
-    fun time(iso: String?): String = ms(iso)?.let { zoned(it).format(TIME) } ?: ""
+    fun time(iso: String?): String = ms(iso)?.let { Dates.time(zoned(it)) } ?: ""
 
-    fun timeOf(ms: Long): String = zoned(ms).format(TIME)
+    fun timeOf(ms: Long): String = Dates.time(zoned(ms))
 
     /** A day without the time: `10 Nov` this year, `10 Nov 2025` in another (Discussion Controls A3). */
     fun day(iso: String?, nowMs: Long = now()): String {
         val d = zoned(ms(iso) ?: return "")
-        return if (d.year == zoned(nowMs).year) d.format(DAY) else d.format(DAY_YEAR)
+        return Dates.day(d, year = !Dates.sameYear(d, zoned(nowMs)))
     }
 
     /** mm:ss for a remaining duration; never negative; hours never appear. */
     fun countdown(remainingMs: Long): String {
         val total = (remainingMs.coerceAtLeast(0) + 999) / 1000
-        return "${total / 60}:${(total % 60).toString().padStart(2, '0')}"
+        return localDigits("${total / 60}:${(total % 60).toString().padStart(2, '0')}")
     }
 
     /** `PT1H` → 3 600 000, `PT6M` → 360 000, `PT30S` → 30 000. */

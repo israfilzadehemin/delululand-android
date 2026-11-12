@@ -1,5 +1,7 @@
 package com.delulutopia.core.data
 
+import com.delulutopia.core.i18n.I18n
+import com.delulutopia.core.i18n.Lang
 import com.delulutopia.core.network.ApiCaller
 import com.delulutopia.core.network.ApiException
 import com.delulutopia.core.network.DelulutopiaApi
@@ -11,6 +13,7 @@ import com.delulutopia.core.network.model.Entered
 import com.delulutopia.core.network.model.EntryView
 import com.delulutopia.core.network.model.InviteRequest
 import com.delulutopia.core.network.model.JoinRequest
+import com.delulutopia.core.network.model.LanguageBody
 import com.delulutopia.core.network.model.LoginRequest
 import com.delulutopia.core.network.model.Profile
 import javax.inject.Inject
@@ -48,7 +51,10 @@ class AccountRepository @Inject constructor(
 
     suspend fun createUniverse(request: CreateUniverseRequest): CreatedUniverse = caller.call { api.createUniverse(request) }
 
-    suspend fun join(username: String, timezone: String, pin: String) = caller.call { api.join(JoinRequest(username, timezone, pin)) }
+    suspend fun join(username: String, timezone: String, pin: String) = caller.call { api.join(JoinRequest(username, timezone, pin, I18n.lang.tag)) }
+
+    /** You › Language (L8): saved to the account; the other devices follow through the live signal `language`. */
+    suspend fun setLanguage(lang: Lang) = caller.call { api.setLanguage(LanguageBody(lang.tag)) }
 
     /** FS-A17: every other device stays logged in. */
     suspend fun changePin(current: String, next: String) = withThrottleRetry("PIN_THROTTLED") { api.changePin(ChangePinBody(current, next)) }

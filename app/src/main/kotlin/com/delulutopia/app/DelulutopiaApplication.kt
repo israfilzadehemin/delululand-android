@@ -6,6 +6,7 @@ import coil3.PlatformContext
 import coil3.SingletonImageLoader
 import coil3.network.okhttp.OkHttpNetworkFetcherFactory
 import coil3.svg.SvgDecoder
+import com.delulutopia.core.i18n.I18n
 import com.delulutopia.core.ui.HttpOwner
 import dagger.Lazy
 import dagger.hilt.android.HiltAndroidApp
@@ -22,6 +23,12 @@ class DelulutopiaApplication :
     @Inject lateinit var okHttp: Lazy<OkHttpClient>
 
     override val httpClient: OkHttpClient get() = okHttp.get()
+
+    override fun onCreate() {
+        super.onCreate()
+        // The remembered language (or the phone's) before the first screen draws (L6).
+        I18n.init(this)
+    }
 
     override fun newImageLoader(context: PlatformContext): ImageLoader = ImageLoader.Builder(context)
         .components {

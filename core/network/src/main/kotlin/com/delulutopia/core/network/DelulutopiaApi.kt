@@ -31,6 +31,7 @@ import com.delulutopia.core.network.model.HomeSession
 import com.delulutopia.core.network.model.InviteRequest
 import com.delulutopia.core.network.model.JoinRequest
 import com.delulutopia.core.network.model.KeyCode
+import com.delulutopia.core.network.model.LanguageBody
 import com.delulutopia.core.network.model.LetterFull
 import com.delulutopia.core.network.model.LetterPage
 import com.delulutopia.core.network.model.LoginRequest
@@ -302,6 +303,9 @@ interface DelulutopiaApi {
     // Profile and settings
     @GET("api/me/profile")
     suspend fun profile(): Profile
+
+    @PUT("api/me/language")
+    suspend fun setLanguage(@Body body: LanguageBody)
 
     @PUT("api/me/profile")
     suspend fun saveProfile(@Body body: ProfileBody): Profile

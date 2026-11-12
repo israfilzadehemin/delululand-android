@@ -9,6 +9,7 @@ import com.delulutopia.core.data.Backend
 import com.delulutopia.core.data.HomeRepository
 import com.delulutopia.core.data.Refresher
 import com.delulutopia.core.data.Time
+import com.delulutopia.core.i18n.t
 import com.delulutopia.core.network.ApiException
 import com.delulutopia.core.network.model.DComment
 import com.delulutopia.core.network.model.DComments
@@ -179,15 +180,15 @@ class DiscussionViewModel @AssistedInject constructor(
         load()
         null
     } catch (_: ApiException) {
-        "Not posted. Try again."
+        t("common.notPosted")
     }
 
     /** E2, E3: the edited comment, or an error line. */
     suspend fun edit(c: DComment, text: String): String? {
-        val t = text.trim()
-        if (t == c.text) return null
+        val trimmed = text.trim()
+        if (trimmed == c.text) return null
         return try {
-            val updated = backend.run { editComment(id, c.id, TextBody(t)) }
+            val updated = backend.run { editComment(id, c.id, TextBody(trimmed)) }
             comments = comments.map { if (it.id == c.id) updated else it }
             null
         } catch (e: ApiException) {
@@ -195,7 +196,7 @@ class DiscussionViewModel @AssistedInject constructor(
                 drop(c.id)
                 null
             } else {
-                "Not saved. Try again."
+                t("reactions.notSavedTryAgain")
             }
         }
     }
@@ -212,7 +213,7 @@ class DiscussionViewModel @AssistedInject constructor(
             drop(c.id)
             null
         } else {
-            "Not deleted. Try again."
+            t("common.notDeleted")
         }
     }
 
@@ -230,17 +231,17 @@ class DiscussionViewModel @AssistedInject constructor(
     suspend fun archive(): String = try {
         ui = Ui.Shown(backend.run { archive(id) })
         homeRepo.refreshSoon()
-        "Archived for both of you"
+        t("discussions.archivedForBoth")
     } catch (e: ApiException) {
-        if (e.status in 400..499) e.message else "Not archived. Try again."
+        if (e.status in 400..499) e.message else t("discussions.notArchived")
     }
 
     suspend fun unarchive(): String = try {
         ui = Ui.Shown(backend.run { unarchive(id) })
         homeRepo.refreshSoon()
-        "Back in Discussions"
+        t("discussions.backInDiscussions")
     } catch (e: ApiException) {
-        if (e.status in 400..499) e.message else "Not unarchived. Try again."
+        if (e.status in 400..499) e.message else t("discussions.notUnarchived")
     }
 
     /** Delete (X1–X3) and take back (D2) are the same call; null when done or already gone. */
@@ -251,9 +252,9 @@ class DiscussionViewModel @AssistedInject constructor(
     } catch (e: ApiException) {
         when {
             e.status == 404 -> null
-            takeBack && e.code == "WINDOW_CLOSED" -> "Too late: it's on its way."
-            takeBack -> "Not taken back. Try again."
-            else -> "Not deleted. Try again."
+            takeBack && e.code == "WINDOW_CLOSED" -> t("common.tooLate")
+            takeBack -> t("discussions.notTakenBack")
+            else -> t("common.notDeleted")
         }.also { if (it != null) load() }
     }
 }

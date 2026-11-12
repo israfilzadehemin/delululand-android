@@ -54,6 +54,7 @@ import com.delulutopia.core.designsystem.icon.WebIcons
 import com.delulutopia.core.designsystem.motion.Enter
 import com.delulutopia.core.designsystem.motion.enter
 import com.delulutopia.core.designsystem.theme.DlTheme
+import com.delulutopia.core.i18n.t
 import com.delulutopia.core.network.model.Mood
 import com.delulutopia.core.ui.EmojiPickerSheet
 import kotlinx.coroutines.launch
@@ -103,11 +104,11 @@ internal fun MoodSheet(
                 // web .dl-sheet-titlebar (mood: 18/700) with the close button at the end.
                 Row(Modifier.fillMaxWidth().padding(start = 16.dp, end = 6.dp, bottom = 8.dp), verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        "How do you feel?",
+                        t("home.howDoYouFeel"),
                         Modifier.weight(1f),
                         style = MaterialTheme.typography.titleLarge.copy(fontSize = 18.sp, fontWeight = FontWeight.Bold),
                     )
-                    IconButton(onClick = onClose) { Icon(WebIcons.Close, "Close", Modifier.size(20.dp)) }
+                    IconButton(onClick = onClose) { Icon(WebIcons.Close, t("home.close"), Modifier.size(20.dp)) }
                 }
                 HorizontalPager(pager, Modifier.fillMaxWidth()) { p ->
                     Column(Modifier.padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -141,7 +142,7 @@ internal fun MoodSheet(
                                                         .background(MaterialTheme.colorScheme.surface)
                                                         .border(1.dp, MaterialTheme.colorScheme.outlineVariant, CircleShape)
                                                         .clickable(enabled = !busy, role = Role.Button) { view = MoodView.Edit(m) }
-                                                        .semantics { contentDescription = "Edit ${m.label}" },
+                                                        .semantics { contentDescription = t("home.edit2", "label" to m.label) },
                                                     contentAlignment = Alignment.Center,
                                                 ) {
                                                     Icon(WebIcons.Pencil, null, Modifier.size(13.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -159,7 +160,7 @@ internal fun MoodSheet(
                 }
                 Row(Modifier.fillMaxWidth().padding(top = 12.dp), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
                     IconButton(onClick = { scope.launch { pager.animateScrollToPage(pager.currentPage - 1) } }, enabled = pager.currentPage > 0) {
-                        Icon(WebIcons.Back, "Previous moods", Modifier.size(18.dp))
+                        Icon(WebIcons.Back, t("home.previousMoods"), Modifier.size(18.dp))
                     }
                     Spacer(Modifier.width(16.dp))
                     Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -171,20 +172,20 @@ internal fun MoodSheet(
                                     .clip(RoundedCornerShape(3.dp))
                                     .background(if (on) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant)
                                     .clickable { scope.launch { pager.animateScrollToPage(p) } }
-                                    .semantics { contentDescription = "Mood page ${p + 1}" },
+                                    .semantics { contentDescription = t("home.moodPage", "n" to p + 1) },
                             )
                         }
                     }
                     Spacer(Modifier.width(16.dp))
                     IconButton(onClick = { scope.launch { pager.animateScrollToPage(pager.currentPage + 1) } }, enabled = pager.currentPage < pages.size - 1) {
-                        Icon(WebIcons.Forward, "More moods", Modifier.size(18.dp))
+                        Icon(WebIcons.Forward, t("home.moreMoods"), Modifier.size(18.dp))
                     }
                 }
                 val foot = when {
-                    error -> "Not saved. Try again."
-                    canAdd && full -> "$limit of $limit — delete one to add another"
-                    friend != null -> "One tap sets it. $friend sees it right away, not after an hour."
-                    else -> "One tap sets it."
+                    error -> t("home.notSavedTryAgain")
+                    canAdd && full -> t("home.ofDeleteOneToAdd", "limit" to limit, "limit" to limit)
+                    friend != null -> t("home.oneTapFriend", "friend" to friend)
+                    else -> t("home.oneTap")
                 }
                 Text(
                     foot,
@@ -259,7 +260,7 @@ private fun NewMoodTile(enabled: Boolean, onClick: () -> Unit) {
     ) {
         Text("+", fontSize = 26.sp, color = if (enabled) MaterialTheme.colorScheme.primary else line)
         Text(
-            "New mood",
+            t("home.newMood"),
             style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold, fontSize = 12.sp, lineHeight = 14.4.sp),
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
@@ -296,8 +297,8 @@ private fun MoodForm(
 
     Column(Modifier.padding(horizontal = 16.dp).padding(bottom = 24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            IconButton(onClick = onBack, enabled = !busy) { Icon(WebIcons.Back, "Back to moods", Modifier.size(20.dp)) }
-            Text(if (editing != null) "Edit mood" else "New mood", style = MaterialTheme.typography.headlineSmall)
+            IconButton(onClick = onBack, enabled = !busy) { Icon(WebIcons.Back, t("home.backToMoods"), Modifier.size(20.dp)) }
+            Text(if (editing != null) t("home.editMood") else t("home.newMood"), style = MaterialTheme.typography.headlineSmall)
         }
         Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Box(
@@ -307,7 +308,7 @@ private fun MoodForm(
                     .background(MaterialTheme.colorScheme.surface)
                     .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(16.dp))
                     .clickable(enabled = !busy, role = Role.Button) { picker = true }
-                    .semantics { contentDescription = if (emoji.isNotEmpty()) "Emoji $emoji. Change it" else "Choose an emoji" },
+                    .semantics { contentDescription = if (emoji.isNotEmpty()) t("home.emojiChangeIt", "emoji" to emoji) else t("home.chooseAnEmoji") },
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
@@ -318,7 +319,7 @@ private fun MoodForm(
                     color = if (emoji.isEmpty()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
                 )
             }
-            if (emoji.isEmpty()) Text("Choose an emoji", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            if (emoji.isEmpty()) Text(t("home.chooseAnEmoji"), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
         DlTextField(
             value = label,
@@ -326,7 +327,7 @@ private fun MoodForm(
                 if (it.length <= 40) label = it
                 error = null
             },
-            label = "Label",
+            label = t("home.label"),
             supportingText = Moods.LABEL_RULE,
             errorText = problem,
             counter = "$count/${Moods.LABEL_MAX}",
@@ -342,7 +343,7 @@ private fun MoodForm(
             )
         }
         DlFilledButton(
-            if (busy && !confirm) "Saving…" else "Save",
+            if (busy && !confirm) t("common.saving") else t("common.save"),
             {
                 busy = true
                 error = null
@@ -359,13 +360,13 @@ private fun MoodForm(
             enabled = canSave,
         )
         if (editing != null) {
-            DlTextButton("Delete mood", { confirm = true }, Modifier.align(Alignment.CenterHorizontally), destructive = true, enabled = !busy)
+            DlTextButton(t("home.deleteMood"), { confirm = true }, Modifier.align(Alignment.CenterHorizontally), destructive = true, enabled = !busy)
         }
     }
 
     if (picker) {
         EmojiPickerSheet(
-            title = "Choose an emoji",
+            title = t("home.chooseAnEmoji"),
             onPick = {
                 emoji = it
                 error = null
@@ -379,16 +380,16 @@ private fun MoodForm(
         val meWears = current == editing.key
         val friendWears = friend != null && friendMood == editing.key
         val wearing = when {
-            meWears && friendWears -> "You and $friend are feeling this right now. Deleting it clears your moods."
-            friendWears -> "$friend is feeling this right now. Deleting it clears their mood."
-            meWears -> "You're feeling this right now. Deleting it clears your mood."
+            meWears && friendWears -> t("home.wearing.both", "friend" to friend)
+            friendWears -> t("home.wearing.friend", "friend" to friend)
+            meWears -> t("home.wearing.me")
             else -> null
         }
         DlDialog(
-            title = "Delete this mood?",
-            text = "“${editing.emoji} ${editing.label}” goes from the sheet${if (friend != null) " for both of you" else ""}. Letters already sent keep it." +
+            title = t("home.deleteThisMood"),
+            text = t(if (friend != null) "home.moodGoesShared" else "home.moodGoesAlone", "mood" to "${editing.emoji} ${editing.label}") +
                 (wearing?.let { "\n\n$it" } ?: ""),
-            confirmLabel = "Yes, delete",
+            confirmLabel = t("home.yesDelete"),
             onConfirm = {
                 busy = true
                 error = null
@@ -403,7 +404,7 @@ private fun MoodForm(
                     }
                 }
             },
-            dismissLabel = "No",
+            dismissLabel = t("home.no"),
             onDismiss = { confirm = false },
             busy = busy,
         )

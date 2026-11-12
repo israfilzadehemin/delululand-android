@@ -34,7 +34,10 @@ import androidx.compose.ui.unit.sp
 import com.delulutopia.core.designsystem.icon.DlIcons
 import com.delulutopia.core.designsystem.motion.dotFill
 import com.delulutopia.core.designsystem.motion.pressScale
+import com.delulutopia.core.designsystem.text.Ltr
 import com.delulutopia.core.designsystem.theme.Manrope
+import com.delulutopia.core.i18n.localDigits
+import com.delulutopia.core.i18n.t
 
 const val PIN_LENGTH = 6
 
@@ -68,8 +71,34 @@ fun DlPinPad(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     onBiometric: (() -> Unit)? = null,
-    backspaceDescription: String = "Backspace",
-    biometricDescription: String = "Unlock with fingerprint",
+    backspaceDescription: String = t("common.backspace"),
+    biometricDescription: String = t("pin.unlockWithFingerprint"),
+) {
+    // L3: a phone keypad stays 1 2 3 from the left in Persian; its digits are Persian (L4).
+    Ltr {
+        DlPinPadContent(
+            digits = digits,
+            onDigits = onDigits,
+            onComplete = onComplete,
+            modifier = modifier,
+            enabled = enabled,
+            onBiometric = onBiometric,
+            backspaceDescription = backspaceDescription,
+            biometricDescription = biometricDescription,
+        )
+    }
+}
+
+@Composable
+private fun DlPinPadContent(
+    digits: String,
+    onDigits: (String) -> Unit,
+    onComplete: (String) -> Unit,
+    modifier: Modifier,
+    enabled: Boolean,
+    onBiometric: (() -> Unit)?,
+    backspaceDescription: String,
+    biometricDescription: String,
 ) {
     val view = LocalView.current
     // Two taps inside one frame must both count: each tap builds on the last tap, not on the
@@ -127,7 +156,7 @@ fun DlPinPad(
 
 @Composable
 private fun KeyLabel(d: Char) {
-    Text(d.toString(), fontFamily = Manrope, fontSize = 24.sp, fontWeight = FontWeight.SemiBold)
+    Text(localDigits(d.toString()), fontFamily = Manrope, fontSize = 24.sp, fontWeight = FontWeight.SemiBold)
 }
 
 @Composable
@@ -161,7 +190,7 @@ fun DlStepDots(step: Int, of: Int, modifier: Modifier = Modifier) {
     Row(
         modifier
             .padding(end = 16.dp)
-            .semantics { contentDescription = "Step $step of $of" },
+            .semantics { contentDescription = t("common.stepOf", "step" to step, "total" to of) },
         horizontalArrangement = Arrangement.spacedBy(6.dp),
     ) {
         repeat(of) { i ->

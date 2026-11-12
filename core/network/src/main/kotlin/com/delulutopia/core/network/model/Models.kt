@@ -1,5 +1,6 @@
 package com.delulutopia.core.network.model
 
+import com.delulutopia.core.i18n.t
 import kotlinx.serialization.Serializable
 
 /*
@@ -102,6 +103,8 @@ data class Citizen(
     val lastName: String? = null,
     val draftEmpty: Boolean = true,
     val discussionDraftEmpty: Boolean = true,
+    /** Home `me` only: the account's language (L8), which every device follows. */
+    val language: String? = null,
 )
 
 @Serializable
@@ -133,7 +136,7 @@ data class Home(
     val universe: UniverseInfo,
 ) {
     /** The other citizen's name for sentences, or "your friend" while the creator is alone (Universe U8). */
-    val friendName: String get() = friend?.nickname ?: "your friend"
+    val friendName: String get() = friend?.nickname ?: t("settings.yourFriend")
 }
 
 @Serializable

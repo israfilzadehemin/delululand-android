@@ -2,7 +2,6 @@ package com.delulutopia.app.ui
 
 import android.content.Context
 import androidx.activity.compose.LocalActivity
-import androidx.annotation.StringRes
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.tween
@@ -36,7 +35,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentActivity
@@ -68,6 +66,7 @@ import com.delulutopia.core.designsystem.component.DlSnackbarHost
 import com.delulutopia.core.designsystem.component.DlTopAppBar
 import com.delulutopia.core.designsystem.icon.DlIcons
 import com.delulutopia.core.designsystem.theme.ThemeMode
+import com.delulutopia.core.i18n.t
 import com.delulutopia.core.network.model.HomeSession
 import com.delulutopia.core.ui.AfterStart
 import com.delulutopia.core.ui.AppNav
@@ -106,12 +105,12 @@ import kotlin.reflect.KClass
 import kotlinx.coroutines.launch
 
 /** The five destinations of the navigation bar (Y-A1). */
-enum class TopDestination(val route: Any, @StringRes val label: Int, val icon: ImageVector?, val activeIcon: ImageVector?) {
-    Home(HomeRoute, R.string.nav_home, DlIcons.Home, DlIcons.HomeActive),
-    Letters(LettersRoute, R.string.nav_letters, DlIcons.Letters, DlIcons.LettersActive),
-    Discussions(DiscussionsRoute, R.string.nav_discussions, DlIcons.Discussions, DlIcons.DiscussionsActive),
-    Emails(EmailsRoute, R.string.nav_emails, DlIcons.Emails, DlIcons.EmailsActive),
-    You(YouRoute, R.string.nav_you, null, null),
+enum class TopDestination(val route: Any, val label: String, val icon: ImageVector?, val activeIcon: ImageVector?) {
+    Home(HomeRoute, "tabs.home", DlIcons.Home, DlIcons.HomeActive),
+    Letters(LettersRoute, "tabs.letters", DlIcons.Letters, DlIcons.LettersActive),
+    Discussions(DiscussionsRoute, "tabs.discussions", DlIcons.Discussions, DlIcons.DiscussionsActive),
+    Emails(EmailsRoute, "tabs.emails", DlIcons.Emails, DlIcons.EmailsActive),
+    You(YouRoute, "tabs.you", null, null),
 }
 
 /**
@@ -177,7 +176,7 @@ private fun AfterPin(friend: String?) {
     LaunchedEffect(Unit) {
         if (AfterStart.photoFailed) {
             AfterStart.photoFailed = false
-            notice("Couldn't add your photo. You can add it in Profile.")
+            notice(t("universe.photoNotAdded"))
         }
     }
     if (ask) {
@@ -199,16 +198,16 @@ private fun AfterPin(friend: String?) {
         Fingerprint.markOffered(context, pending.first)
         offer = null
     }
-    val yes = stringResource(R.string.fingerprint_offer_yes)
+    val yes = t("settings.fingerprintOfferYes")
     DlDialog(
-        title = stringResource(R.string.fingerprint_offer_title),
-        text = stringResource(R.string.fingerprint_offer_text),
+        title = t("settings.fingerprintOfferTitle"),
+        text = t("settings.fingerprintOfferText"),
         confirmLabel = yes,
         onConfirm = {
             close()
             if (activity != null) Fingerprint.turnOn(activity, pending.first, pending.second, yes) { }
         },
-        dismissLabel = stringResource(R.string.not_now),
+        dismissLabel = t("notify.notNow"),
         onDismiss = close,
     )
 }
@@ -219,12 +218,12 @@ private fun NotifyAsk(friend: String?, onAllow: () -> Unit, onNotNow: () -> Unit
     DlBottomSheet(onDismissRequest = onNotNow) {
         Column(Modifier.fillMaxWidth().padding(horizontal = 24.dp).padding(bottom = 24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Icon(DlIcons.Bell, null, Modifier.size(28.dp), tint = MaterialTheme.colorScheme.primary)
-            Text(stringResource(R.string.notify_ask_title), style = MaterialTheme.typography.titleLarge)
-            Text(stringResource(R.string.notify_ask_text, friend ?: stringResource(R.string.your_friend)), style = MaterialTheme.typography.bodyMedium)
-            Text(stringResource(R.string.notify_ask_quiet), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(t("notify.knowTheMomentALetter"), style = MaterialTheme.typography.titleLarge)
+            Text(t("notify.askTextPhone", "friend" to friend ?: t("settings.yourFriend")), style = MaterialTheme.typography.bodyMedium)
+            Text(t("notify.askQuiet"), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.End)) {
-                DlOutlinedButton(stringResource(R.string.not_now), onNotNow)
-                DlFilledButton(stringResource(R.string.allow), onAllow)
+                DlOutlinedButton(t("notify.notNow"), onNotNow)
+                DlFilledButton(t("notify.allow"), onAllow)
             }
         }
     }
@@ -309,7 +308,7 @@ fun DelulutopiaApp(
                 when {
                     // Home's title is the universe's name (Universe §4).
                     top == TopDestination.Home -> DlTopAppBar(title = brand, modifier = Modifier.leafCeiling())
-                    top != null -> DlTopAppBar(title = stringResource(top.label), modifier = Modifier.leafCeiling())
+                    top != null -> DlTopAppBar(title = t(top.label), modifier = Modifier.leafCeiling())
                 }
             },
             bottomBar = {
@@ -325,9 +324,9 @@ fun DelulutopiaApp(
                                 DlNavigationYouItem(
                                     selected = selected,
                                     onClick = open,
-                                    label = stringResource(item.label),
+                                    label = t(item.label),
                                     alert = alert,
-                                    alertDescription = stringResource(R.string.nav_notifications_off),
+                                    alertDescription = t("notify.hintOff"),
                                 ) {
                                     val me = home?.me
                                     DlRemoteAvatar(
@@ -348,7 +347,7 @@ fun DelulutopiaApp(
                                 DlNavigationItem(
                                     selected = selected,
                                     onClick = open,
-                                    label = stringResource(item.label),
+                                    label = t(item.label),
                                     icon = item.icon!!,
                                     activeIcon = item.activeIcon!!,
                                     hasNew = hasNew,

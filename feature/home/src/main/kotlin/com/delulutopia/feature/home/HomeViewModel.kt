@@ -7,6 +7,7 @@ import com.delulutopia.core.data.DevicePrefs
 import com.delulutopia.core.data.HomeRepository
 import com.delulutopia.core.data.LetterActions
 import com.delulutopia.core.data.Moods
+import com.delulutopia.core.i18n.t
 import com.delulutopia.core.network.ApiException
 import com.delulutopia.core.network.DelulutopiaApi
 import com.delulutopia.core.network.Uploader
@@ -91,7 +92,7 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    private fun moodError(e: ApiException) = if (e.status in 400..499 && !e.code.startsWith("HTTP_")) e.message else "Not saved. Try again."
+    private fun moodError(e: ApiException) = if (e.status in 400..499 && !e.code.startsWith("HTTP_")) e.message else t("home.notSavedTryAgain")
 
     // Letters
 
@@ -133,7 +134,7 @@ class HomeViewModel @Inject constructor(
                 repo.patch { it.copy(board = current) }
                 HomeActions.PostResult.Conflict(current)
             } else {
-                HomeActions.PostResult.Failed(if (e.isOffline) "Posting failed. Try again." else e.message)
+                HomeActions.PostResult.Failed(if (e.isOffline) t("board.postingFailed") else e.message)
             }
         }
     }
@@ -150,20 +151,20 @@ class HomeViewModel @Inject constructor(
             val current = if (e.code == "BOARD_CHANGED") backend.extra(e, "board", Board.serializer()) else null
             if (current != null) {
                 repo.patch { it.copy(board = current) }
-                "$friend just posted a new doodle."
+                t("board.friendJustPosted", "friend" to friend)
             } else {
                 repo.patch { it.copy(board = board) }
-                if (e.isOffline) "Couldn't save your reaction. Try again." else e.message
+                if (e.isOffline) t("board.reactionNotSaved") else e.message
             }
         }
     }
 
     /** §C: the friend's one sticky note. Returns a notice on failure, or null. */
-    override suspend fun comment(board: Board, text: String, friend: String): String? = boardWrite(friend, "Couldn't post your comment. Try again.") {
+    override suspend fun comment(board: Board, text: String, friend: String): String? = boardWrite(friend, t("board.commentNotPosted")) {
         commentBoard(BoardCommentBody(board.version, text))
     }
 
-    override suspend fun uncomment(board: Board, friend: String): String? = boardWrite(friend, "Couldn't delete your comment. Try again.") {
+    override suspend fun uncomment(board: Board, friend: String): String? = boardWrite(friend, t("board.commentNotDeleted")) {
         uncommentBoard(board.version)
     }
 
@@ -176,7 +177,7 @@ class HomeViewModel @Inject constructor(
         when {
             current != null -> {
                 repo.patch { it.copy(board = current) }
-                "$friend just posted a new doodle."
+                t("board.friendJustPosted", "friend" to friend)
             }
             e.code == "COMMENT_EXISTS" -> {
                 repo.refreshSoon()

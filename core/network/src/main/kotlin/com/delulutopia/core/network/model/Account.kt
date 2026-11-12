@@ -34,6 +34,8 @@ data class CreateUniverseRequest(
     val username: String,
     val timezone: String,
     val pin: String,
+    /** L6: the creator's language; also the language of the welcome template (C52). */
+    val language: String? = null,
 )
 
 @Serializable
@@ -43,7 +45,11 @@ data class CreatedUniverse(val code: String, val universe: UniverseRef)
 data class UniverseRef(val id: Int, val name: String)
 
 @Serializable
-data class JoinRequest(val username: String, val timezone: String, val pin: String)
+data class JoinRequest(val username: String, val timezone: String, val pin: String, val language: String? = null)
+
+/** `PUT /api/me/language` (L8). */
+@Serializable
+data class LanguageBody(val language: String)
 
 /** The parts of `GET /api/home` the session needs; the rest of the payload arrives with Home (P2). */
 @Serializable

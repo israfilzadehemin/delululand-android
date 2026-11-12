@@ -23,6 +23,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.delulutopia.core.designsystem.component.DlRemoteAvatar
 import com.delulutopia.core.designsystem.component.DlTopAppBar
+import com.delulutopia.core.i18n.t
 import com.delulutopia.core.ui.fingerprint.Fingerprint
 import com.delulutopia.feature.start.PinViewModel.Mode
 import com.delulutopia.feature.start.PinViewModel.Problem
@@ -35,7 +36,7 @@ fun PinRoute(onBack: () -> Unit, viewModel: PinViewModel = hiltViewModel()) {
     val context = LocalContext.current
     val canFingerprint = activity != null && state.mode == PinViewModel.Mode.Enter && state.user != null &&
         Fingerprint.isOn(context, viewModel.userId) && Fingerprint.available(context)
-    val title = stringResource(R.string.fingerprint_title, state.universe.ifBlank { stringResource(R.string.brand) })
+    val title = t("pin.unlockBrand", "brand" to state.universe.ifBlank { stringResource(R.string.brand) })
     val ask: () -> Unit = {
         if (activity != null) Fingerprint.unlock(activity, viewModel.userId, title, viewModel::onFingerprint) {}
     }
@@ -58,7 +59,7 @@ fun PinScreen(
     onFingerprint: (() -> Unit)? = null,
 ) {
     Column(Modifier.fillMaxSize().safeDrawingPadding()) {
-        DlTopAppBar(title = "", onBack = onBack, backDescription = stringResource(R.string.back))
+        DlTopAppBar(title = "", onBack = onBack, backDescription = t("common.back"))
         val user = state.user
         PinPanel(
             header = {
@@ -76,27 +77,25 @@ fun PinScreen(
                     Text(user.nickname, fontSize = 18.sp, fontWeight = FontWeight.Bold)
                 }
             },
-            prompt = stringResource(
+            prompt = t(
                 when (state.mode) {
-                    Mode.Enter -> R.string.pin_enter
-                    Mode.Create -> R.string.pin_create
-                    Mode.Confirm -> R.string.pin_confirm
+                    Mode.Enter -> "pin.enterYourPin"
+                    Mode.Create -> "pin.createYourPin"
+                    Mode.Confirm -> "pin.confirmYourPin"
                 },
             ),
-            dotsLabel = stringResource(
-                R.string.pin_dots,
-                stringResource(
-                    when (state.mode) {
-                        Mode.Enter -> R.string.pin_dots_pin
-                        Mode.Create -> R.string.pin_dots_new
-                        Mode.Confirm -> R.string.pin_dots_confirm
-                    },
-                ),
-                state.digits.length,
+            dotsLabel = t(
+                when (state.mode) {
+                    Mode.Enter -> "pin.dots.enter"
+                    Mode.Create -> "pin.dots.new"
+                    Mode.Confirm -> "pin.dots.confirm"
+                },
+                "n" to state.digits.length,
+                "total" to 6,
             ),
             digits = state.digits,
             error = problemText(state.problem, state.universe),
-            hint = if (state.mode == Mode.Create) stringResource(R.string.pin_hint) else null,
+            hint = if (state.mode == Mode.Create) t("pin.sixDigits") else null,
             busy = state.busy || state.user == null,
             onDigits = onDigits,
             onComplete = onComplete,
@@ -108,8 +107,8 @@ fun PinScreen(
 @Composable
 internal fun problemText(problem: Problem?, universe: String): String? = when (problem) {
     null -> null
-    Problem.Wrong -> stringResource(R.string.pin_wrong)
-    Problem.Differ -> stringResource(R.string.pin_differ)
-    Problem.Offline -> stringResource(R.string.cant_reach, universe.ifBlank { stringResource(R.string.brand) })
+    Problem.Wrong -> t("common.wrongPin")
+    Problem.Differ -> t("common.pinsDiffer")
+    Problem.Offline -> t("common.cantReachTryAgain", "brand" to universe.ifBlank { stringResource(R.string.brand) })
     is Problem.Text -> problem.text
 }

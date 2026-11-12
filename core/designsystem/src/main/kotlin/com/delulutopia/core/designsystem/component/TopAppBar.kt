@@ -15,6 +15,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.sp
 import com.delulutopia.core.designsystem.icon.DlIcons
+import com.delulutopia.core.i18n.t
 
 /**
  * Top app bar (Y-A3): title only on the five destinations; sub-screens add ← and actions. Paper
@@ -26,7 +27,7 @@ fun DlTopAppBar(
     title: String,
     modifier: Modifier = Modifier,
     onBack: (() -> Unit)? = null,
-    backDescription: String = "Back",
+    backDescription: String = t("common.back"),
     scrollBehavior: TopAppBarScrollBehavior? = null,
     titleStyle: TextStyle? = null,
     actions: @Composable RowScope.() -> Unit = {},

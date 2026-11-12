@@ -43,13 +43,14 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.delulutopia.core.designsystem.component.DlBottomSheet
 import com.delulutopia.core.designsystem.component.DlFilledButton
 import com.delulutopia.core.designsystem.component.DlOutlinedButton
+import com.delulutopia.core.i18n.t
 import com.delulutopia.core.ui.media.MAX_VIDEO_MS
 import com.delulutopia.core.ui.media.VideoPlayer
 import com.delulutopia.core.ui.media.mmss
 import java.io.File
 import kotlinx.coroutines.delay
 
-private const val CAMERA_OFF = "Camera is off · Allow it in Settings"
+private val CAMERA_OFF: String get() = t("media.cameraOffPhone")
 
 /**
  * FS-E16 (web media/VideoRecorderSheet.tsx; canvas E-Video, E-Video-review): the camera preview,
@@ -108,21 +109,21 @@ internal fun VideoRecorderSheet(onUse: (Uri, Long) -> Unit, onPick: () -> Unit, 
 
     DlBottomSheet(onDismissRequest = onClose) {
         Column(Modifier.padding(start = 16.dp, end = 16.dp, bottom = 24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Text("Record a video", Modifier.padding(horizontal = 8.dp), style = MaterialTheme.typography.headlineSmall)
+            Text(t("media.recordAVideo"), Modifier.padding(horizontal = 8.dp), style = MaterialTheme.typography.headlineSmall)
             when {
                 denied || !allowed -> {
                     Text(CAMERA_OFF, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.error)
-                    DlFilledButton("Pick a video", onPick)
+                    DlFilledButton(t("media.pickAVideo"), onPick)
                 }
                 take != null -> {
                     val (file, ms) = take!!
                     VideoPlayer(Uri.fromFile(file).toString(), null, ms, null, null)
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        DlOutlinedButton("Retake", {
+                        DlOutlinedButton(t("media.retake"), {
                             file.delete()
                             take = null
                         }, Modifier.weight(1f))
-                        DlFilledButton("Use", { onUse(Uri.fromFile(file), ms) }, Modifier.weight(1f))
+                        DlFilledButton(t("media.use"), { onUse(Uri.fromFile(file), ms) }, Modifier.weight(1f))
                     }
                 }
                 else -> {
@@ -132,13 +133,13 @@ internal fun VideoRecorderSheet(onUse: (Uri, Long) -> Unit, onPick: () -> Unit, 
                         }, modifier = Modifier.fillMaxWidth().aspectRatio(3f / 4f))
                     }
                     Text(
-                        "${mmss(elapsed)} / ${mmss(MAX_VIDEO_MS)}",
+                        t("media.progress", "time" to mmss(elapsed), "total" to mmss(MAX_VIDEO_MS)),
                         Modifier.align(Alignment.CenterHorizontally),
                         style = MaterialTheme.typography.titleMedium.copy(fontFeatureSettings = "tnum"),
                     )
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         DlOutlinedButton(
-                            "Flip",
+                            t("media.flip"),
                             {
                                 controller.cameraSelector =
                                     if (controller.cameraSelector ==
@@ -153,12 +154,12 @@ internal fun VideoRecorderSheet(onUse: (Uri, Long) -> Unit, onPick: () -> Unit, 
                             enabled = recording == null,
                         )
                         if (recording == null) {
-                            DlFilledButton("● Start", start, Modifier.weight(1f))
+                            DlFilledButton(t("media.start"), start, Modifier.weight(1f))
                         } else {
-                            DlFilledButton("■ Stop", { recording?.stop() }, Modifier.weight(1f))
+                            DlFilledButton(t("media.stop2"), { recording?.stop() }, Modifier.weight(1f))
                         }
                     }
-                    DlOutlinedButton("Pick a video", onPick, Modifier.fillMaxWidth(), enabled = recording == null)
+                    DlOutlinedButton(t("media.pickAVideo"), onPick, Modifier.fillMaxWidth(), enabled = recording == null)
                 }
             }
         }

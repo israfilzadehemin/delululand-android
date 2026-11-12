@@ -20,6 +20,7 @@ enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 rootProject.name = "delulutopia"
 
 include(":app")
+include(":core:i18n")
 include(":core:designsystem")
 include(":core:network")
 include(":core:data")

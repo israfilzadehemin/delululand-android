@@ -9,6 +9,8 @@ import com.delulutopia.core.data.Backend
 import com.delulutopia.core.data.HomeRepository
 import com.delulutopia.core.data.LetterState
 import com.delulutopia.core.data.Time
+import com.delulutopia.core.i18n.t
+import com.delulutopia.core.i18n.tn
 import com.delulutopia.core.network.ApiException
 import com.delulutopia.core.network.model.DRow
 import dagger.assisted.Assisted
@@ -24,11 +26,7 @@ internal fun dStateAt(row: DRow, nowMs: Long): String = LetterState.discussion(n
 /** Q1: the friend's row before arrival carries no title. */
 internal fun hiddenRow(row: DRow, nowMs: Long): Boolean = !row.mine && dStateAt(row, nowMs) != LetterState.ARRIVED
 
-internal fun commentWords(count: Int?): String = when (count) {
-    null, 0 -> ""
-    1 -> "1 comment"
-    else -> "$count comments"
-}
+internal fun commentWords(count: Int?): String = if (count == null || count == 0) "" else tn("discussions.comments", count)
 
 /**
  * S10 Discussions and the Archived list (FS-D1–D8, Discussion Controls A4, A5; web

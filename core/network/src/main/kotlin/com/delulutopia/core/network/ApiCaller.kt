@@ -1,5 +1,6 @@
 package com.delulutopia.core.network
 
+import com.delulutopia.core.i18n.t
 import java.io.IOException
 import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.serialization.SerializationException
@@ -23,16 +24,16 @@ class ApiCaller(private val json: Json, private val events: SessionEvents) {
     } catch (e: HttpException) {
         throw toApiException(e).also { if (it.status == 401 && it.code == "NO_SESSION") events.emitEnded() }
     } catch (e: IOException) {
-        throw ApiException(0, ApiException.OFFLINE, "Can't reach the server.", cause = e)
+        throw ApiException(0, ApiException.OFFLINE, t("common.cantReachServer"), cause = e)
     } catch (e: SerializationException) {
-        throw ApiException(0, "BAD_RESPONSE", "Something went wrong.", cause = e)
+        throw ApiException(0, "BAD_RESPONSE", t("common.somethingWentWrong"), cause = e)
     }
 
     private fun toApiException(e: HttpException): ApiException {
         val body = runCatching { e.response()?.errorBody()?.string() }.getOrNull()
         val obj = body?.takeIf { it.isNotBlank() }?.let { runCatching { json.parseToJsonElement(it).jsonObject }.getOrNull() }
         val code = (obj?.get("code") as? JsonPrimitive)?.contentOrNull ?: "HTTP_${e.code()}"
-        val message = (obj?.get("message") as? JsonPrimitive)?.contentOrNull ?: "Something went wrong."
+        val message = (obj?.get("message") as? JsonPrimitive)?.contentOrNull ?: t("common.somethingWentWrong")
         val extra = JsonObject(obj.orEmpty().filterKeys { it != "code" && it != "message" })
         return ApiException(e.code(), code, message, extra, e)
     }

@@ -13,6 +13,7 @@ import com.delulutopia.core.data.DraftSaver
 import com.delulutopia.core.data.HomeRepository
 import com.delulutopia.core.data.LetterState
 import com.delulutopia.core.data.LettersRepository
+import com.delulutopia.core.i18n.t
 import com.delulutopia.core.network.ApiException
 import com.delulutopia.core.network.model.AppConfig
 import com.delulutopia.core.network.model.Att
@@ -206,13 +207,13 @@ class WriteViewModel @Inject constructor(
 
     /** S5 Send: flush, then send exactly that version (FS-S1–S3). */
     suspend fun send(): SendResult {
-        val s = saver ?: return SendResult.Failed("Not sent. Try again.")
+        val s = saver ?: return SendResult.Failed(t("common.notSent"))
         val version = try {
             s.flush()
         } catch (_: DraftSaver.ConflictException) {
             return SendResult.Conflict
         } catch (_: Exception) {
-            return SendResult.Failed("Not sent. Try again.")
+            return SendResult.Failed(t("common.notSent"))
         }
         return try {
             backend.run { send(DraftVersionBody(version)) }
@@ -220,7 +221,7 @@ class WriteViewModel @Inject constructor(
             letters.refreshSoon()
             SendResult.Sent
         } catch (e: ApiException) {
-            SendResult.Failed(if (e.code == "EMPTY_LETTER") "Nothing to send yet." else "Not sent. Try again.")
+            SendResult.Failed(if (e.code == "EMPTY_LETTER") t("write.nothingToSend") else t("common.notSent"))
         }
     }
 
@@ -239,7 +240,7 @@ class WriteViewModel @Inject constructor(
                 lateByServer = true
                 ""
             } else {
-                if (e.status in 400..499) e.message else "Not sent. Try again."
+                if (e.status in 400..499) e.message else t("common.notSent")
             }
         }
     }

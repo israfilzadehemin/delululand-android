@@ -31,6 +31,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.delulutopia.core.designsystem.icon.DlIcons
+import com.delulutopia.core.i18n.t
 import java.text.Normalizer
 import java.util.Date
 import java.util.Locale
@@ -96,12 +97,12 @@ fun DlTimeZoneSheet(
     value: String,
     onPick: (String) -> Unit,
     onDismiss: () -> Unit,
-    title: String = "Time zone",
-    searchHint: String = "Search a city or zone",
-    deviceLabel: String = "This device",
-    matchesLabel: String = "Matches",
-    allLabel: String = "All zones",
-    noMatch: (String) -> String = { "No time zone matches “$it”." },
+    title: String = t("profile.timeZone"),
+    searchHint: String = t("profile.searchACityOrZone"),
+    deviceLabel: String = t("profile.thisDevice"),
+    matchesLabel: String = t("profile.matches"),
+    allLabel: String = t("profile.allZones"),
+    noMatch: (String) -> String = { t("profile.noTimeZoneMatches", "trim" to it) },
 ) {
     var query by remember { mutableStateOf("") }
     val device = remember { Zones.device() }
@@ -169,7 +170,11 @@ private fun ZoneRow(o: ZoneOption, selected: Boolean, deviceLabel: String?, onPi
                     Text(deviceLabel, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
                 }
             }
-            Text("${o.zone} · ${o.offset}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(
+                t("discussions.metaLine", "author" to o.zone, "when" to o.offset),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
         }
         Text(o.time, style = MaterialTheme.typography.bodyMedium.copy(fontFeatureSettings = "tnum"))
         if (selected) {

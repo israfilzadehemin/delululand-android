@@ -38,12 +38,17 @@ import com.delulutopia.core.designsystem.component.DlSwitchItem
 import com.delulutopia.core.designsystem.component.DlTopAppBar
 import com.delulutopia.core.designsystem.theme.DlTheme
 import com.delulutopia.core.designsystem.theme.ThemeMode
+import com.delulutopia.core.i18n.t
 import com.delulutopia.core.ui.LocalAppNav
 import com.delulutopia.core.ui.LocalNotice
 import com.delulutopia.core.ui.notify.NotifyPermission
 import com.delulutopia.core.ui.notify.rememberNotifyAccess
 
-private val THEME_SUBS = mapOf(ThemeMode.Light to "Paper and navy", ThemeMode.Dark to "Dusk paper, cream ink", ThemeMode.System to "Follows your phone")
+private val THEME_SUBS get() = mapOf(
+    ThemeMode.Light to t("settings.theme.lightSub"),
+    ThemeMode.Dark to t("settings.theme.darkSub"),
+    ThemeMode.System to t("settings.theme.matchSubPhone"),
+)
 
 /** S2 Appearance, per device (DM3): Light / Dark / Match device and the falling leaves (L6). */
 @Composable
@@ -53,7 +58,7 @@ fun AppearanceScreen(themeMode: ThemeMode, onThemeMode: (ThemeMode) -> Unit, vm:
     val leaves by vm.leaves.collectAsStateWithLifecycle()
     val reduced = remember { Settings.Global.getFloat(context.contentResolver, Settings.Global.ANIMATOR_DURATION_SCALE, 1f) == 0f }
     Column(Modifier.fillMaxSize()) {
-        DlTopAppBar(title = "Appearance", onBack = { nav.back() })
+        DlTopAppBar(title = t("settings.appearance"), onBack = { nav.back() })
         // web .dl-sub-main.dl-settings: 4/20/24 padding, 12 dp between blocks.
         Column(
             Modifier.verticalScroll(rememberScrollState()).padding(start = 20.dp, end = 20.dp, top = 4.dp, bottom = 24.dp),
@@ -81,13 +86,13 @@ fun AppearanceScreen(themeMode: ThemeMode, onThemeMode: (ThemeMode) -> Unit, vm:
             }
             Card {
                 DlSwitchItem(
-                    "Seasonal effects",
+                    t("settings.seasonalEffects"),
                     leaves,
                     vm::setLeaves,
-                    supporting = if (reduced) "Falling leaves · off while your phone removes animations" else "Falling leaves",
+                    supporting = if (reduced) t("settings.leavesReducedPhone") else t("settings.leaves"),
                 )
             }
-            SubNote("Saved on this phone only.")
+            SubNote(t("settings.savedOnThisPhoneOnly"))
         }
     }
 }
@@ -98,10 +103,10 @@ fun NotificationsScreen(vm: NotificationsViewModel = hiltViewModel()) {
     val nav = LocalAppNav.current
     val notice = LocalNotice.current
     val homeState by vm.homeState.collectAsStateWithLifecycle()
-    val friend = homeState.home?.friend?.nickname ?: "your friend"
-    val fail = { notice("Couldn't save. Try again.") }
+    val friend = homeState.home?.friend?.nickname ?: t("settings.yourFriend")
+    val fail = { notice(t("common.couldntSave")) }
     Column(Modifier.fillMaxSize()) {
-        DlTopAppBar(title = "Notifications", onBack = { nav.back() })
+        DlTopAppBar(title = t("settings.notifications"), onBack = { nav.back() })
         Column(
             Modifier.verticalScroll(rememberScrollState()).padding(start = 20.dp, end = 20.dp, top = 4.dp, bottom = 24.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -115,14 +120,14 @@ fun NotificationsScreen(vm: NotificationsViewModel = hiltViewModel()) {
             // web .dl-set-pause--on: the seal tint while everything is paused.
             Card(background = if (s.paused) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainerHigh) {
                 DlSwitchItem(
-                    "Pause all",
+                    t("settings.pauseAll"),
                     s.paused,
                     { vm.change(paused = it, onFail = fail) },
-                    supporting = if (s.paused) "Nothing is pushed to any of your devices" else "Stop every push on all your devices",
+                    supporting = if (s.paused) t("settings.pausedSub") else t("settings.pauseSub"),
                     emphasis = true,
                 )
             }
-            SubNote("These choices follow you to every device. Dots and NEW marks inside the app stay as they are.")
+            SubNote(t("settings.theseChoicesFollowYouTo"))
             s.sections.forEach { sec ->
                 val title = SECTION_LABELS[sec.key] ?: sec.key
                 Card {
@@ -160,9 +165,9 @@ fun NotificationsScreen(vm: NotificationsViewModel = hiltViewModel()) {
 private fun DeviceCard() {
     val access = rememberNotifyAccess()
     val (state, sub) = when (access.permission) {
-        NotifyPermission.Granted -> "On" to "Notifications reach this phone."
-        NotifyPermission.Denied -> "Blocked" to "Notifications are off for this app in Android settings. Allow opens them."
-        NotifyPermission.Default -> "Off" to "This phone won't show notifications."
+        NotifyPermission.Granted -> t("settings.device.on") to t("settings.device.onSubPhone")
+        NotifyPermission.Denied -> t("settings.device.blocked") to t("settings.device.blockedSubAndroid")
+        NotifyPermission.Default -> t("settings.device.off") to t("settings.device.offSubPhone")
     }
     val on = access.permission == NotifyPermission.Granted
     // web .dl-set-device: 14/16, 12 dp gap, a teal dot when on and a red one when off.
@@ -174,10 +179,10 @@ private fun DeviceCard() {
         ) {
             Box(Modifier.size(10.dp).background(if (on) DlTheme.colors.userB else MaterialTheme.colorScheme.error, CircleShape))
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                Text("This phone · $state", fontSize = 15.sp, lineHeight = 21.sp, fontWeight = FontWeight.Bold)
+                Text(t("settings.thisPhone", "state" to state), fontSize = 15.sp, lineHeight = 21.sp, fontWeight = FontWeight.Bold)
                 Text(sub, fontSize = 13.sp, lineHeight = 18.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
-            if (!on) DlFilledButton("Allow", access.allow, height = 40.dp)
+            if (!on) DlFilledButton(t("settings.allow"), access.allow, height = 40.dp)
         }
     }
 }
@@ -205,7 +210,7 @@ private fun EventRow(label: String, hint: String?, checked: Boolean, enabled: Bo
 
 /** web .dl-sub-note: 13/19 quiet, 4 dp in. */
 @Composable
-private fun SubNote(text: String) {
+internal fun SubNote(text: String) {
     Text(
         text,
         Modifier.padding(horizontal = 4.dp),
@@ -216,7 +221,7 @@ private fun SubNote(text: String) {
 
 /** A native-looking radio in the seal (web input[type=radio] accent-color: seal), 20 dp. */
 @Composable
-private fun Radio(selected: Boolean) {
+internal fun Radio(selected: Boolean) {
     val seal = MaterialTheme.colorScheme.primary
     val off = MaterialTheme.colorScheme.onSurfaceVariant
     val fill = MaterialTheme.colorScheme.surface

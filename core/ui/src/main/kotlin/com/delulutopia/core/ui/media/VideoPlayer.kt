@@ -42,11 +42,12 @@ import androidx.media3.ui.PlayerView
 import coil3.compose.AsyncImage
 import com.delulutopia.core.designsystem.icon.WebIcons
 import com.delulutopia.core.designsystem.theme.DlTheme
+import com.delulutopia.core.i18n.t
 import com.delulutopia.core.ui.httpClient
 
 /** Emails Q12: at most 15 s; the server allows 15.5 s for a container that runs past the stop. */
 const val MAX_VIDEO_MS = 15_000L
-const val VIDEO_TOO_LONG = "This video is longer than 15 seconds"
+val VIDEO_TOO_LONG: String get() = t("media.videoTooLong")
 
 /** A picked video's length, or null when the phone cannot tell (the server decides then). */
 fun videoMs(context: Context, uri: Uri): Long? {
@@ -80,7 +81,7 @@ fun VideoPlayer(url: String, posterUrl: String?, durationMs: Long?, width: Int?,
             .aspectRatio(ratio)
             .clip(shape)
             .background(DlTheme.colors.lightbox)
-            .semantics { contentDescription = durationMs?.let { "Video, ${mmss(it)}" } ?: "Video" },
+            .semantics { contentDescription = durationMs?.let { t("media.videoWithLength", "length" to mmss(it)) } ?: t("media.video") },
     ) {
         if (started) {
             val player = remember(url) {
@@ -108,7 +109,7 @@ fun VideoPlayer(url: String, posterUrl: String?, durationMs: Long?, width: Int?,
                         OnePlayer.stop()
                         started = true
                     }
-                    .semantics { contentDescription = "Play video" },
+                    .semantics { contentDescription = t("media.playVideo") },
                 contentAlignment = Alignment.Center,
             ) {
                 Icon(WebIcons.Play, null, Modifier.size(22.dp), tint = DlTheme.colors.onLightbox)

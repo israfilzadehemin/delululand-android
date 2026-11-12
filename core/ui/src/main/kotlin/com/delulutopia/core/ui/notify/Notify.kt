@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.app.NotificationManagerCompat
 import androidx.lifecycle.compose.LifecycleResumeEffect
+import com.delulutopia.core.i18n.t
 
 /** Where notifications stand on this device (web notify/push.ts `permission`). */
 enum class NotifyPermission { Granted, Default, Denied }
@@ -89,13 +90,16 @@ fun NotificationHint(modifier: Modifier = Modifier) {
     val blocked = access.permission == NotifyPermission.Denied
     Row(modifier.fillMaxWidth().padding(horizontal = 2.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
         Text(
-            if (blocked) "Notifications are blocked in your settings" else "Notifications are off",
+            if (blocked) t("notify.hintBlockedPhone") else t("notify.hintOff"),
             Modifier.weight(1f),
             style = MaterialTheme.typography.bodyMedium.copy(fontSize = 14.sp),
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         TextButton(onClick = access.allow) {
-            Text(if (blocked) "Allow" else "Turn on", style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold, fontSize = 15.sp))
+            Text(
+                if (blocked) t("notify.allow") else t("notify.turnOn"),
+                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold, fontSize = 15.sp),
+            )
         }
     }
 }

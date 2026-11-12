@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.absoluteOffset
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -31,6 +32,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.ui.AbsoluteAlignment
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -72,6 +74,9 @@ import com.delulutopia.core.designsystem.motion.float
 import com.delulutopia.core.designsystem.motion.rememberPlayed
 import com.delulutopia.core.designsystem.motion.rowEnter
 import com.delulutopia.core.designsystem.theme.DlTheme
+import com.delulutopia.core.i18n.formatNumber
+import com.delulutopia.core.i18n.t
+import com.delulutopia.core.i18n.tn
 import com.delulutopia.core.network.model.Citizen
 import com.delulutopia.core.network.model.Row as LetterRow
 import com.delulutopia.core.ui.LetterRoute
@@ -142,7 +147,7 @@ fun LettersList(
             if (state.hasMore && last >= listState.layoutInfo.totalItemsCount - 3) onMore()
         }
     }
-    val friendName = friend?.nickname ?: "Friend"
+    val friendName = friend?.nickname ?: t("common.friend")
     val senderOf = { row: LetterRow -> if (row.direction == "to") me?.id ?: 1 else friend?.id ?: 2 }
     val played = rememberPlayed()
     Box(Modifier.fillMaxSize()) {
@@ -185,13 +190,13 @@ fun LettersList(
                     if (state.hasMore) {
                         CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
                         Text(
-                            "Loading older letters…",
+                            t("letters.loadingOlder"),
                             style = MaterialTheme.typography.bodySmall.copy(fontSize = 13.sp),
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     } else {
                         Text(
-                            "That is everything",
+                            t("common.thatIsEverything"),
                             style = MaterialTheme.typography.bodySmall.copy(fontSize = 13.sp),
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
@@ -201,7 +206,7 @@ fun LettersList(
         }
         DlFab(
             DlIcons.Pen,
-            if (draft) "Continue your draft" else "Write a letter",
+            if (draft) t("letters.continueYourDraft") else t("letters.writeALetter"),
             { nav.open(WriteRoute()) },
             Modifier.align(Alignment.BottomEnd).padding(16.dp).leafSurface(kind = SurfaceKind.Round),
             hasDraft = draft,
@@ -222,7 +227,7 @@ private fun LayoutBar(list: Boolean, onLayout: (Boolean) -> Unit) {
         horizontalArrangement = Arrangement.End,
     ) {
         IconButton(onClick = { onLayout(!list) }) {
-            Icon(if (list) WebIcons.Grid else WebIcons.List, if (list) "Show as thumbnails" else "Show as list")
+            Icon(if (list) WebIcons.Grid else WebIcons.List, if (list) t("letters.showAsThumbnails") else t("letters.showAsList"))
         }
     }
 }
@@ -263,10 +268,14 @@ private fun EmptyLetters(draft: Boolean, onWrite: () -> Unit) {
             }
         }
         Column(Modifier.enter(Enter.Rise, 80, 400), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text("No letters yet.", style = MaterialTheme.typography.titleMedium)
-            Text("Write the first one.", style = MaterialTheme.typography.bodyLarge.copy(fontSize = 15.sp), color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(t("letters.noLettersYet"), style = MaterialTheme.typography.titleMedium)
+            Text(
+                t("letters.writeTheFirstOne"),
+                style = MaterialTheme.typography.bodyLarge.copy(fontSize = 15.sp),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
         }
-        DlFilledButton(if (draft) "Continue your draft" else "Write a letter", onWrite)
+        DlFilledButton(if (draft) t("letters.continueYourDraft") else t("letters.writeALetter"), onWrite)
     }
 }
 
@@ -293,7 +302,7 @@ internal fun StatusChip(row: LetterRow, state: String, nowMs: Long) {
             contentAlignment = Alignment.Center,
         ) {
             Text(
-                "${Time.countdown((Time.ms(row.windowEndsAt) ?: 0) - nowMs)} to edit",
+                t("letters.toEdit", "countdown" to Time.countdown((Time.ms(row.windowEndsAt) ?: 0) - nowMs)),
                 style = chip.copy(fontWeight = FontWeight.Bold, fontFeatureSettings = "tnum"),
                 color = DlTheme.colors.letterInk,
             )
@@ -306,14 +315,14 @@ internal fun StatusChip(row: LetterRow, state: String, nowMs: Long) {
             color = DlTheme.colors.letterInk,
         )
         !to && state == LetterState.DELIVERED -> NewChip()
-        !to -> Text("Opened ${Time.clock(row.readAt, nowMs)}", style = chip, color = quiet)
+        !to -> Text(t("letters.opened", "time" to Time.clock(row.readAt, nowMs)), style = chip, color = quiet)
         state == LetterState.READ -> Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
             Icon(WebIcons.DoubleCheck, null, Modifier.size(16.dp), tint = quiet)
-            Text("Read ${Time.clock(row.readAt, nowMs)}", style = chip, color = quiet)
+            Text(t("letters.readAt", "time" to Time.clock(row.readAt, nowMs)), style = chip, color = quiet)
         }
         else -> Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
             Icon(WebIcons.Check, null, Modifier.size(16.dp), tint = quiet)
-            Text("Delivered", style = chip, color = quiet)
+            Text(t("letters.delivered"), style = chip, color = quiet)
         }
     }
 }
@@ -321,7 +330,12 @@ internal fun StatusChip(row: LetterRow, state: String, nowMs: Long) {
 /** Replies B2: the row's letter answers another one. */
 @Composable
 private fun ReplyMark() {
-    Icon(WebIcons.Reply, "Reply to a letter", Modifier.size(12.dp).offset(y = 1.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+    Icon(
+        WebIcons.Reply,
+        t("letters.replyToALetter").trim().removeSuffix(":"),
+        Modifier.size(12.dp).offset(y = 1.dp),
+        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
 }
 
 @Composable
@@ -337,15 +351,15 @@ private fun ListRow(row: LetterRow, nowMs: Long, friendName: String, who: Who) {
     LetterTile(
         tileShapeOf(row, state),
         who,
-        onClick = { if (incoming) notice("Arrives at $arrives") else nav.open(LetterRoute(row.id)) },
+        onClick = { if (incoming) notice(t("letters.arrivesAt", "time" to arrives)) else nav.open(LetterRoute(row.id)) },
     ) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                Direction(if (to) "→ To $friendName" else "← From $friendName", who)
+                Direction(if (to) t("letters.toFriend", "friend" to friendName) else t("letters.fromFriend", "friend" to friendName), who)
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                     if (!incoming && row.replyToId != null) ReplyMark()
                     Text(
-                        if (incoming) "On its way" else firstLineOf(row),
+                        if (incoming) t("letters.onItsWay") else firstLineOf(row),
                         style = MaterialTheme.typography.bodyLarge.copy(
                             fontSize = 15.sp,
                             lineHeight = 20.sp,
@@ -357,7 +371,12 @@ private fun ListRow(row: LetterRow, nowMs: Long, friendName: String, who: Who) {
                     )
                 }
                 Text(
-                    "Sent ${Time.clock(row.sentAt, nowMs)} · ${if (arrived) "Arrived" else "Arrives"} $arrives",
+                    t(
+                        if (arrived) "letters.timesArrived" else "letters.timesArrives",
+                        "sent" to Time.clock(row.sentAt, nowMs),
+                        "arrived" to arrives,
+                        "arrives" to arrives,
+                    ),
                     style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -408,7 +427,7 @@ private fun Thumb(row: LetterRow, nowMs: Long, friendName: String, who: Who, ind
                         Modifier
                     },
                 )
-                .clickable { if (incoming) notice("Arrives at ${Time.clock(row.arrivesAt, nowMs)}") else nav.open(LetterRoute(row.id)) }
+                .clickable { if (incoming) notice(t("letters.arrivesAt", "time" to Time.clock(row.arrivesAt, nowMs))) else nav.open(LetterRoute(row.id)) }
                 .padding(start = 12.dp, end = 10.dp, top = if (shape == TileShape.Envelope) 0.dp else 10.dp, bottom = 12.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
@@ -431,8 +450,8 @@ private fun Thumb(row: LetterRow, nowMs: Long, friendName: String, who: Who, ind
                         }
                         WaxSeal(seal, Modifier.align(Alignment.TopCenter).offset(y = 44.dp), size = 26.dp)
                         row.stamp?.let {
-                            StampImage(it, Modifier.align(Alignment.TopEnd).offset(y = 8.dp).rotate(2f))
-                            Canvas(Modifier.align(Alignment.TopEnd).offset(x = (-22).dp, y = 18.dp).size(48.dp, 30.dp)) {
+                            StampImage(it, Modifier.align(AbsoluteAlignment.TopRight).offset(y = 8.dp).rotate(2f))
+                            Canvas(Modifier.align(AbsoluteAlignment.TopRight).absoluteOffset(x = (-22).dp, y = 18.dp).size(48.dp, 30.dp)) {
                                 scale(size.width / 48f, size.height / 30f, pivot = Offset.Zero) {
                                     val st = Stroke(1.4f)
                                     drawCircle(hue.copy(alpha = 0.7f), 12f, Offset(15f, 15f), style = st)
@@ -452,11 +471,23 @@ private fun Thumb(row: LetterRow, nowMs: Long, friendName: String, who: Who, ind
                             }
                         }
                     }
-                    Direction(if (to) "→ To $friendName" else "← From $friendName", who)
+                    Direction(if (to) t("letters.toFriend", "friend" to friendName) else t("letters.fromFriend", "friend" to friendName), who)
                 }
             } else {
                 Row(Modifier.fillMaxWidth().heightIn(min = 36.dp), horizontalArrangement = Arrangement.SpaceBetween) {
-                    Box(Modifier.weight(1f).padding(top = 2.dp)) { Direction(if (to) "→ To $friendName" else "← From $friendName", who) }
+                    Box(Modifier.weight(1f).padding(top = 2.dp)) {
+                        Direction(
+                            if (to) {
+                                t("letters.toFriend", "friend" to friendName)
+                            } else {
+                                t(
+                                    "letters.fromFriend",
+                                    "friend" to friendName,
+                                )
+                            },
+                            who,
+                        )
+                    }
                     row.stamp?.let { StampImage(it) }
                 }
             }
@@ -481,7 +512,7 @@ private fun Thumb(row: LetterRow, nowMs: Long, friendName: String, who: Who, ind
             ) {
                 if (!incoming && row.replyToId != null) ReplyMark()
                 Text(
-                    if (incoming) "On its way" else firstLineOf(row),
+                    if (incoming) t("letters.onItsWay") else firstLineOf(row),
                     style = if (incoming) {
                         MaterialTheme.typography.bodyMedium.copy(fontSize = 14.sp, lineHeight = 19.sp)
                     } else {
@@ -499,36 +530,30 @@ private fun Thumb(row: LetterRow, nowMs: Long, friendName: String, who: Who, ind
                     if (media.photos > 0) {
                         Row(
                             Modifier.semantics {
-                                contentDescription = if (media.photos ==
-                                    1
-                                ) {
-                                    "1 photo"
-                                } else {
-                                    "${media.photos} photos"
-                                }
+                                contentDescription = tn("letters.photos", media.photos)
                             },
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(3.dp),
                         ) {
                             Icon(WebIcons.PhotoSmall, null, Modifier.size(14.dp), tint = quiet)
-                            Text("${media.photos}", style = small, color = quiet)
+                            Text(formatNumber(media.photos), style = small, color = quiet)
                         }
                     }
-                    if (media.audios > 0) Icon(WebIcons.MicSmall, "Voice note", Modifier.size(14.dp), tint = quiet)
-                    if (media.doodles > 0) Icon(WebIcons.DoodleSmall, "Doodle", Modifier.size(14.dp), tint = quiet)
+                    if (media.audios > 0) Icon(WebIcons.MicSmall, t("letters.preview.voiceNote"), Modifier.size(14.dp), tint = quiet)
+                    if (media.doodles > 0) Icon(WebIcons.DoodleSmall, t("letters.doodle"), Modifier.size(14.dp), tint = quiet)
                 }
             }
             Spacer(Modifier.weight(1f))
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(
-                    "Sent ${Time.clock(row.sentAt, nowMs)}",
+                    t("letters.sent", "time" to Time.clock(row.sentAt, nowMs)),
                     style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 StatusChip(row, state, nowMs)
             }
         }
-        if (shape == TileShape.Sheet) TileFold(c.letterFlap, Modifier.align(Alignment.BottomEnd))
+        if (shape == TileShape.Sheet) TileFold(c.letterFlap, Modifier.align(AbsoluteAlignment.BottomRight))
     }
 }
 

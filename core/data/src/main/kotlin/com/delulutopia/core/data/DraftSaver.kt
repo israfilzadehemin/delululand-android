@@ -1,5 +1,6 @@
 package com.delulutopia.core.data
 
+import com.delulutopia.core.i18n.t
 import com.delulutopia.core.network.ApiException
 import com.delulutopia.core.network.model.Saved
 import kotlinx.coroutines.CompletableDeferred
@@ -37,7 +38,7 @@ class DraftSaver(
 
     data class State(val status: Status = Status.Clean, val savedAt: String? = null, val serverVersion: Int? = null)
 
-    class ConflictException : Exception("A newer version was saved on another device. Load it?")
+    class ConflictException : Exception(t("common.newerVersion"))
 
     private val _state = MutableStateFlow(State())
     val state: StateFlow<State> = _state.asStateFlow()
@@ -72,13 +73,13 @@ class DraftSaver(
             inFlight?.await()
             if (_state.value.status == Status.Conflict) throw ConflictException()
             if (!dirty) {
-                if (_state.value.status == Status.Error) throw IllegalStateException("Couldn't save your draft")
+                if (_state.value.status == Status.Error) throw IllegalStateException(t("common.draftNotSaved"))
                 return version
             }
             saveNow()
         }
         if (_state.value.status == Status.Conflict) throw ConflictException()
-        if (dirty || _state.value.status == Status.Error) throw IllegalStateException("Couldn't save your draft")
+        if (dirty || _state.value.status == Status.Error) throw IllegalStateException(t("common.draftNotSaved"))
         return version
     }
 

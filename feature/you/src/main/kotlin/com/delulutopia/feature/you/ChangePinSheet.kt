@@ -22,10 +22,11 @@ import com.delulutopia.core.designsystem.component.DlPinDots
 import com.delulutopia.core.designsystem.component.DlPinPad
 import com.delulutopia.core.designsystem.component.PIN_LENGTH
 import com.delulutopia.core.designsystem.icon.DlIcons
+import com.delulutopia.core.i18n.t
 import com.delulutopia.core.ui.LocalBrand
 import kotlinx.coroutines.delay
 
-private val STEPS = listOf("Current PIN", "New PIN", "Confirm new PIN")
+private val STEPS get() = listOf(t("home.pinStep.current"), t("home.pinStep.new"), t("home.pinStep.confirm"))
 
 /**
  * Change PIN (FS-A17, artboard ChangePIN): current, new, confirm in one sheet with one keypad. A
@@ -49,11 +50,11 @@ fun ChangePinSheet(onClose: () -> Unit, onChanged: (String) -> Unit, vm: ChangeP
     }
     DlBottomSheet(onDismissRequest = { if (!vm.busy) close() }) {
         Column(Modifier.fillMaxWidth().padding(horizontal = 24.dp).padding(bottom = 24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Text("Change PIN", style = MaterialTheme.typography.titleLarge)
+            Text(t("settings.changePin"), style = MaterialTheme.typography.titleLarge)
             if (vm.changed) {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     Icon(DlIcons.Check, null, Modifier.size(20.dp), tint = MaterialTheme.colorScheme.primary)
-                    Text("PIN changed", fontWeight = FontWeight.SemiBold)
+                    Text(t("home.pinChanged"), fontWeight = FontWeight.SemiBold)
                 }
                 return@Column
             }
@@ -69,15 +70,23 @@ fun ChangePinSheet(onClose: () -> Unit, onChanged: (String) -> Unit, vm: ChangeP
                     when {
                         i < vm.step -> Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                             Icon(DlIcons.Check, null, Modifier.size(16.dp), tint = MaterialTheme.colorScheme.primary)
-                            Text("Entered", style = MaterialTheme.typography.bodySmall)
+                            Text(t("home.entered"), style = MaterialTheme.typography.bodySmall)
                         }
-                        i == vm.step -> DlPinDots(vm.values[i].length, "$label, ${vm.values[i].length} of $PIN_LENGTH digits")
-                        else -> Text("Next", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        i == vm.step -> DlPinDots(
+                            vm.values[i].length,
+                            t(
+                                "home.ofDigits",
+                                "label" to label,
+                                "count" to vm.values[i].length,
+                                "pinlength" to PIN_LENGTH,
+                            ),
+                        )
+                        else -> Text(t("home.next"), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }
             }
             Text(
-                vm.error ?: "Your other devices stay logged in. Forgot the current one? It can be cleared on the server; there is no e-mail reset.",
+                vm.error ?: t("home.yourOtherDevicesStayLogged"),
                 style = MaterialTheme.typography.bodySmall.copy(
                     fontSize = 13.sp,
                     fontWeight = if (vm.error !=
@@ -110,11 +119,11 @@ fun FingerprintPinSheet(userId: Int, onClose: () -> Unit, onPin: (String) -> Uni
             verticalArrangement = Arrangement.spacedBy(12.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Text("Fingerprint unlock", style = MaterialTheme.typography.titleLarge, modifier = Modifier.fillMaxWidth())
-            Text("Enter your PIN", fontSize = 15.sp, fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            DlPinDots(vm.digits.length, "PIN, ${vm.digits.length} of $PIN_LENGTH digits", error = vm.error != null)
+            Text(t("settings.fingerprint"), style = MaterialTheme.typography.titleLarge, modifier = Modifier.fillMaxWidth())
+            Text(t("pin.enterYourPin"), fontSize = 15.sp, fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            DlPinDots(vm.digits.length, t("pin.dots.enter", "n" to vm.digits.length, "total" to PIN_LENGTH), error = vm.error != null)
             Text(
-                vm.error ?: "Kept on this phone only, opened by your fingerprint.",
+                vm.error ?: t("settings.fingerprintKept"),
                 style = MaterialTheme.typography.bodySmall,
                 color = if (vm.error != null) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
             )

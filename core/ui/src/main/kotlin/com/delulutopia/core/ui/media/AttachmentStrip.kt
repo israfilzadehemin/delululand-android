@@ -59,6 +59,7 @@ import com.delulutopia.core.designsystem.motion.Enter
 import com.delulutopia.core.designsystem.motion.Motion
 import com.delulutopia.core.designsystem.motion.enter
 import com.delulutopia.core.designsystem.theme.DlTheme
+import com.delulutopia.core.i18n.t
 import com.delulutopia.core.network.Uploader
 
 /** Emails only (Q11–Q13): record or pick one video; [full] while the email already carries one. */
@@ -112,16 +113,20 @@ fun AttachmentStrip(
                     when (item.kind) {
                         "photo" -> {
                             photoNo++
-                            Print(item, "Photo $photoNo of $photoCount", "Remove photo $photoNo") { onRemove(item, index) }
+                            Print(item, t("media.photoOf", "n" to photoNo, "of" to photoCount), t("media.removePhoto", "n" to photoNo)) {
+                                onRemove(item, index)
+                            }
                         }
-                        "doodle" -> Print(item, "Doodle", "Remove doodle") { onRemove(item, index) }
-                        "video" -> Print(item, "Video", "Remove video", length = item.att?.durationMs ?: item.pending?.durationMs) { onRemove(item, index) }
+                        "doodle" -> Print(item, t("media.doodle"), t("media.removeDoodle")) { onRemove(item, index) }
+                        "video" -> Print(item, t("media.video"), t("media.removeVideo"), length = item.att?.durationMs ?: item.pending?.durationMs) {
+                            onRemove(item, index)
+                        }
                         else -> VoicePill(item) { onRemove(item, index) }
                     }
                 }
             }
             Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                AddButton(WebIcons.Photo, "Add photo", enabled) {
+                AddButton(WebIcons.Photo, t("media.addPhoto"), enabled) {
                     photosPicker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
                 }
                 if (voice.recording) {
@@ -131,30 +136,30 @@ fun AttachmentStrip(
                             .clip(RoundedCornerShape(24.dp))
                             .background(MaterialTheme.colorScheme.errorContainer)
                             .clickable(onClick = voice.stop)
-                            .semantics { contentDescription = "Stop recording" }
+                            .semantics { contentDescription = t("media.stopRecording") }
                             .padding(horizontal = 12.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(6.dp),
                     ) {
                         Box(Modifier.size(10.dp).background(MaterialTheme.colorScheme.error, CircleShape))
                         Text(mmss(voice.elapsedMs), style = MaterialTheme.typography.labelLarge.copy(fontFeatureSettings = "tnum"))
-                        Text("Stop", style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold))
+                        Text(t("media.stop"), style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold))
                     }
                 } else {
-                    AddButton(WebIcons.Mic, "Record a voice note", enabled, onClick = voice.start)
+                    AddButton(WebIcons.Mic, t("media.recordAVoiceNote"), enabled, onClick = voice.start)
                 }
-                AddButton(WebIcons.AudioFile, "Attach audio file", enabled) { audioPicker.launch("audio/*") }
+                AddButton(WebIcons.AudioFile, t("media.attachAudioFile"), enabled) { audioPicker.launch("audio/*") }
                 if (doodle != null) {
                     AddButton(
                         WebIcons.Doodle,
-                        if (doodle.full) "Doodle attached · one per letter" else "Draw a doodle",
+                        if (doodle.full) t("media.doodleAttached") else t("media.drawADoodle"),
                         enabled && !doodle.full,
                         onClick = doodle.onOpen,
                     )
                 }
                 if (video != null) {
-                    AddButton(WebIcons.Video, "Record a video", enabled && !video.full, onClick = video.onRecord)
-                    AddButton(WebIcons.VideoFile, "Pick a video", enabled && !video.full) {
+                    AddButton(WebIcons.Video, t("media.recordAVideo"), enabled && !video.full, onClick = video.onRecord)
+                    AddButton(WebIcons.VideoFile, t("media.pickAVideo"), enabled && !video.full) {
                         videoPicker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.VideoOnly))
                     }
                 }
@@ -163,7 +168,7 @@ fun AttachmentStrip(
         attachments.errors.forEach { (key, text) ->
             Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp), verticalAlignment = Alignment.CenterVertically) {
                 Text(text, Modifier.weight(1f), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)
-                IconButton(onClick = { attachments.dismissError(key) }) { Icon(WebIcons.Close, "Dismiss", Modifier.size(14.dp)) }
+                IconButton(onClick = { attachments.dismissError(key) }) { Icon(WebIcons.Close, t("media.dismiss"), Modifier.size(14.dp)) }
             }
         }
     }
@@ -237,7 +242,7 @@ private fun Ring(fraction: Float, busy: Boolean, modifier: Modifier) {
     val spin by rememberInfiniteTransition(
         label = "ring",
     ).animateFloat(0f, 360f, infiniteRepeatable(tween(900, easing = LinearEasing), RepeatMode.Restart), label = "spin")
-    Canvas(modifier.size(36.dp).semantics { contentDescription = if (busy) "Processing" else "Uploading" }) {
+    Canvas(modifier.size(36.dp).semantics { contentDescription = if (busy) t("media.processing") else t("media.uploading") }) {
         val r = 14.dp.toPx()
         drawCircle(paper.copy(alpha = 0.85f), r)
         drawCircle(line, r, style = Stroke(3.dp.toPx()))
@@ -279,7 +284,7 @@ private fun VoicePill(item: Item, onRemove: () -> Unit) {
                 .clip(CircleShape)
                 .background(MaterialTheme.colorScheme.primary)
                 .clickable(enabled = url != null) { if (playing) OnePlayer.pause() else OnePlayer.play(context, url!!) }
-                .semantics { contentDescription = if (playing) "Pause voice note" else "Play voice note" },
+                .semantics { contentDescription = if (playing) t("media.pauseVoiceNote") else t("media.playVoiceNote") },
             contentAlignment = Alignment.Center,
         ) {
             Icon(if (playing) WebIcons.Pause else WebIcons.Play, null, Modifier.size(10.dp), tint = MaterialTheme.colorScheme.onPrimary)
@@ -297,7 +302,7 @@ private fun VoicePill(item: Item, onRemove: () -> Unit) {
         if (item.pending != null) Ring(item.pending.progress, item.pending.processing, Modifier.size(20.dp))
         Box(
             Modifier.size(36.dp).clip(CircleShape).clickable(onClick = onRemove).semantics {
-                contentDescription = "Remove voice note"
+                contentDescription = t("media.removeVoiceNote")
             },
             contentAlignment = Alignment.Center,
         ) {

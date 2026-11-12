@@ -12,6 +12,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.exifinterface.media.ExifInterface
+import com.delulutopia.core.i18n.t
 import com.delulutopia.core.network.ApiException
 import com.delulutopia.core.network.Uploader
 import com.delulutopia.core.network.model.Att
@@ -41,7 +42,7 @@ data class Item(val key: String, val att: Att? = null, val pending: Pending? = n
     val kind: String get() = att?.kind ?: pending?.kind?.wire.orEmpty()
 }
 
-private const val READ_FAILED = "This file couldn't be read from your phone"
+private val READ_FAILED: String get() = t("media.readFailed")
 private const val LONG_EDGE = 2048
 private const val DECODE_MAX = 40L * 1024 * 1024
 

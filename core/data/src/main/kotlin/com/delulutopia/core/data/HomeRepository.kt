@@ -1,5 +1,7 @@
 package com.delulutopia.core.data
 
+import com.delulutopia.core.i18n.I18n
+import com.delulutopia.core.i18n.Lang
 import com.delulutopia.core.network.ApiException
 import com.delulutopia.core.network.model.Home
 import com.delulutopia.core.network.model.Mood
@@ -13,6 +15,7 @@ import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -48,10 +51,17 @@ class HomeRepository @Inject constructor(private val backend: Backend) {
         started = scope.launch {
             refresher = backend.refresher(
                 scope,
-                setOf("letter", "discussion", "comment", "email", "reaction", "board", "mood", "moods", "profile", "universe"),
+                setOf("letter", "discussion", "comment", "email", "reaction", "board", "mood", "moods", "profile", "universe", "language"),
                 deadlines = { deadlines() },
             ) { load() }
             launch { backend.live.signals.collect { if (it.name == "moods") loadMoods() } }
+            // A switch reaches the server's own words too: default moods, stamps, errors (L9).
+            launch {
+                I18n.changes.drop(1).collect {
+                    load()
+                    loadMoods()
+                }
+            }
             load()
             loadMoods()
         }
@@ -66,6 +76,8 @@ class HomeRepository @Inject constructor(private val backend: Backend) {
     suspend fun load() = mutex.withLock {
         try {
             val home = backend.run { home() }
+            // L8: the account's language wins on every device.
+            Lang.parse(home.me.language)?.let { if (it != I18n.lang) I18n.set(it) }
             _state.update { it.copy(home = home, offline = false) }
             refresher?.armDeadline()
         } catch (e: ApiException) {

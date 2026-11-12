@@ -40,6 +40,7 @@ import com.delulutopia.core.designsystem.component.DlBottomSheet
 import com.delulutopia.core.designsystem.component.DlFilledButton
 import com.delulutopia.core.designsystem.component.DlOutlinedButton
 import com.delulutopia.core.designsystem.icon.WebIcons
+import com.delulutopia.core.i18n.t
 import com.delulutopia.core.ui.LocalBrand
 import com.delulutopia.core.ui.LocalNoticeAction
 import java.io.File
@@ -150,7 +151,7 @@ fun rememberVoiceRecording(onRecorded: (ByteArray, Long) -> Unit): VoiceState {
     }
     LaunchedEffect(blocked) {
         if (blocked) {
-            notice("Microphone is off for $brand", "Settings") { openAppSettings(context) }
+            notice("Microphone is off for $brand", t("settings.settings")) { openAppSettings(context) }
             blocked = false
         }
     }
@@ -171,17 +172,17 @@ fun rememberVoiceRecording(onRecorded: (ByteArray, Long) -> Unit): VoiceState {
                 Box(Modifier.size(56.dp).background(MaterialTheme.colorScheme.primaryContainer, CircleShape), contentAlignment = Alignment.Center) {
                     Icon(WebIcons.Mic, null, Modifier.size(28.dp))
                 }
-                Text("Record a voice note", style = MaterialTheme.typography.headlineSmall)
-                Text("Your phone asks once for the microphone.", style = MaterialTheme.typography.bodyLarge)
+                Text(t("media.recordAVoiceNote"), style = MaterialTheme.typography.headlineSmall)
+                Text(t("media.yourPhoneAsksOnce"), style = MaterialTheme.typography.bodyLarge)
                 Text(
-                    "Notes stop at five minutes and play on any phone. If you say no, you can still attach an audio file.",
+                    t("media.notesStopAtFiveMinutes"),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    DlOutlinedButton("Not now", { asking = false }, Modifier.weight(1f))
+                    DlOutlinedButton(t("media.notNow"), { asking = false }, Modifier.weight(1f))
                     DlFilledButton(
-                        "Allow",
+                        t("media.allow"),
                         {
                             prefs.edit().putBoolean(ASKED, true).apply()
                             asking = false

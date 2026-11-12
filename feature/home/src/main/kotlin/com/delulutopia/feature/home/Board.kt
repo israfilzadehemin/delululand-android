@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.absoluteOffset
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -39,6 +40,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.AbsoluteAlignment
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -52,6 +54,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -71,7 +74,10 @@ import com.delulutopia.core.designsystem.component.DlOutlinedButton
 import com.delulutopia.core.designsystem.component.LocalServerBaseUrl
 import com.delulutopia.core.designsystem.component.resolveMedia
 import com.delulutopia.core.designsystem.icon.WebIcons
+import com.delulutopia.core.designsystem.text.tBold
 import com.delulutopia.core.designsystem.theme.DlTheme
+import com.delulutopia.core.i18n.formatNumber
+import com.delulutopia.core.i18n.t
 import com.delulutopia.core.network.model.Board
 import com.delulutopia.core.network.model.Home
 import com.delulutopia.core.ui.LocalNotice
@@ -118,17 +124,19 @@ internal fun BoardTile(home: Home, nowMs: Long, vm: HomeActions) {
         if (!mini && home.boardNew && board != null) vm.boardSeen(board.version)
     }
 
-    val nameOf = { authorId: Int -> if (authorId == home.me.id) "You" else friend }
-    val didWhat = { b: Board ->
+    val nameOf = { authorId: Int -> if (authorId == home.me.id) t("board.you") else friend }
+    // web BoardTile byline: the author's name in bold inside the language's own sentence.
+    val bylineKey = { b: Board ->
+        val me = b.authorId == home.me.id
         when (b.editedFrom) {
-            null -> "drew this"
-            b.authorId -> "edited this"
-            else -> "edited ${if (b.editedFrom == home.me.id) "your" else "$friend's"} doodle"
+            null -> if (me) "board.byline.meDrew" else "board.byline.friendDrew"
+            b.authorId -> if (me) "board.byline.meEditedOwn" else "board.byline.friendEditedOwn"
+            else -> if (me) "board.byline.meEditedFriends" else "board.byline.friendEditedMine"
         }
     }
     val canReact = board != null && board.authorId != home.me.id
     val mark = reactionOf(board?.reaction)
-    val whose = board?.let { if (it.authorId == home.me.id) "your doodle" else "$friend's doodle" }
+    val boardMine = board?.authorId == home.me.id
 
     val post: (ByteArray, Int, Boolean) -> Unit = { png, version, edit ->
         busy = true
@@ -159,13 +167,15 @@ internal fun BoardTile(home: Home, nowMs: Long, vm: HomeActions) {
             board != null -> {
                 Box(Modifier.fillMaxWidth()) {
                     Frame(
-                        Modifier.clickable(onClickLabel = "Open full screen") { viewing = true }
-                            .semantics { contentDescription = "Board: ${if (board.authorId == home.me.id) "your" else "$friend's"} doodle" },
+                        Modifier.clickable(onClickLabel = t("board.openFullScreen")) { viewing = true }
+                            .semantics {
+                                contentDescription = if (boardMine) t("board.frame.mine") else t("board.frame.friends", "friend" to friend)
+                            },
                     ) {
                         BoardImage(board, base)
                         if (ribbon == board.version) NewChip(Modifier.padding(8.dp), paper = false)
                     }
-                    Corner(board, canReact, mark, drawn, friend, Modifier.align(Alignment.TopEnd).padding(6.dp)) { picking = true }
+                    Corner(board, canReact, mark, drawn, friend, Modifier.align(AbsoluteAlignment.TopRight).padding(6.dp)) { picking = true }
                 }
                 BoardNote(board, home, vm)
                 // The status line on its own row, the actions under it at the end (web .dl-board-meta wraps).
@@ -177,16 +187,18 @@ internal fun BoardTile(home: Home, nowMs: Long, vm: HomeActions) {
                     WhoDot(board.authorId)
                     val reacted = when {
                         board.reaction == null -> ""
-                        canReact -> " · you reacted"
-                        else -> " · $friend reacted"
+                        canReact -> t("board.reactedSuffix.me")
+                        else -> t("board.reactedSuffix.friend", "friend" to friend)
                     }
                     Text(
-                        buildAnnotatedString {
-                            withStyle(SpanStyle(fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface)) {
-                                append(nameOf(board.authorId))
-                            }
-                            append(" ${didWhat(board)} · ${ageWords(board.createdAt, nowMs)}$reacted")
-                        },
+                        tBold(
+                            bylineKey(board),
+                            setOf("name"),
+                            "name" to nameOf(board.authorId),
+                            "friend" to friend,
+                            "age" to ageWords(board.createdAt, nowMs),
+                            style = SpanStyle(fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface),
+                        ) + AnnotatedString(reacted),
                         Modifier.weight(1f),
                         style = MaterialTheme.typography.bodyMedium.copy(fontSize = 13.sp, lineHeight = 17.sp),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -197,9 +209,12 @@ internal fun BoardTile(home: Home, nowMs: Long, vm: HomeActions) {
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
                 ) {
-                    DrawButton(WebIcons.Doodle, "Edit", "Edit $whose") { drawing = "edit" }
-                    DrawButton(WebIcons.Write, "Draw", null) { drawing = "new" }
-                    IconButton(onClick = { vm.setBoardMini(true) }) { Icon(WebIcons.ChevronUp, "Fold the board") }
+                    DrawButton(WebIcons.Doodle, t("home.edit"), if (boardMine) t("board.editMine") else t("board.editFriends", "friend" to friend)) {
+                        drawing =
+                            "edit"
+                    }
+                    DrawButton(WebIcons.Write, t("board.draw"), null) { drawing = "new" }
+                    IconButton(onClick = { vm.setBoardMini(true) }) { Icon(WebIcons.ChevronUp, t("board.foldTheBoard")) }
                 }
             }
             else -> Box(Modifier.fillMaxWidth()) {
@@ -209,13 +224,13 @@ internal fun BoardTile(home: Home, nowMs: Long, vm: HomeActions) {
                         verticalArrangement = Arrangement.spacedBy(14.dp, Alignment.CenterVertically),
                         horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
-                        Text("The board is empty", style = DlTheme.type.letterBody.copy(fontSize = 17.sp), color = Color(0xFF48536C))
-                        DlFilledButton("Draw the first doodle", { drawing = "new" }, icon = WebIcons.Write)
+                        Text(t("board.theBoardIsEmpty"), style = DlTheme.type.letterBody.copy(fontSize = 17.sp), color = Color(0xFF48536C))
+                        DlFilledButton(t("board.drawTheFirstDoodle"), { drawing = "new" }, icon = WebIcons.Write)
                     }
                 }
                 IconButton(onClick = {
                     vm.setBoardMini(true)
-                }, Modifier.align(Alignment.BottomEnd).offset(y = 8.dp)) { Icon(WebIcons.ChevronUp, "Fold the board") }
+                }, Modifier.align(Alignment.BottomEnd).offset(y = 8.dp)) { Icon(WebIcons.ChevronUp, t("board.foldTheBoard")) }
             }
         }
     }
@@ -244,16 +259,23 @@ internal fun BoardTile(home: Home, nowMs: Long, vm: HomeActions) {
                 drawing = null
             },
             surface = Surfaces.BOARD,
-            title = if (edit) "Edit the board" else "Draw on the board",
-            doneLabel = "Post",
-            busyLabel = "Posting…",
+            title = if (edit) t("board.editTheBoard") else t("board.drawOnTheBoard"),
+            doneLabel = t("board.post"),
+            busyLabel = t("board.posting"),
             busy = busy,
-            note = whose?.let { if (edit) "Posting replaces $it with your edit" else "Posting replaces $it" },
+            note = board?.let {
+                when {
+                    boardMine && edit -> t("board.replacing.mineEdit")
+                    boardMine -> t("board.replacing.mine")
+                    edit -> t("board.replacing.friendsEdit", "friend" to friend)
+                    else -> t("board.replacing.friends", "friend" to friend)
+                }
+            },
             board = true,
             backdrop = if (edit) board?.let { resolveMedia(base, it.url) } else null,
             onBackdropError = {
                 drawing = null
-                notice("Couldn't open the doodle. Try again.")
+                notice(t("board.couldntOpenDoodle"))
             },
         )
     }
@@ -262,16 +284,16 @@ internal fun BoardTile(home: Home, nowMs: Long, vm: HomeActions) {
         val mine = c.current.authorId == home.me.id
         DlBottomSheet(onDismissRequest = { conflict = null }) {
             Column(Modifier.padding(horizontal = 24.dp).padding(bottom = 24.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-                Text("${if (mine) "You" else friend} just posted a new doodle", style = MaterialTheme.typography.titleLarge)
+                Text(if (mine) t("board.conflict.me") else t("board.conflict.friend", "friend" to friend), style = MaterialTheme.typography.titleLarge)
                 Text(
-                    "You were drawing over an older one. Posting now replaces it; keeping it discards your drawing.",
+                    t("board.youWereDrawingOverAn"),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 Frame(Modifier.width(200.dp)) { BoardImage(c.current, base) }
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     DlOutlinedButton(
-                        if (mine) "Keep it" else "Keep $friend's",
+                        if (mine) t("board.keepIt") else t("board.keepFriends", "friend" to friend),
                         {
                             conflict = null
                             drawing = null
@@ -279,7 +301,9 @@ internal fun BoardTile(home: Home, nowMs: Long, vm: HomeActions) {
                         Modifier.weight(1f),
                         enabled = !busy,
                     )
-                    DlFilledButton(if (busy) "Posting…" else "Replace it", { post(c.png, c.current.version, c.edit) }, Modifier.weight(1f), enabled = !busy)
+                    DlFilledButton(if (busy) t("board.posting") else t("board.replaceIt"), {
+                        post(c.png, c.current.version, c.edit)
+                    }, Modifier.weight(1f), enabled = !busy)
                 }
             }
         }
@@ -288,7 +312,7 @@ internal fun BoardTile(home: Home, nowMs: Long, vm: HomeActions) {
     if (picking && board != null && canReact) {
         DlBottomSheet(onDismissRequest = { picking = false }) {
             Column(Modifier.padding(horizontal = 16.dp).padding(bottom = 24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Text("React to $friend's doodle", Modifier.padding(horizontal = 8.dp), style = MaterialTheme.typography.titleLarge)
+                Text(t("board.reactToSDoodle", "friend" to friend), Modifier.padding(horizontal = 8.dp), style = MaterialTheme.typography.titleLarge)
                 REACTIONS.chunked(5).forEach { row ->
                     Row(Modifier.fillMaxWidth()) {
                         row.forEach { r ->
@@ -308,7 +332,7 @@ internal fun BoardTile(home: Home, nowMs: Long, vm: HomeActions) {
                     }
                 }
                 if (board.reaction != null) {
-                    DlOutlinedButton("Remove reaction", { react(null) }, Modifier.fillMaxWidth())
+                    DlOutlinedButton(t("board.removeReaction"), { react(null) }, Modifier.fillMaxWidth())
                 }
             }
         }
@@ -335,8 +359,14 @@ private fun Frame(modifier: Modifier, content: @Composable BoxScope.() -> Unit) 
                 Alignment.BottomCenter,
             ).offset(y = 11.dp).padding(horizontal = 21.dp).fillMaxWidth().height(6.dp).background(c.boardTray, RoundedCornerShape(3.dp)),
         ) {
-            Box(Modifier.align(Alignment.BottomEnd).offset(x = (-16).dp, y = (-2).dp).size(34.dp, 6.dp).background(Color(0xFF202B45), RoundedCornerShape(3.dp)))
-            Box(Modifier.align(Alignment.BottomEnd).offset(x = (-56).dp, y = (-2).dp).size(34.dp, 6.dp).background(Color(0xFFC96F52), RoundedCornerShape(3.dp)))
+            Box(
+                Modifier.align(AbsoluteAlignment.BottomRight).absoluteOffset(x = (-16).dp, y = (-2).dp).size(34.dp, 6.dp)
+                    .background(Color(0xFF202B45), RoundedCornerShape(3.dp)),
+            )
+            Box(
+                Modifier.align(AbsoluteAlignment.BottomRight).absoluteOffset(x = (-56).dp, y = (-2).dp).size(34.dp, 6.dp)
+                    .background(Color(0xFFC96F52), RoundedCornerShape(3.dp)),
+            )
         }
     }
 }
@@ -360,7 +390,7 @@ private fun Strip(home: Home, board: Board?, nowMs: Long, base: String, nameOf: 
             .fillMaxWidth()
             .shadow(1.dp, RoundedCornerShape(8.dp))
             .background(c.boardFrame, RoundedCornerShape(8.dp))
-            .clickable(onClickLabel = "Unfold the board", onClick = onUnfold)
+            .clickable(onClickLabel = t("board.unfoldTheBoard"), onClick = onUnfold)
             .padding(start = 8.dp, end = 12.dp, top = 8.dp, bottom = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -370,16 +400,22 @@ private fun Strip(home: Home, board: Board?, nowMs: Long, base: String, nameOf: 
         }
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text("Board", style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.ExtraBold), color = Color(0xFF202B45))
+                Text(t("board.board"), style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.ExtraBold), color = Color(0xFF202B45))
                 if (home.boardNew && board != null) NewChip()
             }
             Text(
                 if (board !=
                     null
                 ) {
-                    "${nameOf(board.authorId)} ${if (board.editedFrom == null) "drew" else "edited"} · ${ageWords(board.createdAt, nowMs)}"
+                    val age = ageWords(board.createdAt, nowMs)
+                    when {
+                        board.authorId == home.me.id && board.editedFrom == null -> t("board.strip.meDrew", "age" to age)
+                        board.authorId == home.me.id -> t("board.strip.meEdited", "age" to age)
+                        board.editedFrom == null -> t("board.strip.friendDrew", "friend" to friend, "age" to age)
+                        else -> t("board.strip.friendEdited", "friend" to friend, "age" to age)
+                    }
                 } else {
-                    "The board is empty"
+                    t("board.theBoardIsEmpty")
                 },
                 style = MaterialTheme.typography.bodyMedium,
                 color = Color(0xFF202B45).copy(alpha = 0.85f),
@@ -398,7 +434,10 @@ private fun Corner(board: Board, canReact: Boolean, mark: BoardReaction?, drawn:
                 .sizeIn(minWidth = 48.dp, minHeight = 48.dp)
                 .clip(CircleShape)
                 .clickable(role = Role.Button, onClick = onPick)
-                .semantics { contentDescription = if (mark != null) "Your reaction: ${mark.name}. Change it" else "React to $friend's doodle" },
+                .semantics {
+                    contentDescription =
+                        if (mark != null) t("board.yourReactionChangeIt", "name" to mark.name) else t("board.reactToSDoodle", "friend" to friend)
+                },
             contentAlignment = Alignment.Center,
         ) {
             if (mark != null) {
@@ -409,7 +448,7 @@ private fun Corner(board: Board, canReact: Boolean, mark: BoardReaction?, drawn:
         }
     } else if (mark != null) {
         Box(modifier.sizeIn(minWidth = 48.dp, minHeight = 48.dp), contentAlignment = Alignment.Center) {
-            HandReaction(mark, 64.dp, tilt = 8f, label = "$friend reacted: ${mark.name}")
+            HandReaction(mark, 64.dp, tilt = 8f, label = t("board.reacted", "friend" to friend, "name" to mark.name))
         }
     }
 }
@@ -475,7 +514,7 @@ internal fun BoardNote(board: Board, home: Home, vm: HomeActions, viewer: Boolea
             ) {
                 Text(comment.text, style = DlTheme.type.boardNote.copy(fontSize = 23.sp), color = ink)
                 Text(
-                    "— ${if (mine) "You" else friend}",
+                    "— ${if (mine) t("board.you") else friend}",
                     Modifier.fillMaxWidth().padding(top = 4.dp),
                     style = DlTheme.type.boardNote.copy(fontSize = 18.sp),
                     color = ink.copy(alpha = 0.72f),
@@ -497,7 +536,7 @@ internal fun BoardNote(board: Board, home: Home, vm: HomeActions, viewer: Boolea
                     enabled = !busy,
                 ) {
                     Box(Modifier.size(28.dp).background(ink.copy(alpha = 0.08f), CircleShape), contentAlignment = Alignment.Center) {
-                        Icon(WebIcons.Close, "Delete your comment", Modifier.size(12.dp), tint = ink)
+                        Icon(WebIcons.Close, t("board.deleteYourComment"), Modifier.size(12.dp), tint = ink)
                     }
                 }
             }
@@ -527,7 +566,7 @@ internal fun BoardNote(board: Board, home: Home, vm: HomeActions, viewer: Boolea
                 BasicTextField(
                     value = text,
                     onValueChange = { text = it.replace(Regex("[\\r\\n]+"), " ") },
-                    modifier = Modifier.weight(1f).semantics { contentDescription = "Comment on $friend's doodle" },
+                    modifier = Modifier.weight(1f).semantics { contentDescription = t("board.commentOnSDoodle", "friend" to friend) },
                     enabled = !busy,
                     singleLine = true,
                     textStyle = DlTheme.type.boardNote.copy(color = ink),
@@ -536,14 +575,14 @@ internal fun BoardNote(board: Board, home: Home, vm: HomeActions, viewer: Boolea
                     keyboardActions = KeyboardActions(onSend = { submit() }),
                     decorationBox = { field ->
                         Box {
-                            if (text.isEmpty()) Text("Leave $friend a note…", style = DlTheme.type.boardNote, color = ink.copy(alpha = 0.55f))
+                            if (text.isEmpty()) Text(t("board.leaveANote", "friend" to friend), style = DlTheme.type.boardNote, color = ink.copy(alpha = 0.55f))
                             field()
                         }
                     },
                 )
                 if (length >= COUNT_FROM) {
                     Text(
-                        "${COMMENT_MAX - length}",
+                        formatNumber(COMMENT_MAX - length),
                         style = MaterialTheme.typography.labelSmall,
                         color = if (tooLong) (if (dark) Color(0xFFF0A39A) else Color(0xFFB23A3A)) else ink.copy(alpha = 0.7f),
                     )
@@ -555,7 +594,7 @@ internal fun BoardNote(board: Board, home: Home, vm: HomeActions, viewer: Boolea
                         .clip(CircleShape)
                         .background(MaterialTheme.colorScheme.primary.copy(alpha = if (enabled) 1f else 0.35f))
                         .clickable(enabled = enabled, role = Role.Button) { submit() }
-                        .semantics { contentDescription = "Post comment" },
+                        .semantics { contentDescription = t("board.postComment") },
                     contentAlignment = Alignment.Center,
                 ) {
                     Icon(WebIcons.Check, null, Modifier.size(16.dp), tint = Color.White)
@@ -573,26 +612,33 @@ private fun BoardViewer(board: Board, home: Home, vm: HomeActions, canReact: Boo
     val base = LocalServerBaseUrl.current
     val friend = home.friendName
     val mark = reactionOf(board.reaction)
-    val name = if (board.authorId == home.me.id) "You" else friend
+    val name = if (board.authorId == home.me.id) t("board.you") else friend
     Dialog(onDismissRequest = onClose, properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false)) {
         Surface(Modifier.fillMaxSize(), color = c.lightbox, contentColor = c.onLightbox) {
             Column(Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding()) {
                 Row(Modifier.fillMaxWidth().padding(4.dp)) {
-                    IconButton(onClick = onClose) { Icon(WebIcons.Close, "Close", tint = c.onLightbox) }
+                    IconButton(onClick = onClose) { Icon(WebIcons.Close, t("home.close"), tint = c.onLightbox) }
                 }
                 Column(Modifier.weight(1f).fillMaxWidth().padding(horizontal = 12.dp), verticalArrangement = Arrangement.Center) {
                     Box {
                         Frame(Modifier) {
                             AsyncImage(
                                 model = resolveMedia(base, board.url),
-                                contentDescription = "${if (name == "You") "Your" else "$name's"} doodle",
+                                contentDescription = if (name == t("board.you")) t("board.alt.mine") else t("board.alt.friends", "friend" to name),
                                 modifier = Modifier.fillMaxSize(),
                                 contentScale = ContentScale.Fit,
                             )
                         }
                         if (mark != null) {
-                            val by = if (canReact) "Your reaction" else "$friend reacted"
-                            HandReaction(mark, 84.dp, Modifier.align(Alignment.TopEnd).padding(14.dp), tilt = 8f, label = "$by: ${mark.name}")
+                            val label = if (canReact) {
+                                t(
+                                    "board.myReaction",
+                                    "name" to mark.name,
+                                )
+                            } else {
+                                t("board.reacted", "friend" to friend, "name" to mark.name)
+                            }
+                            HandReaction(mark, 84.dp, Modifier.align(AbsoluteAlignment.TopRight).padding(14.dp), tilt = 8f, label = label)
                         }
                     }
                     Spacer(Modifier.height(12.dp))
@@ -611,14 +657,22 @@ private fun BoardViewer(board: Board, home: Home, vm: HomeActions, canReact: Boo
                     if (canReact) {
                         Box(
                             Modifier.size(48.dp).clip(CircleShape).clickable(role = Role.Button, onClick = onReact)
-                                .semantics { contentDescription = if (mark != null) "Your reaction: ${mark.name}. Change it" else "React" },
+                                .semantics {
+                                    contentDescription = if (mark !=
+                                        null
+                                    ) {
+                                        t("board.yourReactionChangeIt", "name" to mark.name)
+                                    } else {
+                                        t("board.react")
+                                    }
+                                },
                             contentAlignment = Alignment.Center,
                         ) {
                             if (mark != null) HandReaction(mark, 28.dp) else ReactSlot(c.onLightbox, c.onLightbox, size = 32.dp)
                         }
                     }
-                    ViewerButton(WebIcons.Doodle, "Edit", outlined = true) { onDraw("edit") }
-                    ViewerButton(WebIcons.Write, "Draw new", outlined = false) { onDraw("new") }
+                    ViewerButton(WebIcons.Doodle, t("home.edit"), outlined = true) { onDraw("edit") }
+                    ViewerButton(WebIcons.Write, t("board.drawNew"), outlined = false) { onDraw("new") }
                 }
             }
         }

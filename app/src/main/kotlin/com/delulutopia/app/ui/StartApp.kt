@@ -19,6 +19,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import com.delulutopia.app.R
 import com.delulutopia.core.designsystem.component.DlFilledButton
+import com.delulutopia.core.i18n.t
 import com.delulutopia.feature.start.EntryDestination
 import com.delulutopia.feature.start.startGraph
 
@@ -41,7 +42,7 @@ fun UnreachableScreen(onRetry: () -> Unit) {
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(stringResource(R.string.brand), fontSize = 24.sp, fontWeight = FontWeight.ExtraBold)
-        Text(stringResource(R.string.cant_reach_brand), color = MaterialTheme.colorScheme.error, textAlign = TextAlign.Center)
-        DlFilledButton(stringResource(R.string.try_again), onRetry)
+        Text(t("app.cantReachDelulutopia"), color = MaterialTheme.colorScheme.error, textAlign = TextAlign.Center)
+        DlFilledButton(t("entry.tryAgain"), onRetry)
     }
 }

@@ -57,8 +57,11 @@ import com.delulutopia.core.designsystem.icon.DlIcons
 import com.delulutopia.core.designsystem.icon.WebIcons
 import com.delulutopia.core.designsystem.motion.pressScale
 import com.delulutopia.core.designsystem.theme.ThemeMode
+import com.delulutopia.core.i18n.I18n
+import com.delulutopia.core.i18n.t
 import com.delulutopia.core.network.model.NotifySettings
 import com.delulutopia.core.ui.AppearanceRoute
+import com.delulutopia.core.ui.LanguageRoute
 import com.delulutopia.core.ui.LocalAppNav
 import com.delulutopia.core.ui.LocalBrand
 import com.delulutopia.core.ui.LocalNotice
@@ -72,7 +75,11 @@ import com.delulutopia.core.ui.notify.rememberNotifyAccess
 import com.delulutopia.core.ui.signatureOf
 import com.delulutopia.core.ui.tintOf
 
-val THEME_WORDS = mapOf(ThemeMode.Light to "Light", ThemeMode.Dark to "Dark", ThemeMode.System to "Match device")
+val THEME_WORDS get() = mapOf(
+    ThemeMode.Light to t("settings.theme.light"),
+    ThemeMode.Dark to t("settings.theme.dark"),
+    ThemeMode.System to t("settings.theme.match"),
+)
 
 /** The universe mark (web IconUniverse): a planet and its ring. */
 val UniverseIcon: ImageVector by lazy {
@@ -95,17 +102,17 @@ val UniverseIcon: ImageVector by lazy {
 }
 
 fun deviceWords(p: NotifyPermission): String = when (p) {
-    NotifyPermission.Granted -> "On"
-    NotifyPermission.Denied -> "Blocked"
-    NotifyPermission.Default -> "Off"
+    NotifyPermission.Granted -> t("settings.device.on")
+    NotifyPermission.Denied -> t("settings.device.blocked")
+    NotifyPermission.Default -> t("settings.device.off")
 }
 
 fun notifySummary(s: NotifySettings?): String {
     if (s == null) return ""
-    if (s.paused) return "Paused"
+    if (s.paused) return t("settings.paused")
     val total = s.sections.sumOf { it.events.size }
     val on = s.sections.filter { it.enabled }.sumOf { sec -> sec.events.count { it.enabled } }
-    return "$on of $total on"
+    return t("settings.someOn", "on" to on, "total" to total)
 }
 
 /**
@@ -173,7 +180,7 @@ fun YouScreen(themeMode: ThemeMode, onLogout: () -> Unit, vm: YouViewModel = hil
                         )
                     }
                     Text(
-                        "View profile",
+                        t("settings.viewProfile"),
                         style = MaterialTheme.typography.bodySmall.copy(fontSize = 13.sp, lineHeight = 18.sp, fontWeight = FontWeight.Bold),
                         color = MaterialTheme.colorScheme.primary,
                     )
@@ -181,17 +188,28 @@ fun YouScreen(themeMode: ThemeMode, onLogout: () -> Unit, vm: YouViewModel = hil
                 Icon(DlIcons.ChevronRight, null, Modifier.size(20.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
-        Group("Settings") {
-            DlListItem("Universe", supporting = "$brand · name, welcome, key", icon = UniverseIcon, onClick = { nav.open(UniverseRoute) })
+        Group(t("settings.settings")) {
+            DlListItem(t("settings.universe"), supporting = t("settings.nameWelcomeKey", "brand" to brand), icon = UniverseIcon, onClick = {
+                nav.open(UniverseRoute)
+            })
             DlListItem(
-                "Appearance",
-                supporting = "${THEME_WORDS[themeMode]} · falling leaves ${if (leaves) "on" else "off"}",
+                t("settings.appearance"),
+                supporting = t(if (leaves) "settings.appearanceSubOn" else "settings.appearanceSubOff", "theme" to THEME_WORDS[themeMode]),
                 icon = DlIcons.Palette,
                 onClick = { nav.open(AppearanceRoute) },
             )
             DlListItem(
-                "Notifications",
-                supporting = listOf(summary, "this phone: ${deviceWords(device.permission)}").filter { it.isNotEmpty() }.joinToString(" · "),
+                t("settings.language"),
+                // Each language in its own words (L8), so it can be found from any language.
+                supporting = I18n.lang.native,
+                icon = DlIcons.Language,
+                onClick = { nav.open(LanguageRoute) },
+            )
+            DlListItem(
+                t("settings.notifications"),
+                supporting = listOf(summary, t("settings.thisPhoneState", "device" to deviceWords(device.permission))).filter {
+                    it.isNotEmpty()
+                }.joinToString(" · "),
                 icon = DlIcons.Bell,
                 onClick = { nav.open(NotificationsRoute) },
                 trailing = {
@@ -202,12 +220,12 @@ fun YouScreen(themeMode: ThemeMode, onLogout: () -> Unit, vm: YouViewModel = hil
                 },
             )
         }
-        Group("Account") {
-            DlListItem("Change PIN", icon = WebIcons.Key, showChevron = false, onClick = { changePin = true })
+        Group(t("settings.account")) {
+            DlListItem(t("settings.changePin"), icon = WebIcons.Key, showChevron = false, onClick = { changePin = true })
             if (me != null && activity != null && Fingerprint.available(context)) {
                 DlListItem(
-                    "Fingerprint unlock",
-                    supporting = "Instead of typing your PIN on this phone",
+                    t("settings.fingerprint"),
+                    supporting = t("settings.fingerprintSub"),
                     icon = DlIcons.Fingerprint,
                     onClick = {
                         if (fingerprintOn) {
@@ -220,10 +238,10 @@ fun YouScreen(themeMode: ThemeMode, onLogout: () -> Unit, vm: YouViewModel = hil
                     trailing = { DlSwitch(fingerprintOn, null) },
                 )
             }
-            DlListItem("About", icon = WebIcons.Info, enabled = false, showChevron = false, trailing = { SoonChip() })
+            DlListItem(t("settings.about"), icon = WebIcons.Info, enabled = false, showChevron = false, trailing = { SoonChip() })
         }
         Card {
-            DlListItem("Log out", icon = DlIcons.LogOut, showChevron = false, destructive = true, onClick = { confirmLogout = true })
+            DlListItem(t("settings.logOut"), icon = DlIcons.LogOut, showChevron = false, destructive = true, onClick = { confirmLogout = true })
         }
     }
 
@@ -232,7 +250,7 @@ fun YouScreen(themeMode: ThemeMode, onLogout: () -> Unit, vm: YouViewModel = hil
             // A changed PIN replaces the one kept behind the fingerprint.
             if (me != null && activity != null && fingerprintOn) {
                 Fingerprint.turnOff(context, me.id)
-                Fingerprint.turnOn(activity, me.id, pin, "Keep fingerprint unlock") { fingerprintOn = it }
+                Fingerprint.turnOn(activity, me.id, pin, t("settings.fingerprintKeep")) { fingerprintOn = it }
             }
         })
     }
@@ -242,23 +260,23 @@ fun YouScreen(themeMode: ThemeMode, onLogout: () -> Unit, vm: YouViewModel = hil
             onClose = { fingerprintPin = false },
             onPin = { pin ->
                 fingerprintPin = false
-                Fingerprint.turnOn(activity, me.id, pin, "Turn on fingerprint unlock") { ok ->
+                Fingerprint.turnOn(activity, me.id, pin, t("settings.fingerprintTurnOn")) { ok ->
                     fingerprintOn = ok
-                    if (ok) notice("Fingerprint unlock is on")
+                    if (ok) notice(t("settings.fingerprintOn"))
                 }
             },
         )
     }
     if (confirmLogout) {
         DlDialog(
-            title = "Log out of $brand?",
-            text = "Your letters and drafts stay safe. You'll need your PIN to come back on this device.",
-            confirmLabel = "Log out",
+            title = t("app.logOutOf", "brand" to brand),
+            text = t("app.yourLettersAndDraftsStay"),
+            confirmLabel = t("settings.logOut"),
             onConfirm = {
                 confirmLogout = false
                 onLogout()
             },
-            dismissLabel = "Cancel",
+            dismissLabel = t("settings.cancel"),
             onDismiss = { confirmLogout = false },
             destructive = true,
         )
@@ -303,7 +321,7 @@ private fun SoonChip() {
 internal fun LoadOrFail(failed: Boolean) {
     val brand = LocalBrand.current
     Text(
-        if (failed) "Can't reach $brand. Try again." else "Loading…",
+        if (failed) t("common.cantReachTryAgain", "brand" to brand) else t("common.loading"),
         Modifier.padding(24.dp),
         style = MaterialTheme.typography.bodyMedium,
         color = MaterialTheme.colorScheme.onSurfaceVariant,

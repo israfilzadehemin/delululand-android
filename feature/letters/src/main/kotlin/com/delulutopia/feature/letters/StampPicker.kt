@@ -48,6 +48,7 @@ import com.delulutopia.core.designsystem.component.DlBottomSheet
 import com.delulutopia.core.designsystem.component.DlOutlinedButton
 import com.delulutopia.core.designsystem.component.LocalServerBaseUrl
 import com.delulutopia.core.designsystem.component.resolveMedia
+import com.delulutopia.core.i18n.t
 import com.delulutopia.core.network.model.StampCatalogue
 import com.delulutopia.core.network.model.StampMark
 import com.delulutopia.core.network.model.StampView
@@ -95,8 +96,8 @@ internal fun StampPicker(catalogue: StampCatalogue?, failed: Boolean, current: S
             OutlinedTextField(
                 value = raw,
                 onValueChange = { raw = it },
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).semantics { contentDescription = "Search stamps by name or keyword" },
-                placeholder = { Text("Search stamps") },
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).semantics { contentDescription = t("stamps.searchStampsByNameOr") },
+                placeholder = { Text(t("stamps.searchStamps")) },
                 singleLine = true,
                 shape = RoundedCornerShape(24.dp),
             )
@@ -128,29 +129,29 @@ internal fun StampPicker(catalogue: StampCatalogue?, failed: Boolean, current: S
                 when {
                     catalogue == null && failed -> item(span = { GridItemSpan(maxLineSpan) }) {
                         Text(
-                            "Couldn't load the stamps. Check your connection and try again.",
+                            t("stamps.couldntLoadTheStampsCheck"),
                             color = MaterialTheme.colorScheme.error,
                             textAlign = TextAlign.Center,
                         )
                     }
                     catalogue == null -> item(span = { GridItemSpan(maxLineSpan) }) {
-                        Text("Loading stamps…", color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center)
+                        Text(t("stamps.loadingStamps"), color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center)
                     }
                     query.isNotEmpty() -> if (results.isEmpty()) {
                         item(span = {
                             GridItemSpan(maxLineSpan)
-                        }) { Text("Nothing found", color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center) }
+                        }) { Text(t("stamps.nothingFound"), color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center) }
                     } else {
                         cells("q", results)
                     }
                     else -> {
                         if (recent.isNotEmpty()) {
-                            heading("Recent")
+                            heading(t("stamps.recent"))
                             cells("recent", recent)
                         }
                         if (current != null) {
                             index++
-                            item(span = { GridItemSpan(maxLineSpan) }) { DlOutlinedButton("No stamp", { pick(null) }) }
+                            item(span = { GridItemSpan(maxLineSpan) }) { DlOutlinedButton(t("stamps.noStamp"), { pick(null) }) }
                         }
                         themes.forEach { t ->
                             val of = all.filter { it.theme == t.slug }

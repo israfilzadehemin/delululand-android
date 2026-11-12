@@ -45,6 +45,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.delulutopia.core.designsystem.component.DlFilledButton
 import com.delulutopia.core.designsystem.component.DlTextButton
+import com.delulutopia.core.i18n.t
 import kotlin.math.max
 import kotlin.math.min
 
@@ -88,10 +89,10 @@ fun AvatarCrop(photo: Bitmap?, onUse: (ByteArray) -> Unit, onCancel: () -> Unit)
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Row(Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-                DlTextButton("Cancel", onCancel)
-                Text("Move and zoom", Modifier.weight(1f), color = Color.White, style = MaterialTheme.typography.titleMedium)
+                DlTextButton(t("profile.cancel"), onCancel)
+                Text(t("profile.moveAndZoom"), Modifier.weight(1f), color = Color.White, style = MaterialTheme.typography.titleMedium)
                 DlFilledButton(
-                    "Use",
+                    t("profile.use"),
                     {
                         val p = photo ?: return@DlFilledButton
                         val s = base * current.zoom
@@ -102,13 +103,13 @@ fun AvatarCrop(photo: Bitmap?, onUse: (ByteArray) -> Unit, onCancel: () -> Unit)
             }
             Box(Modifier.weight(1f), contentAlignment = Alignment.Center) {
                 if (image == null) {
-                    Text("This file isn't a photo we can read", color = Color.White)
+                    Text(t("profile.thisFileIsntAPhoto"), color = Color.White)
                 } else {
                     Canvas(
                         Modifier
                             .size(VIEW)
                             .clipToBounds()
-                            .semantics { contentDescription = "Photo position: drag to move, pinch to zoom" }
+                            .semantics { contentDescription = t("profile.photoPositionPinch") }
                             .pointerInput(photo) {
                                 detectTransformGestures { _, pan, zoom, _ ->
                                     val p = current
@@ -141,12 +142,12 @@ fun AvatarCrop(photo: Bitmap?, onUse: (ByteArray) -> Unit, onCancel: () -> Unit)
                         value = pose.zoom,
                         onValueChange = { pose = fit(it, pose) },
                         valueRange = 1f..MAX_ZOOM,
-                        modifier = Modifier.weight(1f).semantics { contentDescription = "Zoom" },
+                        modifier = Modifier.weight(1f).semantics { contentDescription = t("profile.zoom") },
                     )
                     Text("+", color = Color.White)
                 }
                 Text(
-                    "Drag to move · pinch or slide to zoom",
+                    t("profile.dragToMovePinchOr"),
                     Modifier.padding(16.dp),
                     color = Color.White.copy(alpha = 0.75f),
                     style = MaterialTheme.typography.bodySmall,

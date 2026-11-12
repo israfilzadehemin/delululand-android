@@ -65,6 +65,7 @@ import com.delulutopia.core.designsystem.component.DlDialog
 import com.delulutopia.core.designsystem.component.DlFilledButton
 import com.delulutopia.core.designsystem.icon.WebIcons
 import com.delulutopia.core.designsystem.theme.DlTheme
+import com.delulutopia.core.i18n.t
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -82,8 +83,8 @@ fun DoodlePad(
     onDone: (ByteArray) -> Unit,
     onClose: () -> Unit,
     surface: Surface = Surfaces.LETTER,
-    title: String = "Doodle",
-    doneLabel: String = "Done",
+    title: String = t("doodle.doodle"),
+    doneLabel: String = t("doodle.done"),
     busyLabel: String? = null,
     busy: Boolean = false,
     note: String? = null,
@@ -135,7 +136,7 @@ fun DoodlePad(
         Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.surface) {
             Column(Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding()) {
                 Row(Modifier.fillMaxWidth().height(64.dp).padding(horizontal = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-                    IconButton(onClick = requestClose) { Icon(WebIcons.Close, "Close", Modifier.size(20.dp)) }
+                    IconButton(onClick = requestClose) { Icon(WebIcons.Close, t("doodle.close"), Modifier.size(20.dp)) }
                     Text(
                         title,
                         Modifier.weight(1f).padding(horizontal = 4.dp),
@@ -162,9 +163,9 @@ fun DoodlePad(
                             .then(if (board) Modifier.background(DlTheme.colors.boardFrame, RoundedCornerShape(8.dp)).padding(frame) else Modifier),
                     ) {
                         val label = when {
-                            backdrop != null -> "The doodle you are editing"
-                            blank -> if (board) "Empty board" else "Empty drawing paper"
-                            else -> "Your doodle"
+                            backdrop != null -> t("doodle.editing")
+                            blank -> if (board) t("doodle.emptyBoard") else t("doodle.emptyPaper")
+                            else -> t("doodle.yours")
                         }
                         Spacer(
                             Modifier
@@ -268,21 +269,21 @@ fun DoodlePad(
                             }
                         }
                         Spacer(Modifier.weight(1f))
-                        Tool(WebIcons.Eraser, "Eraser", on = eraser) { eraser = !eraser }
-                        Tool(WebIcons.Undo, "Undo", enabled = history.canUndo) { history = history.undo() }
-                        Tool(WebIcons.Redo, "Redo", enabled = history.canRedo) { history = history.redo() }
-                        Tool(WebIcons.Trash, "Clear", enabled = history.canClear(backdrop != null)) { history = history.clear(backdrop != null) }
+                        Tool(WebIcons.Eraser, t("doodle.eraser"), on = eraser) { eraser = !eraser }
+                        Tool(WebIcons.Undo, t("doodle.undo"), enabled = history.canUndo) { history = history.undo() }
+                        Tool(WebIcons.Redo, t("doodle.redo"), enabled = history.canRedo) { history = history.redo() }
+                        Tool(WebIcons.Trash, t("doodle.clear"), enabled = history.canClear(backdrop != null)) { history = history.clear(backdrop != null) }
                     }
                 }
             }
         }
         if (askDiscard) {
             DlDialog(
-                title = "Discard doodle?",
+                title = t("doodle.discardDoodle"),
                 text = null,
-                confirmLabel = "Discard",
+                confirmLabel = t("doodle.discard"),
                 onConfirm = onClose,
-                dismissLabel = "Keep drawing",
+                dismissLabel = t("doodle.keepDrawing"),
                 onDismiss = { askDiscard = false },
             )
         }

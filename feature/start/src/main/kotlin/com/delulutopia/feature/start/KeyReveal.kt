@@ -22,7 +22,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.toClipEntry
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
@@ -32,6 +31,7 @@ import com.delulutopia.core.designsystem.component.DlOutlinedButton
 import com.delulutopia.core.designsystem.icon.DlIcons
 import com.delulutopia.core.designsystem.theme.DlTheme
 import com.delulutopia.core.designsystem.theme.Literata
+import com.delulutopia.core.i18n.t
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -51,23 +51,23 @@ fun KeyReveal(name: String, code: String, continueLabel: String? = null, onConti
         ready = true
     }
     val grouped = groupKey(code)
-    val shareText = stringResource(R.string.share_text, name, grouped)
+    val shareText = t("universe.shareText", "name" to name, "key" to grouped)
 
     Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        Text(stringResource(R.string.key_reveal_title, name), fontFamily = Literata, style = MaterialTheme.typography.headlineSmall)
+        Text(t("universe.thisIsSKey", "name" to name), fontFamily = Literata, style = MaterialTheme.typography.headlineSmall)
         Text(
             grouped,
             modifier = Modifier
                 .fillMaxWidth()
                 .background(MaterialTheme.colorScheme.surfaceContainerHigh, RoundedCornerShape(12.dp))
                 .padding(vertical = 20.dp)
-                .semantics { contentDescription = "Key " + code.toList().joinToString(" ") },
+                .semantics { contentDescription = t("universe.key", "join" to code.toList().joinToString(" ")) },
             style = DlTheme.type.key.copy(fontSize = DlTheme.type.key.fontSize * 1.3f),
             textAlign = TextAlign.Center,
         )
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             DlOutlinedButton(
-                stringResource(if (copied) R.string.copied else R.string.copy),
+                t(if (copied) "universe.copied" else "universe.copy"),
                 onClick = {
                     scope.launch { clipboard.setClipEntry(ClipData.newPlainText(name, grouped).toClipEntry()) }
                     copied = true
@@ -76,7 +76,7 @@ fun KeyReveal(name: String, code: String, continueLabel: String? = null, onConti
                 icon = if (copied) DlIcons.Check else DlIcons.Copy,
             )
             DlOutlinedButton(
-                stringResource(R.string.share),
+                t("universe.share"),
                 onClick = {
                     val send = Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT, shareText)
                     context.startActivity(Intent.createChooser(send, null))
@@ -85,9 +85,9 @@ fun KeyReveal(name: String, code: String, continueLabel: String? = null, onConti
                 icon = DlIcons.Share,
             )
         }
-        Text(stringResource(R.string.key_send), style = MaterialTheme.typography.bodyMedium)
+        Text(t("universe.sendItToTheOne"), style = MaterialTheme.typography.bodyMedium)
         Text(
-            stringResource(R.string.key_warning),
+            t("universe.itsShownOnlyNowLost"),
             modifier = Modifier
                 .fillMaxWidth()
                 .background(MaterialTheme.colorScheme.surfaceContainer, RoundedCornerShape(12.dp))
@@ -95,6 +95,6 @@ fun KeyReveal(name: String, code: String, continueLabel: String? = null, onConti
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
-        DlFilledButton(continueLabel ?: stringResource(R.string.continue_), onContinue, Modifier.fillMaxWidth(), enabled = ready, height = 48.dp)
+        DlFilledButton(continueLabel ?: t("universe.continue"), onContinue, Modifier.fillMaxWidth(), enabled = ready, height = 48.dp)
     }
 }

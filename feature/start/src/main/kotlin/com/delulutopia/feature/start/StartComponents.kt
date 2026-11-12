@@ -32,7 +32,6 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -49,6 +48,7 @@ import com.delulutopia.core.designsystem.motion.pressScale
 import com.delulutopia.core.designsystem.motion.shake
 import com.delulutopia.core.designsystem.theme.DlTheme
 import com.delulutopia.core.designsystem.theme.Literata
+import com.delulutopia.core.i18n.t
 import com.delulutopia.core.network.model.UserCard
 
 /** First citizen of a universe wears terracotta, the second sage (signature colours, canvas Z-Tokens). */
@@ -64,7 +64,7 @@ fun WelcomeDialog(name: String, welcome: String, onEnter: () -> Unit, preview: B
     AlertDialog(
         onDismissRequest = { if (preview) onEnter() },
         containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-        title = { Text(stringResource(R.string.welcome_to, name), style = MaterialTheme.typography.titleLarge) },
+        title = { Text(t("universe.welcomeTo", "name" to name), style = MaterialTheme.typography.titleLarge) },
         text = {
             Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Rules.paragraphs(welcome).forEach { p ->
@@ -74,7 +74,7 @@ fun WelcomeDialog(name: String, welcome: String, onEnter: () -> Unit, preview: B
         },
         confirmButton = {
             DlFilledButton(
-                stringResource(if (preview) R.string.close else R.string.enter),
+                t(if (preview) "common.close" else "entry.enter"),
                 onEnter,
                 Modifier.fillMaxWidth(),
             )
@@ -98,7 +98,7 @@ internal fun UserCardRow(user: UserCard, index: Int, onClick: () -> Unit) {
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(user.nickname, fontSize = 20.sp, fontWeight = FontWeight.SemiBold)
             Text(
-                stringResource(if (user.hasPin) R.string.tap_to_enter else R.string.tap_to_set_pin),
+                t(if (user.hasPin) "entry.tapToEnter" else "entry.tapToSetPin"),
                 style = MaterialTheme.typography.bodySmall.copy(fontSize = 13.sp),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -121,8 +121,8 @@ internal fun JoinCardRow(name: String, onClick: () -> Unit) {
             Icon(DlIcons.Plus, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(24.dp))
         }
         Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            Text(stringResource(R.string.join_universe, name), fontSize = 18.sp, fontWeight = FontWeight.Bold)
-            Text(stringResource(R.string.create_your_citizen), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(t("entry.join", "name" to name), fontSize = 18.sp, fontWeight = FontWeight.Bold)
+            Text(t("entry.createYourCitizen"), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
 }
@@ -218,7 +218,7 @@ internal fun ColumnScope.PinPanel(
         onComplete = onComplete,
         enabled = !busy,
         onBiometric = onFingerprint,
-        backspaceDescription = stringResource(R.string.backspace),
+        backspaceDescription = t("common.backspace"),
         modifier = Modifier.padding(bottom = 20.dp),
     )
 }

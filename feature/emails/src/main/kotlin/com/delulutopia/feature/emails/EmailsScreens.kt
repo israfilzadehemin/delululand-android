@@ -71,6 +71,8 @@ import com.delulutopia.core.designsystem.motion.float
 import com.delulutopia.core.designsystem.motion.rememberPlayed
 import com.delulutopia.core.designsystem.motion.rowEnter
 import com.delulutopia.core.designsystem.theme.DlTheme
+import com.delulutopia.core.i18n.formatNumber
+import com.delulutopia.core.i18n.t
 import com.delulutopia.core.network.model.Att
 import com.delulutopia.core.network.model.Citizen
 import com.delulutopia.core.network.model.Email
@@ -105,7 +107,7 @@ fun EmailsScreen(vm: EmailsViewModel = hiltViewModel()) {
 fun EmailsList(rows: List<ThreadRow>?, hasMore: Boolean, draftEmpty: Boolean, home: Home?, onMore: () -> Unit) {
     val nav = LocalAppNav.current
     val nowMs = rememberNow(30_000)
-    val newLabel = if (draftEmpty) "New email" else "Continue your new email"
+    val newLabel = if (draftEmpty) t("emails.newEmail") else t("emails.continueNewEmail")
     val credits = home?.emailCredits
     val line = creditsLine(credits)
     if (rows == null) {
@@ -122,9 +124,9 @@ fun EmailsList(rows: List<ThreadRow>?, hasMore: Boolean, draftEmpty: Boolean, ho
         ) {
             Icon(WebIcons.Emails, null, Modifier.enter(Enter.Rise, durationMs = 400).float(400).size(64.dp), tint = MaterialTheme.colorScheme.outlineVariant)
             Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text("No emails yet.", style = MaterialTheme.typography.titleMedium)
+                Text(t("emails.noEmailsYet"), style = MaterialTheme.typography.titleMedium)
                 Text(
-                    "Start the first one.",
+                    t("emails.startTheFirstOne"),
                     style = MaterialTheme.typography.bodyLarge.copy(fontSize = 15.sp),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -175,13 +177,13 @@ fun EmailsList(rows: List<ThreadRow>?, hasMore: Boolean, draftEmpty: Boolean, ho
                     if (hasMore) {
                         CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
                         Text(
-                            "Loading older threads…",
+                            t("emails.loadingOlderThreads"),
                             style = MaterialTheme.typography.bodySmall.copy(fontSize = 13.sp),
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     } else {
                         Text(
-                            "That is everything",
+                            t("emails.thatIsEverything"),
                             style = MaterialTheme.typography.bodySmall.copy(fontSize = 13.sp),
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
@@ -203,10 +205,16 @@ private fun ThreadCard(row: ThreadRow, nowMs: Long, home: Home?) {
     val mineLast = row.lastSenderId == home?.me?.id
     val sender = if (mineLast) home?.me?.nickname else home?.friend?.nickname
     val recipient = if (mineLast) home?.friend?.nickname else home?.me?.nickname
-    val meta = "${sender.orEmpty()} → ${recipient.orEmpty()} · ${Time.clock(row.lastEmailAt, nowMs)} · ${emailCountWords(row.emailCount)}"
+    val meta = t(
+        "emails.meta",
+        "sender" to sender.orEmpty(),
+        "recipient" to recipient.orEmpty(),
+        "time" to Time.clock(row.lastEmailAt, nowMs),
+        "count" to emailCountWords(row.emailCount),
+    )
     val reacted = row.unseenReactions
     val snippet = if (reactionWins(row.lastReaction, reacted, row.lastEmailAt)) {
-        noticeLine(row.lastReaction!!, reacted, home?.friend?.nickname ?: "Friend")
+        noticeLine(row.lastReaction!!, reacted, home?.friend?.nickname ?: t("common.friend"))
     } else {
         row.lastText ?: row.lastMedia?.let { mediaWords(it.photos, it.audios, it.videos) } ?: ""
     }
@@ -261,7 +269,7 @@ private fun ThreadCard(row: ThreadRow, nowMs: Long, home: Home?) {
                 )
             }
         }
-        if (unread) DlMailPill("$fresh new")
+        if (unread) DlMailPill(t("emails.new", "fresh" to fresh))
     }
 }
 
@@ -275,18 +283,18 @@ fun ThreadScreen(id: Long) {
     Column(Modifier.fillMaxSize().imePadding()) {
         when (val ui = vm.ui) {
             ThreadViewModel.Ui.Loading -> {
-                DlTopAppBar(title = "", onBack = { nav.back() }, backDescription = "Back to Emails")
+                DlTopAppBar(title = "", onBack = { nav.back() }, backDescription = t("emails.backToEmails"))
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
             }
             ThreadViewModel.Ui.Gone, ThreadViewModel.Ui.Unreachable -> {
-                DlTopAppBar(title = "Email", onBack = { nav.back() }, backDescription = "Back to Emails")
+                DlTopAppBar(title = t("emails.email"), onBack = { nav.back() }, backDescription = t("emails.backToEmails"))
                 Column(
                     Modifier.fillMaxSize().padding(24.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
                 ) {
-                    Text(if (ui == ThreadViewModel.Ui.Gone) "This thread isn't here." else "Can't reach ${LocalBrand.current}. Try again.")
-                    DlOutlinedButton("Back", { nav.back() })
+                    Text(if (ui == ThreadViewModel.Ui.Gone) t("emails.threadGone") else t("common.cantReachTryAgain", "brand" to LocalBrand.current))
+                    DlOutlinedButton(t("emails.back"), { nav.back() })
                 }
             }
             is ThreadViewModel.Ui.Shown -> {
@@ -294,7 +302,7 @@ fun ThreadScreen(id: Long) {
                 DlTopAppBar(
                     title = ui.t.thread.subject,
                     onBack = { nav.back() },
-                    backDescription = "Back to Emails",
+                    backDescription = t("emails.backToEmails"),
                     titleStyle = DlTheme.type.noteTitle.copy(fontSize = 18.sp, lineHeight = 23.sp, fontWeight = FontWeight.Bold),
                 )
                 ThreadBody(vm, home?.me, home?.friend, home)
@@ -338,17 +346,17 @@ private fun ThreadBody(vm: ThreadViewModel, me: Citizen?, friend: Citizen?, home
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             if (vm.cursor != null) {
-                DlGhostButton(if (vm.loadingOlder) "Loading older emails…" else "See older", vm::seeOlder, enabled = !vm.loadingOlder)
+                DlGhostButton(if (vm.loadingOlder) t("emails.loadingOlder") else t("emails.seeOlder"), vm::seeOlder, enabled = !vm.loadingOlder)
             } else if (items.size > 20) {
                 Text(
-                    "That is everything",
+                    t("emails.thatIsEverything"),
                     style = MaterialTheme.typography.bodySmall.copy(fontSize = 13.sp),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
             if (vm.olderFailed) {
                 Text(
-                    "Couldn't load older emails. Try again.",
+                    t("emails.couldntLoadOlderEmailsTry"),
                     style = MaterialTheme.typography.bodySmall.copy(fontSize = 13.sp),
                     color = MaterialTheme.colorScheme.error,
                 )
@@ -402,7 +410,7 @@ private fun EmailCard(
                 .heightIn(min = 44.dp)
                 .clickable(onClick = onToggle)
                 .padding(horizontal = 12.dp, vertical = 8.dp)
-                .semantics { contentDescription = if (open) "Fold" else "Unfold" },
+                .semantics { contentDescription = if (open) t("emails.fold") else t("emails.unfold") },
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
@@ -427,7 +435,7 @@ private fun EmailCard(
             )
             if (open) {
                 Text(
-                    "to ${if (mine) friend?.nickname.orEmpty() else me?.nickname.orEmpty()}",
+                    t("emails.to", "name" to if (mine) friend?.nickname.orEmpty() else me?.nickname.orEmpty()),
                     style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -443,8 +451,8 @@ private fun EmailCard(
                     overflow = TextOverflow.Ellipsis,
                 )
                 val icons = listOfNotNull(
-                    if (photos.isNotEmpty()) "📷${if (photos.size > 1) " ${photos.size}" else ""}" else null,
-                    if (audios.isNotEmpty()) "🎙${if (audios.size > 1) " ${audios.size}" else ""}" else null,
+                    if (photos.isNotEmpty()) "📷${if (photos.size > 1) " ${formatNumber(photos.size)}" else ""}" else null,
+                    if (audios.isNotEmpty()) "🎙${if (audios.size > 1) " ${formatNumber(audios.size)}" else ""}" else null,
                     if (video != null) "🎬" else null,
                 )
                 if (icons.isNotEmpty()) Text(icons.joinToString(" "), fontSize = 12.sp)
@@ -472,7 +480,7 @@ private fun EmailCard(
                         photos.forEachIndexed { i, p ->
                             AsyncImage(
                                 model = resolveMedia(base, p.thumbUrl ?: p.url),
-                                contentDescription = "Photo ${i + 1} of ${photos.size}, open full size",
+                                contentDescription = t("emails.photoOfOpenFullSize", "n" to i + 1, "count" to photos.size),
                                 modifier = Modifier.size(64.dp).clip(RoundedCornerShape(8.dp)).clickable { onPhoto(photos, i) },
                                 contentScale = ContentScale.Crop,
                             )
@@ -486,9 +494,9 @@ private fun EmailCard(
                         label = if (audios.size >
                             1
                         ) {
-                            "voice note ${i + 1}"
+                            t("letters.voiceNoteN", "n" to i + 1)
                         } else {
-                            "voice note"
+                            t("media.voiceNoteLower")
                         },
                     )
                 }
@@ -497,7 +505,7 @@ private fun EmailCard(
         }
         seen?.let {
             Text(
-                "Seen ${Time.clock(it, nowMs)}",
+                t("emails.seen", "time" to Time.clock(it, nowMs)),
                 Modifier.fillMaxWidth().padding(start = 12.dp, end = 12.dp, bottom = 8.dp).offset(y = (-4).dp),
                 style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -513,7 +521,7 @@ fun NewEmailScreen(vm: NewEmailViewModel = hiltViewModel()) {
     val nav = LocalAppNav.current
     val home by vm.home.collectAsStateWithLifecycle()
     Column(Modifier.fillMaxSize().imePadding()) {
-        DlTopAppBar(title = "New email", onBack = { nav.back() }, backDescription = "Back to Emails")
+        DlTopAppBar(title = t("emails.newEmail"), onBack = { nav.back() }, backDescription = t("emails.backToEmails"))
         Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 16.dp, vertical = 4.dp)) {
             ComposerView(vm.composer, home.home?.emailCredits) { sent ->
                 nav.replace(ThreadRoute(sent.thread.id))

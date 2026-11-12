@@ -605,8 +605,20 @@ object WebIcons {
 
     private class E(val d: String, val fill: Boolean, val stroke: Boolean, val width: Float)
 
+    /** Icons that point along the reading direction mirror in Persian (L3), as the web's `dl-rtl-flip`. */
+    private val MIRRORED = setOf(
+        "IconBack", "IconForward", "IconChevronRight", "IconReply", "IconUndo", "IconRedo", "IconLogout", "IconList", "IconPlane", "IconPlaneSmall",
+    )
+
     private fun icon(name: String, w: Float, h: Float, vararg els: E): ImageVector =
-        ImageVector.Builder(name = name, defaultWidth = 24.dp, defaultHeight = 24.dp * (h / w), viewportWidth = w, viewportHeight = h)
+        ImageVector.Builder(
+            name = name,
+            defaultWidth = 24.dp,
+            defaultHeight = 24.dp * (h / w),
+            viewportWidth = w,
+            viewportHeight = h,
+            autoMirror = name in MIRRORED,
+        )
             .apply {
                 els.forEach { e ->
                     addPath(

@@ -9,6 +9,7 @@ android {
 }
 
 dependencies {
+    api(projects.core.i18n)
     api(libs.okhttp)
     api(libs.kotlinx.serialization.json)
     implementation(libs.retrofit)

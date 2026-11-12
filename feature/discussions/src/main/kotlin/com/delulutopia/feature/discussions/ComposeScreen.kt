@@ -65,8 +65,10 @@ import com.delulutopia.core.designsystem.component.DlFilledButton
 import com.delulutopia.core.designsystem.component.DlOutlinedButton
 import com.delulutopia.core.designsystem.icon.DlIcons
 import com.delulutopia.core.designsystem.icon.WebIcons
+import com.delulutopia.core.designsystem.text.tBold
 import com.delulutopia.core.designsystem.theme.DlTheme
 import com.delulutopia.core.designsystem.theme.NoteColor
+import com.delulutopia.core.i18n.t
 import com.delulutopia.core.network.Uploader
 import com.delulutopia.core.ui.DiscussionRoute
 import com.delulutopia.core.ui.DiscussionsRoute
@@ -104,8 +106,8 @@ fun ComposeScreen(editId: Long?) {
             Modifier.fillMaxSize().padding(24.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
         ) {
-            Text("Couldn't load your draft. Check your connection and try again.", color = MaterialTheme.colorScheme.error)
-            DlOutlinedButton("Back", { nav.back() })
+            Text(t("discussions.couldntLoadYourDraftCheck"), color = MaterialTheme.colorScheme.error)
+            DlOutlinedButton(t("discussions.back"), { nav.back() })
         }
         is ComposeViewModel.Load.NotEditable -> LaunchedEffect(load.id) { nav.replace(DiscussionRoute(load.id)) }
         is ComposeViewModel.Load.Ready -> {
@@ -120,7 +122,7 @@ private fun Compose(vm: ComposeViewModel, editor: RichEditorState) {
     val nav = LocalAppNav.current
     val scope = rememberCoroutineScope()
     val home by vm.homeState.collectAsStateWithLifecycle()
-    val friend = home.home?.friend?.nickname ?: "Friend"
+    val friend = home.home?.friend?.nickname ?: t("common.friend")
     val saver = vm.saver!!
     val saveState by saver.state.collectAsStateWithLifecycle()
     var postOpen by remember { mutableStateOf(false) }
@@ -130,22 +132,22 @@ private fun Compose(vm: ComposeViewModel, editor: RichEditorState) {
     val voice = rememberVoiceRecording { bytes, ms -> atts.add(Uploader.Kind.Audio, Source.Made(bytes, "audio/mp4"), "voice.m4a", ms) }
     val canPost = vm.title.isNotBlank() && !vm.empty && !atts.uploading && !voice.recording
     val savedLine = when {
-        saveState.status == DraftSaver.Status.Error -> "Couldn't save your draft"
-        saveState.savedAt != null && saveState.status != DraftSaver.Status.Conflict -> "Draft saved ${Time.time(saveState.savedAt)}"
+        saveState.status == DraftSaver.Status.Error -> t("common.draftNotSaved")
+        saveState.savedAt != null && saveState.status != DraftSaver.Status.Conflict -> t("common.draftSaved", "time" to Time.time(saveState.savedAt))
         else -> ""
     }
     Frame(
         vm,
         editor,
-        title = "New discussion",
+        title = t("discussions.newDiscussion"),
         subtitle = savedLine,
         subtitleError = saveState.status == DraftSaver.Status.Error,
-        backLabel = "Back to Discussions",
+        backLabel = t("discussions.backToDiscussions"),
         onBack = {
             vm.flushOnHide()
             nav.back()
         },
-        action = "Post",
+        action = t("discussions.post"),
         actionEnabled = canPost,
         onAction = { postOpen = true },
         voice = voice,
@@ -178,11 +180,11 @@ private fun Compose(vm: ComposeViewModel, editor: RichEditorState) {
     }
     if (saveState.status == DraftSaver.Status.Conflict) {
         DlDialog(
-            title = "A newer version was saved on another device. Load it?",
+            title = t("discussions.aNewerVersionWasSaved"),
             text = null,
-            confirmLabel = "Load",
+            confirmLabel = t("discussions.load"),
             onConfirm = { scope.launch { vm.loadServer()?.let(editor::set) } },
-            dismissLabel = "Keep mine",
+            dismissLabel = t("discussions.keepMine"),
             onDismiss = { vm.keepMine() },
         )
     }
@@ -208,12 +210,16 @@ private fun Edit(vm: ComposeViewModel, editor: RichEditorState) {
     Frame(
         vm,
         editor,
-        title = "Editing a discussion",
-        subtitle = "${if (arrived) "Arrived" else "Arrives"} at ${Time.clock(d.arrivesAt)}${if (arrived) "" else " whatever you change"}",
+        title = t("discussions.editingADiscussion"),
+        subtitle = if (arrived) {
+            t("discussions.arrivedAt", "time" to Time.clock(d.arrivesAt))
+        } else {
+            t("discussions.arrivesAtChange", "time" to Time.clock(d.arrivesAt))
+        },
         subtitleError = false,
-        backLabel = "Back, discard changes",
+        backLabel = t("discussions.backDiscardChanges"),
         onBack = back,
-        action = "Save",
+        action = t("discussions.save"),
         actionEnabled = canSave,
         onAction = {
             if (!changed) {
@@ -239,9 +245,9 @@ private fun Edit(vm: ComposeViewModel, editor: RichEditorState) {
     )
     if (confirm) {
         DlDialog(
-            title = "Discard your changes?",
+            title = t("discussions.discardYourChanges"),
             text = null,
-            confirmLabel = "Yes",
+            confirmLabel = t("discussions.yes"),
             onConfirm = {
                 confirm = false
                 scope.launch {
@@ -249,7 +255,7 @@ private fun Edit(vm: ComposeViewModel, editor: RichEditorState) {
                     nav.back()
                 }
             },
-            dismissLabel = "No",
+            dismissLabel = t("discussions.no"),
             onDismiss = { confirm = false },
         )
     }
@@ -319,20 +325,20 @@ private fun Frame(
                         .fillMaxWidth()
                         .drawBehind { drawLine(rule, Offset(0f, size.height), Offset(size.width, size.height), 1.dp.toPx()) }
                         .padding(start = 16.dp, end = 16.dp, top = 10.dp, bottom = 6.dp)
-                        .semantics { contentDescription = "Title" },
+                        .semantics { contentDescription = t("discussions.title") },
                     singleLine = true,
                     textStyle = titleStyle.copy(color = noteInk),
                     cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
                     decorationBox = { inner ->
                         Box {
-                            if (vm.title.isEmpty()) Text("Title", style = titleStyle, color = noteInkQuiet.copy(alpha = 0.6f))
+                            if (vm.title.isEmpty()) Text(t("discussions.title"), style = titleStyle, color = noteInkQuiet.copy(alpha = 0.6f))
                             inner()
                         }
                     },
                 )
                 ColourPicker(vm.colour, vm::changeColour)
                 Box(Modifier.padding(horizontal = 20.dp)) {
-                    RichEditor(editor, colour = noteInk, label = "Discussion text", minHeight = 220.dp)
+                    RichEditor(editor, colour = noteInk, label = t("discussions.discussionText"), minHeight = 220.dp)
                 }
             }
             Pin(20.dp, Modifier.align(Alignment.TopCenter).offset(y = (-17).dp))
@@ -340,7 +346,7 @@ private fun Frame(
         AttachmentStrip(attachments = vm.attachments!!, onRemove = onRemove, voice = voice)
         EditorToolbar(editor, Modifier.background(DlTheme.colors.letterEnvelope)) { emojiOpen = true }
     }
-    if (emojiOpen) EmojiPickerSheet("Emoji", onPick = { editor.insert(it) }, onDismiss = { emojiOpen = false })
+    if (emojiOpen) EmojiPickerSheet(t("editor.emoji"), onPick = { editor.insert(it) }, onDismiss = { emojiOpen = false })
 }
 
 /** The note colour (Materials story): six swatches as one radio group. */
@@ -349,7 +355,7 @@ private fun ColourPicker(value: NoteColor, onChange: (NoteColor) -> Unit) {
     // web .dl-note-picker / .dl-note-swatch: 28 dp squares, 2 dp corners, a soft shadow; the chosen one ringed in ink.
     val ink = MaterialTheme.colorScheme.onSurface
     Row(
-        Modifier.padding(start = 20.dp, end = 20.dp, top = 10.dp, bottom = 8.dp).semantics { contentDescription = "Note colour" },
+        Modifier.padding(start = 20.dp, end = 20.dp, top = 10.dp, bottom = 8.dp).semantics { contentDescription = t("discussions.noteColour") },
         horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         PICKABLE_NOTES.forEach { c ->
@@ -398,36 +404,34 @@ private fun PostSheet(friend: String, delay: String, window: String, onClose: ()
             Box(Modifier.size(48.dp).background(MaterialTheme.colorScheme.primaryContainer, CircleShape), contentAlignment = Alignment.Center) {
                 Icon(WebIcons.Discussions, null)
             }
-            Text("Post this discussion?", style = MaterialTheme.typography.headlineSmall)
+            Text(t("discussions.postThisDiscussion"), style = MaterialTheme.typography.headlineSmall)
             Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                Text("Arrives for $friend at", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(
+                    t("discussions.arrivesForAt", "friend" to friend),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
                 Row(verticalAlignment = Alignment.Bottom) {
                     Text(
                         Time.timeOf(nowMs + delayMs),
                         style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold, fontFeatureSettings = "tnum"),
                     )
                     Text(
-                        " · in ${Math.round(delayMs / 60_000.0)} min",
+                        " " + t("discussions.inMin", "minutes" to Math.round(delayMs / 60_000.0)),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
             }
             Text(
-                buildAnnotatedString {
-                    append("Until ")
-                    pushStyle(SpanStyle(fontWeight = FontWeight.Bold))
-                    append(Time.timeOf(nowMs + windowMs))
-                    pop()
-                    append(" you can still take it back.")
-                },
+                tBold("discussions.untilTakeBack", setOf("time"), "time" to Time.timeOf(nowMs + windowMs)),
                 style = MaterialTheme.typography.bodyMedium,
             )
             error?.let { Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodyMedium) }
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                DlOutlinedButton("Keep writing", onClose, Modifier.weight(1f), enabled = !posting)
+                DlOutlinedButton(t("discussions.keepWriting"), onClose, Modifier.weight(1f), enabled = !posting)
                 DlFilledButton(
-                    if (posting) "Posting…" else "Post",
+                    if (posting) t("common.posting") else t("discussions.post"),
                     {
                         posting = true
                         error = null

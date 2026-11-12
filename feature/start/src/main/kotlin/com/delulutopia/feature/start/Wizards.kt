@@ -37,6 +37,8 @@ import com.delulutopia.core.designsystem.component.DlStepDots
 import com.delulutopia.core.designsystem.component.DlTextField
 import com.delulutopia.core.designsystem.component.DlTopAppBar
 import com.delulutopia.core.designsystem.theme.Literata
+import com.delulutopia.core.i18n.counter
+import com.delulutopia.core.i18n.t
 import com.delulutopia.feature.start.CreateUniverseViewModel.InviteProblem
 
 @Composable
@@ -47,22 +49,22 @@ fun CreateUniverseRoute(onLeave: () -> Unit, viewModel: CreateUniverseViewModel 
     val brand = stringResource(R.string.brand)
 
     WizardFrame(
-        title = if (s.step == 5) "" else stringResource(R.string.create_title),
+        title = if (s.step == 5) "" else t("universe.createAUniverse"),
         step = s.step,
         of = 5,
         onBack = if (s.step == 5) null else back,
     ) {
         when (s.step) {
             1 -> FormColumn {
-                WizardTitle(stringResource(R.string.invite_title))
-                Text(stringResource(R.string.invite_text), style = MaterialTheme.typography.bodyMedium)
+                WizardTitle(t("universe.yourInvite"))
+                Text(t("universe.aUniverseStartsWithAn"), style = MaterialTheme.typography.bodyMedium)
                 DlTextField(
                     value = s.invite,
                     onValueChange = viewModel::onInvite,
-                    label = stringResource(R.string.invite_label),
+                    label = t("universe.invite"),
                     errorText = when (s.inviteProblem) {
-                        InviteProblem.Wrong -> stringResource(R.string.invite_wrong)
-                        InviteProblem.Offline -> stringResource(R.string.cant_reach, brand)
+                        InviteProblem.Wrong -> t("universe.inviteInvalid")
+                        InviteProblem.Offline -> t("common.cantReachTryAgain", "brand" to brand)
                         null -> null
                     },
                     centeredMono = true,
@@ -75,43 +77,43 @@ fun CreateUniverseRoute(onLeave: () -> Unit, viewModel: CreateUniverseViewModel 
                     keyboardActions = KeyboardActions(onGo = { viewModel.checkInvite() }),
                 )
                 DlFilledButton(
-                    stringResource(R.string.continue_),
+                    t("universe.continue"),
                     viewModel::checkInvite,
                     Modifier.fillMaxWidth(),
                     enabled = !s.busy && s.invite.isNotBlank(),
                     height = 48.dp,
                 )
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
-                    Text(stringResource(R.string.have_key_instead), fontSize = 14.sp)
-                    TextButton(onClick = onLeave) { StrongLink(stringResource(R.string.enter_it)) }
+                    Text(t("universe.haveAKeyQ"), fontSize = 14.sp)
+                    TextButton(onClick = onLeave) { StrongLink(t("universe.enterIt")) }
                 }
             }
             2 -> FormColumn {
                 val typed = s.name.trim()
-                val nameError = s.nameServerError ?: if (s.name.isNotEmpty() && !Rules.nameOk(s.name)) stringResource(R.string.name_rule) else null
+                val nameError = s.nameServerError ?: if (s.name.isNotEmpty() && !Rules.nameOk(s.name)) t("universe.nameRule") else null
                 val welcomeLength = Rules.welcomeLength(s.welcome)
                 val welcomeError = when {
-                    s.welcome.isBlank() -> stringResource(R.string.welcome_empty)
-                    welcomeLength > Rules.WELCOME_MAX -> stringResource(R.string.welcome_too_long)
+                    s.welcome.isBlank() -> t("universe.writeAFewWords")
+                    welcomeLength > Rules.WELCOME_MAX -> t("universe.welcomeMax")
                     else -> null
                 }
-                WizardTitle(stringResource(R.string.universe_title))
+                WizardTitle(t("universe.yourUniverse"))
                 DlTextField(
                     value = s.name,
                     onValueChange = viewModel::onName,
-                    label = stringResource(R.string.name_label),
-                    supportingText = stringResource(R.string.name_hint),
+                    label = t("universe.name"),
+                    supportingText = t("universe.212LettersOrDigits"),
                     errorText = nameError,
                     maxLength = 12,
-                    counter = "${s.name.trim().codePointCount(0, s.name.trim().length)}/12",
+                    counter = counter(s.name.trim().codePointCount(0, s.name.trim().length), 12),
                     keyboardOptions = KeyboardOptions(autoCorrectEnabled = false),
                 )
-                val shownName = typed.ifEmpty { stringResource(R.string.your_universe_lower) }
+                val shownName = typed.ifEmpty { t("universe.yourUniverseLower") }
                 DlTextField(
                     value = s.welcome,
                     onValueChange = viewModel::onWelcome,
-                    label = stringResource(R.string.welcome_label),
-                    supportingText = stringResource(if (s.welcomeEdited) R.string.welcome_hint else R.string.welcome_follows, shownName),
+                    label = t("universe.welcomeMessage"),
+                    supportingText = t(if (s.welcomeEdited) "universe.welcomeHint" else "universe.welcomeHintFollows", "name" to shownName),
                     errorText = welcomeError.takeIf { s.welcomeEdited },
                     singleLine = false,
                     maxLength = null,
@@ -124,12 +126,12 @@ fun CreateUniverseRoute(onLeave: () -> Unit, viewModel: CreateUniverseViewModel 
                 )
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     TextButton(onClick = { viewModel.setPreview(true) }, enabled = welcomeError == null) {
-                        StrongLink(stringResource(R.string.see_as_friend))
+                        StrongLink(t("universe.seeItAsYourFriend"))
                     }
-                    if (s.welcomeEdited) TextButton(onClick = viewModel::resetWelcome) { Text(stringResource(R.string.reset_original)) }
+                    if (s.welcomeEdited) TextButton(onClick = viewModel::resetWelcome) { Text(t("universe.resetToTheOriginal")) }
                 }
                 DlFilledButton(
-                    stringResource(R.string.continue_),
+                    t("universe.continue"),
                     viewModel::next,
                     Modifier.fillMaxWidth(),
                     enabled = Rules.nameOk(s.name) && welcomeError == null,
@@ -138,10 +140,10 @@ fun CreateUniverseRoute(onLeave: () -> Unit, viewModel: CreateUniverseViewModel 
                 if (s.preview) WelcomeDialog(shownName, s.welcome, { viewModel.setPreview(false) }, preview = true)
             }
             3 -> FormColumn {
-                WizardTitle(stringResource(R.string.citizen_title))
+                WizardTitle(t("universe.yourCitizen"))
                 CitizenStep(s.citizen, viewModel::onCitizen, taken = emptyList(), serverError = s.citizenError)
                 DlFilledButton(
-                    stringResource(R.string.continue_),
+                    t("universe.continue"),
                     viewModel::next,
                     Modifier.fillMaxWidth(),
                     enabled = Rules.usernameOk(s.citizen.username),
@@ -149,7 +151,7 @@ fun CreateUniverseRoute(onLeave: () -> Unit, viewModel: CreateUniverseViewModel 
                 )
             }
             4 -> WizardPinStep(
-                who = "${s.citizen.username} · ${s.name.trim()}",
+                who = t("profile.moodSince", "mood" to s.citizen.username, "age" to s.name.trim()),
                 pin = s.pin,
                 universe = s.name.trim(),
                 onDigits = viewModel::onPinDigits,
@@ -168,13 +170,13 @@ fun JoinRoute(onLeave: () -> Unit, viewModel: JoinViewModel = hiltViewModel()) {
     BackHandler { back() }
     val name = s.name.ifBlank { stringResource(R.string.brand) }
 
-    WizardFrame(title = stringResource(R.string.join_universe, name), step = s.step, of = 2, onBack = back) {
+    WizardFrame(title = t("entry.join", "name" to name), step = s.step, of = 2, onBack = back) {
         if (s.step == 1) {
             FormColumn {
-                WizardTitle(stringResource(R.string.citizen_title))
+                WizardTitle(t("universe.yourCitizen"))
                 CitizenStep(s.citizen, viewModel::onCitizen, taken = s.taken, serverError = s.serverError, signature = 1)
                 DlFilledButton(
-                    stringResource(R.string.continue_),
+                    t("universe.continue"),
                     viewModel::next,
                     Modifier.fillMaxWidth(),
                     enabled = s.loaded && Rules.usernameOk(s.citizen.username) && !Rules.usernameTaken(s.citizen.username, s.taken),
@@ -183,7 +185,7 @@ fun JoinRoute(onLeave: () -> Unit, viewModel: JoinViewModel = hiltViewModel()) {
             }
         } else {
             WizardPinStep(
-                who = "${s.citizen.username} · $name",
+                who = t("profile.moodSince", "mood" to s.citizen.username, "age" to name),
                 pin = s.pin,
                 universe = name,
                 onDigits = viewModel::onPinDigits,
@@ -204,7 +206,7 @@ private fun WizardFrame(title: String, step: Int, of: Int, onBack: (() -> Unit)?
         DlTopAppBar(
             title = title,
             onBack = onBack,
-            backDescription = stringResource(R.string.back),
+            backDescription = t("common.back"),
             actions = { DlStepDots(step, of) },
         )
         content()
@@ -239,15 +241,11 @@ private fun ColumnScope.WizardPinStep(
 ) {
     PinPanel(
         header = { Text(who, fontSize = 18.sp, fontWeight = FontWeight.Bold, modifier = Modifier.heightIn(min = 24.dp)) },
-        prompt = stringResource(if (pin.confirming) R.string.pin_confirm else R.string.pin_create),
-        dotsLabel = stringResource(
-            R.string.pin_dots,
-            stringResource(if (pin.confirming) R.string.pin_dots_confirm else R.string.pin_dots_new),
-            pin.digits.length,
-        ),
+        prompt = t(if (pin.confirming) "pin.confirmYourPin" else "pin.createYourPin"),
+        dotsLabel = t(if (pin.confirming) "pin.dots.confirm" else "pin.dots.new", "n" to pin.digits.length, "total" to 6),
         digits = pin.digits,
         error = problemText(pin.problem, universe),
-        hint = if (!pin.confirming) stringResource(R.string.pin_hint) else null,
+        hint = if (!pin.confirming) t("pin.sixDigits") else null,
         busy = pin.busy,
         onDigits = onDigits,
         onComplete = onComplete,

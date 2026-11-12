@@ -37,6 +37,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.AbsoluteAlignment
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -80,7 +81,10 @@ import com.delulutopia.core.designsystem.component.DlFilledButton
 import com.delulutopia.core.designsystem.component.DlOutlinedButton
 import com.delulutopia.core.designsystem.icon.DlIcons
 import com.delulutopia.core.designsystem.icon.WebIcons
+import com.delulutopia.core.designsystem.text.tBold
 import com.delulutopia.core.designsystem.theme.DlTheme
+import com.delulutopia.core.i18n.I18n
+import com.delulutopia.core.i18n.t
 import com.delulutopia.core.network.Uploader
 import com.delulutopia.core.network.model.StampMark
 import com.delulutopia.core.ui.EmojiPickerSheet
@@ -124,11 +128,11 @@ fun WriteScreen(vm: WriteViewModel = hiltViewModel()) {
             verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
         ) {
             Text(
-                if (vm.editId == null) "Couldn't load your draft. Check your connection and try again." else "This letter can't be edited.",
+                if (vm.editId == null) t("write.couldntLoadYourDraftCheck") else t("write.thisLetterCantBeEdited"),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.error,
             )
-            DlOutlinedButton("Back", { nav.back() })
+            DlOutlinedButton(t("letters.back"), { nav.back() })
         }
         is WriteViewModel.Load.NotEditable -> LaunchedEffect(load.id) { nav.replace(LetterRoute(load.id)) }
         is WriteViewModel.Load.Ready -> {
@@ -144,7 +148,7 @@ private fun DraftWrite(vm: WriteViewModel, editor: RichEditorState) {
     val scope = rememberCoroutineScope()
     val homeState by vm.homeState.collectAsStateWithLifecycle()
     val home = homeState.home
-    val friend = home?.friend?.nickname ?: "Friend"
+    val friend = home?.friend?.nickname ?: t("common.friend")
     val saver = vm.saver!!
     val saveState by saver.state.collectAsStateWithLifecycle()
     var sendOpen by remember { mutableStateOf(false) }
@@ -157,23 +161,23 @@ private fun DraftWrite(vm: WriteViewModel, editor: RichEditorState) {
     val voice = rememberVoiceRecording { bytes, ms -> atts.add(Uploader.Kind.Audio, Source.Made(bytes, "audio/mp4"), "voice.m4a", ms) }
     val canSend = (!vm.empty || atts.done.isNotEmpty()) && !atts.uploading && !voice.recording
     val savedLine = when {
-        saveState.status == DraftSaver.Status.Error -> "Couldn't save your draft"
-        saveState.savedAt != null && saveState.status != DraftSaver.Status.Conflict -> "Draft saved ${Time.time(saveState.savedAt)}"
+        saveState.status == DraftSaver.Status.Error -> t("common.draftNotSaved")
+        saveState.savedAt != null && saveState.status != DraftSaver.Status.Conflict -> t("common.draftSaved", "time" to Time.time(saveState.savedAt))
         else -> ""
     }
 
     WriteFrame(
         vm = vm,
         editor = editor,
-        title = "To $friend",
+        title = t("letters.to", "friend" to friend),
         subtitle = savedLine,
         subtitleError = saveState.status == DraftSaver.Status.Error,
-        backLabel = "Back, keep the draft",
+        backLabel = t("write.backKeepTheDraft"),
         onBack = {
             vm.flushOnHide()
             nav.back()
         },
-        action = "Send",
+        action = t("write.send"),
         actionEnabled = canSend,
         onAction = { sendOpen = true },
         voice = voice,
@@ -217,11 +221,11 @@ private fun DraftWrite(vm: WriteViewModel, editor: RichEditorState) {
     }
     if (saveState.status == DraftSaver.Status.Conflict) {
         DlDialog(
-            title = "A newer version was saved on another device. Load it?",
+            title = t("write.aNewerVersionWasSaved"),
             text = null,
-            confirmLabel = "Load",
+            confirmLabel = t("write.load"),
             onConfirm = { scope.launch { vm.loadServer()?.let(editor::set) } },
-            dismissLabel = "Keep mine",
+            dismissLabel = t("write.keepMine"),
             onDismiss = { vm.keepMine() },
         )
     }
@@ -233,7 +237,7 @@ private fun EditWrite(vm: WriteViewModel, editor: RichEditorState) {
     val scope = rememberCoroutineScope()
     val homeState by vm.homeState.collectAsStateWithLifecycle()
     val home = homeState.home
-    val friend = home?.friend?.nickname ?: "Friend"
+    val friend = home?.friend?.nickname ?: t("common.friend")
     val letter = vm.letter!!
     val nowMs = rememberNow()
     val left = (Time.ms(letter.windowEndsAt) ?: 0) - nowMs
@@ -261,13 +265,13 @@ private fun EditWrite(vm: WriteViewModel, editor: RichEditorState) {
     WriteFrame(
         vm = vm,
         editor = editor,
-        title = "Editing a sent letter · ${Time.countdown(left)} left",
-        subtitle = "Arrives at $arrives${if (late) "" else " whatever you change"}",
+        title = t("write.editingSentLetter", "countdown" to Time.countdown(left)),
+        subtitle = if (late) t("write.arrivesAtTime", "time" to arrives) else t("write.arrivesAtChange", "time" to arrives),
         subtitleError = false,
-        backLabel = "Back, discard changes",
+        backLabel = t("write.backDiscardChanges"),
         onBack = back,
         backEnabled = !late,
-        action = "Send again",
+        action = t("write.sendAgain"),
         actionEnabled = canSend,
         onAction = {
             busy = true
@@ -295,10 +299,10 @@ private fun EditWrite(vm: WriteViewModel, editor: RichEditorState) {
 
     if (late) {
         DlDialog(
-            title = "Too late: the original version is on its way.",
-            text = "$friend gets the letter as you first sent it, at $arrives. The text you changed is still here.",
-            warning = if (home != null && !home.me.draftEmpty) "Keeping it replaces your current draft." else null,
-            confirmLabel = "Keep text in draft",
+            title = t("write.tooLateTheOriginalVersion"),
+            text = t("write.getsTheLetterAsYou", "friend" to friend, "arrives" to arrives),
+            warning = if (home != null && !home.me.draftEmpty) t("write.keepingItReplacesYourCurrent") else null,
+            confirmLabel = t("write.keepTextInDraft"),
             onConfirm = {
                 busy = true
                 scope.launch {
@@ -306,11 +310,11 @@ private fun EditWrite(vm: WriteViewModel, editor: RichEditorState) {
                         nav.replace(WriteRoute())
                     } else {
                         busy = false
-                        error = "Couldn't save your draft"
+                        error = t("common.draftNotSaved")
                     }
                 }
             },
-            dismissLabel = "Discard",
+            dismissLabel = t("write.discard"),
             onDismiss = {
                 busy = true
                 scope.launch {
@@ -322,9 +326,9 @@ private fun EditWrite(vm: WriteViewModel, editor: RichEditorState) {
         )
     } else if (confirmDiscard) {
         DlDialog(
-            title = "Discard your changes?",
+            title = t("write.discardYourChanges"),
             text = null,
-            confirmLabel = "Yes",
+            confirmLabel = t("write.yes"),
             onConfirm = {
                 confirmDiscard = false
                 busy = true
@@ -333,7 +337,7 @@ private fun EditWrite(vm: WriteViewModel, editor: RichEditorState) {
                     nav.back()
                 }
             },
-            dismissLabel = "No",
+            dismissLabel = t("letters.no"),
             onDismiss = { confirmDiscard = false },
         )
     }
@@ -435,7 +439,7 @@ private fun WriteFrame(
             }
             // The dog-ear (web .dl-paper-fold): the page cuts the corner, the fold lies on top.
             val page = MaterialTheme.colorScheme.background
-            Canvas(Modifier.align(Alignment.BottomEnd).size(22.dp)) {
+            Canvas(Modifier.align(AbsoluteAlignment.BottomRight).size(22.dp)) {
                 drawPath(
                     Path().apply {
                         moveTo(size.width, 0f)
@@ -446,7 +450,7 @@ private fun WriteFrame(
                     page,
                 )
             }
-            TileFold(DlTheme.colors.letterFlap, Modifier.align(Alignment.BottomEnd), fold = 22.dp)
+            TileFold(DlTheme.colors.letterFlap, Modifier.align(AbsoluteAlignment.BottomRight), fold = 22.dp)
             if (sealing) Seal(sealColour)
         }
         if (!late) {
@@ -470,7 +474,7 @@ private fun WriteFrame(
     }
     if (stampOpen) StampPicker(vm.stamps, vm.stampsFailed, vm.stamp, vm::chooseStamp) { stampOpen = false }
     if (emojiOpen) {
-        EmojiPickerSheet("Emoji", onPick = { editor.insert(it) }, onDismiss = { emojiOpen = false })
+        EmojiPickerSheet(t("editor.emoji"), onPick = { editor.insert(it) }, onDismiss = { emojiOpen = false })
     }
 }
 
@@ -497,7 +501,7 @@ private fun StampSlot(stamp: StampMark?, enabled: Boolean, onOpen: () -> Unit) {
             .clip(RoundedCornerShape(6.dp))
             .clickable(enabled = enabled, onClick = onOpen)
             .alpha(if (enabled) 1f else 0.55f)
-            .semantics { contentDescription = if (stamp != null) "Stamp: ${stamp.name}. Change it" else "Add a stamp" },
+            .semantics { contentDescription = if (stamp != null) t("stamps.stampChangeIt", "name" to stamp.name) else t("stamps.addAStamp") },
         contentAlignment = Alignment.Center,
     ) {
         if (stamp != null) {
@@ -587,37 +591,35 @@ private fun SendSheet(delay: String, window: String, feeling: String?, onClose: 
             Box(Modifier.size(48.dp).background(MaterialTheme.colorScheme.primaryContainer, CircleShape), contentAlignment = Alignment.Center) {
                 Icon(WebIcons.Envelope, null)
             }
-            Text("Send this letter?", style = MaterialTheme.typography.headlineSmall)
+            Text(t("write.sendThisLetter"), style = MaterialTheme.typography.headlineSmall)
             Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                Text("Arrives at", style = MaterialTheme.typography.bodyMedium.copy(fontSize = 14.sp), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(
+                    t("write.arrivesAt"),
+                    style = MaterialTheme.typography.bodyMedium.copy(fontSize = 14.sp),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
                 Row(verticalAlignment = Alignment.Bottom) {
                     Text(
                         Time.timeOf(nowMs + delayMs),
                         style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold, fontFeatureSettings = "tnum"),
                     )
                     Text(
-                        " · in ${Math.round(delayMs / 60_000.0)} min",
+                        " " + t("write.inMin", "minutes" to Math.round(delayMs / 60_000.0)),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
             }
             Text(
-                buildAnnotatedString {
-                    append("Until ")
-                    pushStyle(SpanStyle(fontWeight = FontWeight.Bold))
-                    append(Time.timeOf(nowMs + windowMs))
-                    pop()
-                    append(" you can still edit or cancel it from Letters or Home.")
-                },
+                tBold("write.untilEditOrCancel", setOf("time"), "time" to Time.timeOf(nowMs + windowMs)),
                 style = MaterialTheme.typography.bodyMedium,
             )
-            if (feeling != null) Text("Feeling $feeling", style = MaterialTheme.typography.bodyMedium)
+            if (feeling != null) Text(t("write.feeling", "feeling" to feeling), style = MaterialTheme.typography.bodyMedium)
             error?.let { Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodyMedium) }
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                DlOutlinedButton("Keep writing", onClose, Modifier.weight(1f), enabled = !sending)
+                DlOutlinedButton(t("write.keepWriting"), onClose, Modifier.weight(1f), enabled = !sending)
                 DlFilledButton(
-                    if (sending) "Sending…" else "Send",
+                    if (sending) t("common.sending") else t("write.send"),
                     {
                         sending = true
                         error = null
@@ -673,7 +675,7 @@ private fun ReferencePanel(vm: WriteViewModel, friend: String) {
             contentAlignment = Alignment.Center,
         ) {
             Text(
-                "Show $friend's letter",
+                t("write.showSLetter", "friendName" to friend),
                 style = MaterialTheme.typography.labelLarge.copy(fontSize = 13.sp, fontWeight = FontWeight.SemiBold),
                 color = MaterialTheme.colorScheme.primary,
             )
@@ -692,7 +694,7 @@ private fun ReferencePanel(vm: WriteViewModel, friend: String) {
             Moods.text(it.moodAtSend)
         }
     }
-    val meta = listOfNotNull(friend, feeling?.let { "Feeling $it" }, l?.let { Time.clock(it.arrivesAt) }).joinToString(" · ")
+    val meta = listOfNotNull(friend, feeling?.let { t("write.feeling", "feeling" to it) }, l?.let { Time.clock(it.arrivesAt) }).joinToString(" · ")
     // web .dl-ref: a note slip clipped to the sheet, overlapping its top edge by 8 dp.
     Box(
         Modifier
@@ -710,13 +712,13 @@ private fun ReferencePanel(vm: WriteViewModel, friend: String) {
                 .background(c.letterSlip, RefShape)
                 .drawBehind { drawRect(c.userA, size = Size(3.dp.toPx(), size.height)) }
                 .padding(start = 15.dp, end = 12.dp, top = 12.dp, bottom = 10.dp)
-                .semantics { contentDescription = "The letter you are answering" },
+                .semantics { contentDescription = t("write.theLetterYouAreAnswering") },
             verticalArrangement = Arrangement.spacedBy(6.dp),
         ) {
             Row(Modifier.padding(start = 18.dp), verticalAlignment = Alignment.CenterVertically) {
                 Icon(WebIcons.Reply, null, Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
                 Text(
-                    "REPLYING TO",
+                    t("write.replyingTo").uppercase(I18n.lang.locale),
                     Modifier.padding(start = 6.dp),
                     style = MaterialTheme.typography.labelSmall.copy(fontSize = 11.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.06.em),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -734,12 +736,14 @@ private fun ReferencePanel(vm: WriteViewModel, friend: String) {
                 )
                 IconButton(onClick = {
                     newerId?.let(vm::pin)
-                }, enabled = newerId != null) { Icon(WebIcons.Back, "Newer received letter", Modifier.size(18.dp)) }
+                }, enabled = newerId != null) { Icon(WebIcons.Back, t("write.newerReceivedLetter"), Modifier.size(18.dp)) }
                 IconButton(onClick = { olderId?.let(vm::pin) ?: vm.loadReceived() }, enabled = olderId != null || vm.receivedMore) {
-                    Icon(WebIcons.Forward, "Older received letter", Modifier.size(18.dp))
+                    Icon(WebIcons.Forward, t("write.olderReceivedLetter"), Modifier.size(18.dp))
                 }
-                IconButton(onClick = { vm.pin(null) }) { Icon(WebIcons.Close, "Not a reply: send as a new letter", Modifier.size(12.dp)) }
-                TextButton(onClick = { setHidden(true) }) { Text("Hide", style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold)) }
+                IconButton(onClick = { vm.pin(null) }) { Icon(WebIcons.Close, t("write.notAReplySendAs"), Modifier.size(12.dp)) }
+                TextButton(onClick = {
+                    setHidden(true)
+                }) { Text(t("write.hide"), style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold)) }
             }
             if (l != null) {
                 Box(Modifier.heightIn(max = 84.dp).verticalScroll(rememberScrollState())) {

@@ -56,6 +56,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.delulutopia.core.designsystem.icon.WebIcons
 import com.delulutopia.core.designsystem.theme.DlTheme
+import com.delulutopia.core.i18n.t
 import com.delulutopia.core.network.model.Doc
 
 /**
@@ -146,7 +147,7 @@ fun RichEditor(
     enabled: Boolean = true,
     style: TextStyle = DlTheme.type.letterBody,
     colour: Color = DlTheme.colors.letterInk,
-    label: String = "Letter text",
+    label: String = t("editor.letterText"),
     minHeight: Dp = 240.dp,
 ) {
     var layout by remember { mutableStateOf<TextLayoutResult?>(null) }
@@ -209,21 +210,21 @@ private fun styled(doc: RichDoc, text: String): AnnotatedString {
 @Composable
 fun EditorToolbar(state: RichEditorState, modifier: Modifier = Modifier, enabled: Boolean = true, onEmoji: () -> Unit) {
     Row(
-        modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp).semantics { contentDescription = "Formatting" },
+        modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp).semantics { contentDescription = t("editor.formatting") },
         horizontalArrangement = Arrangement.spacedBy(4.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Tool("Bold", state.isActive(MarkType.Bold), enabled, { state.toggle(MarkType.Bold) }) {
+        Tool(t("doodle.size.bold"), state.isActive(MarkType.Bold), enabled, { state.toggle(MarkType.Bold) }) {
             Text("B", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold))
         }
-        Tool("Italic", state.isActive(MarkType.Italic), enabled, { state.toggle(MarkType.Italic) }) {
+        Tool(t("editor.italic"), state.isActive(MarkType.Italic), enabled, { state.toggle(MarkType.Italic) }) {
             Text("I", style = MaterialTheme.typography.titleMedium.copy(fontStyle = FontStyle.Italic, fontWeight = FontWeight.SemiBold))
         }
-        Tool("Underline", state.isActive(MarkType.Underline), enabled, { state.toggle(MarkType.Underline) }) {
+        Tool(t("editor.underline"), state.isActive(MarkType.Underline), enabled, { state.toggle(MarkType.Underline) }) {
             Text("U", style = MaterialTheme.typography.titleMedium.copy(textDecoration = TextDecoration.Underline, fontWeight = FontWeight.SemiBold))
         }
-        Tool("Bullet list", state.inBullet, enabled, state::toggleBullet) { Icon(WebIcons.List, null, Modifier.size(20.dp)) }
-        Tool("Emoji", false, enabled, onEmoji) { Icon(WebIcons.Emoji, null, Modifier.size(20.dp)) }
+        Tool(t("editor.bulletList"), state.inBullet, enabled, state::toggleBullet) { Icon(WebIcons.List, null, Modifier.size(20.dp)) }
+        Tool(t("common.emoji"), false, enabled, onEmoji) { Icon(WebIcons.Emoji, null, Modifier.size(20.dp)) }
     }
 }
 

@@ -70,6 +70,8 @@ import com.delulutopia.core.designsystem.motion.float
 import com.delulutopia.core.designsystem.motion.rememberPlayed
 import com.delulutopia.core.designsystem.motion.rowEnter
 import com.delulutopia.core.designsystem.theme.DlTheme
+import com.delulutopia.core.i18n.localDigits
+import com.delulutopia.core.i18n.t
 import com.delulutopia.core.network.model.Citizen
 import com.delulutopia.core.network.model.Home
 import com.delulutopia.core.network.model.Mood
@@ -100,6 +102,7 @@ import com.delulutopia.core.ui.signatureOf
 import com.delulutopia.core.ui.tileShapeOf
 import com.delulutopia.core.ui.tintOf
 import com.delulutopia.core.ui.whoOf
+import java.util.Locale
 import kotlinx.coroutines.launch
 
 /**
@@ -171,7 +174,7 @@ private fun HomeContent(home: Home, stale: Boolean, moods: List<Mood>, moodLimit
             item(key = "empty") { EmptyPost() }
         } else if (friend != null) {
             if (home.from.isNotEmpty()) {
-                item(key = "from-h") { GroupHeading("From ${friend.nickname}", whoOf(friend.id)) }
+                item(key = "from-h") { GroupHeading(t("home.from", "nickname" to friend.nickname), whoOf(friend.id)) }
                 itemsIndexed(home.from, key = { _, it -> "from-${it.id}" }) { i, row ->
                     Box(Modifier.animateItem().rowEnter(i, played, "from-${row.id}", stateAt(row, nowMs)).leafSurface("/letters/${row.id}")) {
                         FromRow(row, nowMs, whoOf(friend.id))
@@ -179,7 +182,7 @@ private fun HomeContent(home: Home, stale: Boolean, moods: List<Mood>, moodLimit
                 }
             }
             if (home.to.isNotEmpty()) {
-                item(key = "to-h") { GroupHeading("To ${friend.nickname}", whoOf(home.me.id)) }
+                item(key = "to-h") { GroupHeading(t("home.to", "nickname" to friend.nickname), whoOf(home.me.id)) }
                 itemsIndexed(home.to, key = { _, it -> "to-${it.id}" }) { i, row ->
                     Box(Modifier.animateItem().rowEnter(i, played, "to-${row.id}", stateAt(row, nowMs)).leafSurface("/letters/${row.id}")) {
                         ToRow(row, nowMs, whoOf(home.me.id)) {
@@ -206,7 +209,7 @@ private fun HomeContent(home: Home, stale: Boolean, moods: List<Mood>, moodLimit
     }
     cancelId?.let { id ->
         TakeBackDialog(
-            friend = friend?.nickname ?: "Friend",
+            friend = friend?.nickname ?: t("common.friend"),
             draftEmpty = home.me.draftEmpty,
             busy = cancelling,
             onYes = {
@@ -262,14 +265,14 @@ private fun MyMood(me: Citizen, nowMs: Long, onOpen: () -> Unit) {
                     buildAnnotatedString {
                         append(mood)
                         withStyle(SpanStyle(fontWeight = FontWeight.Normal, fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)) {
-                            append(" · set ${ageWords(me.moodSetAt, nowMs)}")
+                            append(" " + t("home.set", "age" to ageWords(me.moodSetAt, nowMs)))
                         }
                     },
                     style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold, fontSize = 14.sp),
                 )
             } else {
                 Text(
-                    "Set your mood",
+                    t("home.setYourMood"),
                     style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold, fontSize = 14.sp),
                     color = MaterialTheme.colorScheme.primary,
                 )
@@ -286,7 +289,7 @@ private fun FriendCard(friend: Citizen, nowMs: Long, onOpen: () -> Unit) {
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Box(Modifier.clip(CircleShape).clickable(onClickLabel = "${friend.nickname}'s profile", onClick = onOpen)) {
+        Box(Modifier.clip(CircleShape).clickable(onClickLabel = t("home.sProfile", "nickname" to friend.nickname), onClick = onOpen)) {
             DlRemoteAvatar(friend.avatarUrl, friend.nickname, tintOf(friend.id), size = 48.dp, initials = friend.initials(), ring = signatureOf(friend.id))
         }
         Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
@@ -295,12 +298,14 @@ private fun FriendCard(friend: Citizen, nowMs: Long, onOpen: () -> Unit) {
                 Text(
                     buildAnnotatedString {
                         append(mood)
-                        withStyle(SpanStyle(color = MaterialTheme.colorScheme.onSurfaceVariant)) { append(" · set ${ageWords(friend.moodSetAt, nowMs)}") }
+                        withStyle(SpanStyle(color = MaterialTheme.colorScheme.onSurfaceVariant)) {
+                            append(" " + t("home.set", "age" to ageWords(friend.moodSetAt, nowMs)))
+                        }
                     },
                     style = MaterialTheme.typography.bodySmall.copy(fontSize = 13.sp),
                 )
             } else {
-                Text("No mood yet", style = MaterialTheme.typography.bodySmall.copy(fontSize = 13.sp), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(t("home.noMoodYet"), style = MaterialTheme.typography.bodySmall.copy(fontSize = 13.sp), color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
     }
@@ -313,12 +318,12 @@ private fun WaitingCard(name: String, isCreator: Boolean, onUniverse: () -> Unit
         Modifier.fillMaxWidth().dashed(DlTheme.colors.inkDisabled, 12.dp, width = 2.dp).padding(18.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Text("Waiting for someone to join", style = MaterialTheme.typography.titleMedium.copy(fontSize = 17.sp, fontWeight = FontWeight.Bold))
+        Text(t("home.waitingForSomeoneToJoin"), style = MaterialTheme.typography.titleMedium.copy(fontSize = 17.sp, fontWeight = FontWeight.Bold))
         Text(
-            "Send $name's key to the one person you want here.${if (isCreator) " Lost it? Make a new one." else ""}",
+            if (isCreator) t("home.waitingCreator", "name" to name) else t("home.waiting", "name" to name),
             style = MaterialTheme.typography.bodyMedium.copy(fontSize = 14.sp, lineHeight = 21.sp),
         )
-        if (isCreator) DlFilledButton("You › Universe", onUniverse, height = 40.dp)
+        if (isCreator) DlFilledButton(t("home.youUniverse"), onUniverse, height = 40.dp)
     }
 }
 
@@ -337,7 +342,7 @@ private fun ZoneClock(person: Citizen, nowMs: Long, modifier: Modifier) {
     val zone = person.timezone ?: "UTC"
     val (hour, minute) = Time.zonedTime(nowMs, zone)
     val night = Time.isNight(hour)
-    val hhmm = "%02d:%02d".format(hour, minute)
+    val hhmm = localDigits("%02d:%02d".format(Locale.ROOT, hour, minute))
     val city = Time.cityOf(zone)
     val c = DlTheme.colors
     val seal = MaterialTheme.colorScheme.primary
@@ -346,7 +351,12 @@ private fun ZoneClock(person: Citizen, nowMs: Long, modifier: Modifier) {
     val quiet = MaterialTheme.colorScheme.onSurfaceVariant
     val ring = signatureOf(person.id)
     Row(modifier, verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-        Canvas(Modifier.size(56.dp).semantics { contentDescription = "${person.nickname}, $city: $hhmm${if (night) ", night" else ""}" }) {
+        Canvas(
+            Modifier.size(56.dp).semantics {
+                contentDescription =
+                    t(if (night) "home.clockLabelNight" else "home.clockLabel", "name" to person.nickname, "city" to city, "time" to hhmm)
+            },
+        ) {
             scale(size.width / 100f, size.height / 100f, pivot = Offset.Zero) {
                 val centre = Offset(50f, 50f)
                 drawCircle(if (night) seal else paper, 46f, centre)
@@ -370,11 +380,14 @@ private fun ZoneClock(person: Citizen, nowMs: Long, modifier: Modifier) {
             }
         }
         Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            Text("${person.nickname} · $city", style = MaterialTheme.typography.labelMedium.copy(fontSize = 13.sp, fontWeight = FontWeight.SemiBold))
+            Text(
+                t("discussions.metaLine", "author" to person.nickname, "when" to city),
+                style = MaterialTheme.typography.labelMedium.copy(fontSize = 13.sp, fontWeight = FontWeight.SemiBold),
+            )
             Text(
                 buildAnnotatedString {
                     append(hhmm)
-                    if (night) withStyle(SpanStyle(fontWeight = FontWeight.Normal, color = quiet)) { append(" · night") }
+                    if (night) withStyle(SpanStyle(fontWeight = FontWeight.Normal, color = quiet)) { append(" " + t("home.night")) }
                 },
                 style = MaterialTheme.typography.titleSmall.copy(fontSize = 15.sp, fontWeight = FontWeight.SemiBold, fontFeatureSettings = "tnum"),
                 color = seal,
@@ -404,7 +417,7 @@ private fun FromRow(row: LetterRow, nowMs: Long, who: Who) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 Column(Modifier.weight(1f)) {
                     RowLine(firstLineOf(row), strong = true)
-                    RowMeta("Arrived ${Time.clock(row.arrivesAt, nowMs)}")
+                    RowMeta(t("home.arrived", "time" to Time.clock(row.arrivesAt, nowMs)))
                 }
                 row.stamp?.let { StampImage(it) }
                 if (state == LetterState.DELIVERED) NewChip()
@@ -417,9 +430,9 @@ private fun FromRow(row: LetterRow, nowMs: Long, who: Who) {
         TileShape.Envelope,
         who,
         Modifier.semantics {
-            contentDescription = "On its way, arrives $arrives"
+            contentDescription = t("home.onItsWayArrives2", "arrives" to arrives)
         },
-        onClick = { notice("Arrives at $arrives") },
+        onClick = { notice(t("home.arrivesAt", "time" to arrives)) },
     ) {
         InTransit(row, nowMs, who, arrives)
     }
@@ -429,7 +442,7 @@ private fun FromRow(row: LetterRow, nowMs: Long, who: Who) {
 private fun InTransit(row: LetterRow, nowMs: Long, who: Who, arrives: String) {
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            RowMeta("On its way · arrives $arrives")
+            RowMeta(t("home.onItsWayArrives", "arrives" to arrives))
             Arc(progressAt(row, nowMs), who)
         }
         Text(Time.countdown((Time.ms(row.arrivesAt) ?: 0) - nowMs), style = DlTheme.type.countdown, color = DlTheme.colors.letterInk)
@@ -447,11 +460,11 @@ private fun ToRow(row: LetterRow, nowMs: Long, who: Who, onCancel: () -> Unit) {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        "${Time.countdown((Time.ms(row.windowEndsAt) ?: 0) - nowMs)} left to edit or cancel",
+                        t("home.leftToEditOrCancel", "countdown" to Time.countdown((Time.ms(row.windowEndsAt) ?: 0) - nowMs)),
                         style = MaterialTheme.typography.labelMedium.copy(fontSize = 13.sp, fontWeight = FontWeight.Bold, fontFeatureSettings = "tnum"),
                         color = DlTheme.colors.letterInk,
                     )
-                    RowMeta("Arrives $arrives")
+                    RowMeta(t("home.arrives", "arrives" to arrives))
                 }
                 Row(
                     Modifier.fillMaxWidth().clickable { nav.open(LetterRoute(row.id)) },
@@ -462,8 +475,8 @@ private fun ToRow(row: LetterRow, nowMs: Long, who: Who, onCancel: () -> Unit) {
                     row.stamp?.let { StampImage(it) }
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    ReachButton("Edit", Modifier.weight(1f)) { nav.open(WriteRoute(editId = row.id)) }
-                    ReachButton("Cancel", Modifier.weight(1f), onClick = onCancel)
+                    ReachButton(t("home.edit"), Modifier.weight(1f)) { nav.open(WriteRoute(editId = row.id)) }
+                    ReachButton(t("home.cancel"), Modifier.weight(1f), onClick = onCancel)
                 }
             }
         }
@@ -471,7 +484,7 @@ private fun ToRow(row: LetterRow, nowMs: Long, who: Who, onCancel: () -> Unit) {
             TileShape.Envelope,
             who,
             Modifier.semantics {
-                contentDescription = "On its way, arrives $arrives"
+                contentDescription = t("home.onItsWayArrives2", "arrives" to arrives)
             },
             onClick = { nav.open(LetterRoute(row.id)) },
         ) {
@@ -485,9 +498,9 @@ private fun ToRow(row: LetterRow, nowMs: Long, who: Who, onCancel: () -> Unit) {
                         if (state ==
                             LetterState.READ
                         ) {
-                            "Read ${Time.clock(row.readAt, nowMs)}"
+                            t("home.readAt", "time" to Time.clock(row.readAt, nowMs))
                         } else {
-                            "Delivered ${Time.clock(row.arrivesAt, nowMs)} · not read yet"
+                            t("home.deliveredNotRead", "time" to Time.clock(row.arrivesAt, nowMs))
                         },
                     )
                 }
@@ -539,7 +552,7 @@ private fun EmptyPost() {
             }
         }
         Text(
-            "Nothing in the post yet",
+            t("home.nothingInThePostYet"),
             Modifier.enter(Enter.Rise, 80, 400),
             style = MaterialTheme.typography.bodyLarge.copy(fontSize = 15.sp),
             color = MaterialTheme.colorScheme.onSurfaceVariant,

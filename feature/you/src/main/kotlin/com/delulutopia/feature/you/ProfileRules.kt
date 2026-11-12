@@ -1,5 +1,6 @@
 package com.delulutopia.feature.you
 
+import com.delulutopia.core.i18n.t
 import com.delulutopia.core.network.model.Profile
 
 /** Q2, Q3 (web src/profile/rules.ts): the API checks the same rules. */
@@ -17,13 +18,13 @@ data class ProfileForm(val username: String = "", val firstName: String = "", va
     /** Client-side messages for the three text fields; empty = fine. */
     fun problems(): Map<String, String> {
         val out = mutableMapOf<String, String>()
-        if (!USERNAME_RULE.matches(username)) out["username"] = "3–16 letters or digits, no spaces"
+        if (!USERNAME_RULE.matches(username)) out["username"] = t("profile.316LettersOrDigits")
         for ((k, raw) in listOf("firstName" to firstName, "lastName" to lastName)) {
             val v = raw.trim().replace(Regex("\\s+"), " ")
             if (v.isNotEmpty() && v.codePointCount(0, v.length) > 40) {
-                out[k] = "Up to 40 characters"
+                out[k] = t("profile.nameTooLong")
             } else if (v.isNotEmpty() && !NAME_RULE.matches(v)) {
-                out[k] = "Letters, spaces, - and ’ only"
+                out[k] = t("profile.nameRule")
             }
         }
         return out
@@ -43,38 +44,44 @@ data class ProfileForm(val username: String = "", val firstName: String = "", va
 }
 
 /** Notifications: section titles and event words with the friend's name (web src/api/me.ts). */
-val SECTION_LABELS = mapOf("letters" to "Letters", "discussions" to "Discussions", "emails" to "Emails", "board" to "Board", "home" to "Home")
+val SECTION_LABELS get() = mapOf(
+    "letters" to t("letters.letters"),
+    "discussions" to t("discussions.discussions"),
+    "emails" to t("emails.emails"),
+    "board" to t("board.board"),
+    "home" to t("notFound.home"),
+)
 
 fun eventLabel(key: String, friend: String): Pair<String, String> = when (key) {
-    "letter.arrived" -> "A letter arrives" to "When $friend's letter reaches you"
-    "letter.incoming" -> "A letter is on its way" to "When $friend sends one · the arrival time only"
-    "letter.read" -> "$friend read your letter" to "When it is opened for the first time"
-    "discussion.arrived" -> "A discussion arrives" to "When $friend's discussion reaches you"
-    "discussion.comment" -> "New comment" to "On any discussion"
-    "discussion.reaction" -> "Reaction on your post" to "On your discussions and comments"
-    "email.new" -> "New email" to "Every email from $friend"
-    "email.reaction" -> "Reaction on your email" to ""
-    "board.doodle" -> "New doodle" to "$friend drew on or edited the board"
-    "board.reaction" -> "Reaction on your doodle" to ""
-    "board.note" -> "Note on your doodle" to ""
-    "mood.changed" -> "$friend changed mood" to "The last change within a minute"
+    "letter.arrived" -> t("notifyEvent.letterArrived") to t("notifyEvent.letterArrivedHint", "friend" to friend)
+    "letter.incoming" -> t("notifyEvent.letterIncoming") to t("notifyEvent.letterIncomingHint", "friend" to friend)
+    "letter.read" -> t("notifyEvent.letterRead", "friend" to friend) to t("notifyEvent.letterReadHint")
+    "discussion.arrived" -> t("notifyEvent.discussionArrived") to t("notifyEvent.discussionArrivedHint", "friend" to friend)
+    "discussion.comment" -> t("notifyEvent.discussionComment") to t("notifyEvent.discussionCommentHint")
+    "discussion.reaction" -> t("notifyEvent.discussionReaction") to t("notifyEvent.discussionReactionHint")
+    "email.new" -> t("emails.newEmail") to t("notifyEvent.emailNewHint", "friend" to friend)
+    "email.reaction" -> t("notifyEvent.emailReaction") to ""
+    "board.doodle" -> t("notifyEvent.boardDoodle") to t("notifyEvent.boardDoodleHint", "friend" to friend)
+    "board.reaction" -> t("notifyEvent.boardReaction") to ""
+    "board.note" -> t("notifyEvent.boardNote") to ""
+    "mood.changed" -> t("notifyEvent.moodChanged", "friend" to friend) to t("notifyEvent.moodChangedHint")
     else -> key to ""
 }
 
 /** "2 of 3 on" / "None on" under an on section's title when some of its events are off. */
 fun sectionCount(on: Int, total: Int): String? = when {
     on == total -> null
-    on == 0 -> "None on"
-    else -> "$on of $total on"
+    on == 0 -> t("settings.noneOn")
+    else -> t("settings.someOn", "on" to on, "total" to total)
 }
 
 /** U5 rules, as the API checks them. */
-fun universeNameError(name: String): String? = if (Regex("^[\\p{L}\\p{Nd}]{2,12}$").matches(name.trim())) null else "2–12 letters or digits"
+fun universeNameError(name: String): String? = if (Regex("^[\\p{L}\\p{Nd}]{2,12}$").matches(name.trim())) null else t("universe.nameRule")
 
 const val WELCOME_MAX = 1500
 
 fun welcomeError(welcome: String): String? {
     val w = welcome.trim()
-    if (w.isEmpty()) return "Write a few words"
-    return if (w.codePointCount(0, w.length) > WELCOME_MAX) "Up to 1,500 characters" else null
+    if (w.isEmpty()) return t("universe.writeAFewWords")
+    return if (w.codePointCount(0, w.length) > WELCOME_MAX) t("universe.welcomeMax") else null
 }

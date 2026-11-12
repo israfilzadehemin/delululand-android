@@ -7,6 +7,7 @@ import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import com.delulutopia.core.data.Time
+import com.delulutopia.core.i18n.t
 import kotlinx.coroutines.delay
 
 /** The server-aligned now, re-read every [intervalMs] (web `useNow`). */
@@ -26,10 +27,10 @@ fun rememberNow(intervalMs: Long = 1_000): Long {
 fun ageWords(sinceIso: String?, nowMs: Long): String {
     val since = Time.ms(sinceIso) ?: return ""
     val s = ((nowMs - since) / 1000).coerceAtLeast(0)
-    if (s < 60) return "just now"
+    if (s < 60) return t("common.age.justNow")
     val m = s / 60
-    if (m < 60) return "$m min ago"
+    if (m < 60) return t("common.age.min", "n" to m)
     val h = m / 60
-    if (h < 24) return "$h h ago"
-    return "${h / 24} d ago"
+    if (h < 24) return t("common.age.h", "n" to h)
+    return t("common.age.d", "n" to h / 24)
 }

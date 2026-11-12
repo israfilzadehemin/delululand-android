@@ -60,7 +60,7 @@ jobs:
         run: nohup node tools/parity/server.mjs > parity-server.log 2>&1 &
 
       - name: Unit and screenshot tests
-        run: ./gradlew testProdDebugUnitTest :core:designsystem:testDebugUnitTest :core:network:testDebugUnitTest :feature:start:testDebugUnitTest :core:ui:testDebugUnitTest :feature:home:testDebugUnitTest :feature:letters:testDebugUnitTest :feature:emails:testDebugUnitTest :feature:you:testDebugUnitTest -Proborazzi.test.record=true --continue
+        run: ./gradlew testProdDebugUnitTest :core:i18n:testDebugUnitTest :core:designsystem:testDebugUnitTest :core:network:testDebugUnitTest :feature:start:testDebugUnitTest :core:ui:testDebugUnitTest :feature:home:testDebugUnitTest :feature:letters:testDebugUnitTest :feature:emails:testDebugUnitTest :feature:you:testDebugUnitTest -Proborazzi.test.record=true --continue
 
       - name: Screenshots
         if: always()

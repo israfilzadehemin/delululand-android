@@ -24,6 +24,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.delulutopia.core.i18n.t
 
 /*
  * Board reactions (web board/reactions.tsx, doc "Delululand — Board" §R): ten marker-drawn marks in
@@ -47,15 +48,15 @@ private fun dot(x: Int, y: Int) = Mark("M${x - 3.5f} $y a3.5 3.5 0 1 0 7 0 a3.5 
 
 class BoardReaction internal constructor(val key: String, val name: String, internal val marks: List<Mark>)
 
-val REACTIONS: List<BoardReaction> = listOf(
+val REACTIONS: List<BoardReaction> get() = listOf(
     BoardReaction(
         "love",
-        "Love it",
+        t("board.reaction.love"),
         listOf(s("M50 82 C22 63 12 46 19 31 C26 17 43 19 50 34 C57 19 74 16 81 30 C89 45 79 63 50 82 Z", RED, 6f), s("M29 33 q5 -8 13 -5", RED, 3.5f)),
     ),
     BoardReaction(
         "haha",
-        "Haha",
+        t("board.reaction.haha"),
         listOf(
             s(FACE, MUSTARD, 6f),
             s("M31 41 q6 -8 13 0 M56 41 q6 -8 13 0", INK, 5f),
@@ -65,7 +66,7 @@ val REACTIONS: List<BoardReaction> = listOf(
     ),
     BoardReaction(
         "wow",
-        "Wow",
+        t("board.reaction.wow"),
         listOf(
             s(FACE, MUSTARD, 6f),
             dot(37, 40),
@@ -76,12 +77,12 @@ val REACTIONS: List<BoardReaction> = listOf(
     ),
     BoardReaction(
         "star",
-        "Star",
+        t("board.reaction.star"),
         listOf(s("M50 11 L60 38 L89 39 L66 56 L75 85 L50 68 L26 85 L34 56 L11 39 L40 37 Z", MUSTARD, 6f), s("M82 14 v10 M77 19 h10", MUSTARD, 3.5f)),
     ),
     BoardReaction(
         "fire",
-        "Fire",
+        t("board.reaction.fire"),
         listOf(
             s("M50 89 C27 89 19 70 26 54 C31 44 39 39 37 24 C49 31 55 42 53 54 C59 48 61 39 59 30 C73 41 82 58 75 73 C71 83 62 89 50 89 Z", TERRACOTTA, 6f),
             s("M50 83 C41 83 39 74 43 68 C47 62 48 58 47 52 C55 58 60 66 58 74 C56 80 54 83 50 83", MUSTARD, 4.5f),
@@ -89,7 +90,7 @@ val REACTIONS: List<BoardReaction> = listOf(
     ),
     BoardReaction(
         "yes",
-        "Thumbs up",
+        t("board.reaction.yes"),
         listOf(
             s("M22 48 H38 V86 H22 Z", INK, 5.5f),
             s("M38 51 L52 29 C55 20 66 22 64 33 L61 45 H79 C86 45 88 53 83 57 C88 61 86 67 81 69 C84 73 82 79 77 80 C78 86 73 88 69 88 H38", INK, 5.5f),
@@ -97,12 +98,12 @@ val REACTIONS: List<BoardReaction> = listOf(
     ),
     BoardReaction(
         "aww",
-        "Aww",
+        t("board.reaction.aww"),
         listOf(s(FACE, SKY, 6f), dot(37, 42), dot(63, 42), s("M35 70 q15 -13 30 0", INK, 5f), s("M66 50 c-5 8 -4 14 0 14 c4 0 5 -6 0 -14", SKY, 3.5f)),
     ),
     BoardReaction(
         "kiss",
-        "Kiss",
+        t("board.reaction.kiss"),
         listOf(
             s("M14 50 C28 34 41 37 50 44 C59 37 72 34 86 50 C73 67 61 73 50 73 C39 73 27 67 14 50 Z", RED, 6f),
             s("M16 50 C36 55 64 55 84 50", RED, 4f),
@@ -111,7 +112,7 @@ val REACTIONS: List<BoardReaction> = listOf(
     ),
     BoardReaction(
         "sparkle",
-        "Sparkle",
+        t("board.reaction.sparkle"),
         listOf(
             s("M40 18 C42 37 46 41 65 43 C46 45 42 49 40 68 C38 49 34 45 15 43 C34 41 38 37 40 18 Z", LAVENDER, 5.5f),
             s("M72 56 C73 65 75 67 84 68 C75 69 73 71 72 80 C71 71 69 69 60 68 C69 67 71 65 72 56 Z", MUSTARD, 4.5f),
@@ -120,7 +121,7 @@ val REACTIONS: List<BoardReaction> = listOf(
     ),
     BoardReaction(
         "hundred",
-        "100",
+        t("board.reaction.hundred"),
         listOf(
             s("M14 36 L23 29 V70", RED, 6f),
             s("M45 30 C34 30 33 70 45 70 C57 70 56 30 45 30", RED, 6f),

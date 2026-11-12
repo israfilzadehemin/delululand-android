@@ -41,6 +41,8 @@ import kotlinx.serialization.Serializable
 
 @Serializable data object AppearanceRoute
 
+@Serializable data object LanguageRoute
+
 @Serializable data object NotificationsRoute
 
 @Serializable data object UniverseRoute

@@ -10,6 +10,7 @@ import com.delulutopia.core.data.Backend
 import com.delulutopia.core.data.DraftSaver
 import com.delulutopia.core.data.HomeRepository
 import com.delulutopia.core.designsystem.theme.NoteColor
+import com.delulutopia.core.i18n.t
 import com.delulutopia.core.network.ApiException
 import com.delulutopia.core.network.model.AppConfig
 import com.delulutopia.core.network.model.DDraft
@@ -185,20 +186,20 @@ class ComposeViewModel @AssistedInject constructor(
 
     /** FS-D21: flush, then post exactly that version. */
     suspend fun post(): PostResult {
-        val s = saver ?: return PostResult.Failed("Not posted. Try again.")
+        val s = saver ?: return PostResult.Failed(t("common.notPosted"))
         val version = try {
             s.flush()
         } catch (_: DraftSaver.ConflictException) {
             return PostResult.Conflict
         } catch (_: Exception) {
-            return PostResult.Failed("Not posted. Try again.")
+            return PostResult.Failed(t("common.notPosted"))
         }
         return try {
             val posted = backend.run { post(DraftVersionBody(version)) }
             home.load()
             PostResult.Posted(posted.id)
         } catch (e: ApiException) {
-            PostResult.Failed(if (e.code in setOf("TITLE_REQUIRED", "EMPTY_DISCUSSION", "TITLE_TOO_LONG")) e.message else "Not posted. Try again.")
+            PostResult.Failed(if (e.code in setOf("TITLE_REQUIRED", "EMPTY_DISCUSSION", "TITLE_TOO_LONG")) e.message else t("common.notPosted"))
         }
     }
 
@@ -214,7 +215,7 @@ class ComposeViewModel @AssistedInject constructor(
             when {
                 e.status == 404 -> GONE
                 e.status in 400..499 -> e.message
-                else -> "Not saved. Try again."
+                else -> t("reactions.notSavedTryAgain")
             }
         }
     }

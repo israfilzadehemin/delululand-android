@@ -1,27 +1,34 @@
 package com.delulutopia.core.data
 
+import com.delulutopia.core.i18n.t
 import com.delulutopia.core.network.model.Mood
 import java.text.Normalizer
 
 /** Moods (web src/text/moods.ts, doc "Delululand — Moods"). The API's catalogue is the source; these show while it loads. */
 object Moods {
-    val DEFAULTS: List<Mood> = listOf(
-        "HAPPY" to ("😊" to "Happy"), "CALM" to ("🍵" to "Calm"), "CURIOUS" to ("🤔" to "Curious"), "INSPIRED" to ("✨" to "Inspired"),
-        "BUSY" to ("🏃" to "Busy"), "TIRED" to ("😴" to "Tired"), "SAD" to ("🌧️" to "Sad"), "MISSING_YOU" to ("💌" to "Missing you"),
-        "LOVED" to ("🥰" to "Loved"), "GRATEFUL" to ("🙏" to "Grateful"), "EXCITED" to ("🤩" to "Excited"), "PLAYFUL" to ("😜" to "Playful"),
-        "COZY" to ("🧸" to "Cozy"), "HOPEFUL" to ("🌱" to "Hopeful"), "PROUD" to ("🏆" to "Proud"), "THINKING_OF_YOU" to ("💭" to "Thinking of you"),
-        "NEED_A_HUG" to ("🤗" to "Need a hug"), "BUTTERFLIES" to ("🦋" to "Butterflies"), "TOUCHED" to ("🥹" to "Touched"),
-        "SAFE_WITH_YOU" to ("🫶" to "Safe with you"), "BLISSFUL" to ("🌸" to "Blissful"), "FLIRTY" to ("😏" to "Flirty"),
-        "CONTENT" to ("☺️" to "Content"), "DREAMY" to ("🌙" to "Dreamy"),
-        "ANXIOUS" to ("😰" to "Anxious"), "STRESSED" to ("🤯" to "Stressed"), "ANGRY" to ("😤" to "Angry"), "LONELY" to ("🥀" to "Lonely"),
-        "BORED" to ("🥱" to "Bored"), "SICK" to ("🤒" to "Sick"), "OVERWHELMED" to ("🌊" to "Overwhelmed"), "HOMESICK" to ("🏡" to "Homesick"),
+    val DEFAULTS: List<Mood> get() = listOf(
+        "HAPPY" to ("😊" to t("mood.HAPPY")), "CALM" to ("🍵" to t("mood.CALM")), "CURIOUS" to ("🤔" to t("mood.CURIOUS")),
+        "INSPIRED" to ("✨" to t("mood.INSPIRED")),
+        "BUSY" to ("🏃" to t("mood.BUSY")), "TIRED" to ("😴" to t("mood.TIRED")), "SAD" to ("🌧️" to t("mood.SAD")),
+        "MISSING_YOU" to ("💌" to t("mood.MISSING_YOU")),
+        "LOVED" to ("🥰" to t("mood.LOVED")), "GRATEFUL" to ("🙏" to t("mood.GRATEFUL")), "EXCITED" to ("🤩" to t("mood.EXCITED")),
+        "PLAYFUL" to ("😜" to t("mood.PLAYFUL")),
+        "COZY" to ("🧸" to t("mood.COZY")), "HOPEFUL" to ("🌱" to t("mood.HOPEFUL")), "PROUD" to ("🏆" to t("mood.PROUD")),
+        "THINKING_OF_YOU" to ("💭" to t("mood.THINKING_OF_YOU")),
+        "NEED_A_HUG" to ("🤗" to t("mood.NEED_A_HUG")), "BUTTERFLIES" to ("🦋" to t("mood.BUTTERFLIES")), "TOUCHED" to ("🥹" to t("mood.TOUCHED")),
+        "SAFE_WITH_YOU" to ("🫶" to t("mood.SAFE_WITH_YOU")), "BLISSFUL" to ("🌸" to t("mood.BLISSFUL")), "FLIRTY" to ("😏" to t("mood.FLIRTY")),
+        "CONTENT" to ("☺️" to t("mood.CONTENT")), "DREAMY" to ("🌙" to t("mood.DREAMY")),
+        "ANXIOUS" to ("😰" to t("mood.ANXIOUS")), "STRESSED" to ("🤯" to t("mood.STRESSED")), "ANGRY" to ("😤" to t("mood.ANGRY")),
+        "LONELY" to ("🥀" to t("mood.LONELY")),
+        "BORED" to ("🥱" to t("mood.BORED")), "SICK" to ("🤒" to t("mood.SICK")), "OVERWHELMED" to ("🌊" to t("mood.OVERWHELMED")),
+        "HOMESICK" to ("🏡" to t("mood.HOMESICK")),
     ).map { (key, v) -> Mood(key, v.first, v.second, false) }
 
     const val PER_PAGE = 8
     const val LIMIT = 48
     const val LABEL_MAX = 16
-    const val LABEL_RULE = "Up to 16 letters, digits or simple punctuation"
-    const val LABEL_TAKEN = "That mood already exists."
+    val LABEL_RULE: String get() = t("home.moodLabelRule")
+    val LABEL_TAKEN: String get() = t("home.moodTaken")
 
     /** "🌧️ Sad", or null for no mood. An emoji and label from the API win over the code. */
     fun text(code: String?, emoji: String? = null, label: String? = null): String? {

@@ -45,6 +45,7 @@ import com.delulutopia.core.data.Time
 import com.delulutopia.core.designsystem.component.DlDialog
 import com.delulutopia.core.designsystem.component.DlFilledButton
 import com.delulutopia.core.designsystem.theme.DlTheme
+import com.delulutopia.core.i18n.t
 import com.delulutopia.core.network.Uploader
 import com.delulutopia.core.network.model.EmailCredits
 import com.delulutopia.core.network.model.EmailSent
@@ -66,7 +67,7 @@ internal fun ComposerView(composer: EmailComposer, credits: EmailCredits?, onSen
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     if (composer.failed) {
-        Text("Couldn't load your draft. Check your connection and try again.", color = MaterialTheme.colorScheme.error)
+        Text(t("emails.couldntLoadYourDraftCheck"), color = MaterialTheme.colorScheme.error)
         return
     }
     val atts = composer.attachments
@@ -94,10 +95,10 @@ internal fun ComposerView(composer: EmailComposer, credits: EmailCredits?, onSen
     val something = composer.text.isNotBlank() || atts.items.isNotEmpty()
     val canSend = (!composer.withSubject || composer.subject.isNotBlank()) && something && !atts.uploading && !voice.recording && !outOfCredits && !sending
     val saved = when {
-        saveState.status == DraftSaver.Status.Error -> "Couldn't save your draft"
+        saveState.status == DraftSaver.Status.Error -> t("common.draftNotSaved")
         saveState.savedAt != null && saveState.status != DraftSaver.Status.Conflict &&
             (composer.text.isNotBlank() || composer.subject.isNotBlank() || atts.items.isNotEmpty()) ->
-            "Draft saved ${Time.time(saveState.savedAt)}"
+            t("common.draftSaved", "time" to Time.time(saveState.savedAt))
         else -> ""
     }
     // web .dl-ecompose: the fields sit on the page, no card; 8 dp between.
@@ -107,7 +108,7 @@ internal fun ComposerView(composer: EmailComposer, credits: EmailCredits?, onSen
             Input(
                 composer.subject,
                 composer::changeSubject,
-                "Subject",
+                t("emails.subject"),
                 DlTheme.type.noteTitle.copy(fontSize = 17.sp, lineHeight = 25.5.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface),
                 single = true,
             )
@@ -115,14 +116,14 @@ internal fun ComposerView(composer: EmailComposer, credits: EmailCredits?, onSen
         Input(
             composer.text,
             composer::changeText,
-            if (composer.withSubject) "Write an email" else "Write a reply",
+            if (composer.withSubject) t("emails.writeAnEmail") else t("emails.writeAReply"),
             field,
             single = false,
             minHeight = if (composer.withSubject) 200.dp else 88.dp,
         )
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Text(
-                "$length / $EMAIL_MAX",
+                t("media.progress", "time" to length, "total" to EMAIL_MAX),
                 style = MaterialTheme.typography.bodySmall.copy(
                     fontSize = 12.sp,
                     fontWeight = if (length >= EMAIL_MAX) FontWeight.Bold else FontWeight.Normal,
@@ -163,7 +164,7 @@ internal fun ComposerView(composer: EmailComposer, credits: EmailCredits?, onSen
                 color = if (outOfCredits) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
             )
             DlFilledButton(
-                if (sending) "Sending…" else "Send",
+                if (sending) t("common.sending") else t("common.send"),
                 {
                     sending = true
                     sendError = null
@@ -197,11 +198,11 @@ internal fun ComposerView(composer: EmailComposer, credits: EmailCredits?, onSen
     }
     if (saveState.status == DraftSaver.Status.Conflict) {
         DlDialog(
-            title = "A newer version was saved on another device. Load it?",
+            title = t("emails.aNewerVersionWasSaved"),
             text = null,
-            confirmLabel = "Load",
+            confirmLabel = t("emails.load"),
             onConfirm = { scope.launch { composer.loadServer() } },
-            dismissLabel = "Keep mine",
+            dismissLabel = t("emails.keepMine"),
             onDismiss = { composer.saver.keepMine() },
         )
     }

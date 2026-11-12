@@ -15,6 +15,9 @@ import androidx.compose.ui.unit.dp
  */
 object DlIcons {
     private const val THIN = 1.75f
+
+    /** Icons that point along the reading direction mirror in Persian (L3). Declared first: the icons below are built at init. */
+    private val MIRRORED = setOf("back", "send", "chevron.right", "plane", "log.out")
     private const val BOLD = 2f
 
     val Home = line("home", THIN, "M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z")
@@ -79,10 +82,18 @@ object DlIcons {
     )
     val Share = line("share", THIN, "M12 15V3", "M7 8l5-5 5 5", "M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6")
     val LogOut = line("log.out", THIN, "M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3", "M10 17l-5-5 5-5", "M5 12h11")
+    val Language = line("language", THIN, "M4 5h16v11H9l-5 4z", "M9.5 13l2.5-6 2.5 6M10.4 11h3.2")
     val Palette = line("palette", THIN, "M12 3a9 9 0 1 0 0 18c1.1 0 1.6-.8 1.6-1.6 0-1.2-1-1.4-1-2.4 0-.8.7-1.4 1.6-1.4H17a4 4 0 0 0 4-4c0-4.7-4-8.6-9-8.6z")
 
     private fun line(name: String, stroke: Float, vararg paths: String): ImageVector =
-        ImageVector.Builder(name = name, defaultWidth = 24.dp, defaultHeight = 24.dp, viewportWidth = 24f, viewportHeight = 24f)
+        ImageVector.Builder(
+            name = name,
+            defaultWidth = 24.dp,
+            defaultHeight = 24.dp,
+            viewportWidth = 24f,
+            viewportHeight = 24f,
+            autoMirror = name in MIRRORED,
+        )
             .apply {
                 paths.forEach { d ->
                     addPath(

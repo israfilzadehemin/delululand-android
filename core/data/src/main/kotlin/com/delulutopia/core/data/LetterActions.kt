@@ -1,5 +1,6 @@
 package com.delulutopia.core.data
 
+import com.delulutopia.core.i18n.t
 import com.delulutopia.core.network.ApiException
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -22,7 +23,7 @@ class LetterActions @Inject constructor(private val backend: Backend, private va
     }
 
     companion object {
-        const val TOO_LATE = "Too late: it's on its way."
-        const val NOT_CANCELLED = "Not cancelled. Try again."
+        val TOO_LATE: String get() = t("common.tooLate")
+        val NOT_CANCELLED: String get() = t("letters.notCancelled")
     }
 }

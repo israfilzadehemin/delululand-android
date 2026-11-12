@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.delulutopia.core.data.AccountRepository
 import com.delulutopia.core.data.SessionRepository
+import com.delulutopia.core.i18n.I18n
 import com.delulutopia.core.network.ApiException
 import com.delulutopia.core.network.model.CreateUniverseRequest
 import com.delulutopia.feature.start.PinViewModel.Problem
@@ -104,7 +105,7 @@ class CreateUniverseViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 val r = account.createUniverse(
-                    CreateUniverseRequest(s.invite, s.name.trim(), s.welcome, s.citizen.username, s.citizen.timezone, pin),
+                    CreateUniverseRequest(s.invite, s.name.trim(), s.welcome, s.citizen.username, s.citizen.timezone, pin, I18n.lang.tag),
                 )
                 account.uploadPhoto(s.citizen.photo)
                 _state.update { it.copy(step = 5, created = Created(r.code, r.universe.name), pin = WizardPin()) }

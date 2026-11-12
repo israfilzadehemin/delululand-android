@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.delulutopia.core.data.Time
 import com.delulutopia.core.designsystem.component.DlDialog
 import com.delulutopia.core.designsystem.component.DlFilledButton
 import com.delulutopia.core.designsystem.component.DlGhostButton
@@ -39,6 +40,9 @@ import com.delulutopia.core.designsystem.component.DlTextButton
 import com.delulutopia.core.designsystem.component.DlTextField
 import com.delulutopia.core.designsystem.component.DlTopAppBar
 import com.delulutopia.core.designsystem.theme.Literata
+import com.delulutopia.core.i18n.I18n
+import com.delulutopia.core.i18n.counter
+import com.delulutopia.core.i18n.t
 import com.delulutopia.core.network.model.UniverseView
 import com.delulutopia.core.ui.LocalAppNav
 import com.delulutopia.core.ui.LocalNotice
@@ -47,10 +51,6 @@ import com.delulutopia.core.ui.tintOf
 import com.delulutopia.feature.start.KeyReveal
 import com.delulutopia.feature.start.Rules
 import com.delulutopia.feature.start.WelcomeDialog
-import java.text.SimpleDateFormat
-import java.time.Instant
-import java.util.Date
-import java.util.Locale
 
 /**
  * Settings › Universe (doc "Delululand — Universe" §2.6): the creator renames, edits the welcome
@@ -63,13 +63,13 @@ fun UniverseScreen(vm: UniverseViewModel = hiltViewModel()) {
     val code = vm.revealed
     Column(Modifier.fillMaxSize().imePadding()) {
         if (code != null && v != null) {
-            DlTopAppBar(title = "New key", onBack = { vm.revealed = null })
+            DlTopAppBar(title = t("settings.newKey"), onBack = { vm.revealed = null })
             Column(Modifier.verticalScroll(rememberScrollState()).padding(24.dp)) {
-                KeyReveal(v.name, code, continueLabel = "Done") { vm.revealed = null }
+                KeyReveal(v.name, code, continueLabel = t("settings.done")) { vm.revealed = null }
             }
             return@Column
         }
-        DlTopAppBar(title = "Universe", onBack = { nav.back() })
+        DlTopAppBar(title = t("settings.universe"), onBack = { nav.back() })
         // web .dl-sub-main.dl-settings: 4/20/24 padding, 12 dp between.
         Column(
             Modifier.verticalScroll(rememberScrollState()).padding(start = 20.dp, end = 20.dp, top = 4.dp, bottom = 24.dp),
@@ -101,49 +101,49 @@ private fun CreatorForm(vm: UniverseViewModel, view: UniverseView) {
             vm.name = it.filterNot(Char::isWhitespace)
             vm.serverError = null
         },
-        label = "Name",
+        label = t("settings.name"),
         errorText = nameProblem,
         maxLength = 24,
-        counter = "${vm.name.trim().codePointCount(0, vm.name.trim().length)}/12",
+        counter = counter(vm.name.trim().codePointCount(0, vm.name.trim().length), 12),
         keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.None, autoCorrectEnabled = false),
     )
     DlTextField(
         value = vm.welcome,
         onValueChange = { vm.welcome = it },
-        label = "Welcome message",
+        label = t("settings.welcomeMessage"),
         errorText = welcomeProblem,
         singleLine = false,
         minLines = 6,
-        counter = "${trimmed.codePointCount(0, trimmed.length)}/$WELCOME_MAX",
+        counter = counter(trimmed.codePointCount(0, trimmed.length), WELCOME_MAX),
     )
-    DlTextButton("See it as your friend will", { preview = true }, enabled = welcomeProblem == null)
-    DlFilledButton(if (vm.busy) "Saving…" else "Save", { vm.save(notice) }, Modifier.fillMaxWidth(), enabled = canSave)
+    DlTextButton(t("settings.seeItAsYourFriend"), { preview = true }, enabled = welcomeProblem == null)
+    DlFilledButton(if (vm.busy) t("common.saving") else t("common.save"), { vm.save(notice) }, Modifier.fillMaxWidth(), enabled = canSave)
 
     // web .dl-universe-section: a 1 dp outlined box, 12 dp corners, 16 padding, 10 between.
     Column(
         Modifier.fillMaxWidth().border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(12.dp)).padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
-        Text("ENTRY KEY", style = FieldLabel, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        val made = view.codeRotatedAt?.let { runCatching { SimpleDateFormat("d MMM", Locale.UK).format(Date.from(Instant.parse(it))) }.getOrNull() }
+        Text(t("settings.entryKey").uppercase(I18n.lang.locale), style = FieldLabel, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        val made = view.codeRotatedAt?.let { Time.day(it) }?.takeIf { it.isNotEmpty() }
         Text(
-            (if (made != null) "Made $made. " else "") + "Keys can't be shown again; make a new one if it's lost.",
+            if (made != null) t("settings.keyMadeOn", "day" to made) else t("settings.keysCantBeShown"),
             style = MaterialTheme.typography.bodyMedium.copy(fontSize = 14.sp),
         )
-        DlGhostButton("Make a new key", { confirmKey = true })
+        DlGhostButton(t("settings.makeANewKey"), { confirmKey = true })
     }
 
     if (preview) WelcomeDialog(vm.name.trim().ifEmpty { view.name }, vm.welcome, { preview = false }, preview = true)
     if (confirmKey) {
         DlDialog(
-            title = "Make a new key?",
-            text = "The old key stops working. Devices that are logged in stay in; devices that only entered the key will need the new one.",
-            confirmLabel = "Make a new key",
+            title = t("settings.makeANewKey2"),
+            text = t("settings.theOldKeyStopsWorking"),
+            confirmLabel = t("settings.makeANewKey"),
             onConfirm = {
                 confirmKey = false
                 vm.rotate(notice)
             },
-            dismissLabel = "Cancel",
+            dismissLabel = t("settings.cancel"),
             onDismiss = { confirmKey = false },
         )
     }
@@ -158,7 +158,7 @@ private fun ReadOnly(vm: UniverseViewModel, view: UniverseView) {
     if (creator != null) {
         // web .dl-key-warning
         Text(
-            "Only ${creator.username} can change this.",
+            t("settings.onlyCanChangeThis", "username" to creator.username),
             Modifier
                 .fillMaxWidth()
                 .background(MaterialTheme.colorScheme.surfaceContainerHigh, RoundedCornerShape(8.dp))
@@ -173,7 +173,7 @@ private fun ReadOnly(vm: UniverseViewModel, view: UniverseView) {
         Text(view.name, fontSize = 16.sp, lineHeight = 22.sp, fontWeight = FontWeight.SemiBold)
     }
     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        Text("WELCOME MESSAGE", style = FieldLabel, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(t("settings.welcomeMessage").uppercase(I18n.lang.locale), style = FieldLabel, color = MaterialTheme.colorScheme.onSurfaceVariant)
         // web .dl-universe-paper: the letter surface, 4 dp corners, a card shadow, Literata 14/1.55.
         Column(
             Modifier
@@ -190,7 +190,7 @@ private fun ReadOnly(vm: UniverseViewModel, view: UniverseView) {
     }
     if (creator != null) {
         Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            Text("CREATED BY", style = FieldLabel, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(t("settings.createdBy").uppercase(I18n.lang.locale), style = FieldLabel, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 val photo = if (friend != null && friend.id == creator.id) friend.avatarUrl else null
                 DlRemoteAvatar(

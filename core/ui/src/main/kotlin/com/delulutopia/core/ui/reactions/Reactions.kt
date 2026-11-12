@@ -53,6 +53,8 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
 import com.delulutopia.core.data.Time
 import com.delulutopia.core.designsystem.theme.DlTheme
+import com.delulutopia.core.i18n.formatNumber
+import com.delulutopia.core.i18n.t
 import com.delulutopia.core.network.model.Citizen
 import com.delulutopia.core.network.model.Reaction
 import com.delulutopia.core.network.model.ReactionNotice
@@ -202,13 +204,11 @@ fun Reactions(
                             },
                         )
                         .semantics {
-                            contentDescription = "${c.emoji} $who${if (readOnly) {
-                                ""
-                            } else if (on) {
-                                ", tap to remove yours"
-                            } else {
-                                ", tap to add yours"
-                            }}"
+                            contentDescription = when {
+                                readOnly -> "${c.emoji} $who"
+                                on -> t("reactions.chipLabelMine", "emoji" to c.emoji, "who" to who)
+                                else -> t("reactions.chipLabel", "emoji" to c.emoji, "who" to who)
+                            }
                         }
                         .padding(horizontal = chipPad),
                     verticalAlignment = Alignment.CenterVertically,
@@ -217,7 +217,7 @@ fun Reactions(
                     Text(c.emoji, fontSize = if (compact) 14.sp else 16.sp)
                     if (c.userIds.size > 1) {
                         Text(
-                            "${c.userIds.size}",
+                            formatNumber(c.userIds.size),
                             style = MaterialTheme.typography.labelMedium.copy(fontSize = 13.sp, fontWeight = FontWeight.SemiBold, fontFeatureSettings = "tnum"),
                         )
                     }
@@ -243,7 +243,7 @@ fun Reactions(
                                     style = Stroke(w, pathEffect = PathEffect.dashPathEffect(floatArrayOf(3.dp.toPx(), 2.dp.toPx()))),
                                 )
                             }.combinedClickable { quick = !quick }
-                            .semantics { contentDescription = "Add a reaction" },
+                            .semantics { contentDescription = t("reactions.addAReaction") },
                         contentAlignment = Alignment.Center,
                     ) {
                         FacePlus(quiet)
@@ -280,7 +280,7 @@ fun Reactions(
                                             quick = false
                                             all = true
                                         }
-                                        .semantics { contentDescription = "All emojis" },
+                                        .semantics { contentDescription = t("reactions.allEmojis") },
                                     contentAlignment = Alignment.Center,
                                 ) { Text("⋯", fontSize = 18.sp, color = MaterialTheme.colorScheme.onSurfaceVariant) }
                             }
@@ -292,7 +292,7 @@ fun Reactions(
         tip?.let { Text(it, Modifier.padding(top = 4.dp), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
         if (error) {
             Text(
-                "Not saved. Try again.",
+                t("reactions.notSavedTryAgain"),
                 Modifier.padding(top = 4.dp),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.error,
@@ -301,7 +301,7 @@ fun Reactions(
     }
     if (all) {
         EmojiPickerSheet(
-            "All emojis",
+            t("reactions.allEmojis"),
             onPick = {
                 all = false
                 if (!mineOn(it)) toggle(it)
@@ -316,7 +316,7 @@ fun Reactions(
 fun ReactionSummary(reactions: List<Reaction>, modifier: Modifier = Modifier) {
     if (reactions.isEmpty()) return
     val shown = reactions.take(4).joinToString("") { it.emoji } + if (reactions.size > 4) "…" else ""
-    Text(shown, modifier.semantics { contentDescription = "Reactions: ${reactions.joinToString(" ") { it.emoji }}" }, fontSize = 14.sp)
+    Text(shown, modifier.semantics { contentDescription = t("reactions.reactions2", "join" to reactions.joinToString(" ") { it.emoji }) }, fontSize = 14.sp)
 }
 
 /** C3: how much of the reacted item's text a row quotes, in visible characters. */
@@ -327,17 +327,24 @@ const val NOTICE_SNIPPET = 40
  * "Friend reacted to 'first 40 characters…' with ❤️", "+N more" when there are others.
  */
 fun noticeLine(n: ReactionNotice, count: Int, reactorName: String): String {
-    val what = n.text?.let { "'${clip(it, NOTICE_SNIPPET)}'" } ?: "${if (n.onMine) "your" else "their"} ${itemWord(n)}"
-    val more = if (count > 1) " · +${count - 1} more" else ""
-    return "$reactorName reacted to $what with ${n.emoji}$more"
+    val more = if (count > 1) t("reactions.notice.more", "n" to count - 1) else ""
+    val text = n.text
+    val line = when {
+        text != null -> t("reactions.notice.text", "name" to reactorName, "text" to clip(text, NOTICE_SNIPPET), "emoji" to n.emoji)
+        n.onMine -> t("reactions.notice.mine", "name" to reactorName, "item" to itemWord(n), "emoji" to n.emoji)
+        else -> t("reactions.notice.theirs", "name" to reactorName, "item" to itemWord(n), "emoji" to n.emoji)
+    }
+    return line + more
 }
 
 private fun itemWord(n: ReactionNotice): String = when {
+    n.target == "discussion" -> t("reactions.item.discussion")
+    n.target == "comment" -> t("reactions.item.comment")
     n.target != "email" -> n.target
-    n.media == "video" -> "video"
-    n.media == "photo" -> "photo"
-    n.media == "audio" -> "voice note"
-    else -> "email"
+    n.media == "video" -> t("reactions.item.video")
+    n.media == "photo" -> t("reactions.item.photo")
+    n.media == "audio" -> t("reactions.item.voiceNote")
+    else -> t("reactions.item.email")
 }
 
 private fun clip(text: String, max: Int): String {

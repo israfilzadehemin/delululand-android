@@ -34,13 +34,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.delulutopia.core.designsystem.icon.WebIcons
+import com.delulutopia.core.designsystem.text.Ltr
 import com.delulutopia.core.designsystem.theme.DlTheme
+import com.delulutopia.core.i18n.localDigits
+import com.delulutopia.core.i18n.t
 import kotlinx.coroutines.delay
 
 /** `m:ss` of a duration (web media/duration.ts). */
 fun mmss(ms: Long): String {
     val s = (ms.coerceAtLeast(0) / 1000)
-    return "${s / 60}:${(s % 60).toString().padStart(2, '0')}"
+    return localDigits("${s / 60}:${(s % 60).toString().padStart(2, '0')}")
 }
 
 /**
@@ -48,7 +51,13 @@ fun mmss(ms: Long): String {
  * note plays at a time across the app.
  */
 @Composable
-fun AudioPlayer(url: String, durationMs: Long?, modifier: Modifier = Modifier, compact: Boolean = false, label: String = "voice note") {
+fun AudioPlayer(url: String, durationMs: Long?, modifier: Modifier = Modifier, compact: Boolean = false, label: String = t("media.voiceNoteLower")) {
+    // L3: media progress runs left to right in Persian too, as on every phone.
+    Ltr { AudioPlayerContent(url = url, durationMs = durationMs, modifier = modifier, compact = compact, label = label) }
+}
+
+@Composable
+private fun AudioPlayerContent(url: String, durationMs: Long?, modifier: Modifier, compact: Boolean, label: String) {
     val context = LocalContext.current
     val mine = OnePlayer.url == url
     val playing = mine && OnePlayer.playing
@@ -82,10 +91,10 @@ fun AudioPlayer(url: String, durationMs: Long?, modifier: Modifier = Modifier, c
                 .size(button)
                 .clip(CircleShape)
                 .background(seal)
-                .clickable(role = Role.Button, onClickLabel = if (playing) "Pause $label" else "Play $label") {
+                .clickable(role = Role.Button, onClickLabel = if (playing) t("media.pause", "label" to label) else t("media.play", "label" to label)) {
                     if (playing) OnePlayer.pause() else OnePlayer.play(context, url)
                 }
-                .semantics { contentDescription = if (playing) "Pause $label" else "Play $label" },
+                .semantics { contentDescription = if (playing) t("media.pause", "label" to label) else t("media.play", "label" to label) },
             contentAlignment = Alignment.Center,
         ) {
             Icon(if (playing) WebIcons.Pause else WebIcons.Play, null, Modifier.size(if (compact) 12.dp else 14.dp), tint = MaterialTheme.colorScheme.onPrimary)
@@ -94,7 +103,7 @@ fun AudioPlayer(url: String, durationMs: Long?, modifier: Modifier = Modifier, c
             Modifier
                 .weight(1f)
                 .height(44.dp)
-                .semantics { contentDescription = "Scrub bar, ${mmss(time)} of ${mmss(total)}" }
+                .semantics { contentDescription = t("media.scrubBarOf", "time" to mmss(time), "total" to mmss(total)) }
                 .pointerInput(url, total) {
                     detectTapGestures { o -> if (total > 0) OnePlayer.seek(context, url, (o.x / size.width * total).toLong()) }
                 }
@@ -115,7 +124,7 @@ fun AudioPlayer(url: String, durationMs: Long?, modifier: Modifier = Modifier, c
             drawCircle(seal, r - 2.dp.toPx(), Offset(cx, y))
         }
         Text(
-            if (playing || time > 0) "${mmss(time)} / ${mmss(total)}" else mmss(total),
+            if (playing || time > 0) t("media.progress", "time" to mmss(time), "total" to mmss(total)) else mmss(total),
             style = MaterialTheme.typography.labelMedium.copy(fontSize = 12.sp, fontWeight = FontWeight.SemiBold, fontFeatureSettings = "tnum"),
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )

@@ -63,6 +63,9 @@ import com.delulutopia.core.designsystem.component.LocalServerBaseUrl
 import com.delulutopia.core.designsystem.component.resolveMedia
 import com.delulutopia.core.designsystem.theme.DlTheme
 import com.delulutopia.core.designsystem.theme.NoteColor
+import com.delulutopia.core.i18n.I18n
+import com.delulutopia.core.i18n.t
+import com.delulutopia.core.i18n.tn
 import com.delulutopia.core.network.model.Citizen
 import com.delulutopia.core.network.model.DComment
 import com.delulutopia.core.network.model.DFull
@@ -98,12 +101,12 @@ fun DiscussionScreen(id: Long) {
     val nav = LocalAppNav.current
     val home by vm.home.collectAsStateWithLifecycle()
     Column(Modifier.fillMaxSize().imePadding()) {
-        DlTopAppBar(title = "Discussion", onBack = { nav.back() }, backDescription = "Back to Discussions")
+        DlTopAppBar(title = t("discussions.discussion"), onBack = { nav.back() }, backDescription = t("discussions.backToDiscussions"))
         when (val ui = vm.ui) {
             DiscussionViewModel.Ui.Loading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
-            is DiscussionViewModel.Ui.NotArrived -> Gone("Arrives at ${Time.clock(ui.arrivesAt)}")
-            DiscussionViewModel.Ui.Gone -> Gone("This discussion isn't here anymore.")
-            DiscussionViewModel.Ui.Unreachable -> Gone("Can't reach ${LocalBrand.current}. Try again.")
+            is DiscussionViewModel.Ui.NotArrived -> Gone(t("discussions.arrivesAt", "time" to Time.clock(ui.arrivesAt)))
+            DiscussionViewModel.Ui.Gone -> Gone(t("discussions.thisDiscussionIsntHereAnymore"))
+            DiscussionViewModel.Ui.Unreachable -> Gone(t("discussions.cantReachTryAgain", "brand" to LocalBrand.current))
             is DiscussionViewModel.Ui.Shown -> Thread(ui.d, home.home?.me, home.home?.friend, vm)
         }
     }
@@ -118,7 +121,7 @@ private fun Gone(text: String) {
         verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
     ) {
         Text(text, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        DlOutlinedButton("Back", { nav.back() })
+        DlOutlinedButton(t("discussions.back"), { nav.back() })
     }
 }
 
@@ -146,7 +149,7 @@ private fun Thread(d: DFull, me: Citizen?, friend: Citizen?, vm: DiscussionViewM
     var busy by remember { mutableStateOf(false) }
     val archivedBy = when (d.archivedBy) {
         me?.id -> "you"
-        friend?.id -> friend?.nickname ?: "your friend"
+        friend?.id -> friend?.nickname ?: t("settings.yourFriend")
         else -> ""
     }
 
@@ -157,15 +160,21 @@ private fun Thread(d: DFull, me: Citizen?, friend: Citizen?, vm: DiscussionViewM
             Column(Modifier.fillMaxWidth().heightIn(min = viewport)) {
                 if (inReach) {
                     ReachBar(
-                        "${Time.countdown((Time.ms(d.windowEndsAt) ?: 0) - nowMs)} left to take it back",
+                        t("discussions.leftToTakeBack", "countdown" to Time.countdown((Time.ms(d.windowEndsAt) ?: 0) - nowMs)),
                         Modifier.padding(start = 16.dp, end = 16.dp, bottom = 10.dp),
                     ) {
-                        ReachButton("Cancel", padded = true) { askTakeBack = true }
+                        ReachButton(t("discussions.cancel"), padded = true) { askTakeBack = true }
                     }
                 }
                 if (archived) {
-                    Bar("Archived${if (archivedBy.isNotEmpty()) " by $archivedBy" else ""} · ${Time.day(d.archivedAt)}") {
-                        if (d.canUnarchive) ReachButton("Unarchive", padded = true) { scope.launch { notice(vm.unarchive()) } }
+                    val day = Time.day(d.archivedAt)
+                    val line = when (d.archivedBy) {
+                        me?.id -> t("discussions.archivedByYou", "day" to day)
+                        friend?.id -> t("discussions.archivedByFriend", "friend" to archivedBy, "day" to day)
+                        else -> t("discussions.archivedOn", "day" to day)
+                    }
+                    Bar(line) {
+                        if (d.canUnarchive) ReachButton(t("discussions.unarchive"), padded = true) { scope.launch { notice(vm.unarchive()) } }
                     }
                 }
                 val rule = if (DlTheme.isDark) Color(0x1FECE4D6) else Color(0x1F33323B)
@@ -211,14 +220,19 @@ private fun Thread(d: DFull, me: Citizen?, friend: Citizen?, vm: DiscussionViewM
                                 )
                                 Row {
                                     Text(
-                                        "Posted ${Time.clock(d.postedAt, nowMs)} · ${if (arrived) "Arrived" else "Arrives"} ${Time.clock(d.arrivesAt, nowMs)}",
+                                        t(
+                                            if (arrived) "discussions.timesArrived" else "discussions.timesArrives",
+                                            "posted" to Time.clock(d.postedAt, nowMs),
+                                            "arrived" to Time.clock(d.arrivesAt, nowMs),
+                                            "arrives" to Time.clock(d.arrivesAt, nowMs),
+                                        ),
                                         style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp),
                                         color = noteInkQuiet,
                                     )
                                     if (d.editedAt != null) {
-                                        val label = "Edited ${Time.clock(d.editedAt, nowMs)}"
+                                        val label = t("discussions.editedAt", "time" to Time.clock(d.editedAt, nowMs))
                                         Text(
-                                            " · ${if (showEditedAt) label else "Edited"}",
+                                            " · ${if (showEditedAt) label else t("discussions.edited")}",
                                             Modifier.clickable { showEditedAt = !showEditedAt }.semantics { contentDescription = label },
                                             style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp),
                                             color = noteInkQuiet,
@@ -247,7 +261,7 @@ private fun Thread(d: DFull, me: Citizen?, friend: Citizen?, vm: DiscussionViewM
                                         photos.forEachIndexed { i, p ->
                                             AsyncImage(
                                                 model = resolveMedia(base, p.thumbUrl ?: p.url),
-                                                contentDescription = "Photo ${i + 1} of ${photos.size}, open full size",
+                                                contentDescription = t("discussions.photoOfOpenFullSize", "n" to i + 1, "count" to photos.size),
                                                 modifier = Modifier.size(64.dp).clip(RoundedCornerShape(8.dp)).clickable { photo = i },
                                                 contentScale = ContentScale.Crop,
                                             )
@@ -255,11 +269,25 @@ private fun Thread(d: DFull, me: Citizen?, friend: Citizen?, vm: DiscussionViewM
                                     }
                                 }
                                 audios.forEachIndexed { i, a ->
-                                    AudioPlayer(resolveMedia(base, a.url), a.durationMs, label = if (audios.size > 1) "voice note ${i + 1}" else "voice note")
+                                    AudioPlayer(
+                                        resolveMedia(base, a.url),
+                                        a.durationMs,
+                                        label = if (audios.size >
+                                            1
+                                        ) {
+                                            t("letters.voiceNoteN", "n" to i + 1)
+                                        } else {
+                                            t("reactions.item.voiceNote")
+                                        },
+                                    )
                                 }
                                 if (!arrived) {
                                     Text(
-                                        "Arrives for ${friend?.nickname ?: "your friend"} in ${Time.countdown((Time.ms(d.arrivesAt) ?: 0) - nowMs)}",
+                                        t(
+                                            "discussions.arrivesForIn",
+                                            "friend" to (friend?.nickname ?: t("settings.yourFriend")),
+                                            "countdown" to Time.countdown((Time.ms(d.arrivesAt) ?: 0) - nowMs),
+                                        ),
                                         style = MaterialTheme.typography.labelMedium.copy(
                                             fontSize = 13.sp,
                                             fontWeight = FontWeight.SemiBold,
@@ -286,10 +314,10 @@ private fun Thread(d: DFull, me: Citizen?, friend: Citizen?, vm: DiscussionViewM
                     }
                     Box(Modifier.align(Alignment.TopEnd).padding(top = 8.dp, end = 8.dp)) {
                         val items = buildList {
-                            if (d.canEdit) add("Edit")
-                            if (d.canArchive) add("Archive")
-                            if (d.canUnarchive) add("Unarchive")
-                            if (d.canDelete) add("Delete")
+                            if (d.canEdit) add(t("discussions.edit"))
+                            if (d.canArchive) add(t("discussions.archive"))
+                            if (d.canUnarchive) add(t("discussions.unarchive"))
+                            if (d.canDelete) add(t("discussions.delete"))
                         }
                         if (items.isNotEmpty()) {
                             Box {
@@ -300,7 +328,7 @@ private fun Thread(d: DFull, me: Citizen?, friend: Citizen?, vm: DiscussionViewM
                                         .clip(RoundedCornerShape(8.dp))
                                         .background(if (menu) noteInk.copy(alpha = 0.08f) else Color.Transparent)
                                         .clickable { menu = true }
-                                        .semantics { contentDescription = "Discussion options" },
+                                        .semantics { contentDescription = t("discussions.discussionOptions") },
                                     contentAlignment = Alignment.Center,
                                 ) {
                                     Text("⋯", fontSize = 20.sp, color = if (menu) noteInk else noteInkQuiet)
@@ -312,7 +340,7 @@ private fun Thread(d: DFull, me: Citizen?, friend: Citizen?, vm: DiscussionViewM
                                                 Text(
                                                     label,
                                                     color = if (label ==
-                                                        "Delete"
+                                                        t("discussions.delete")
                                                     ) {
                                                         MaterialTheme.colorScheme.error
                                                     } else {
@@ -323,10 +351,10 @@ private fun Thread(d: DFull, me: Citizen?, friend: Citizen?, vm: DiscussionViewM
                                             onClick = {
                                                 menu = false
                                                 when (label) {
-                                                    "Edit" -> nav.open(EditDiscussionRoute(d.id))
-                                                    "Archive" -> scope.launch { notice(vm.archive()) }
-                                                    "Unarchive" -> scope.launch { notice(vm.unarchive()) }
-                                                    "Delete" -> askDelete = true
+                                                    t("discussions.edit") -> nav.open(EditDiscussionRoute(d.id))
+                                                    t("discussions.archive") -> scope.launch { notice(vm.archive()) }
+                                                    t("discussions.unarchive") -> scope.launch { notice(vm.unarchive()) }
+                                                    t("discussions.delete") -> askDelete = true
                                                 }
                                             },
                                         )
@@ -344,9 +372,9 @@ private fun Thread(d: DFull, me: Citizen?, friend: Citizen?, vm: DiscussionViewM
     if (photo >= 0 && photo < photos.size) Lightbox(photos, photo, { photo = it }, { photo = -1 })
     if (askTakeBack) {
         DlDialog(
-            title = "Take it back?",
-            text = "This deletes the discussion and every comment on it. It can't be undone.",
-            confirmLabel = "Yes, take it back",
+            title = t("discussions.takeItBack"),
+            text = t("discussions.thisDeletesTheDiscussionAnd"),
+            confirmLabel = t("discussions.yesTakeItBack"),
             onConfirm = {
                 busy = true
                 scope.launch {
@@ -356,16 +384,16 @@ private fun Thread(d: DFull, me: Citizen?, friend: Citizen?, vm: DiscussionViewM
                     if (failed == null) nav.back() else notice(failed)
                 }
             },
-            dismissLabel = "No",
+            dismissLabel = t("discussions.no"),
             onDismiss = { askTakeBack = false },
             busy = busy,
         )
     }
     if (askDelete) {
         DlDialog(
-            title = "Delete this discussion?",
-            text = "It disappears for both of you, with every comment and reaction. It can't be undone.",
-            confirmLabel = "Yes, delete",
+            title = t("discussions.deleteThisDiscussion"),
+            text = t("discussions.itDisappearsForBothOf2"),
+            confirmLabel = t("discussions.yesDelete"),
             onConfirm = {
                 busy = true
                 scope.launch {
@@ -375,16 +403,16 @@ private fun Thread(d: DFull, me: Citizen?, friend: Citizen?, vm: DiscussionViewM
                     if (failed == null) nav.back() else notice(failed)
                 }
             },
-            dismissLabel = "No",
+            dismissLabel = t("discussions.no"),
             onDismiss = { askDelete = false },
             busy = busy,
         )
     }
     deletingComment?.let { c ->
         DlDialog(
-            title = "Delete this comment?",
-            text = "It disappears for both of you, with its reactions. It can't be undone.",
-            confirmLabel = "Yes, delete",
+            title = t("discussions.deleteThisComment"),
+            text = t("discussions.itDisappearsForBothOf"),
+            confirmLabel = t("discussions.yesDelete"),
             onConfirm = {
                 busy = true
                 scope.launch {
@@ -393,7 +421,7 @@ private fun Thread(d: DFull, me: Citizen?, friend: Citizen?, vm: DiscussionViewM
                     deletingComment = null
                 }
             },
-            dismissLabel = "No",
+            dismissLabel = t("discussions.no"),
             onDismiss = { deletingComment = null },
             busy = busy,
         )
@@ -440,19 +468,19 @@ private fun Comments(d: DFull, me: Citizen?, friend: Citizen?, readOnly: Boolean
     // web .dl-comments: 12/16/16 margins, 10 dp between; the heading is a quiet 11 px label.
     Column(Modifier.padding(start = 16.dp, end = 16.dp, top = 36.dp, bottom = 16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Text(
-            when (count) {
-                0 -> "No comments yet"
-                1 -> "1 comment"
-                else -> "$count comments"
-            }.uppercase(),
+            (if (count == 0) t("discussions.noCommentsYet") else tn("discussions.comments", count)).uppercase(I18n.lang.locale),
             style = MaterialTheme.typography.labelSmall.copy(fontSize = 11.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.08.em),
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         if (cursor != null) {
-            DlOutlinedButton(if (vm.loadingOlder) "Loading older comments…" else "See older comments", vm::seeOlder, enabled = !vm.loadingOlder)
+            DlOutlinedButton(
+                if (vm.loadingOlder) t("discussions.loadingOlderComments") else t("discussions.seeOlderComments"),
+                vm::seeOlder,
+                enabled = !vm.loadingOlder,
+            )
         } else if (items.size > 5) {
             Text(
-                "That is everything",
+                t("discussions.thatIsEverything"),
                 Modifier.fillMaxWidth(),
                 style = MaterialTheme.typography.bodySmall.copy(fontSize = 13.sp),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -461,7 +489,7 @@ private fun Comments(d: DFull, me: Citizen?, friend: Citizen?, readOnly: Boolean
         }
         if (vm.olderFailed) {
             Text(
-                "Couldn't load older comments. Try again.",
+                t("discussions.couldntLoadOlderCommentsTry"),
                 color = MaterialTheme.colorScheme.error,
                 style = MaterialTheme.typography.bodySmall,
             )
@@ -478,7 +506,7 @@ private fun Comments(d: DFull, me: Citizen?, friend: Citizen?, readOnly: Boolean
         }
         if (readOnly) {
             Text(
-                "Archived. Unarchive it to comment.",
+                t("discussions.archivedUnarchiveItToComment"),
                 Modifier.fillMaxWidth().padding(top = 8.dp).padding(12.dp),
                 style = MaterialTheme.typography.bodyMedium.copy(fontSize = 14.sp),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -488,11 +516,11 @@ private fun Comments(d: DFull, me: Citizen?, friend: Citizen?, readOnly: Boolean
             var text by rememberSaveable { mutableStateOf("") }
             var busy by remember { mutableStateOf(false) }
             var error by remember { mutableStateOf<String?>(null) }
-            Field(text, { text = it }, "Write a comment", enabled = !busy, modifier = Modifier.padding(top = 4.dp))
+            Field(text, { text = it }, t("discussions.writeAComment"), enabled = !busy, modifier = Modifier.padding(top = 4.dp))
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.End), verticalAlignment = Alignment.CenterVertically) {
                 error?.let { Text(it, Modifier.weight(1f), color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall) }
                 DlFilledButton(
-                    if (busy) "Posting…" else "Post",
+                    if (busy) t("common.posting") else t("discussions.post"),
                     {
                         busy = true
                         error = null
@@ -552,9 +580,9 @@ private fun CommentItem(
                     )
                     Text(Time.clock(c.createdAt, nowMs), style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp), color = noteInkQuiet)
                     if (c.editedAt != null) {
-                        val label = "Edited ${Time.clock(c.editedAt, nowMs)}"
+                        val label = t("discussions.editedAt", "time" to Time.clock(c.editedAt, nowMs))
                         Text(
-                            if (showEditedAt) "(edited ${Time.clock(c.editedAt, nowMs)})" else "(edited)",
+                            if (showEditedAt) t("discussions.commentEditedAt", "time" to Time.clock(c.editedAt, nowMs)) else t("discussions.commentEdited"),
                             Modifier.clickable { showEditedAt = !showEditedAt }.semantics { contentDescription = label },
                             style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp),
                             color = noteInkQuiet,
@@ -567,17 +595,17 @@ private fun CommentItem(
                                 "⋯",
                                 Modifier.clip(RoundedCornerShape(16.dp)).clickable { menu = true }.padding(horizontal = 10.dp).semantics {
                                     contentDescription =
-                                        "Comment options"
+                                        t("discussions.commentOptions")
                                 },
                                 fontSize = 18.sp,
                                 color = noteInk,
                             )
                             DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
-                                DropdownMenuItem(text = { Text("Edit") }, onClick = {
+                                DropdownMenuItem(text = { Text(t("discussions.edit")) }, onClick = {
                                     menu = false
                                     editing = true
                                 })
-                                DropdownMenuItem(text = { Text("Delete", color = MaterialTheme.colorScheme.error) }, onClick = {
+                                DropdownMenuItem(text = { Text(t("discussions.delete"), color = MaterialTheme.colorScheme.error) }, onClick = {
                                     menu = false
                                     onDelete(c)
                                 })
@@ -589,16 +617,16 @@ private fun CommentItem(
                     var text by remember { mutableStateOf(c.text) }
                     var busy by remember { mutableStateOf(false) }
                     var error by remember { mutableStateOf<String?>(null) }
-                    Field(text, { text = it }, "Edit comment", enabled = !busy)
+                    Field(text, { text = it }, t("discussions.editComment"), enabled = !busy)
                     Row(
                         Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         error?.let { Text(it, Modifier.weight(1f), color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall) }
-                        DlOutlinedButton("Cancel", { editing = false }, enabled = !busy)
+                        DlOutlinedButton(t("discussions.cancel"), { editing = false }, enabled = !busy)
                         DlFilledButton(
-                            if (busy) "Saving…" else "Save",
+                            if (busy) t("common.saving") else t("discussions.save"),
                             {
                                 busy = true
                                 error = null

@@ -54,6 +54,8 @@ import com.delulutopia.core.designsystem.component.DlTopAppBar
 import com.delulutopia.core.designsystem.component.Zones
 import com.delulutopia.core.designsystem.icon.DlIcons
 import com.delulutopia.core.designsystem.icon.WebIcons
+import com.delulutopia.core.i18n.I18n
+import com.delulutopia.core.i18n.t
 import com.delulutopia.core.ui.LocalAppNav
 import com.delulutopia.core.ui.LocalNotice
 import com.delulutopia.core.ui.ageWords
@@ -74,13 +76,13 @@ fun ProfileScreen(vm: ProfileViewModel = hiltViewModel()) {
     val nav = LocalAppNav.current
     val notice = LocalNotice.current
     val homeState by vm.homeState.collectAsStateWithLifecycle()
-    val friend = homeState.home?.friend?.nickname ?: "your friend"
+    val friend = homeState.home?.friend?.nickname ?: t("settings.yourFriend")
     val nowMs = rememberNow(30_000)
     var source by remember { mutableStateOf(false) }
     var confirmRemove by remember { mutableStateOf(false) }
     var zonePicker by remember { mutableStateOf(false) }
     Column(Modifier.fillMaxSize().imePadding()) {
-        DlTopAppBar(title = "Profile", onBack = { nav.back() })
+        DlTopAppBar(title = t("profile.profile"), onBack = { nav.back() })
         val profile = vm.profile
         if (profile == null) {
             LoadOrFail(vm.failed)
@@ -104,7 +106,7 @@ fun ProfileScreen(vm: ProfileViewModel = hiltViewModel()) {
                 Box(contentAlignment = Alignment.Center) {
                     DlRemoteAvatar(
                         profile.avatarUrl,
-                        "Your photo",
+                        t("universe.yourPhoto"),
                         tintOf(profile.id),
                         Modifier.alpha(if (vm.photoBusy) 0.5f else 1f),
                         size = 96.dp,
@@ -114,27 +116,31 @@ fun ProfileScreen(vm: ProfileViewModel = hiltViewModel()) {
                     if (vm.photoBusy) CircularProgressIndicator(Modifier.size(32.dp))
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
-                    DlGhostButton("Change photo", { source = true }, icon = WebIcons.Camera, enabled = !vm.photoBusy)
+                    DlGhostButton(t("profile.changePhoto"), { source = true }, icon = WebIcons.Camera, enabled = !vm.photoBusy)
                     if (profile.avatarUrl != null) {
-                        DlTextButton("Remove", { confirmRemove = true }, destructive = true, enabled = !vm.photoBusy, icon = WebIcons.Trash)
+                        DlTextButton(t("profile.remove"), { confirmRemove = true }, destructive = true, enabled = !vm.photoBusy, icon = WebIcons.Trash)
                     }
                 }
             }
             DlTextField(
                 value = form.username,
                 onValueChange = { vm.set("username", it.filterNot(Char::isWhitespace)) },
-                label = "Username",
-                supportingText = "3–16 letters or digits, no spaces",
+                label = t("profile.username"),
+                supportingText = t("profile.316LettersOrDigits"),
                 errorText = errors["username"],
                 maxLength = 32,
                 keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.None, autoCorrectEnabled = false),
             )
-            DlTextField(value = form.firstName, onValueChange = { vm.set("firstName", it) }, label = "Name", errorText = errors["firstName"], maxLength = 60)
-            DlTextField(value = form.lastName, onValueChange = { vm.set("lastName", it) }, label = "Surname", errorText = errors["lastName"], maxLength = 60)
+            DlTextField(value = form.firstName, onValueChange = {
+                vm.set("firstName", it)
+            }, label = t("settings.name"), errorText = errors["firstName"], maxLength = 60)
+            DlTextField(value = form.lastName, onValueChange = {
+                vm.set("lastName", it)
+            }, label = t("profile.surname"), errorText = errors["lastName"], maxLength = 60)
             // web .dl-field with .dl-field-picker: label above, a 48 dp box; the time in the seal.
             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 Text(
-                    "TIME ZONE",
+                    t("profile.timeZone").uppercase(I18n.lang.locale),
                     style = MaterialTheme.typography.labelSmall.copy(
                         fontSize = 12.sp,
                         lineHeight = 16.sp,
@@ -176,7 +182,7 @@ fun ProfileScreen(vm: ProfileViewModel = hiltViewModel()) {
                 errors["timezone"]?.let { Text(it, style = MaterialTheme.typography.bodySmall.copy(fontSize = 13.sp), color = MaterialTheme.colorScheme.error) }
             }
             Text(
-                "Your username is what $friend sees everywhere. Name and surname show only on your profiles. Your time zone sets your clock on Home.",
+                t("profile.yourUsernameIsWhatSees", "friend" to friend),
                 Modifier.padding(horizontal = 4.dp),
                 style = MaterialTheme.typography.bodySmall.copy(fontSize = 13.sp, lineHeight = 19.sp),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -184,21 +190,21 @@ fun ProfileScreen(vm: ProfileViewModel = hiltViewModel()) {
         }
         // web .dl-sub-foot: 8/20/12 around a full-width Save.
         DlFilledButton(
-            if (vm.busy) "Saving…" else "Save",
+            if (vm.busy) t("common.saving") else t("common.save"),
             { vm.save { it?.let(notice) } },
             Modifier.fillMaxWidth().padding(start = 20.dp, end = 20.dp, top = 8.dp, bottom = 12.dp),
             enabled = canSave,
         )
         if (confirmRemove) {
             DlDialog(
-                title = "Remove your photo?",
-                text = "Your initials show instead, for you and for $friend.",
-                confirmLabel = "Remove",
+                title = t("profile.removeYourPhoto"),
+                text = t("profile.yourInitialsShowInsteadFor", "friend" to friend),
+                confirmLabel = t("profile.remove"),
                 onConfirm = {
                     confirmRemove = false
                     vm.remove(notice)
                 },
-                dismissLabel = "Keep it",
+                dismissLabel = t("profile.keepIt"),
                 onDismiss = { confirmRemove = false },
                 destructive = true,
             )
@@ -214,7 +220,7 @@ fun ProfileScreen(vm: ProfileViewModel = hiltViewModel()) {
         sheet = source,
         onDismissSheet = { source = false },
         onPhoto = { vm.upload(it, notice) },
-        onTooBig = { notice("This photo is larger than 10 MB") },
+        onTooBig = { notice(t("profile.photoTooLarge")) },
     )
 }
 
@@ -238,16 +244,31 @@ fun FriendScreen(vm: YouViewModel = hiltViewModel()) {
             DlRemoteAvatar(friend.avatarUrl, friend.nickname, tintOf(friend.id), size = 96.dp, initials = friend.initials(), ring = signatureOf(friend.id))
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(friend.nickname, fontSize = 20.sp, fontWeight = FontWeight.Bold)
-                Text(fullName.ifEmpty { "No name added" }, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(
+                    fullName.ifEmpty {
+                        t("profile.noNameAdded")
+                    },
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
             }
             Column(
                 Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surfaceContainerHigh, RoundedCornerShape(16.dp)).padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 friend.timezone?.let { tz ->
-                    Fact("Local time", "${Zones.option(tz, nowMs).time} · ${Zones.cityOf(tz)}")
+                    Fact(t("profile.localTime"), t("profile.moodSince", "mood" to Zones.option(tz, nowMs).time, "age" to Zones.cityOf(tz)))
                 }
-                Fact("Mood", if (mood != null) "$mood · ${ageWords(friend.moodSetAt, nowMs)}" else "No mood yet")
+                Fact(
+                    t("profile.mood"),
+                    if (mood !=
+                        null
+                    ) {
+                        t("profile.moodSince", "mood" to mood, "age" to ageWords(friend.moodSetAt, nowMs))
+                    } else {
+                        t("profile.noMoodYet")
+                    },
+                )
             }
         }
     }

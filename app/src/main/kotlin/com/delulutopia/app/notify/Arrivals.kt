@@ -10,6 +10,7 @@ import androidx.core.app.NotificationManagerCompat
 import com.delulutopia.app.MainActivity
 import com.delulutopia.app.R
 import com.delulutopia.core.data.Time
+import com.delulutopia.core.i18n.t
 import com.delulutopia.core.network.model.Home
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
@@ -50,13 +51,17 @@ class Arrivals @Inject constructor(@ApplicationContext private val context: Cont
             val seen = done(LETTERS)
             val rows = home.from.filter { it.state == "DELIVERED" && it.id.toString() !in seen && (Time.ms(it.arrivesAt) ?: 0) >= since }
             remember(LETTERS, rows.map { it.id })
-            rows.forEach { post(manager, "letter-${it.id}", LETTERS, "A letter from $friend has arrived", "Tap to read", "/letters/${it.id}") }
+            rows.forEach {
+                post(manager, "letter-${it.id}", LETTERS, t("notify.inTab.letter", "name" to friend), t("notify.inTab.tapToRead"), "/letters/${it.id}")
+            }
         }
         if (on("discussion.arrived")) {
             val seen = done(DISCUSSIONS)
             val rows = home.newDiscussions.filter { it.id.toString() !in seen && (Time.ms(it.arrivesAt) ?: 0) >= since }
             remember(DISCUSSIONS, rows.map { it.id })
-            rows.forEach { post(manager, "discussion-${it.id}", DISCUSSIONS, "A discussion from $friend", it.title, "/discussions/${it.id}") }
+            rows.forEach {
+                post(manager, "discussion-${it.id}", DISCUSSIONS, t("notify.inTab.discussion", "name" to friend), it.title, "/discussions/${it.id}")
+            }
         }
         if (on("email.new")) {
             val seen = done(EMAILS)
@@ -64,7 +69,16 @@ class Arrivals @Inject constructor(@ApplicationContext private val context: Cont
             remember(EMAILS, rows.map { it.id })
             rows.distinctBy {
                 it.threadId
-            }.forEach { post(manager, "email-thread-${it.threadId}", EMAILS, "An email from $friend", "Tap to read", "/emails/${it.threadId}") }
+            }.forEach {
+                post(
+                    manager,
+                    "email-thread-${it.threadId}",
+                    EMAILS,
+                    t("notify.inTab.email", "name" to friend),
+                    t("notify.inTab.tapToRead"),
+                    "/emails/${it.threadId}",
+                )
+            }
         }
     }
 

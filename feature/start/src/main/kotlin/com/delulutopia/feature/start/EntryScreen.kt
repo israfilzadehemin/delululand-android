@@ -38,6 +38,7 @@ import com.delulutopia.core.designsystem.component.DlFilledButton
 import com.delulutopia.core.designsystem.component.DlTextField
 import com.delulutopia.core.designsystem.motion.Enter
 import com.delulutopia.core.designsystem.motion.enter
+import com.delulutopia.core.i18n.t
 
 @Composable
 fun EntryRoute(
@@ -104,15 +105,15 @@ private fun Landing(state: EntryViewModel.Content.Landing, onKeyChange: (String)
             verticalArrangement = Arrangement.spacedBy(6.dp),
         ) {
             Text(brand, fontSize = 24.sp, fontWeight = FontWeight.ExtraBold)
-            Text(stringResource(R.string.landing_line), fontSize = 15.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(t("entry.enterYourUniversesKey"), fontSize = 15.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
         DlTextField(
             value = state.key,
             onValueChange = onKeyChange,
-            label = stringResource(R.string.key_label),
+            label = t("entry.key"),
             errorText = when {
-                state.wrong -> stringResource(R.string.key_wrong)
-                state.offline -> stringResource(R.string.cant_reach, brand)
+                state.wrong -> t("entry.wrongKey")
+                state.offline -> t("common.cantReachTryAgain", "brand" to brand)
                 else -> null
             },
             centeredMono = true,
@@ -125,7 +126,7 @@ private fun Landing(state: EntryViewModel.Content.Landing, onKeyChange: (String)
             keyboardActions = KeyboardActions(onGo = { onSubmit() }),
         )
         DlFilledButton(
-            stringResource(R.string.enter),
+            t("entry.enter"),
             onSubmit,
             Modifier.fillMaxWidth(),
             enabled = !state.busy && state.key.isNotBlank(),
@@ -133,9 +134,10 @@ private fun Landing(state: EntryViewModel.Content.Landing, onKeyChange: (String)
         )
         Spacer(Modifier.weight(1f))
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
-            Text(stringResource(R.string.have_invite), fontSize = 14.sp)
-            TextButton(onClick = onCreate) { StrongLink(stringResource(R.string.create_universe_link)) }
+            Text(t("entry.haveAnInviteQ"), fontSize = 14.sp)
+            TextButton(onClick = onCreate) { StrongLink(t("entry.createAUniverse")) }
         }
+        LangSwitch()
     }
 }
 
@@ -155,8 +157,9 @@ private fun Cards(state: EntryViewModel.Content.Cards, onOpenPin: (Int) -> Unit,
         if (state.view.canJoin) Box(Modifier.enter(Enter.Rise, 120 + 80 * state.view.users.size, 380)) { JoinCardRow(state.view.name, onJoin) }
         Spacer(Modifier.weight(1f))
         TextButton(onClick = onForget, modifier = Modifier.align(Alignment.CenterHorizontally)) {
-            StrongLink(stringResource(R.string.use_different_key))
+            StrongLink(t("entry.useADifferentKey"))
         }
+        LangSwitch()
     }
 }
 
@@ -169,11 +172,11 @@ private fun Unreachable(onRetry: () -> Unit) {
     ) {
         Text(stringResource(R.string.brand), fontSize = 24.sp, fontWeight = FontWeight.ExtraBold)
         Text(
-            stringResource(R.string.cant_reach, stringResource(R.string.brand)),
+            t("common.cantReachTryAgain", "brand" to stringResource(R.string.brand)),
             color = MaterialTheme.colorScheme.error,
             textAlign = TextAlign.Center,
         )
-        DlFilledButton(stringResource(R.string.try_again), onRetry)
+        DlFilledButton(t("entry.tryAgain"), onRetry)
     }
 }
 

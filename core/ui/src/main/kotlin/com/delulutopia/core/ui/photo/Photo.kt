@@ -28,6 +28,7 @@ import com.delulutopia.core.designsystem.component.DlBottomSheet
 import com.delulutopia.core.designsystem.component.DlListItem
 import com.delulutopia.core.designsystem.component.DlTextButton
 import com.delulutopia.core.designsystem.icon.WebIcons
+import com.delulutopia.core.i18n.t
 import java.io.ByteArrayOutputStream
 import java.io.File
 import kotlin.math.max
@@ -66,21 +67,21 @@ fun rememberPhotoSource(onPicked: (Uri) -> Unit): PhotoSource {
 fun PhotoSourceSheet(source: PhotoSource, onDismiss: () -> Unit, onRemove: (() -> Unit)? = null) {
     DlBottomSheet(onDismissRequest = onDismiss) {
         Column(Modifier.fillMaxWidth().padding(bottom = 24.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            DlListItem(title = "Choose photo", icon = WebIcons.Photo, showChevron = false, onClick = {
+            DlListItem(title = t("profile.choosePhoto"), icon = WebIcons.Photo, showChevron = false, onClick = {
                 onDismiss()
                 source.choose()
             })
-            DlListItem(title = "Take photo", icon = WebIcons.Camera, showChevron = false, onClick = {
+            DlListItem(title = t("profile.takePhoto"), icon = WebIcons.Camera, showChevron = false, onClick = {
                 onDismiss()
                 source.take()
             })
             if (onRemove != null) {
-                DlListItem(title = "Remove photo", icon = WebIcons.Trash, showChevron = false, onClick = {
+                DlListItem(title = t("universe.removePhoto"), icon = WebIcons.Trash, showChevron = false, onClick = {
                     onDismiss()
                     onRemove()
                 })
             }
-            DlTextButton("Cancel", onDismiss, Modifier.fillMaxWidth())
+            DlTextButton(t("profile.cancel"), onDismiss, Modifier.fillMaxWidth())
         }
     }
 }

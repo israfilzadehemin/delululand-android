@@ -10,6 +10,7 @@ import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_STRONG
 import androidx.biometric.BiometricPrompt
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
+import com.delulutopia.core.i18n.t
 import java.security.KeyStore
 import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
@@ -73,7 +74,7 @@ object Fingerprint {
         }
         val info = BiometricPrompt.PromptInfo.Builder()
             .setTitle(title)
-            .setNegativeButtonText("Use PIN")
+            .setNegativeButtonText(t("pin.usePin"))
             .setAllowedAuthenticators(BIOMETRIC_STRONG)
             .build()
         BiometricPrompt(activity, ContextCompat.getMainExecutor(activity), callback).authenticate(info, BiometricPrompt.CryptoObject(cipher))
