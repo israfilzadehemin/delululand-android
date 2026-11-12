@@ -52,6 +52,9 @@ object E2E {
     const val B_ID = 2
     const val B_PIN = "246801"
 
+    /** The PIN the Change PIN case switches to and back from. */
+    const val A_PIN_2 = "975310"
+
     fun prepare() {
         assumeTrue("no e2e API (set -Pdl.e2e)", server != null)
         System.setProperty("dl.baseUrl", server!!)
@@ -65,7 +68,7 @@ object E2E {
 }
 
 /** User B, through the API as the web app would call it. */
-class Friend(private val base: String = E2E.server!!) {
+class Friend(private val base: String = E2E.server!!, private val id: Int = E2E.B_ID, private val pin: String = E2E.B_PIN) {
     private val cookies = CookieManager(null, CookiePolicy.ACCEPT_ALL)
     private val json = Json { ignoreUnknownKeys = true }
 
@@ -113,10 +116,10 @@ class Friend(private val base: String = E2E.server!!) {
     fun signIn(): Friend {
         ok(call("POST", "api/entry", """{"code":"${E2E.KEY}"}"""), "entry")
         val users = ok(call("GET", "api/universe/entry"), "cards").obj["users"]!!.jsonArray
-        val me = users.first { it.jsonObject["id"]!!.jsonPrimitive.int == E2E.B_ID }.jsonObject
+        val me = users.first { it.jsonObject["id"]!!.jsonPrimitive.int == id }.jsonObject
         val hasPin = me["hasPin"]!!.jsonPrimitive.content == "true"
         val path = if (hasPin) "api/auth/login" else "api/auth/pin"
-        ok(call("POST", path, """{"userId":${E2E.B_ID},"pin":"${E2E.B_PIN}"}"""), "pin")
+        ok(call("POST", path, """{"userId":$id,"pin":"$pin"}"""), "pin")
         return this
     }
 
@@ -326,6 +329,15 @@ class Ui(val test: ComposeUiTest, private val case: String) {
                 see("Confirm your PIN")
             }
             pin(E2E.A_PIN)
+            pass(1500)
+            // A Change PIN case that stopped half-way leaves the other PIN: put the usual one back.
+            if (sees("Wrong PIN")) {
+                pin(E2E.A_PIN_2)
+                runCatching {
+                    Friend(id = E2E.A_ID, pin = E2E.A_PIN_2).signIn()
+                        .call("POST", "api/me/pin", """{"currentPin":"${E2E.A_PIN_2}","newPin":"${E2E.A_PIN}"}""")
+                }
+            }
             home()
         }
     }

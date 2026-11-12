@@ -35,14 +35,19 @@ private val STEPS = listOf("Current PIN", "New PIN", "Confirm new PIN")
 @Composable
 fun ChangePinSheet(onClose: () -> Unit, onChanged: (String) -> Unit, vm: ChangePinViewModel = hiltViewModel()) {
     val brand = LocalBrand.current
-    LaunchedEffect(Unit) { vm.reset() }
+    // The view model outlives the sheet (it belongs to the You screen): a second opening must not
+    // flash the last one's "PIN changed" or its digits, so the sheet resets when it closes.
+    val close = {
+        onClose()
+        vm.reset()
+    }
     LaunchedEffect(vm.changed) {
         if (vm.changed) {
             delay(1_200)
-            onClose()
+            close()
         }
     }
-    DlBottomSheet(onDismissRequest = { if (!vm.busy) onClose() }) {
+    DlBottomSheet(onDismissRequest = { if (!vm.busy) close() }) {
         Column(Modifier.fillMaxWidth().padding(horizontal = 24.dp).padding(bottom = 24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Text("Change PIN", style = MaterialTheme.typography.titleLarge)
             if (vm.changed) {

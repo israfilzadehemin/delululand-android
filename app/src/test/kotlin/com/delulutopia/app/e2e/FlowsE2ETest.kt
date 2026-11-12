@@ -74,26 +74,31 @@ class FlowsE2ETest {
 
     @Test fun moods() = case("moods") {
         step("set a mood") {
-            tap("Happy")
-            pass(1500)
-            // The chosen mood shows as mine on Home.
-            see("Happy")
+            until(20_000, "the mood pill") { sees("Set your mood") || sees(" · set ") }
+            tap(if (sees("Set your mood")) "Set your mood" else " · set ")
+            see("How do you feel?")
+            tap("Happy", exact = true)
+            gone("How do you feel?")
+            see("Happy · set")
         }
-        step("custom mood: add") {
-            tapLabel("More moods")
-            see("How do you feel")
-            tap("New mood")
-            type("Label", "Testing")
-            tap("Save", exact = true)
+        step("custom mood: the friend's shows up") {
+            // The emoji picker is a platform View; the new mood comes from user B, the form is tested on edit.
+            Friend().signIn().call("POST", "api/moods", """{"emoji":"🧪","label":"Testing"}""").also {
+                check(it.status in 200..299) { "add mood: ${it.status} ${it.body}" }
+            }
+            pass(2000)
+            tap("Happy · set")
+            see("How do you feel?")
+            repeat(8) { if (!sees("Testing")) tapLabel("More moods") }
             see("Testing")
         }
         step("custom mood: edit and delete") {
-            tapLabel("Edit mood")
+            tapLabel("Edit Testing")
             type("Label", "Tested", replace = true)
             tap("Save", exact = true)
             see("Tested")
-            tapLabel("Edit mood")
-            tap("Delete")
+            tapLabel("Edit Tested")
+            tap("Delete mood")
             tap("Yes, delete")
             gone("Tested")
         }
@@ -103,8 +108,8 @@ class FlowsE2ETest {
         val friend = Friend().signIn()
         step("write and send") {
             tab("Letters")
-            until(20_000, "the letter button") { seesLabel("Write a letter") || seesLabel("Continue your letter") }
-            tapLabel(if (seesLabel("Write a letter")) "Write a letter" else "Continue your letter")
+            until(20_000, "the letter button") { sees("Write a letter") || sees("Continue your draft") }
+            tap(if (sees("Continue your draft")) "Continue your draft" else "Write a letter")
             seeLabel("Letter text")
             type("Letter text", "E2E letter one")
             tap("Send", exact = true)
@@ -155,8 +160,8 @@ class FlowsE2ETest {
         val friend = Friend().signIn()
         step("compose and post") {
             tab("Discussions")
-            until(20_000, "the discussion button") { seesLabel("Start a discussion") || seesLabel("Continue your discussion draft") }
-            tapLabel(if (seesLabel("Start a discussion")) "Start a discussion" else "Continue your discussion draft")
+            until(20_000, "the discussion button") { sees("Start a discussion") || sees("Continue your discussion draft") }
+            tap(if (sees("Start a discussion")) "Start a discussion" else "Continue your discussion draft")
             type("Title", "E2E topic", replace = true)
             type("Discussion text", "What do we think?")
             tap("Post", exact = true)
@@ -226,8 +231,8 @@ class FlowsE2ETest {
         val friend = Friend().signIn()
         step("new email") {
             tab("Emails")
-            until(20_000, "the email button") { seesLabel("New email") || seesLabel("Continue your new email") }
-            tapLabel(if (seesLabel("New email")) "New email" else "Continue your new email")
+            until(20_000, "the email button") { sees("New email") || sees("Continue your new email") }
+            tap(if (sees("Continue your new email")) "Continue your new email" else "New email")
             type("Subject", "E2E subject", replace = true)
             type("Write an email", "Hello by email")
             tap("Send", exact = true)
@@ -287,14 +292,17 @@ class FlowsE2ETest {
         step("change PIN and back") {
             tap("Change PIN")
             pin(E2E.A_PIN)
-            pin("975310")
-            pin("975310")
+            pin(E2E.A_PIN_2)
+            pin(E2E.A_PIN_2)
             see("PIN changed", 30_000)
+            gone("PIN changed")
             tap("Change PIN")
-            pin("975310")
+            see("Current PIN")
+            pin(E2E.A_PIN_2)
             pin(E2E.A_PIN)
             pin(E2E.A_PIN)
             see("PIN changed", 30_000)
+            gone("PIN changed")
         }
         step("log out and in") {
             tap("Log out")
