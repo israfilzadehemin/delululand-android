@@ -60,14 +60,21 @@ private class VoiceRecorder(private val context: Context) {
 
         @Suppress("DEPRECATION")
         val r = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) MediaRecorder(context) else MediaRecorder()
-        r.setAudioSource(MediaRecorder.AudioSource.MIC)
-        r.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
-        r.setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
-        r.setAudioSamplingRate(44_100)
-        r.setAudioEncodingBitRate(96_000)
-        r.setOutputFile(out.absolutePath)
-        r.prepare()
-        r.start()
+        try {
+            r.setAudioSource(MediaRecorder.AudioSource.MIC)
+            r.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
+            r.setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
+            r.setAudioSamplingRate(44_100)
+            r.setAudioEncodingBitRate(96_000)
+            r.setOutputFile(out.absolutePath)
+            r.prepare()
+            r.start()
+        } catch (e: Exception) {
+            // A microphone held by another app (a call, a recorder): let it go again, keep nothing.
+            r.release()
+            out.delete()
+            throw e
+        }
         recorder = r
         file = out
         startedAt = SystemClock.elapsedRealtime()

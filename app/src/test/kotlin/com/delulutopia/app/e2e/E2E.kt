@@ -369,7 +369,8 @@ class Ui(val test: ComposeUiTest, private val case: String) {
 
     /** Home is up; the one-time fingerprint offer (X1) is declined if it shows. */
     fun home() {
-        until(30_000, "Home's content") { sees("Nothing in the post") || sees("Set your mood") || sees("FROM") || sees("No mood yet") }
+        // The tab bar (all four tabs) only exists once the session is in; Home's own content varies.
+        until(30_000, "Home's content") { sees("Letters", false) && sees("Discussions", false) && sees("Emails", false) && sees("Home", false) }
         pass(800)
         if (sees("Unlock with your fingerprint?")) tap("Not now")
     }
