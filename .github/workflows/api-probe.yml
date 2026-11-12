@@ -1,0 +1,15 @@
+name: api-probe
+on:
+  push:
+    branches: [p1/start-and-network]
+    paths: [.github/workflows/api-probe.yml]
+permissions:
+  contents: read
+  packages: read
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo "${{ github.token }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+          docker pull ghcr.io/israfilzadehemin/delululand-api:latest && echo PULL_OK || echo PULL_FAILED
