@@ -64,7 +64,7 @@ class UploaderTest {
         // Read in buffer-sized pieces (okio uses 8 KB segments), never the whole file at once.
         assertThat(input.biggestChunk).isAtMost(64 * 1024)
         val request = server.takeRequest()
-        assertThat(request.body!!.size).isGreaterThan(size.toLong())
+        assertThat(request.body!!.size).isGreaterThan(size)
         assertThat(progress.last()).isEqualTo(1f)
         assertThat(progress.dropLast(1).all { it < 1f }).isTrue()
     }
