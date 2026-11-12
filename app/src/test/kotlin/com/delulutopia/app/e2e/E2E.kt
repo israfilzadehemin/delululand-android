@@ -8,12 +8,10 @@ import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsMatcher
-import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
-import androidx.compose.ui.test.isDialog
 import androidx.compose.ui.test.isRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
@@ -255,18 +253,18 @@ class Ui(val test: ComposeUiTest, private val case: String) {
     fun tapLast(text: String, exact: Boolean = true) {
         val m = hasText(text, substring = !exact) and hasClickAction()
         until(20_000, "a tappable \"$text\"") { count(m) > 0 }
-        // A dialog's button first; else the lowest on screen (a sheet's, under the top bar's).
-        val inDialog = m and hasAnyAncestor(isDialog())
-        if (count(inDialog) > 0) {
-            test.onAllNodes(inDialog)[0].performClick()
-            pass(300)
-            trace("after tap dialog \"$text\"")
-            return
-        }
+        // The newest window's match: a dialog or sheet opens above the screen whose top bar
+        // repeats the same word ("Send", "Post", "Log out", "Enter").
+        val roots = test.onAllNodes(isRoot(), useUnmergedTree = true).fetchSemanticsNodes().map { it.id }
         val nodes = test.onAllNodes(m)
         val all = nodes.fetchSemanticsNodes()
-        val lowest = all.indices.maxBy { all[it].boundsInWindow.top }
-        nodes[lowest].performClick()
+        fun rootOf(n: SemanticsNode): Int {
+            var x = n
+            while (x.parent != null) x = x.parent!!
+            return roots.indexOf(x.id)
+        }
+        val pick = all.indices.maxWith(compareBy<Int> { rootOf(all[it]) }.thenBy { all[it].boundsInWindow.top })
+        nodes[pick].performClick()
         pass(300)
         trace("after tap last \"$text\"")
     }
