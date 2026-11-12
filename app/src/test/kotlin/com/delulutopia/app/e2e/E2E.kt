@@ -173,6 +173,28 @@ class Friend(private val base: String = E2E.server!!, private val id: Int = E2E.
 /** UI steps with strict checks: a missing text fails the case with what the screen showed instead. */
 @OptIn(ExperimentalTestApi::class)
 class Ui(val test: ComposeUiTest, private val case: String) {
+    @Volatile private var beat = System.currentTimeMillis()
+    private val worker = Thread.currentThread()
+
+    init {
+        // A watchdog: if the test thread makes no progress for a minute (a recomposition or
+        // network loop inside the app), print where it is stuck, so CI says why.
+        Thread {
+            var dumps = 0
+            while (worker.isAlive && dumps < 3) {
+                Thread.sleep(5_000)
+                if (System.currentTimeMillis() - beat > 60_000) {
+                    dumps++
+                    println("e2e $case !! no progress for 60 s; the test thread is at:")
+                    worker.stackTrace.take(60).forEach { println("e2e $case !!   at $it") }
+                    val rt = Runtime.getRuntime()
+                    println("e2e $case !! heap ${(rt.totalMemory() - rt.freeMemory()) shr 20} MB used")
+                    beat = System.currentTimeMillis()
+                }
+            }
+        }.apply { isDaemon = true }.start()
+    }
+
     private var shots = 0
 
     /** Lets real time pass for the app: the main looper's clock follows the wall clock. */
@@ -185,6 +207,7 @@ class Ui(val test: ComposeUiTest, private val case: String) {
             // Delays inside composition (effects, a sheet's coroutine) run on the test clock.
             runCatching { test.mainClock.advanceTimeBy(step) }
             left -= step
+            beat = System.currentTimeMillis()
         }
         runCatching { test.waitForIdle() }.onFailure {
             // An exception inside the app (a coroutine, a recomposition) surfaces here: show it.
