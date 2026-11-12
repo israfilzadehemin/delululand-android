@@ -82,6 +82,11 @@ class FlowsE2ETest {
             gone("How do you feel?")
             see("Happy · set")
         }
+        step("live: the friend's mood shows within seconds") {
+            // Home polls every 15 s without the stream; the stream brings it at once.
+            Friend().signIn().setMood("CALM")
+            see("Calm", 8_000)
+        }
         step("custom mood: the friend's shows up") {
             // The emoji picker is a platform View; the new mood comes from user B, the form is tested on edit.
             Friend().signIn().call("POST", "api/moods", """{"emoji":"🧪","label":"Testing"}""").also {
