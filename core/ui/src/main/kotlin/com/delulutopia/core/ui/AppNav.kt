@@ -13,7 +13,7 @@ interface AppNav {
 
     fun back()
 
-    /** Switch to a navigation-bar destination as the bar would (Home, Letters, …). */
+    /** Go to a navigation-bar destination's list after an action (sent, posted), with nothing stacked on it. */
     fun top(route: Any)
 }
 

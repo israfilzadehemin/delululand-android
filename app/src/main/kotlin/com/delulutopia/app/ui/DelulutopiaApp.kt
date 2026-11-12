@@ -269,7 +269,16 @@ fun DelulutopiaApp(
                 navController.popBackStack()
             }
 
-            override fun top(route: Any) = navController.navigateToTop(route)
+            /**
+             * After an action (sent, posted): that list itself, fresh. Not the tab bar's restore,
+             * which brought back the tab's saved stack — the Write or Compose screen just left.
+             */
+            override fun top(route: Any) {
+                navController.navigate(route) {
+                    popUpTo(navController.graph.findStartDestination().id)
+                    launchSingleTop = true
+                }
+            }
         }
     }
 

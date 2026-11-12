@@ -8,10 +8,12 @@ import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.isDialog
 import androidx.compose.ui.test.isRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
@@ -186,7 +188,11 @@ class Ui(val test: ComposeUiTest, private val case: String) {
             runCatching { test.mainClock.advanceTimeBy(step) }
             left -= step
         }
-        runCatching { test.waitForIdle() }
+        runCatching { test.waitForIdle() }.onFailure {
+            // An exception inside the app (a coroutine, a recomposition) surfaces here: show it.
+            println("e2e $case !! ${it::class.simpleName}: ${it.message}\n${it.stackTraceToString().lines().take(12).joinToString("\n")}")
+            throw it
+        }
     }
 
     fun until(timeoutMs: Long, what: String, cond: () -> Boolean) {
@@ -249,6 +255,14 @@ class Ui(val test: ComposeUiTest, private val case: String) {
     fun tapLast(text: String, exact: Boolean = true) {
         val m = hasText(text, substring = !exact) and hasClickAction()
         until(20_000, "a tappable \"$text\"") { count(m) > 0 }
+        // A dialog's button first; else the lowest on screen (a sheet's, under the top bar's).
+        val inDialog = m and hasAnyAncestor(isDialog())
+        if (count(inDialog) > 0) {
+            test.onAllNodes(inDialog)[0].performClick()
+            pass(300)
+            trace("after tap dialog \"$text\"")
+            return
+        }
         val nodes = test.onAllNodes(m)
         val all = nodes.fetchSemanticsNodes()
         val lowest = all.indices.maxBy { all[it].boundsInWindow.top }
