@@ -12,6 +12,7 @@ import androidx.compose.animation.slideIn
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -356,7 +357,9 @@ fun DelulutopiaApp(
             NavHost(
                 navController,
                 startDestination = HomeRoute,
-                modifier = Modifier.padding(padding),
+                // The bars' space counts as consumed, so a screen's imePadding lifts only by the
+                // part of the keyboard the navigation bar does not already cover.
+                modifier = Modifier.padding(padding).consumeWindowInsets(padding),
                 enterTransition = {
                     pageIn(
                         if (isTop(initialState.destination) &&

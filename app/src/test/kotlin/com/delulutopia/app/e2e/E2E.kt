@@ -182,6 +182,8 @@ class Ui(val test: ComposeUiTest, private val case: String) {
             val step = minOf(100L, left)
             Thread.sleep(step)
             shadowOf(Looper.getMainLooper()).idleFor(Duration.ofMillis(step))
+            // Delays inside composition (effects, a sheet's coroutine) run on the test clock.
+            runCatching { test.mainClock.advanceTimeBy(step) }
             left -= step
         }
         runCatching { test.waitForIdle() }
@@ -192,10 +194,14 @@ class Ui(val test: ComposeUiTest, private val case: String) {
         while (true) {
             if (runCatching { cond() }.getOrDefault(false)) return
             if (waited >= timeoutMs) fail("timed out waiting for $what")
+            if (waited > 0 && waited % 10_000 == 0L) trace("still waiting for $what")
             pass(200)
             waited += 200
         }
     }
+
+    /** What the screen shows now, in the log (one line). */
+    fun trace(why: String) = println("e2e $case · $why: ${visible().take(700)}")
 
     private fun count(m: SemanticsMatcher, unmerged: Boolean = false) =
         runCatching { test.onAllNodes(m, useUnmergedTree = unmerged).fetchSemanticsNodes().size }.getOrDefault(0)
@@ -218,6 +224,7 @@ class Ui(val test: ComposeUiTest, private val case: String) {
         runCatching { node.performScrollTo() }
         node.performClick()
         pass(300)
+        trace("after tap \"$text\"")
     }
 
     fun tapLabel(label: String, exact: Boolean = false, timeoutMs: Long = 20_000) {
@@ -235,13 +242,19 @@ class Ui(val test: ComposeUiTest, private val case: String) {
         pass(500)
     }
 
-    /** Last of several matches (a sheet's confirm button repeats the screen's action word). */
+    /**
+     * The lowest of several matches on screen: a sheet's or dialog's confirm button repeats the
+     * screen's action word in the top bar ("Send", "Post", "Log out", "Enter").
+     */
     fun tapLast(text: String, exact: Boolean = true) {
         val m = hasText(text, substring = !exact) and hasClickAction()
         until(20_000, "a tappable \"$text\"") { count(m) > 0 }
         val nodes = test.onAllNodes(m)
-        nodes[nodes.fetchSemanticsNodes().size - 1].performClick()
+        val all = nodes.fetchSemanticsNodes()
+        val lowest = all.indices.maxBy { all[it].boundsInWindow.top }
+        nodes[lowest].performClick()
         pass(300)
+        trace("after tap last \"$text\"")
     }
 
     /** Types into the text field labelled [label] (content description or placeholder). */
@@ -277,7 +290,7 @@ class Ui(val test: ComposeUiTest, private val case: String) {
 
     /** Every text and label on screen, for failure messages. */
     fun visible(): String = runCatching {
-        val out = linkedSetOf<String>()
+        val out = mutableListOf<String>()
         fun walk(n: SemanticsNode) {
             n.config.getOrNull(SemanticsProperties.Text)?.forEach { out += it.text }
             n.config.getOrNull(SemanticsProperties.ContentDescription)?.forEach { out += "[$it]" }

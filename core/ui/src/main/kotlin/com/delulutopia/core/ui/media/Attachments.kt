@@ -82,17 +82,28 @@ class Attachments(
         jobs[key] = scope.launch {
             gate.withPermit {
                 try {
-                    val (bytes, file, mime) = withContext(Dispatchers.IO) { prepare(kind, source, name) }
-                    Uploader.precheck(kind, bytes.size.toLong())?.let { throw ApiException(413, "TOO_LARGE", it) }
                     // Progress arrives on OkHttp's thread; the strip is changed on the main thread only,
                     // so two uploads finishing together can't overwrite each other's state.
                     var shown = -1
-                    val att = uploader.upload(uploadPath, kind, { bytes }, file, mime) { f ->
+                    val progress: (Float) -> Unit = { f ->
                         val step = (f * 50).toInt()
                         if (step != shown) {
                             shown = step
                             scope.launch(Dispatchers.Main) { patch(key) { p -> p.copy(progress = f, processing = f >= 0.99f) } }
                         }
+                    }
+                    val streamed = (source as? Source.Picked)?.takeIf { kind != Uploader.Kind.Photo }?.let { picked ->
+                        withContext(Dispatchers.IO) { sizeOf(picked.uri) }?.let { size -> picked.uri to size }
+                    }
+                    val att = if (streamed != null) {
+                        // Audio and video files are streamed from the phone, never read whole into memory.
+                        val (uri, size) = streamed
+                        val mime = context.contentResolver.getType(uri) ?: defaultMime(kind)
+                        uploader.upload(uploadPath, kind, size, { context.contentResolver.openInputStream(uri) ?: throw ReadException() }, name, mime, progress)
+                    } else {
+                        val (bytes, file, mime) = withContext(Dispatchers.IO) { prepare(kind, source, name) }
+                        Uploader.precheck(kind, bytes.size.toLong())?.let { throw ApiException(413, "TOO_LARGE", it) }
+                        uploader.upload(uploadPath, kind, { bytes }, file, mime, progress)
                     }
                     items = items.map { if (it.key == key) Item(key, att = att, local = it.local) else it }
                 } catch (e: CancellationException) {
@@ -140,7 +151,14 @@ class Attachments(
         errors = errors.filterNot { it.first == key }
     }
 
-    private class ReadException : Exception()
+    private class ReadException : java.io.IOException()
+
+    /** The exact length of a picked file, or null when the provider doesn't say (then it is read whole). */
+    private fun sizeOf(uri: Uri): Long? = runCatching {
+        context.contentResolver.query(uri, arrayOf(android.provider.OpenableColumns.SIZE), null, null, null)?.use { c ->
+            if (c.moveToFirst() && !c.isNull(0)) c.getLong(0).takeIf { it > 0 } else null
+        }
+    }.getOrNull()
 
     /** A stable copy of the bytes; a photo shrunk to 2048 px on its long edge, upright, as JPEG. */
     private fun prepare(kind: Uploader.Kind, source: Source, name: String): Triple<ByteArray, String, String> {

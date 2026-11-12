@@ -21,12 +21,12 @@ import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody
-import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
 import okio.Buffer
 import okio.BufferedSink
 import okio.ForwardingSink
 import okio.buffer
+import okio.source
 
 /**
  * Attachment uploads with progress (web src/media/upload.ts): `kind` + `file` multipart, `201 Att`,
@@ -51,10 +51,35 @@ class Uploader @Inject constructor(
         onProgress: (Float) -> Unit,
     ): Att {
         val data = bytes()
-        precheck(kind, data.size.toLong())?.let { throw ApiException(413, "TOO_LARGE", it) }
+        return upload(path, kind, data.size.toLong(), { data.inputStream() }, filename, mime, onProgress)
+    }
+
+    /**
+     * A file streamed from where it lives (a picked video can be 100 MB: it is never held in memory
+     * whole). [open] is called once per attempt; [size] must be the exact length.
+     */
+    suspend fun upload(
+        path: String,
+        kind: Kind,
+        size: Long,
+        open: () -> java.io.InputStream,
+        filename: String,
+        mime: String,
+        onProgress: (Float) -> Unit,
+    ): Att {
+        precheck(kind, size)?.let { throw ApiException(413, "TOO_LARGE", it) }
+        val stream = object : RequestBody() {
+            override fun contentType(): MediaType = mime.toMediaType()
+
+            override fun contentLength(): Long = size
+
+            override fun writeTo(sink: BufferedSink) {
+                open().use { input -> sink.writeAll(input.source()) }
+            }
+        }
         val form = MultipartBody.Builder().setType(MultipartBody.FORM)
             .addFormDataPart("kind", kind.wire)
-            .addFormDataPart("file", filename, ProgressBody(data.toRequestBody(mime.toMediaType()), onProgress))
+            .addFormDataPart("file", filename, ProgressBody(stream, onProgress))
             .build()
         val request = Request.Builder().url(config.baseUrl().trimEnd('/') + "/" + path.trimStart('/')).post(form).build()
         val call = client.newBuilder().callTimeout(kind.timeoutS, TimeUnit.SECONDS).build().newCall(request)

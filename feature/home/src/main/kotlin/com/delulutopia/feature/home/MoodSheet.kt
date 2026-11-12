@@ -23,6 +23,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -83,6 +84,8 @@ internal fun MoodSheet(
     onClose: () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
+    // A mood the friend added or changed since shows up without waiting for a live signal.
+    LaunchedEffect(Unit) { vm.refreshMoods() }
     var view by remember { mutableStateOf<MoodView>(MoodView.Grid) }
     var busy by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf(false) }

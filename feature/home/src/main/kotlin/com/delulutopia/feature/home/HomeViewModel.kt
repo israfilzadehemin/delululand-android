@@ -51,6 +51,9 @@ class HomeViewModel @Inject constructor(
     override fun setBoardMini(mini: Boolean) = prefs.setBoardMini(mini)
 
     // Moods (S3, custom moods CM1–CM7)
+    override fun refreshMoods() {
+        viewModelScope.launch { repo.loadMoods() }
+    }
 
     override suspend fun setMood(key: String, catalogue: List<Mood>): Boolean = try {
         val r = backend.run { setMood(MoodBody(key)) }

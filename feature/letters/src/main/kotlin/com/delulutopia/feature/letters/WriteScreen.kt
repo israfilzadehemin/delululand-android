@@ -195,11 +195,15 @@ private fun DraftWrite(vm: WriteViewModel, editor: RichEditorState) {
             onSend = {
                 when (val r = vm.send()) {
                     WriteViewModel.SendResult.Sent -> {
-                        sendOpen = false
                         // Letter paper story: the sheet folds into its envelope and is sealed, then Letters opens.
+                        // The wait runs in the screen's scope: closing the send sheet cancels the sheet's own,
+                        // which left the screen sealed and never moved on to Letters.
                         sealing = true
-                        delay(SEAL_MS)
-                        nav.top(LettersRoute)
+                        sendOpen = false
+                        scope.launch {
+                            delay(SEAL_MS)
+                            nav.top(LettersRoute)
+                        }
                         null
                     }
                     WriteViewModel.SendResult.Conflict -> {

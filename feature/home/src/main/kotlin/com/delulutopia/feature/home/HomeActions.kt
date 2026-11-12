@@ -13,6 +13,9 @@ interface HomeActions {
 
     fun setBoardMini(mini: Boolean)
 
+    /** The sheet opened: re-read the universe's moods (web refetches `GET /api/moods` on open). */
+    fun refreshMoods() {}
+
     suspend fun setMood(key: String, catalogue: List<Mood>): Boolean
 
     suspend fun saveMood(editing: Mood?, emoji: String, label: String): Result<Mood>

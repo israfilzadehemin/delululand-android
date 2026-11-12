@@ -123,7 +123,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     permissions:
-      contents: read
+      contents: write
       packages: read
     steps:
       - uses: actions/checkout@v5
@@ -175,7 +175,28 @@ jobs:
 
       - name: API log
         if: always()
-        run: docker logs api > api.log 2>&1 || true
+        run: |
+          docker logs api > api.log 2>&1 || true
+          grep -E "WARN|ERROR|Exception" api.log | tail -40 || true
+
+      # The cases' screenshots (each step's failure and each case's end) go to ci-screenshots/<branch>-e2e.
+      - name: Publish flow screenshots
+        if: always() && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
+        env:
+          BRANCH_DIR: ${{ github.head_ref || github.ref_name }}
+        run: |
+          shopt -s nullglob
+          files=(app/build/outputs/roborazzi/e2e_*.png)
+          [ ${#files[@]} -eq 0 ] && exit 0
+          dir="$RUNNER_TEMP/shots"
+          git clone --quiet --depth 1 --branch ci-screenshots "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" "$dir"
+          target="$dir/${BRANCH_DIR//\//-}-e2e"
+          rm -rf "$target" && mkdir -p "$target"
+          cp "${files[@]}" "$target/"
+          cd "$dir"
+          git add -A
+          git -c user.name="ci" -c user.email="ci@users.noreply.github.com" commit -qm "E2E screenshots for ${BRANCH_DIR} @ ${GITHUB_SHA::7}" || exit 0
+          for i in 1 2 3; do git push -q origin ci-screenshots && break; git pull -q --rebase origin ci-screenshots; done
 
       - name: Flow reports
         if: always()
