@@ -3,6 +3,7 @@ package com.delulutopia.app.e2e
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.runAndroidComposeUiTest
 import com.delulutopia.app.MainActivity
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
@@ -25,7 +26,7 @@ import org.robolectric.annotation.GraphicsMode
 class FlowsE2ETest {
     private fun case(name: String, block: Ui.(() -> MainActivity) -> Unit) {
         E2E.prepare()
-        runAndroidComposeUiTest<MainActivity> {
+        runAndroidComposeUiTest<MainActivity>(effectContext = StandardTestDispatcher()) {
             val ui = Ui(this, name)
             ui.signIn()
             ui.block { activity!! }
@@ -35,7 +36,7 @@ class FlowsE2ETest {
 
     @Test fun startWrongKeyThenRightKey() {
         E2E.prepare()
-        runAndroidComposeUiTest<MainActivity> {
+        runAndroidComposeUiTest<MainActivity>(effectContext = StandardTestDispatcher()) {
             val ui = Ui(this, "start")
             ui.step("wrong key") {
                 ui.until(30_000, "the landing") { ui.sees("Enter your universe") }
@@ -115,7 +116,9 @@ class FlowsE2ETest {
             tap("Send", exact = true)
             see("Send this letter?")
             tapLast("Send")
-            see("E2E letter one", 30_000)
+            // Sealed, then Letters: the row with its window.
+            until(30_000, "Letters with the sent letter") { sees("to edit") && !seesLabel("Letter text") }
+            see("E2E letter one")
         }
         step("take it back") {
             tap("E2E letter one")
@@ -129,13 +132,13 @@ class FlowsE2ETest {
         step("send again and edit in the window") {
             tap("Send", exact = true)
             tapLast("Send")
-            see("E2E letter one", 30_000)
+            until(30_000, "Letters with the sent letter") { sees("to edit") && !seesLabel("Letter text") }
             tap("E2E letter one")
             tap("Edit", exact = true)
             see("Editing a sent letter")
             type("Letter text", " edited")
             tap("Send again")
-            see("edited", 30_000)
+            until(30_000, "the edited letter") { sees("edited") && !seesLabel("Letter text") }
         }
         step("receive a letter") {
             friend.sendLetter("E2E letter from two")
@@ -152,7 +155,7 @@ class FlowsE2ETest {
             type("Letter text", "E2E reply")
             tap("Send", exact = true)
             tapLast("Send")
-            see("E2E reply", 30_000)
+            until(30_000, "Letters with the reply") { sees("E2E reply") && !seesLabel("Letter text") }
         }
     }
 
@@ -167,7 +170,8 @@ class FlowsE2ETest {
             tap("Post", exact = true)
             see("Post this discussion?")
             tapLast("Post")
-            see("E2E topic", 30_000)
+            until(30_000, "the posted discussion") { sees("Write a comment") || seesLabel("Write a comment") }
+            see("E2E topic")
             see("What do we think?")
         }
         step("comment, edit, delete") {
@@ -236,7 +240,8 @@ class FlowsE2ETest {
             type("Subject", "E2E subject", replace = true)
             type("Write an email", "Hello by email")
             tap("Send", exact = true)
-            see("Hello by email", 30_000)
+            until(30_000, "the new thread") { seesLabel("Write a reply") || sees("Write a reply") }
+            see("Hello by email")
             see("E2E subject")
         }
         step("friend replies, live") {
