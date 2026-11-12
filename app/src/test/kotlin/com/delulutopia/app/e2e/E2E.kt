@@ -8,6 +8,8 @@ import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.SemanticsNodeInteraction
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasSetTextAction
@@ -260,12 +262,20 @@ class Ui(val test: ComposeUiTest, private val case: String) {
 
     fun gone(text: String, timeoutMs: Long = 20_000) = until(timeoutMs, "\"$text\" to go") { !sees(text) }
 
+    /**
+     * Scrolls [node] into view only when none of it shows: performScrollTo never settles on a node
+     * drawn a few dp outside its list (the Discussions "Archived · N" link is pulled 6 dp up).
+     */
+    private fun scrollIn(node: SemanticsNodeInteraction) {
+        if (runCatching { node.assertIsDisplayed() }.isFailure) runCatching { node.performScrollTo() }
+    }
+
     /** Taps the first clickable node showing [text] (scrolled into view first). */
     fun tap(text: String, exact: Boolean = false, timeoutMs: Long = 20_000) {
         val m = hasText(text, substring = !exact) and hasClickAction()
         until(timeoutMs, "a tappable \"$text\"") { count(m) > 0 }
         val node = test.onAllNodes(m)[0]
-        runCatching { node.performScrollTo() }
+        scrollIn(node)
         node.performClick()
         pass(300)
         trace("after tap \"$text\"")
@@ -275,7 +285,7 @@ class Ui(val test: ComposeUiTest, private val case: String) {
         val m = hasContentDescription(label, substring = !exact) and hasClickAction()
         until(timeoutMs, "a tappable [$label]") { count(m) > 0 }
         val node = test.onAllNodes(m)[0]
-        runCatching { node.performScrollTo() }
+        scrollIn(node)
         node.performClick()
         pass(300)
     }
@@ -314,7 +324,7 @@ class Ui(val test: ComposeUiTest, private val case: String) {
         val m = hasSetTextAction() and (hasContentDescription(label, substring = true) or hasText(label, substring = true))
         until(20_000, "a field [$label]") { count(m) > 0 }
         val node = test.onAllNodes(m)[0]
-        runCatching { node.performScrollTo() }
+        scrollIn(node)
         if (replace) node.performTextReplacement(text) else node.performTextInput(text)
         pass(300)
     }

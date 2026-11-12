@@ -173,7 +173,7 @@ jobs:
       - name: End-to-end flows
         run: |
           set +e
-          ./gradlew :app:testProdDebugUnitTest --tests 'com.delulutopia.app.e2e.FlowsE2ETest.discussions' -Pdl.e2e=http://localhost:8080/ -Proborazzi.test.record=true --info > e2e.out 2>&1
+          ./gradlew :app:testProdDebugUnitTest --tests 'com.delulutopia.app.e2e.*' -Pdl.e2e=http://localhost:8080/ -Proborazzi.test.record=true --info > e2e.out 2>&1
           code=$?
           grep -E "e2e |FAILED|PASSED|SKIPPED|tests completed|BUILD|OutOfMemory|exit value|Could not complete|crashed" e2e.out
           # Why each case failed or was skipped, from the JUnit reports.
