@@ -41,6 +41,8 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
         }
         dependencies { add("coreLibraryDesugaring", libs.library("desugar-jdk-libs")) }
         tasks.withType<Test>().configureEach {
+            // Robolectric with Compose and screenshots outgrows the default 512 MB over a long flow run.
+            maxHeapSize = "3g"
             // Robolectric's FileDescriptor interceptor needs JDK internals on JDK 21+.
             jvmArgs(
                 "--add-opens=java.base/jdk.internal.access=ALL-UNNAMED",
