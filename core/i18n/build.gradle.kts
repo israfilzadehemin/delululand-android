@@ -8,7 +8,7 @@ android {
 
 dependencies {
     // The language is snapshot state, so a switch recomposes every screen that reads a text.
-    implementation(platform(libs.androidx.compose.bom))
+    api(platform(libs.androidx.compose.bom))
     api(libs.androidx.compose.runtime)
     api(libs.kotlinx.coroutines.android)
 
