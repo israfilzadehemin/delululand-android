@@ -20,6 +20,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -71,10 +72,19 @@ fun DlPinPad(
     biometricDescription: String = "Unlock with fingerprint",
 ) {
     val view = LocalView.current
+    // Two taps inside one frame must both count: each tap builds on the last tap, not on the
+    // [digits] of the last composition (which a fast thumb outruns). [digits] still wins when the
+    // caller changes it itself: a reset after six digits, or anything that isn't the typing lagging behind.
+    val typed = remember { StringBuilder(digits) }
+    SideEffect {
+        val now = typed.toString()
+        if (now != digits && (now.length == PIN_LENGTH || !now.startsWith(digits))) typed.replace(0, typed.length, digits)
+    }
     val press: (Char) -> Unit = { d ->
-        if (enabled && digits.length < PIN_LENGTH) {
+        if (enabled && typed.length < PIN_LENGTH) {
             view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
-            val next = digits + d
+            typed.append(d)
+            val next = typed.toString()
             onDigits(next)
             if (next.length == PIN_LENGTH) onComplete(next)
         }
@@ -103,9 +113,10 @@ fun DlPinPad(
                 Modifier.weight(1f),
                 enabled,
                 onClick = {
-                    if (digits.isNotEmpty()) {
+                    if (typed.isNotEmpty()) {
                         view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
-                        onDigits(digits.dropLast(1))
+                        typed.setLength(typed.length - 1)
+                        onDigits(typed.toString())
                     }
                 },
                 description = backspaceDescription,

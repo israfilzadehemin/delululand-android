@@ -23,6 +23,7 @@ import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -127,6 +128,12 @@ fun SignedInApp(
     val state by shell.state.collectAsStateWithLifecycle()
     val leaves by shell.leaves.collectAsStateWithLifecycle()
     val currentTheme by rememberUpdatedState(themeMode)
+    val activity = LocalActivity.current
+    DisposableEffect(session.me.id) {
+        shell.enter()
+        // A rotation recomposes the shell; only a real sign-out (or another citizen) forgets the session.
+        onDispose { if (activity?.isChangingConfigurations != true) shell.leave() }
+    }
     LifecycleStartEffect(Unit) {
         shell.foreground()
         onStopOrDispose { shell.background() }

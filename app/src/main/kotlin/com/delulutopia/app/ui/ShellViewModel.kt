@@ -40,8 +40,20 @@ class ShellViewModel @Inject constructor(
     }
 
     init {
-        home.start()
         viewModelScope.launch { home.state.mapNotNull { it.home }.collect { arrivals.announce(it) } }
+    }
+
+    /**
+     * The shell is shown for a signed-in citizen. This view model lives as long as the activity, so
+     * a sign-out followed by another sign-in (the other card, or the same one) must not keep the
+     * previous session's Home, letters or stream: [leave] forgets them, [enter] starts afresh.
+     */
+    fun enter() = home.start()
+
+    fun leave() {
+        live.stop()
+        home.stop()
+        letters.clear()
     }
 
     fun foreground() {

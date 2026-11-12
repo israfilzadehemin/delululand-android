@@ -42,6 +42,18 @@ class PersistentCookieJarTest {
     }
 
     @Test
+    fun `a Keystore that refuses keeps the cookies in memory instead of failing the call`() {
+        val broken = object : CookieVault {
+            override fun seal(plain: ByteArray): ByteArray = throw java.security.KeyStoreException("AndroidKeyStore KeyStore not available")
+
+            override fun open(sealed: ByteArray): ByteArray = throw java.security.KeyStoreException("AndroidKeyStore KeyStore not available")
+        }
+        val jar = PersistentCookieJar(File(folder.root, "cookies.bin"), broken) { now }
+        jar.saveFromResponse(url, listOf(header("__Host-dl=abc; Path=/; Secure; Max-Age=600")))
+        assertThat(jar.loadForRequest(url).map { it.name }).containsExactly("__Host-dl")
+    }
+
+    @Test
     fun `max-age zero removes the cookie`() {
         val jar = jar()
         jar.saveFromResponse(url, listOf(header("__Host-dl=abc; Path=/; Secure; Max-Age=600")))

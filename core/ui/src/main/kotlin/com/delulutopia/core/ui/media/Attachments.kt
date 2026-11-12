@@ -84,8 +84,15 @@ class Attachments(
                 try {
                     val (bytes, file, mime) = withContext(Dispatchers.IO) { prepare(kind, source, name) }
                     Uploader.precheck(kind, bytes.size.toLong())?.let { throw ApiException(413, "TOO_LARGE", it) }
+                    // Progress arrives on OkHttp's thread; the strip is changed on the main thread only,
+                    // so two uploads finishing together can't overwrite each other's state.
+                    var shown = -1
                     val att = uploader.upload(uploadPath, kind, { bytes }, file, mime) { f ->
-                        patch(key) { p -> p.copy(progress = f, processing = f >= 0.99f) }
+                        val step = (f * 50).toInt()
+                        if (step != shown) {
+                            shown = step
+                            scope.launch(Dispatchers.Main) { patch(key) { p -> p.copy(progress = f, processing = f >= 0.99f) } }
+                        }
                     }
                     items = items.map { if (it.key == key) Item(key, att = att, local = it.local) else it }
                 } catch (e: CancellationException) {

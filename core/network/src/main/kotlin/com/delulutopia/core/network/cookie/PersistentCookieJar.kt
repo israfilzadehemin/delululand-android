@@ -55,12 +55,19 @@ class PersistentCookieJar(
         Json.decodeFromString(ListSerializer(StoredCookie.serializer()), json).mapNotNull { it.toCookie() }.toMutableList()
     }.getOrElse { mutableListOf() } // A key lost with a restore or a corrupt file: start signed out.
 
+    /**
+     * Writes the sealed file. A Keystore that refuses (some devices after a restore or an OS
+     * update, emulators without one) must not break the call that set the cookie: the cookies stay
+     * in memory for this run and the next start signs in again.
+     */
     private fun persist() {
-        val json = Json.encodeToString(ListSerializer(StoredCookie.serializer()), cookies.filter { it.persistent }.map(StoredCookie::of))
-        file.parentFile?.mkdirs()
-        val tmp = File(file.parentFile, file.name + ".tmp")
-        tmp.writeBytes(vault.seal(json.encodeToByteArray()))
-        tmp.renameTo(file)
+        runCatching {
+            val json = Json.encodeToString(ListSerializer(StoredCookie.serializer()), cookies.filter { it.persistent }.map(StoredCookie::of))
+            file.parentFile?.mkdirs()
+            val tmp = File(file.parentFile, file.name + ".tmp")
+            tmp.writeBytes(vault.seal(json.encodeToByteArray()))
+            tmp.renameTo(file)
+        }
     }
 
     @Serializable
