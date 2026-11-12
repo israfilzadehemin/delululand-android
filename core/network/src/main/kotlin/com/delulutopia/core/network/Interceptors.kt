@@ -7,9 +7,11 @@ import okhttp3.Interceptor
 import okhttp3.Response
 
 /**
- * Every call: `X-Requested-With: delululand` (the API's CSRF rule, Technical Design §8.3), JSON
- * accepted, a `User-Agent` naming the app (the server lists sessions by it), and the server clock fed
- * from `X-Server-Time`.
+ * Every call: `X-Requested-With: delululand` (the API's CSRF rule, Technical Design §8.3), a
+ * `User-Agent` naming the app (the server lists sessions by it), and the server clock fed from
+ * `X-Server-Time`. `Accept` is left to the caller: images (Coil), voice notes and videos (ExoPlayer)
+ * share this client, and forcing `application/json` on them made the API answer 406 — no photo,
+ * avatar, stamp, doodle, board, voice note or video ever loaded.
  */
 class ApiHeadersInterceptor(
     private val clock: ServerClock,
@@ -18,7 +20,6 @@ class ApiHeadersInterceptor(
     override fun intercept(chain: Interceptor.Chain): Response {
         val request = chain.request().newBuilder()
             .header("X-Requested-With", "delululand")
-            .header("Accept", "application/json")
             .header("User-Agent", userAgent)
             .build()
         val response = chain.proceed(request)

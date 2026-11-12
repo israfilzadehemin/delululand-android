@@ -171,7 +171,25 @@ jobs:
           SQL
 
       - name: End-to-end flows
-        run: ./gradlew :app:testProdDebugUnitTest --tests 'com.delulutopia.app.e2e.*' -Pdl.e2e=http://localhost:8080/ -Proborazzi.test.record=true --info 2>&1 | grep -E "e2e |FAILED|PASSED|SKIPPED|AssertionError|On screen|Caused by|tests completed|BUILD" ; exit ${PIPESTATUS[0]}
+        run: |
+          set +e
+          ./gradlew :app:testProdDebugUnitTest --tests 'com.delulutopia.app.e2e.*' -Pdl.e2e=http://localhost:8080/ -Proborazzi.test.record=true --info > e2e.out 2>&1
+          code=$?
+          grep -E "e2e |FAILED|PASSED|SKIPPED|tests completed|BUILD" e2e.out
+          # Why each case failed or was skipped, from the JUnit reports.
+          python3 - <<'PY'
+          import glob, re, html
+          for f in glob.glob('app/build/test-results/**/TEST-*E2E*.xml', recursive=True):
+              x = open(f).read()
+              for m in re.finditer(r'<testcase name="([^"]+)"[^>]*>(.*?)</testcase>', x, re.S):
+                  body = m.group(2)
+                  for k in ('failure', 'skipped', 'error'):
+                      mm = re.search(r'<%s[^>]*?(?:message="([^"]*)")?[^>]*>(.*?)</%s>' % (k, k), body, re.S)
+                      if mm:
+                          print('==', k.upper(), m.group(1))
+                          print(html.unescape((mm.group(2) or mm.group(1) or ''))[:3000])
+          PY
+          exit $code
 
       - name: API log
         if: always()

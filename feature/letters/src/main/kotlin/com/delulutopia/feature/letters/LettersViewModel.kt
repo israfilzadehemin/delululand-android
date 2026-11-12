@@ -76,6 +76,11 @@ class LettersViewModel @Inject constructor(
         reload(id)
     }
 
+    /** Back on a letter (after editing it in its window): show what the server holds now. */
+    fun refresh(id: Long) {
+        if (_letters.value[id] is LetterUi.Shown) reload(id)
+    }
+
     private fun reload(id: Long) {
         viewModelScope.launch {
             val ui = try {

@@ -138,11 +138,13 @@ class FlowsE2ETest {
             see("Editing a sent letter")
             type("Letter text", " edited")
             tap("Send again")
-            until(30_000, "the edited letter") { sees("edited") && !seesLabel("Letter text") }
+            // Back on the letter, which shows the edit at once (not after the next signal).
+            until(10_000, "the edited letter") { sees("edited") && !seesLabel("Letter text") }
         }
         step("receive a letter") {
             friend.sendLetter("E2E letter from two")
             // Delay 40 s; Home re-reads at the arrival.
+            tapLabel("Back")
             tab("Home")
             see("E2E letter from two", 90_000)
         }

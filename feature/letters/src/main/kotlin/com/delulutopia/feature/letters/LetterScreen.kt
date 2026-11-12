@@ -62,6 +62,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import com.delulutopia.core.data.LetterActions
@@ -146,6 +148,8 @@ fun LetterScreen(id: Long, vm: LettersViewModel = hiltViewModel()) {
         }
         if (pager.settledPage >= ids.size - 1 && rowsState.hasMore) vm.loadMore()
     }
+    // Coming back from Edit (or from another app): the letter as it is now, not as it was opened.
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { vm.refresh(current) }
     val shownLetter = (letters[current] as? LetterUi.Shown)?.letter
     val friend = home?.friend?.nickname ?: "Friend"
     Column(Modifier.fillMaxSize()) {
