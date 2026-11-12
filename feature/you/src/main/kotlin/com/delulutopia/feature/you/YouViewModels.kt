@@ -316,7 +316,12 @@ class ChangePinViewModel @Inject constructor(private val account: AccountReposit
             } catch (e: ApiException) {
                 values = listOf("", "", "")
                 step = 0
-                error = if (e.code == "WRONG_PIN" || e.code == "PIN_THROTTLED") "Wrong PIN. Try again." else "Can't reach $brand. Try again."
+                error = when {
+                    e.code == "WRONG_PIN" || e.code == "PIN_THROTTLED" -> "Wrong PIN. Try again."
+                    // A refusal with its own words (a malformed PIN) is not "can't reach".
+                    !e.isOffline -> e.message
+                    else -> "Can't reach $brand. Try again."
+                }
             } finally {
                 busy = false
             }

@@ -49,10 +49,6 @@ class LiveUpdates @Inject constructor(
     private val _live = MutableStateFlow(false)
     val live: StateFlow<Boolean> = _live.asStateFlow()
 
-    /** The app is in the foreground and signed in (between [start] and [stop]); polling only happens then. */
-    private val _active = MutableStateFlow(false)
-    val active: StateFlow<Boolean> = _active.asStateFlow()
-
     private val _signals = MutableSharedFlow<Signal>(extraBufferCapacity = 64)
     val signals: SharedFlow<Signal> = _signals
 
@@ -65,14 +61,12 @@ class LiveUpdates @Inject constructor(
     fun start() {
         if (running) return
         running = true
-        _active.value = true
         open()
     }
 
     @Synchronized
     fun stop() {
         running = false
-        _active.value = false
         retryJob?.cancel()
         source?.cancel()
         source = null

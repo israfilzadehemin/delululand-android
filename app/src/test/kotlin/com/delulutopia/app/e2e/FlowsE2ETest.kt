@@ -67,7 +67,7 @@ class FlowsE2ETest {
                     ui.see("Wrong PIN")
                     ui.pin(E2E.A_PIN)
                 }
-                ui.seeLabel("Home", 30_000)
+                ui.home()
             }
         }
     }
@@ -102,7 +102,7 @@ class FlowsE2ETest {
     @Test fun letterSendCancelEditAndReceive() = case("letters") {
         val friend = Friend().signIn()
         step("write and send") {
-            tapLabel("Letters", exact = true)
+            tab("Letters")
             until(20_000, "the letter button") { seesLabel("Write a letter") || seesLabel("Continue your letter") }
             tapLabel(if (seesLabel("Write a letter")) "Write a letter" else "Continue your letter")
             seeLabel("Letter text")
@@ -135,7 +135,7 @@ class FlowsE2ETest {
         step("receive a letter") {
             friend.sendLetter("E2E letter from two")
             // Delay 40 s; Home re-reads at the arrival.
-            tapLabel("Home", exact = true)
+            tab("Home")
             see("E2E letter from two", 90_000)
         }
         step("open it and reply") {
@@ -154,7 +154,7 @@ class FlowsE2ETest {
     @Test fun discussions() = case("discussions") {
         val friend = Friend().signIn()
         step("compose and post") {
-            tapLabel("Discussions", exact = true)
+            tab("Discussions")
             until(20_000, "the discussion button") { seesLabel("Start a discussion") || seesLabel("Continue your discussion draft") }
             tapLabel(if (seesLabel("Start a discussion")) "Start a discussion" else "Continue your discussion draft")
             type("Title", "E2E topic", replace = true)
@@ -225,7 +225,7 @@ class FlowsE2ETest {
     @Test fun emails() = case("emails") {
         val friend = Friend().signIn()
         step("new email") {
-            tapLabel("Emails", exact = true)
+            tab("Emails")
             until(20_000, "the email button") { seesLabel("New email") || seesLabel("Continue your new email") }
             tapLabel(if (seesLabel("New email")) "New email" else "Continue your new email")
             type("Subject", "E2E subject", replace = true)
@@ -256,7 +256,7 @@ class FlowsE2ETest {
 
     @Test fun you() = case("you") {
         step("profile") {
-            tapLabel("You", exact = true)
+            tab("You")
             tap("View profile")
             type("Name", "Ada", replace = true)
             tap("Save", exact = true)
@@ -303,7 +303,7 @@ class FlowsE2ETest {
             tap("userone")
             see("Enter your PIN")
             pin(E2E.A_PIN)
-            seeLabel("Home", 30_000)
+            home()
         }
     }
 

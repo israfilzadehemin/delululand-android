@@ -75,6 +75,17 @@ class Friend(private val base: String = E2E.server!!) {
     }
 
     fun call(method: String, path: String, body: String? = null): Answer {
+        repeat(5) {
+            val a = once(method, path, body)
+            if (a.status != 429) return a
+            // Throttles (a wrong key typed in the app a moment ago) say how long to wait.
+            val wait = runCatching { a.obj["retryAfterMs"]!!.jsonPrimitive.long }.getOrDefault(1_000L)
+            Thread.sleep(wait + 100)
+        }
+        return once(method, path, body)
+    }
+
+    private fun once(method: String, path: String, body: String?): Answer {
         val url = URL(base + path.trimStart('/'))
         val c = url.openConnection() as HttpURLConnection
         c.requestMethod = method
@@ -215,6 +226,12 @@ class Ui(val test: ComposeUiTest, private val case: String) {
         pass(300)
     }
 
+    /** A navigation bar destination (its label is the last node with that text). */
+    fun tab(name: String) {
+        tapLast(name, exact = true)
+        pass(500)
+    }
+
     /** Last of several matches (a sheet's confirm button repeats the screen's action word). */
     fun tapLast(text: String, exact: Boolean = true) {
         val m = hasText(text, substring = !exact) and hasClickAction()
@@ -309,11 +326,14 @@ class Ui(val test: ComposeUiTest, private val case: String) {
                 see("Confirm your PIN")
             }
             pin(E2E.A_PIN)
-            seeLabel("Home", 30_000)
-            until(30_000, "Home's content") {
-                sees("How do you feel") || sees("Set your mood") || sees("No mood yet") || sees("FROM") ||
-                    sees("Nothing in the post")
-            }
+            home()
         }
+    }
+
+    /** Home is up; the one-time fingerprint offer (X1) is declined if it shows. */
+    fun home() {
+        until(30_000, "Home's content") { sees("Nothing in the post") || sees("Set your mood") || sees("FROM") || sees("No mood yet") }
+        pass(800)
+        if (sees("Unlock with your fingerprint?")) tap("Not now")
     }
 }

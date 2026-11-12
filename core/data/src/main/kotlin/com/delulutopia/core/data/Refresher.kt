@@ -6,8 +6,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -36,11 +34,9 @@ class Refresher(
                 armDeadline()
             }
         }
-        // Polls only while the app is in front without a stream: a phone in a pocket must not
-        // keep calling the server every 15 s (the web pauses with a hidden tab the same way).
         scope.launch {
-            combine(live.live, live.active) { isLive, active -> active && !isLive }.distinctUntilChanged().collectLatest { poll ->
-                while (poll && isActive) {
+            live.live.collectLatest { isLive ->
+                while (!isLive && isActive) {
                     delay(pollMs)
                     reload()
                     armDeadline()
