@@ -189,6 +189,23 @@ class Ui(val test: ComposeUiTest, private val case: String) {
                     worker.stackTrace.take(60).forEach { println("e2e $case !!   at $it") }
                     val rt = Runtime.getRuntime()
                     println("e2e $case !! heap ${(rt.totalMemory() - rt.freeMemory()) shr 20} MB used")
+                    runCatching {
+                        // What keeps the main thread busy: the head of its message queue.
+                        val q = Looper.getMainLooper().queue
+                        val head = android.os.MessageQueue::class.java.getDeclaredField("mMessages").apply { isAccessible = true }
+                        val next = android.os.Message::class.java.getDeclaredField("next").apply { isAccessible = true }
+                        var m = head.get(q) as android.os.Message?
+                        val seen = LinkedHashMap<String, Int>()
+                        var n = 0
+                        while (m != null && n < 5_000) {
+                            val k = "${m.target?.javaClass?.name} ${m.callback?.javaClass?.name} what=${m.what}"
+                            seen[k] = (seen[k] ?: 0) + 1
+                            m = next.get(m) as android.os.Message?
+                            n++
+                        }
+                        println("e2e $case !! main queue: $n messages")
+                        seen.entries.sortedByDescending { it.value }.take(15).forEach { println("e2e $case !!   ${it.value} × ${it.key}") }
+                    }.onFailure { println("e2e $case !! queue: $it") }
                     beat = System.currentTimeMillis()
                 }
             }
