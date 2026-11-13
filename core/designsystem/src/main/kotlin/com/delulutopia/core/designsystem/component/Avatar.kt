@@ -31,14 +31,14 @@ fun DlAvatar(
     size: Dp = 40.dp,
     ring: Color? = null,
     ringWidth: Dp = 2.dp,
+    initialsColor: Color = InitialsInk,
     content: (@Composable () -> Unit)? = null,
 ) {
     Box(
         modifier = modifier
             .size(size)
             .clip(CircleShape)
-            .background(signature)
-            .then(if (ring != null) Modifier.border(ringWidth, ring, CircleShape) else Modifier),
+            .background(signature),
         contentAlignment = Alignment.Center,
     ) {
         if (content != null) {
@@ -46,7 +46,7 @@ fun DlAvatar(
         } else {
             Text(
                 text = initials,
-                color = InitialsInk,
+                color = initialsColor,
                 fontFamily = Manrope,
                 fontWeight = FontWeight.ExtraBold,
                 fontSize = (size.value * 0.375f).sp,
@@ -54,6 +54,8 @@ fun DlAvatar(
                 maxLines = 1,
             )
         }
+        // Drawn last so a photo never covers the signature ring.
+        if (ring != null) Box(Modifier.matchParentSize().border(ringWidth, ring, CircleShape))
     }
 }
 

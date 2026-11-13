@@ -1,5 +1,7 @@
 package com.delulutopia.core.designsystem.component
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomSheetDefaults
@@ -11,6 +13,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import com.delulutopia.core.designsystem.motion.Enter
+import com.delulutopia.core.designsystem.motion.enter
 import com.delulutopia.core.designsystem.theme.DlShape
 
 /**
@@ -35,8 +41,10 @@ fun DlBottomSheet(
         scrimColor = MaterialTheme.colorScheme.scrim,
         tonalElevation = BottomSheetDefaults.Elevation,
         dragHandle = { BottomSheetDefaults.DragHandle(color = MaterialTheme.colorScheme.outline) },
-        content = content,
-    )
+    ) {
+        // The sheet's contents rise a beat after the sheet (web .dl-sheet > *: 320 ms at 70 ms).
+        Column(Modifier.enter(Enter.Rise, 70, 320), content = content)
+    }
 }
 
 /**
@@ -46,21 +54,42 @@ fun DlBottomSheet(
 @Composable
 fun DlDialog(
     title: String,
-    text: String,
+    text: String?,
     confirmLabel: String,
     onConfirm: () -> Unit,
     dismissLabel: String,
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
     destructive: Boolean = false,
+    /** A second, stronger line ("This replaces your current draft."). */
+    warning: String? = null,
+    /** While the confirmed action runs: both buttons off, the scrim does nothing. */
+    busy: Boolean = false,
 ) {
     AlertDialog(
-        onDismissRequest = onDismiss,
+        onDismissRequest = { if (!busy) onDismiss() },
         modifier = modifier,
         title = { Text(title, style = MaterialTheme.typography.titleLarge) },
-        text = { Text(text, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant) },
-        confirmButton = { DlTextButton(confirmLabel, onConfirm, destructive = destructive) },
-        dismissButton = { DlTextButton(dismissLabel, onDismiss) },
+        text = if (text == null && warning == null) {
+            null
+        } else {
+            {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    if (text != null) Text(text, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    if (warning !=
+                        null
+                    ) {
+                        Text(
+                            warning,
+                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                            color = MaterialTheme.colorScheme.error,
+                        )
+                    }
+                }
+            }
+        },
+        confirmButton = { DlTextButton(confirmLabel, onConfirm, destructive = destructive, enabled = !busy) },
+        dismissButton = { DlTextButton(dismissLabel, onDismiss, enabled = !busy) },
         containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
         titleContentColor = MaterialTheme.colorScheme.onSurface,
         textContentColor = MaterialTheme.colorScheme.onSurfaceVariant,

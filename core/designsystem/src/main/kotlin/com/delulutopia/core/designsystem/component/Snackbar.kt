@@ -10,6 +10,9 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import com.delulutopia.core.designsystem.motion.Enter
+import com.delulutopia.core.designsystem.motion.Motion
+import com.delulutopia.core.designsystem.motion.enter
 import com.delulutopia.core.designsystem.theme.DlShape
 
 /** Snackbars replace the web's toasts (§3): inverse surface, 8 dp corners, optional text action. */
@@ -22,7 +25,8 @@ fun DlSnackbarHost(hostState: SnackbarHostState, modifier: Modifier = Modifier) 
 fun DlSnackbar(data: SnackbarData, modifier: Modifier = Modifier) {
     val label = data.visuals.actionLabel
     Snackbar(
-        modifier = modifier,
+        // A notice pops in with a little spring (web .dl-notice).
+        modifier = modifier.enter(Enter.PopIn, durationMs = 260, easing = Motion.Spring, key = data),
         shape = DlShape.snackbar,
         containerColor = MaterialTheme.colorScheme.inverseSurface,
         contentColor = MaterialTheme.colorScheme.inverseOnSurface,

@@ -5,12 +5,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onRoot
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.delulutopia.app.navigation.AppearanceRoute
-import com.delulutopia.app.navigation.LettersRoute
 import com.delulutopia.app.ui.DelulutopiaApp
+import com.delulutopia.app.ui.PlaceholderScreen
+import com.delulutopia.core.data.HomeRepository
 import com.delulutopia.core.designsystem.theme.DelulutopiaTheme
-import com.delulutopia.core.designsystem.theme.ThemeMode
+import com.delulutopia.core.network.model.HomeSession
+import com.delulutopia.core.network.model.Person
+import com.delulutopia.core.network.model.UniverseInfo
+import com.delulutopia.core.ui.DiscussionsRoute
+import com.delulutopia.core.ui.EmailsRoute
+import com.delulutopia.core.ui.HomeRoute
+import com.delulutopia.core.ui.LettersRoute
+import com.delulutopia.core.ui.YouRoute
 import com.github.takahirom.roborazzi.captureRoboImage
 import org.junit.Rule
 import org.junit.Test
@@ -32,7 +40,13 @@ class AppShellScreenshotTest {
     private fun Shell(dark: Boolean) {
         nav = rememberNavController()
         DelulutopiaTheme(darkTheme = dark) {
-            DelulutopiaApp(themeMode = if (dark) ThemeMode.Dark else ThemeMode.Light, onThemeModeChange = {}, navController = nav)
+            DelulutopiaApp(session = SAMPLE, state = HomeRepository.State(), navController = nav) {
+                composable<HomeRoute> { PlaceholderScreen() }
+                composable<LettersRoute> { PlaceholderScreen() }
+                composable<DiscussionsRoute> { PlaceholderScreen() }
+                composable<EmailsRoute> { PlaceholderScreen() }
+                composable<YouRoute> { PlaceholderScreen() }
+            }
         }
     }
 
@@ -54,7 +68,11 @@ class AppShellScreenshotTest {
 
     @Test fun letters_dark() = capture("letters_dark", dark = true, start = LettersRoute)
 
-    @Test fun appearance_light() = capture("appearance_light", dark = false, start = AppearanceRoute)
-
-    @Test fun appearance_dark() = capture("appearance_dark", dark = true, start = AppearanceRoute)
+    private companion object {
+        val SAMPLE = HomeSession(
+            me = Person(1, "Emin"),
+            friend = Person(2, "Leyla"),
+            universe = UniverseInfo(1, "Delulutopia", isCreator = true),
+        )
+    }
 }

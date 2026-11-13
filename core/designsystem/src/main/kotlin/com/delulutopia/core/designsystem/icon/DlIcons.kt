@@ -15,6 +15,9 @@ import androidx.compose.ui.unit.dp
  */
 object DlIcons {
     private const val THIN = 1.75f
+
+    /** Icons that point along the reading direction mirror in Persian (L3). Declared first: the icons below are built at init. */
+    private val MIRRORED = setOf("back", "send", "chevron.right", "plane", "log.out")
     private const val BOLD = 2f
 
     val Home = line("home", THIN, "M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z")
@@ -59,8 +62,38 @@ object DlIcons {
     val ChevronRight = line("chevron.right", THIN, "M9 6l6 6-6 6")
     val Bell = line("bell", THIN, "M6 16V11a6 6 0 0 1 12 0v5l2 2H4z", "M10 21a2 2 0 0 0 4 0")
     val Plane = line("plane", BOLD, "M3 11l18-8-7 18-3-7z")
+
+    /** PIN pad fingerprint key (S-PIN). */
+    val Fingerprint = line(
+        "fingerprint",
+        THIN,
+        "M6.5 18.5c1-1.8 1.5-4 1.5-6.5a4 4 0 0 1 8 0c0 2.6-.4 5-1.2 7",
+        "M12 12c0 3.2-.8 6-2.2 8.2",
+        "M4.5 15c.3-1 .5-2 .5-3a7 7 0 0 1 12.5-4.3",
+        "M19 10.5c.3 2.6.1 5.2-.6 7.6",
+    )
+    val Backspace = line("backspace", THIN, "M8 5h12a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H8l-6-7z", "M11 9l6 6M17 9l-6 6")
+    val Search = line("search", THIN, "M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14z", "M20 20l-4-4")
+    val Copy = line(
+        "copy",
+        THIN,
+        "M9 9h10a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1V10a1 1 0 0 1 1-1z",
+        "M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1",
+    )
+    val Share = line("share", THIN, "M12 15V3", "M7 8l5-5 5 5", "M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6")
+    val LogOut = line("log.out", THIN, "M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3", "M10 17l-5-5 5-5", "M5 12h11")
+    val Language = line("language", THIN, "M4 5h16v11H9l-5 4z", "M9.5 13l2.5-6 2.5 6M10.4 11h3.2")
+    val Palette = line("palette", THIN, "M12 3a9 9 0 1 0 0 18c1.1 0 1.6-.8 1.6-1.6 0-1.2-1-1.4-1-2.4 0-.8.7-1.4 1.6-1.4H17a4 4 0 0 0 4-4c0-4.7-4-8.6-9-8.6z")
+
     private fun line(name: String, stroke: Float, vararg paths: String): ImageVector =
-        ImageVector.Builder(name = name, defaultWidth = 24.dp, defaultHeight = 24.dp, viewportWidth = 24f, viewportHeight = 24f)
+        ImageVector.Builder(
+            name = name,
+            defaultWidth = 24.dp,
+            defaultHeight = 24.dp,
+            viewportWidth = 24f,
+            viewportHeight = 24f,
+            autoMirror = name in MIRRORED,
+        )
             .apply {
                 paths.forEach { d ->
                     addPath(

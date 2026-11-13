@@ -6,6 +6,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.unit.LayoutDirection
+import com.delulutopia.core.i18n.I18n
 
 /** Settings › Appearance (A4): Light, Dark or Match device. Saved per device. */
 enum class ThemeMode { Light, Dark, System }
@@ -19,6 +22,7 @@ fun ThemeMode.isDark(): Boolean = when (this) {
 
 private val LocalDlColors = staticCompositionLocalOf { LightDlColors }
 private val LocalDlType = staticCompositionLocalOf { DefaultDlType }
+private val LocalDlDark = staticCompositionLocalOf { false }
 
 /**
  * Brand on Material 3 (decision A1): the Delulutopia palette and type on M3 structure. Dynamic
@@ -32,6 +36,9 @@ fun DelulutopiaTheme(
     CompositionLocalProvider(
         LocalDlColors provides if (darkTheme) DarkDlColors else LightDlColors,
         LocalDlType provides DefaultDlType,
+        LocalDlDark provides darkTheme,
+        // L3: Persian lays out right to left; a language switch re-lays every screen at once.
+        LocalLayoutDirection provides if (I18n.lang.rtl) LayoutDirection.Rtl else LayoutDirection.Ltr,
     ) {
         MaterialTheme(
             colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme,
@@ -51,4 +58,9 @@ object DlTheme {
     val type: DlType
         @Composable @ReadOnlyComposable
         get() = LocalDlType.current
+
+    /** Whether the dark theme is showing (a few materials keep their own dark tones). */
+    val isDark: Boolean
+        @Composable @ReadOnlyComposable
+        get() = LocalDlDark.current
 }

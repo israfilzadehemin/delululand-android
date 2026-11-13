@@ -16,15 +16,16 @@ import com.delulutopia.core.designsystem.R
  * Type (canvas "Foundations › Type", Z-Type): Manrope for the interface, Literata for letters and
  * notes, Caveat for the board note. Fonts are bundled (P10) and sized in sp. The bundled Manrope
  * carries capital schwa Ə (U+018F) merged from Noto Sans by tools/fonts/merge_schwa.py, as the web
- * does with its 'DL Schwa' face. Arabic script falls back to the system's Noto Arabic faces.
+ * does with its 'DL Schwa' face. Behind Manrope sits Vazirmatn for the Persian interface (UiFont); letters
+ * and notes in Persian fall back to the system's Noto Naskh Arabic (L5).
  */
 
 val Manrope = FontFamily(
-    Font(R.font.manrope_regular, FontWeight.Normal),
-    Font(R.font.manrope_medium, FontWeight.Medium),
-    Font(R.font.manrope_semibold, FontWeight.SemiBold),
-    Font(R.font.manrope_bold, FontWeight.Bold),
-    Font(R.font.manrope_extrabold, FontWeight.ExtraBold),
+    UiFont(R.font.manrope_regular, R.font.vazirmatn_nl_regular, FontWeight.Normal),
+    UiFont(R.font.manrope_medium, R.font.vazirmatn_nl_medium, FontWeight.Medium),
+    UiFont(R.font.manrope_semibold, R.font.vazirmatn_nl_semibold, FontWeight.SemiBold),
+    UiFont(R.font.manrope_bold, R.font.vazirmatn_nl_bold, FontWeight.Bold),
+    UiFont(R.font.manrope_extrabold, R.font.vazirmatn_nl_extrabold, FontWeight.ExtraBold),
 )
 
 val Literata = FontFamily(

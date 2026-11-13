@@ -81,6 +81,17 @@ android {
 
 dependencies {
     implementation(projects.core.designsystem)
+    implementation(projects.core.data)
+    implementation(projects.feature.start)
+    implementation(projects.feature.home)
+    implementation(projects.feature.letters)
+    implementation(projects.feature.discussions)
+    implementation(projects.feature.emails)
+    implementation(projects.feature.you)
+    implementation(projects.core.ui)
+    implementation(libs.coil.compose)
+    implementation(libs.coil.network.okhttp)
+    implementation(libs.coil.svg)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.core.splashscreen)
@@ -104,4 +115,11 @@ dependencies {
     testImplementation(libs.roborazzi)
     testImplementation(libs.roborazzi.compose)
     testImplementation(libs.roborazzi.junit.rule)
+}
+
+// The parity run (ParityScreensTest) walks the real app; a screen can take longer than runTest's minute.
+tasks.withType<Test>().configureEach {
+    systemProperty("kotlinx.coroutines.test.default_timeout", "5m")
+    // The end-to-end cases (e2e/FlowsE2ETest) run only when CI's e2e job passes the API's URL.
+    providers.gradleProperty("dl.e2e").orNull?.let { systemProperty("dl.e2e", it) }
 }

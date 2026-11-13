@@ -1,6 +1,7 @@
 package com.delulutopia.core.designsystem.component
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
@@ -14,10 +15,12 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.delulutopia.core.designsystem.motion.pressScale
 import com.delulutopia.core.designsystem.theme.DlShape
 import com.delulutopia.core.designsystem.theme.DlTheme
 
@@ -40,9 +43,11 @@ fun DlFilledButton(
     enabled: Boolean = true,
     height: Dp = ButtonHeight,
 ) {
+    val press = remember { MutableInteractionSource() }
     Button(
         onClick = onClick,
-        modifier = modifier.defaultMinSize(minHeight = height),
+        modifier = modifier.pressScale(press, 0.97f).defaultMinSize(minHeight = height),
+        interactionSource = press,
         enabled = enabled,
         shape = DlShape.button,
         contentPadding = ContentPadding,
@@ -64,9 +69,11 @@ fun DlTonalButton(
     icon: ImageVector? = null,
     enabled: Boolean = true,
 ) {
+    val press = remember { MutableInteractionSource() }
     Button(
         onClick = onClick,
-        modifier = modifier.defaultMinSize(minHeight = ButtonHeight),
+        modifier = modifier.pressScale(press, 0.97f).defaultMinSize(minHeight = ButtonHeight),
+        interactionSource = press,
         enabled = enabled,
         shape = DlShape.button,
         contentPadding = ContentPadding,
@@ -74,6 +81,33 @@ fun DlTonalButton(
             containerColor = MaterialTheme.colorScheme.primaryContainer,
             contentColor = MaterialTheme.colorScheme.primary,
             disabledContainerColor = MaterialTheme.colorScheme.outlineVariant,
+            disabledContentColor = DlTheme.colors.inkDisabled,
+        ),
+    ) { ButtonContent(text, icon) }
+}
+
+/** web .dl-btn--ghost: the letter surface with a 1 dp line, ink label: See older, Back. */
+@Composable
+fun DlGhostButton(
+    text: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    icon: ImageVector? = null,
+    enabled: Boolean = true,
+) {
+    val press = remember { MutableInteractionSource() }
+    Button(
+        onClick = onClick,
+        modifier = modifier.pressScale(press, 0.97f).defaultMinSize(minHeight = ButtonHeight),
+        interactionSource = press,
+        enabled = enabled,
+        shape = DlShape.button,
+        contentPadding = ContentPadding,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = DlTheme.colors.letterEnvelope,
+            contentColor = MaterialTheme.colorScheme.onSurface,
+            disabledContainerColor = DlTheme.colors.letterEnvelope,
             disabledContentColor = DlTheme.colors.inkDisabled,
         ),
     ) { ButtonContent(text, icon) }
@@ -88,9 +122,11 @@ fun DlOutlinedButton(
     icon: ImageVector? = null,
     enabled: Boolean = true,
 ) {
+    val press = remember { MutableInteractionSource() }
     OutlinedButton(
         onClick = onClick,
-        modifier = modifier.defaultMinSize(minHeight = ButtonHeight),
+        modifier = modifier.pressScale(press).defaultMinSize(minHeight = ButtonHeight),
+        interactionSource = press,
         enabled = enabled,
         shape = DlShape.button,
         contentPadding = ContentPadding,
@@ -110,10 +146,13 @@ fun DlTextButton(
     modifier: Modifier = Modifier,
     destructive: Boolean = false,
     enabled: Boolean = true,
+    icon: ImageVector? = null,
 ) {
+    val press = remember { MutableInteractionSource() }
     TextButton(
         onClick = onClick,
-        modifier = modifier.defaultMinSize(minHeight = ButtonHeight),
+        modifier = modifier.pressScale(press).defaultMinSize(minHeight = ButtonHeight),
+        interactionSource = press,
         enabled = enabled,
         shape = DlShape.button,
         contentPadding = TextContentPadding,
@@ -121,7 +160,7 @@ fun DlTextButton(
             contentColor = if (destructive) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
             disabledContentColor = DlTheme.colors.inkDisabled,
         ),
-    ) { Text(text, style = MaterialTheme.typography.labelLarge) }
+    ) { ButtonContent(text, icon) }
 }
 
 @Composable
