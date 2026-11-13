@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Window theme under Compose: paper (or dark ground) so nothing flashes white. -->
+    <style name="Theme.Delulutopia" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@color/window_background</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+    </style>
+
+    <!-- Z-Icon splash: the envelope mark on the letter-paper circle, paper ground (dark in night). -->
+    <style name="Theme.Delulutopia.Starting" parent="Theme.SplashScreen.IconBackground">
+        <item name="windowSplashScreenBackground">@color/window_background</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash</item>
+        <item name="windowSplashScreenIconBackgroundColor">@color/splash_icon_background</item>
+        <item name="postSplashScreenTheme">@style/Theme.Delulutopia</item>
+    </style>
+</resources>

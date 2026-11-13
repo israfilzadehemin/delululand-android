@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Texts are in core:i18n (t("key")); the brand stays in Latin letters in every language (L11). -->
+    <string name="brand" translatable="false">Delulutopia</string>
+</resources>

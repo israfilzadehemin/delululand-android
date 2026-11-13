@@ -1,0 +1,97 @@
+package com.delulutopia.core.designsystem.component
+
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.BottomSheetDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.SheetState
+import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import com.delulutopia.core.designsystem.motion.Enter
+import com.delulutopia.core.designsystem.motion.enter
+import com.delulutopia.core.designsystem.theme.DlShape
+
+/**
+ * Modal bottom sheet (§3): drag handle, no × (dismiss by handle, scrim or back), 24 dp top corners,
+ * surfaceContainerHigh. Used for Mood, Send, Post, stamps, reactions, time zone, photo source.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun DlBottomSheet(
+    onDismissRequest: () -> Unit,
+    modifier: Modifier = Modifier,
+    sheetState: SheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    ModalBottomSheet(
+        onDismissRequest = onDismissRequest,
+        modifier = modifier,
+        sheetState = sheetState,
+        shape = DlShape.sheet,
+        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+        contentColor = MaterialTheme.colorScheme.onSurface,
+        scrimColor = MaterialTheme.colorScheme.scrim,
+        tonalElevation = BottomSheetDefaults.Elevation,
+        dragHandle = { BottomSheetDefaults.DragHandle(color = MaterialTheme.colorScheme.outline) },
+    ) {
+        // The sheet's contents rise a beat after the sheet (web .dl-sheet > *: 320 ms at 70 ms).
+        Column(Modifier.enter(Enter.Rise, 70, 320), content = content)
+    }
+}
+
+/**
+ * M3 basic dialog with the web's copy (§3): text buttons at the end, the destructive one in the
+ * error colour. E.g. "Take it back?", "Log out?", "Delete this discussion?".
+ */
+@Composable
+fun DlDialog(
+    title: String,
+    text: String?,
+    confirmLabel: String,
+    onConfirm: () -> Unit,
+    dismissLabel: String,
+    onDismiss: () -> Unit,
+    modifier: Modifier = Modifier,
+    destructive: Boolean = false,
+    /** A second, stronger line ("This replaces your current draft."). */
+    warning: String? = null,
+    /** While the confirmed action runs: both buttons off, the scrim does nothing. */
+    busy: Boolean = false,
+) {
+    AlertDialog(
+        onDismissRequest = { if (!busy) onDismiss() },
+        modifier = modifier,
+        title = { Text(title, style = MaterialTheme.typography.titleLarge) },
+        text = if (text == null && warning == null) {
+            null
+        } else {
+            {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    if (text != null) Text(text, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    if (warning !=
+                        null
+                    ) {
+                        Text(
+                            warning,
+                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                            color = MaterialTheme.colorScheme.error,
+                        )
+                    }
+                }
+            }
+        },
+        confirmButton = { DlTextButton(confirmLabel, onConfirm, destructive = destructive, enabled = !busy) },
+        dismissButton = { DlTextButton(dismissLabel, onDismiss, enabled = !busy) },
+        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+        titleContentColor = MaterialTheme.colorScheme.onSurface,
+        textContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+}

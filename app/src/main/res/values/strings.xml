@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- app_name is set per flavour in build.gradle.kts (Delulutopia / Delulutopia Test). -->
+    <!-- Every other text is in core:i18n (t("key")), so it follows the account's language (doc "Delululand — Languages" L8). -->
+    <string name="brand" translatable="false">Delulutopia</string>
+</resources>

@@ -1,0 +1,229 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      DL_VERSION_CODE: ${{ github.run_number }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: gradle/actions/wrapper-validation@v5
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - uses: gradle/actions/setup-gradle@v5
+
+      # C3: the upload key comes from repository secrets once they exist; until then release builds
+      # are signed with the debug key (the summary says which).
+      - name: Upload key
+        env:
+          KEYSTORE_BASE64: ${{ secrets.DL_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.DL_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.DL_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.DL_KEY_PASSWORD }}
+        run: |
+          if [ -n "$KEYSTORE_BASE64" ]; then
+            echo "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/upload.jks"
+            {
+              echo "DL_KEYSTORE_FILE=$RUNNER_TEMP/upload.jks"
+              echo "DL_KEYSTORE_PASSWORD=$KEYSTORE_PASSWORD"
+              echo "DL_KEY_ALIAS=$KEY_ALIAS"
+              echo "DL_KEY_PASSWORD=$KEY_PASSWORD"
+            } >> "$GITHUB_ENV"
+            echo "Release builds: signed with the upload key." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "Release builds: signed with the DEBUG key (no DL_KEYSTORE_BASE64 secret yet)." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Code style
+        run: ./gradlew ktlintCheck --continue
+
+      - name: Parity fixture API
+        run: nohup node tools/parity/server.mjs > parity-server.log 2>&1 &
+
+      - name: Unit and screenshot tests
+        run: ./gradlew testProdDebugUnitTest :core:i18n:testDebugUnitTest :core:designsystem:testDebugUnitTest :core:network:testDebugUnitTest :feature:start:testDebugUnitTest :core:ui:testDebugUnitTest :feature:home:testDebugUnitTest :feature:letters:testDebugUnitTest :feature:emails:testDebugUnitTest :feature:you:testDebugUnitTest -Proborazzi.test.record=true --continue
+
+      - name: Screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshots
+          path: '**/build/outputs/roborazzi/*.png'
+          if-no-files-found: warn
+
+      # Screenshots also go to the ci-screenshots branch (one folder per branch), so they can be browsed on GitHub.
+      - name: Publish screenshots to ci-screenshots
+        if: always() && github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+        env:
+          BRANCH_DIR: ${{ github.head_ref || github.ref_name }}
+        run: |
+          shopt -s globstar nullglob
+          files=(**/build/outputs/roborazzi/*.png)
+          [ ${#files[@]} -eq 0 ] && exit 0
+          dir="$RUNNER_TEMP/shots"
+          git clone --quiet --depth 1 --branch ci-screenshots "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" "$dir" 2>/dev/null || {
+            mkdir -p "$dir" && git -C "$dir" init -q -b ci-screenshots && git -C "$dir" remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}"
+          }
+          target="$dir/${BRANCH_DIR//\//-}"
+          rm -rf "$target" && mkdir -p "$target"
+          cp "${files[@]}" "$target/"
+          cd "$dir"
+          git add -A
+          git -c user.name="ci" -c user.email="ci@users.noreply.github.com" commit -qm "Screenshots for ${BRANCH_DIR} @ ${GITHUB_SHA::7}" || exit 0
+          git push -q origin ci-screenshots
+
+      - name: Lint
+        run: ./gradlew :app:lintProdDebug
+
+      - name: Build APKs and bundle
+        run: ./gradlew assembleStagingDebug assembleProdDebug assembleStagingRelease assembleProdRelease bundleProdRelease
+
+      - name: Reports
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reports
+          path: |
+            **/build/reports/
+            **/build/test-results/
+          if-no-files-found: ignore
+
+      - name: APKs
+        uses: actions/upload-artifact@v4
+        with:
+          name: apks
+          path: |
+            app/build/outputs/apk/**/*.apk
+            app/build/outputs/bundle/**/*.aab
+
+  # Every user flow against the real API (app/src/test/.../e2e): PostgreSQL + the delululand-api
+  # image of its newest green main, short timers, the entry key seeded; the app runs in Robolectric
+  # as user A while the cases act as user B through the API. The image is private: its package
+  # grants this repository Read access (Package settings › Manage Actions access).
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      contents: write
+      packages: read
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - uses: gradle/actions/setup-gradle@v5
+
+      - name: Start the API
+        run: |
+          echo "${{ github.token }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+          docker network create dl
+          docker run -d --name db --network dl -e POSTGRES_DB=delululand -e POSTGRES_USER=delululand -e POSTGRES_PASSWORD=e2e postgres:18
+          for i in $(seq 1 30); do docker exec db pg_isready -U delululand -d delululand && break; sleep 2; done
+          docker run -d --name api --network dl -p 127.0.0.1:8080:8080 \
+            -e DL_ENV=test -e DL_COOKIE_SECURE=false \
+            -e DL_DELAY=PT40S -e DL_WINDOW=PT30S -e DL_DISCUSSION_DELAY=PT40S \
+            -e DL_DB_URL=jdbc:postgresql://db:5432/delululand -e DL_DB_PASSWORD=e2e \
+            -e DL_PUBLIC_URL=http://localhost:8080 \
+            ghcr.io/israfilzadehemin/delululand-api:latest
+          status=""
+          for i in $(seq 1 90); do
+            status="$(curl -fsS http://localhost:8080/api/health 2> /dev/null | jq -r .status || true)"
+            [ "$status" = UP ] && break
+            sleep 2
+          done
+          curl -sS http://localhost:8080/api/health | jq -c . || true
+          [ "$status" = UP ]
+
+      # The master entry key of universe 1 (as delululand-web's e2e seeds it).
+      - name: Seed the entry key
+        run: |
+          docker exec -i db psql -v ON_ERROR_STOP=1 -U delululand -d delululand <<'SQL'
+          do $$ begin
+            if to_regclass('entry_code') is not null then
+              update entry_code set code_hash = crypt('E2EKEY234567', gen_salt('bf', 4)) where id = 1;
+            end if;
+            if to_regclass('universe') is not null then
+              update universe set code_lookup = digest('E2EKEY234567', 'sha256'), code_hash = null where id = 1;
+            end if;
+          end $$;
+          SQL
+
+      - name: End-to-end flows
+        run: |
+          set +e
+          ./gradlew :app:testProdDebugUnitTest --tests 'com.delulutopia.app.e2e.*' -Pdl.e2e=http://localhost:8080/ -Proborazzi.test.record=true --info > e2e.out 2>&1
+          code=$?
+          grep -E "e2e |FAILED|PASSED|SKIPPED|tests completed|BUILD|OutOfMemory|exit value|Could not complete|crashed" e2e.out
+          # Why each case failed or was skipped, from the JUnit reports.
+          python3 - <<'PY'
+          import glob, re, html
+          for f in glob.glob('app/build/test-results/**/TEST-*E2E*.xml', recursive=True):
+              x = open(f).read()
+              for m in re.finditer(r'<testcase name="([^"]+)"[^>]*>(.*?)</testcase>', x, re.S):
+                  body = m.group(2)
+                  for k in ('failure', 'skipped', 'error'):
+                      mm = re.search(r'<%s[^>]*?(?:message="([^"]*)")?[^>]*>(.*?)</%s>' % (k, k), body, re.S)
+                      if mm:
+                          print('==', k.upper(), m.group(1))
+                          print(html.unescape((mm.group(2) or mm.group(1) or ''))[:3000])
+          PY
+          exit $code
+
+      - name: API log
+        if: always()
+        run: |
+          docker logs api > api.log 2>&1 || true
+          grep -E "WARN|ERROR|Exception" api.log | tail -40 || true
+
+      # The cases' screenshots (each step's failure and each case's end) go to ci-screenshots/<branch>-e2e.
+      - name: Publish flow screenshots
+        if: always() && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
+        env:
+          BRANCH_DIR: ${{ github.head_ref || github.ref_name }}
+        run: |
+          shopt -s nullglob
+          files=(app/build/outputs/roborazzi/e2e_*.png)
+          [ ${#files[@]} -eq 0 ] && exit 0
+          dir="$RUNNER_TEMP/shots"
+          git clone --quiet --depth 1 --branch ci-screenshots "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" "$dir"
+          target="$dir/${BRANCH_DIR//\//-}-e2e"
+          rm -rf "$target" && mkdir -p "$target"
+          cp "${files[@]}" "$target/"
+          cd "$dir"
+          git add -A
+          git -c user.name="ci" -c user.email="ci@users.noreply.github.com" commit -qm "E2E screenshots for ${BRANCH_DIR} @ ${GITHUB_SHA::7}" || exit 0
+          for i in 1 2 3; do git push -q origin ci-screenshots && break; git pull -q --rebase origin ci-screenshots; done
+
+      - name: Flow reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e
+          path: |
+            api.log
+            app/build/outputs/roborazzi/e2e_*.png
+            app/build/reports/tests/
+            app/build/test-results/
+          if-no-files-found: ignore

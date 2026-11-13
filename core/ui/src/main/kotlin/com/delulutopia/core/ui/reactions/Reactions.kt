@@ -1,0 +1,387 @@
+package com.delulutopia.core.ui.reactions
+
+import android.content.Context
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.StrokeJoin
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.scale
+import androidx.compose.ui.graphics.vector.PathParser
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Popup
+import com.delulutopia.core.data.Time
+import com.delulutopia.core.designsystem.theme.DlTheme
+import com.delulutopia.core.i18n.formatNumber
+import com.delulutopia.core.i18n.t
+import com.delulutopia.core.network.model.Citizen
+import com.delulutopia.core.network.model.Reaction
+import com.delulutopia.core.network.model.ReactionNotice
+import com.delulutopia.core.ui.EmojiPickerSheet
+import java.text.BreakIterator
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+
+/** Where reactions go: `discussions`, `comments` or `emails`. Adds or removes mine; answers the new chips. */
+fun interface ReactionsApi {
+    suspend fun toggle(target: String, id: Long, emoji: String, add: Boolean): List<Reaction>
+}
+
+val LocalReactionsApi = staticCompositionLocalOf<ReactionsApi> { ReactionsApi { _, _, _, _ -> emptyList() } }
+
+/** The chip list with my emoji added or taken away; a chip with nobody left disappears. */
+fun withMine(list: List<Reaction>, emoji: String, me: Int, add: Boolean): List<Reaction> {
+    val i = list.indexOfFirst { it.emoji == emoji }
+    if (add) {
+        if (i < 0) return list + Reaction(emoji, listOf(me))
+        if (me in list[i].userIds) return list
+        return list.mapIndexed { j, c -> if (j == i) c.copy(userIds = c.userIds + me) else c }
+    }
+    if (i < 0) return list
+    val users = list[i].userIds - me
+    return if (users.isEmpty()) list.filterIndexed { j, _ -> j != i } else list.mapIndexed { j, c -> if (j == i) c.copy(userIds = users) else c }
+}
+
+/** The quick row's six emojis: most recent first, kept on this phone (R2). */
+private val DEFAULT_RECENTS = listOf("❤️", "😂", "🥹", "😮", "😢", "🔥")
+private const val RECENTS = "reactionRecents"
+
+private fun readRecents(context: Context): List<String> {
+    val saved = context.getSharedPreferences("device", Context.MODE_PRIVATE).getString(RECENTS, null)?.split('\u0001').orEmpty()
+    return (saved + DEFAULT_RECENTS).filter { it.isNotEmpty() }.distinct().take(6)
+}
+
+private fun pushRecent(context: Context, emoji: String) {
+    val next = (listOf(emoji) + readRecents(context).filter { it != emoji }).take(6)
+    context.getSharedPreferences("device", Context.MODE_PRIVATE).edit().putString(RECENTS, next.joinToString("\u0001")).apply()
+}
+
+/**
+ * The chip row under a discussion, a comment or an email (doc "Delululand — Reactions" R1–R3; web
+ * reactions/Reactions.tsx): one chip per emoji, highlighted when I am among its users, a count when
+ * both used it. Tapping my chip removes mine; tapping the friend's adds the same. ＋ opens six recent
+ * emojis and ⋯ the full picker. A long press shows who reacted. Changes show at once.
+ */
+@OptIn(ExperimentalLayoutApi::class, ExperimentalFoundationApi::class)
+@Composable
+fun Reactions(
+    target: String,
+    id: Long,
+    reactions: List<Reaction>,
+    me: Citizen?,
+    friend: Citizen?,
+    modifier: Modifier = Modifier,
+    readOnly: Boolean = false,
+    chipColour: Color = MaterialTheme.colorScheme.background,
+    compact: Boolean = false,
+    surface: ReactionSurface = ReactionSurface.Page,
+    onChanged: () -> Unit = {},
+) {
+    // My chip: seal tint on the page; terracotta mark on paper and notes; mail blue on a mail card.
+    val c = DlTheme.colors
+    val (mineFill, mineLine) = when (surface) {
+        ReactionSurface.Page -> MaterialTheme.colorScheme.primaryContainer to MaterialTheme.colorScheme.primary
+        ReactionSurface.Paper -> c.markContainer to c.reactLine
+        ReactionSurface.Mail -> c.mailUnread to c.mailBlue
+    }
+    val chipLine = if (surface == ReactionSurface.Mail) c.mailLine else MaterialTheme.colorScheme.outlineVariant
+    // web .dl-reaction: 30 dp chips (26 on a comment), 15 dp radius, 600 13 px count.
+    val chipH = if (compact) 26.dp else 30.dp
+    val chipMin = if (compact) 32.dp else 36.dp
+    val chipPad = if (compact) 7.dp else 9.dp
+    val chipShape = RoundedCornerShape(chipH / 2)
+    val api = LocalReactionsApi.current
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    var chips by remember { mutableStateOf(reactions) }
+    var pending by remember { mutableIntStateOf(0) }
+    var error by remember { mutableStateOf(false) }
+    var quick by remember { mutableStateOf(false) }
+    var all by remember { mutableStateOf(false) }
+    var tip by remember { mutableStateOf<String?>(null) }
+    // Follow the server's chips (polls) unless a change of mine is in flight: its answer is newer.
+    LaunchedEffect(reactions) { if (pending == 0) chips = reactions }
+    LaunchedEffect(tip) {
+        if (tip != null) {
+            delay(2_000)
+            tip = null
+        }
+    }
+    val myId = me?.id
+    val mineOn = { emoji: String -> myId != null && chips.any { it.emoji == emoji && myId in it.userIds } }
+    val names = { users: List<Int> ->
+        users.mapNotNull { u ->
+            if (u ==
+                me?.id
+            ) {
+                me.nickname
+            } else if (u == friend?.id) {
+                friend.nickname
+            } else {
+                null
+            }
+        }.joinToString(", ")
+    }
+    val toggle = { emoji: String ->
+        if (myId != null && !readOnly) {
+            val removing = mineOn(emoji)
+            error = false
+            chips = withMine(chips, emoji, myId, !removing)
+            if (!removing) pushRecent(context, emoji)
+            pending++
+            scope.launch {
+                try {
+                    chips = api.toggle(target, id, emoji, !removing)
+                    onChanged()
+                } catch (_: Exception) {
+                    chips = withMine(chips, emoji, myId, removing)
+                    error = true
+                } finally {
+                    pending--
+                }
+            }
+        }
+    }
+    if (readOnly && chips.isEmpty()) return
+    Column(modifier) {
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            chips.forEach { c ->
+                val on = myId != null && myId in c.userIds
+                val who = names(c.userIds)
+                Row(
+                    Modifier
+                        .height(chipH)
+                        .widthIn(min = chipMin)
+                        .clip(chipShape)
+                        .background(if (on) mineFill else chipColour)
+                        .border(1.dp, if (on) mineLine else chipLine, chipShape)
+                        .then(
+                            if (readOnly) {
+                                Modifier
+                            } else {
+                                Modifier.combinedClickable(onLongClick = { tip = "${c.emoji} $who" }) { toggle(c.emoji) }
+                            },
+                        )
+                        .semantics {
+                            contentDescription = when {
+                                readOnly -> "${c.emoji} $who"
+                                on -> t("reactions.chipLabelMine", "emoji" to c.emoji, "who" to who)
+                                else -> t("reactions.chipLabel", "emoji" to c.emoji, "who" to who)
+                            }
+                        }
+                        .padding(horizontal = chipPad),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterHorizontally),
+                ) {
+                    Text(c.emoji, fontSize = if (compact) 14.sp else 16.sp)
+                    if (c.userIds.size > 1) {
+                        Text(
+                            formatNumber(c.userIds.size),
+                            style = MaterialTheme.typography.labelMedium.copy(fontSize = 13.sp, fontWeight = FontWeight.SemiBold, fontFeatureSettings = "tnum"),
+                        )
+                    }
+                }
+            }
+            if (!readOnly) {
+                Box {
+                    // web .dl-reaction--add: a dashed chip with the face-plus.
+                    val line = chipLine
+                    val quiet = MaterialTheme.colorScheme.onSurfaceVariant
+                    Box(
+                        Modifier
+                            .size(chipMin, chipH)
+                            .clip(chipShape)
+                            .background(chipColour)
+                            .drawBehind {
+                                val w = 1.dp.toPx()
+                                drawRoundRect(
+                                    line,
+                                    topLeft = Offset(w / 2, w / 2),
+                                    size = Size(size.width - w, size.height - w),
+                                    cornerRadius = CornerRadius(size.height / 2),
+                                    style = Stroke(w, pathEffect = PathEffect.dashPathEffect(floatArrayOf(3.dp.toPx(), 2.dp.toPx()))),
+                                )
+                            }.combinedClickable { quick = !quick }
+                            .semantics { contentDescription = t("reactions.addAReaction") },
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        FacePlus(quiet)
+                    }
+                    if (quick) {
+                        Popup(alignment = Alignment.BottomStart, offset = IntOffset(0, -120), onDismissRequest = { quick = false }) {
+                            Row(
+                                Modifier
+                                    .shadow(8.dp, RoundedCornerShape(22.dp))
+                                    .clip(RoundedCornerShape(22.dp))
+                                    .background(DlTheme.colors.letterEnvelope)
+                                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(22.dp))
+                                    .padding(4.dp),
+                                horizontalArrangement = Arrangement.spacedBy(2.dp),
+                            ) {
+                                readRecents(context).forEach { e ->
+                                    Box(
+                                        Modifier
+                                            .size(38.dp)
+                                            .clip(RoundedCornerShape(19.dp))
+                                            .background(if (mineOn(e)) MaterialTheme.colorScheme.primaryContainer else Color.Transparent)
+                                            .combinedClickable {
+                                                quick = false
+                                                toggle(e)
+                                            },
+                                        contentAlignment = Alignment.Center,
+                                    ) { Text(e, fontSize = 22.sp) }
+                                }
+                                Box(
+                                    Modifier
+                                        .size(38.dp)
+                                        .clip(RoundedCornerShape(19.dp))
+                                        .combinedClickable {
+                                            quick = false
+                                            all = true
+                                        }
+                                        .semantics { contentDescription = t("reactions.allEmojis") },
+                                    contentAlignment = Alignment.Center,
+                                ) { Text("⋯", fontSize = 18.sp, color = MaterialTheme.colorScheme.onSurfaceVariant) }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        tip?.let { Text(it, Modifier.padding(top = 4.dp), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
+        if (error) {
+            Text(
+                t("reactions.notSavedTryAgain"),
+                Modifier.padding(top = 4.dp),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error,
+            )
+        }
+    }
+    if (all) {
+        EmojiPickerSheet(
+            t("reactions.allEmojis"),
+            onPick = {
+                all = false
+                if (!mineOn(it)) toggle(it)
+            },
+            onDismiss = { all = false },
+        )
+    }
+}
+
+/** The folded email line: the chips' emojis only. */
+@Composable
+fun ReactionSummary(reactions: List<Reaction>, modifier: Modifier = Modifier) {
+    if (reactions.isEmpty()) return
+    val shown = reactions.take(4).joinToString("") { it.emoji } + if (reactions.size > 4) "…" else ""
+    Text(shown, modifier.semantics { contentDescription = t("reactions.reactions2", "join" to reactions.joinToString(" ") { it.emoji }) }, fontSize = 14.sp)
+}
+
+/** C3: how much of the reacted item's text a row quotes, in visible characters. */
+const val NOTICE_SNIPPET = 40
+
+/**
+ * The row line for unseen reactions (doc "Delululand — Replies & Reaction Notices" C3–C5):
+ * "Friend reacted to 'first 40 characters…' with ❤️", "+N more" when there are others.
+ */
+fun noticeLine(n: ReactionNotice, count: Int, reactorName: String): String {
+    val more = if (count > 1) t("reactions.notice.more", "n" to count - 1) else ""
+    val text = n.text
+    val line = when {
+        text != null -> t("reactions.notice.text", "name" to reactorName, "text" to clip(text, NOTICE_SNIPPET), "emoji" to n.emoji)
+        n.onMine -> t("reactions.notice.mine", "name" to reactorName, "item" to itemWord(n), "emoji" to n.emoji)
+        else -> t("reactions.notice.theirs", "name" to reactorName, "item" to itemWord(n), "emoji" to n.emoji)
+    }
+    return line + more
+}
+
+private fun itemWord(n: ReactionNotice): String = when {
+    n.target == "discussion" -> t("reactions.item.discussion")
+    n.target == "comment" -> t("reactions.item.comment")
+    n.target != "email" -> n.target
+    n.media == "video" -> t("reactions.item.video")
+    n.media == "photo" -> t("reactions.item.photo")
+    n.media == "audio" -> t("reactions.item.voiceNote")
+    else -> t("reactions.item.email")
+}
+
+private fun clip(text: String, max: Int): String {
+    val t = text.replace(Regex("\\s+"), " ").trim()
+    val chars = BreakIterator.getCharacterInstance()
+    chars.setText(t)
+    var count = 0
+    var end = 0
+    while (true) {
+        val next = chars.next()
+        if (next == BreakIterator.DONE) return t
+        count++
+        end = next
+        if (count == max) break
+    }
+    return if (end >= t.length) t else t.substring(0, end).trimEnd() + "…"
+}
+
+/** C4: the reaction line replaces the row's usual line only while it is the newest activity. */
+fun reactionWins(n: ReactionNotice?, count: Int, otherActivityAt: String?): Boolean {
+    if (n == null || count == 0) return false
+    val other = otherActivityAt?.let { Time.ms(it) } ?: return true
+    return (Time.ms(n.at) ?: 0) > other
+}
+
+/** The add-a-reaction face with a plus (web Reactions.tsx svg, 16 px on a 24 grid). */
+@Composable
+private fun FacePlus(tint: Color) {
+    val path = remember { PathParser().parsePathString("M8 14s1 1.5 3 1.5 3-1.5 3-1.5M8.5 9.5h.01M13.5 9.5h.01M19 3v4M17 5h4").toPath() }
+    Canvas(Modifier.size(16.dp)) {
+        scale(size.width / 24f, pivot = Offset.Zero) {
+            val stroke = Stroke(2f, cap = StrokeCap.Round, join = StrokeJoin.Round)
+            drawCircle(tint, 8f, Offset(11f, 12f), style = stroke)
+            drawPath(path, tint, style = stroke)
+        }
+    }
+}
+
+/** Where a chip row sits: it decides how my own reaction is marked (web reactions.css, paper.css, materials.css). */
+enum class ReactionSurface { Page, Paper, Mail }
