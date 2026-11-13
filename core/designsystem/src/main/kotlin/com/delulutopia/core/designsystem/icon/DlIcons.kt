@@ -83,6 +83,16 @@ object DlIcons {
     val Share = line("share", THIN, "M12 15V3", "M7 8l5-5 5 5", "M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6")
     val LogOut = line("log.out", THIN, "M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3", "M10 17l-5-5 5-5", "M5 12h11")
     val Language = line("language", THIN, "M4 5h16v11H9l-5 4z", "M9.5 13l2.5-6 2.5 6M10.4 11h3.2")
+
+    /** The landing's language button (web LangSwitch, doc "Delululand — Languages" L20). */
+    val Globe = line(
+        "globe",
+        THIN,
+        circle(12f, 12f, 9f),
+        "M3 12h18",
+        "M12 3c2.5 2.7 3.8 5.7 3.8 9s-1.3 6.3-3.8 9",
+        "M12 3C9.5 5.7 8.2 8.7 8.2 12s1.3 6.3 3.8 9",
+    )
     val Palette = line("palette", THIN, "M12 3a9 9 0 1 0 0 18c1.1 0 1.6-.8 1.6-1.6 0-1.2-1-1.4-1-2.4 0-.8.7-1.4 1.6-1.4H17a4 4 0 0 0 4-4c0-4.7-4-8.6-9-8.6z")
 
     private fun line(name: String, stroke: Float, vararg paths: String): ImageVector =

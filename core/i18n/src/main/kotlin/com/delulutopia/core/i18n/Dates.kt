@@ -10,14 +10,20 @@ import java.util.Date
 import java.util.Locale
 
 /**
- * Day and time text in the language in force (L4): 24-hour everywhere; English `27 Oct`, Azerbaijani
- * `27 oktyabr`, Persian the solar (Jalali) calendar `۵ آبان` with Persian digits. "This year" is counted in
- * the calendar shown.
+ * Day and time text in the language in force (L4, L18): 24-hour everywhere; English `27 Oct`, Azerbaijani
+ * `27 oktyabr`, Turkish `27 Ekim`, Russian `27 октября` (the genitive month, no "г."), Persian the solar
+ * (Jalali) calendar `۵ آبان` with Persian digits. "This year" is counted in the calendar shown.
  */
 object Dates {
     private val TIME = DateTimeFormatter.ofPattern("HH:mm", Locale.UK)
     private val EN_DAY = DateTimeFormatter.ofPattern("d MMM", Locale.UK)
     private val EN_DAY_YEAR = DateTimeFormatter.ofPattern("d MMM yyyy", Locale.UK)
+
+    // java.time's "MMMM" after a day is the form a date takes: "Kasım", "ноября".
+    private val TR_DAY = DateTimeFormatter.ofPattern("d MMMM", Lang.TR.locale)
+    private val TR_DAY_YEAR = DateTimeFormatter.ofPattern("d MMMM yyyy", Lang.TR.locale)
+    private val RU_DAY = DateTimeFormatter.ofPattern("d MMMM", Lang.RU.locale)
+    private val RU_DAY_YEAR = DateTimeFormatter.ofPattern("d MMMM yyyy", Lang.RU.locale)
 
     /** Written here so every phone says the same (the web does the same: Chrome has no Azerbaijani dates). */
     private val AZ_MONTHS = listOf(
@@ -33,6 +39,8 @@ object Dates {
     fun day(d: ZonedDateTime, year: Boolean, lang: Lang = I18n.lang): String = when (lang) {
         Lang.EN -> d.format(if (year) EN_DAY_YEAR else EN_DAY)
         Lang.AZ -> "${d.dayOfMonth} ${AZ_MONTHS[d.monthValue - 1]}" + if (year) " ${d.year}" else ""
+        Lang.TR -> d.format(if (year) TR_DAY_YEAR else TR_DAY)
+        Lang.RU -> d.format(if (year) RU_DAY_YEAR else RU_DAY)
         Lang.FA -> persian(d, if (year) "d MMMM y" else "d MMMM")
     }
 

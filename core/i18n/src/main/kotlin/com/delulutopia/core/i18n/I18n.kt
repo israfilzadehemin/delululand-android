@@ -54,15 +54,30 @@ object I18n {
 /** The text for [key] in the current language, with `{name}` placeholders filled from [args]. English when missing. */
 fun t(key: String, vararg args: Pair<String, Any?>): String = translate(I18n.lang, key, *args)
 
-/** Plural: `<base>_one` or `<base>_other` by [n] (CLDR rules of the three languages); `{n}` is filled too. */
+/**
+ * Plural: `<base>_<category>` by [n] and the CLDR rules of each language, else `<base>_other`; `{n}` is
+ * filled too. Russian has `_one`, `_few` and `_many` ("1 письмо", "2 письма", "5 писем", L17); the others
+ * say a noun once after a number, so `_other` mostly does.
+ */
 fun tn(base: String, n: Int, vararg args: Pair<String, Any?>): String {
     val lang = I18n.lang
-    val one = when (lang) {
-        Lang.FA -> n == 0 || n == 1
-        else -> n == 1
-    }
-    val key = if (one && has(lang, "${base}_one")) "${base}_one" else "${base}_other"
+    val own = "${base}_${pluralCategory(n, lang)}"
+    val key = if (has(lang, own)) own else "${base}_other"
     return translate(lang, key, "n" to n, *args)
+}
+
+/** CLDR plural category of a whole number (written here so it runs on a plain JVM, as the tests do). */
+fun pluralCategory(n: Int, lang: Lang): String {
+    val abs = kotlin.math.abs(n)
+    return when (lang) {
+        Lang.FA -> if (abs == 0 || abs == 1) "one" else "other"
+        Lang.RU -> when {
+            abs % 10 == 1 && abs % 100 != 11 -> "one"
+            abs % 10 in 2..4 && abs % 100 !in 12..14 -> "few"
+            else -> "many"
+        }
+        else -> if (abs == 1) "one" else "other"
+    }
 }
 
 fun translate(lang: Lang, key: String, vararg args: Pair<String, Any?>): String {
@@ -82,6 +97,8 @@ private fun catalog(lang: Lang): Map<String, String> = when (lang) {
     Lang.EN -> Catalog.en
     Lang.AZ -> Catalog.az
     Lang.FA -> Catalog.fa
+    Lang.TR -> Catalog.tr
+    Lang.RU -> Catalog.ru
 }
 
 private val PLACEHOLDER = Regex("\\{([A-Za-z]+)\\}")
@@ -119,10 +136,11 @@ internal fun hasForeignLetter(s: String): Boolean {
     return false
 }
 
-/** 1,500 / 1 500 / ۱٬۵۰۰. */
+/** 1,500 / 1 500 / ۱٬۵۰۰ / 1.500 (Turkish). */
 fun formatNumber(n: Long, lang: Lang = I18n.lang): String = when (lang) {
     Lang.EN -> NumberFormat.getIntegerInstance(Locale.UK).format(n)
-    Lang.AZ -> NumberFormat.getIntegerInstance(Locale.UK).format(n).replace(',', ' ')
+    Lang.AZ, Lang.RU -> NumberFormat.getIntegerInstance(Locale.UK).format(n).replace(',', ' ')
+    Lang.TR -> NumberFormat.getIntegerInstance(Locale.UK).format(n).replace(',', '.')
     Lang.FA -> localDigits(NumberFormat.getIntegerInstance(Locale.UK).format(n).replace(',', '٬'), lang)
 }
 

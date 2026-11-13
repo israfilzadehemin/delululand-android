@@ -40,7 +40,7 @@ fun clamp(text: String, max: Int = EMAIL_MAX): Pair<String, Boolean> {
 fun creditsLine(c: EmailCredits?): String? {
     if (c == null) return null
     val renews = Time.time(c.renewsAt)
-    return if (c.left > 0) t("emails.creditsLeft", "n" to c.left, "time" to renews) else t("emails.noCredits", "time" to renews)
+    return if (c.left > 0) tn("emails.creditsLeft", c.left, "time" to renews) else t("emails.noCredits", "time" to renews)
 }
 
 /** Words for an email without text (FS-E3, Q3). */
