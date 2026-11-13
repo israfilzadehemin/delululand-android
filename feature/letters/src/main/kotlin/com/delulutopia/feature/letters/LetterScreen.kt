@@ -266,7 +266,7 @@ private fun LetterContent(letter: LetterFull, home: Home?, swiped: Boolean, vm: 
                                         drawLine(rule, Offset(0f, size.height - 3.dp.toPx()), Offset(size.width, size.height - 3.dp.toPx()), 1.dp.toPx())
                                         drawLine(rule, Offset(0f, size.height - 0.5.dp.toPx()), Offset(size.width, size.height - 0.5.dp.toPx()), 1.dp.toPx())
                                     }
-                                    .padding(start = 16.dp, top = 16.dp, end = if (letter.stamp != null) 84.dp else 16.dp, bottom = 15.dp),
+                                    .absolutePadding(left = 16.dp, top = 16.dp, right = if (letter.stamp != null) 84.dp else 16.dp, bottom = 15.dp),
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                             ) {
