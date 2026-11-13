@@ -13,7 +13,7 @@ import sys
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 HERE = os.path.join(ROOT, 'tools', 'i18n')
 OUT = os.path.join(ROOT, 'core', 'i18n', 'src', 'main', 'kotlin', 'com', 'delulutopia', 'core', 'i18n', 'Catalog.kt')
-LANGS = ('en', 'az', 'fa')
+LANGS = ('en', 'az', 'fa', 'tr', 'ru')
 CHUNK = 150  # entries per function, far below the JVM's 64 KB method limit
 
 
@@ -27,7 +27,7 @@ def load():
             cat[lang][key] = texts[lang]
     ph = lambda s: set(re.findall(r'\{([A-Za-z]+)\}', s))
     for key, en in cat['en'].items():
-        for lang in ('az', 'fa'):
+        for lang in LANGS[1:]:
             if key not in cat[lang]:
                 sys.exit(f'{lang} misses {key}')
             if not ph(cat[lang][key]) <= ph(en):
