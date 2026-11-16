@@ -72,6 +72,7 @@ import com.delulutopia.core.ui.fingerprint.Fingerprint
 import com.delulutopia.core.ui.initials
 import com.delulutopia.core.ui.notify.NotifyPermission
 import com.delulutopia.core.ui.notify.rememberNotifyAccess
+import com.delulutopia.core.ui.plan.TierChip
 import com.delulutopia.core.ui.signatureOf
 import com.delulutopia.core.ui.tintOf
 
@@ -189,9 +190,21 @@ fun YouScreen(themeMode: ThemeMode, onLogout: () -> Unit, vm: YouViewModel = hil
             }
         }
         Group(t("settings.settings")) {
-            DlListItem(t("settings.universe"), supporting = t("settings.nameWelcomeKey", "brand" to brand), icon = UniverseIcon, onClick = {
-                nav.open(UniverseRoute)
-            })
+            val tier = homeState.home?.plan?.tier // Subscription Tiers YU-1
+            DlListItem(
+                t("settings.universe"),
+                supporting = t("settings.nameWelcomeKey", "brand" to brand),
+                icon = UniverseIcon,
+                onClick = { nav.open(UniverseRoute) },
+                trailing = tier?.let {
+                    {
+                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            TierChip(it)
+                            Icon(DlIcons.ChevronRight, null, Modifier.size(20.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
+                    }
+                },
+            )
             DlListItem(
                 t("settings.appearance"),
                 supporting = t(if (leaves) "settings.appearanceSubOn" else "settings.appearanceSubOff", "theme" to THEME_WORDS[themeMode]),

@@ -31,6 +31,8 @@ class EmailComposer(
     private val scope: CoroutineScope,
     private val context: Context,
 ) {
+    /** Home, for the plan's limits (Subscription Tiers CM-1–CM-7). */
+    val homeState = home.state
     val withSubject = key == "new"
     var loaded by mutableStateOf(false)
         private set

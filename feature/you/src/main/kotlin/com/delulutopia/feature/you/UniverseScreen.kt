@@ -46,6 +46,7 @@ import com.delulutopia.core.i18n.t
 import com.delulutopia.core.network.model.UniverseView
 import com.delulutopia.core.ui.LocalAppNav
 import com.delulutopia.core.ui.LocalNotice
+import com.delulutopia.core.ui.plan.PlanSection
 import com.delulutopia.core.ui.signatureOf
 import com.delulutopia.core.ui.tintOf
 import com.delulutopia.feature.start.KeyReveal
@@ -118,6 +119,8 @@ private fun CreatorForm(vm: UniverseViewModel, view: UniverseView) {
     )
     DlTextButton(t("settings.seeItAsYourFriend"), { preview = true }, enabled = welcomeProblem == null)
     DlFilledButton(if (vm.busy) t("common.saving") else t("common.save"), { vm.save(notice) }, Modifier.fillMaxWidth(), enabled = canSave)
+
+    PlanOf(vm, view)
 
     // web .dl-universe-section: a 1 dp outlined box, 12 dp corners, 16 padding, 10 between.
     Column(
@@ -205,6 +208,17 @@ private fun ReadOnly(vm: UniverseViewModel, view: UniverseView) {
             }
         }
     }
+    PlanOf(vm, view)
+}
+
+/** Subscription Tiers PL-1: the same section for both citizens; Home's plan carries today's numbers. */
+@Composable
+private fun PlanOf(vm: UniverseViewModel, view: UniverseView) {
+    val homeState by vm.homeState.collectAsStateWithLifecycle()
+    val plan = homeState.home?.plan
+    val tier = plan?.tier ?: view.tier ?: return
+    val limits = plan?.limits ?: view.limits ?: return
+    PlanSection(tier, limits, plan)
 }
 
 /** web .dl-field-label: 12/700, 0.06 em, caps. */

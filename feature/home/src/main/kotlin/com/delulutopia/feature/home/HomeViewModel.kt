@@ -22,6 +22,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.serialization.builtins.serializer
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.toRequestBody
@@ -129,6 +130,10 @@ class HomeViewModel @Inject constructor(
             repo.refreshSoon()
             HomeActions.PostResult.Posted
         } catch (e: ApiException) {
+            if (e.code == "DOODLE_DAILY_LIMIT") {
+                val renews = backend.extra(e, "renewsAt", String.serializer()) ?: repo.state.value.home?.plan?.renewsAt
+                if (renews != null) return HomeActions.PostResult.Capped(renews)
+            }
             val current = if (e.code == "BOARD_CHANGED") backend.extra(e, "board", Board.serializer()) else null
             if (current != null) {
                 repo.patch { it.copy(board = current) }

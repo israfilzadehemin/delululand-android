@@ -134,6 +134,8 @@ data class Home(
     val boardNew: Boolean = false,
     val notifyPrefs: NotifyPrefs? = null,
     val universe: UniverseInfo,
+    /** Subscription Tiers: null from an API before V24; nothing is limited on screen then. */
+    val plan: Plan? = null,
 ) {
     /** The other citizen's name for sentences, or "your friend" while the creator is alone (Universe U8). */
     val friendName: String get() = friend?.nickname ?: t("settings.yourFriend")
@@ -391,7 +393,31 @@ data class UniverseView(
     val creator: UniverseCreator? = null,
     val isCreator: Boolean = false,
     val codeRotatedAt: String? = null,
+    val tier: String? = null,
+    val limits: PlanLimits? = null,
 )
+
+// Subscription Tiers (doc "Delululand — Subscription Tiers" §5)
+
+@Serializable
+data class PlanLimits(
+    val emailsDaily: Int,
+    val photosPerMessage: Int,
+    val photosDaily: Int,
+    val videoSeconds: Int,
+    val videoMb: Int,
+    val videosDaily: Int,
+    /** Null is unlimited (Premium, ST1). */
+    val boardDoodlesDaily: Int? = null,
+)
+
+@Serializable
+data class PlanLeft(val emails: Int, val photos: Int, val videos: Int, val boardDoodles: Int? = null)
+
+@Serializable
+data class Plan(val tier: String, val limits: PlanLimits, val left: PlanLeft, val renewsAt: String) {
+    val premium: Boolean get() = tier == "premium"
+}
 
 @Serializable
 data class KeyCode(val code: String)

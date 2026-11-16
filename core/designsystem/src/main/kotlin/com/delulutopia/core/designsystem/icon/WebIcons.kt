@@ -603,6 +603,25 @@ object WebIcons {
         )
     }
 
+    /** Subscription Tiers: the Premium badge's star and the "renews at" clock. */
+    val Star: ImageVector by lazy {
+        icon(
+            "IconStar",
+            24f,
+            24f,
+            E("M12 3.5l2.6 5.3 5.9.9-4.25 4.1 1 5.8L12 16.9l-5.25 2.7 1-5.8L3.5 9.7l5.9-.9z", fill = false, stroke = true, width = 2.2f),
+        )
+    }
+
+    val ClockSmall: ImageVector by lazy {
+        icon(
+            "IconClockSmall",
+            24f,
+            24f,
+            E("M3 12a9 9 0 1 0 18 0a9 9 0 1 0-18 0M12 7v5l3 2", fill = false, stroke = true, width = 2f),
+        )
+    }
+
     private class E(val d: String, val fill: Boolean, val stroke: Boolean, val width: Float)
 
     /** Icons that point along the reading direction mirror in Persian (L3), as the web's `dl-rtl-flip`. */

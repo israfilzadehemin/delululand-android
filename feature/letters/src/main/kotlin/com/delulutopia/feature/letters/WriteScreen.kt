@@ -107,6 +107,9 @@ import com.delulutopia.core.ui.media.Item
 import com.delulutopia.core.ui.media.Source
 import com.delulutopia.core.ui.media.VoiceState
 import com.delulutopia.core.ui.media.rememberVoiceRecording
+import com.delulutopia.core.ui.plan.StripLimits
+import com.delulutopia.core.ui.plan.mediaOf
+import com.delulutopia.core.ui.plan.stripLimits
 import com.delulutopia.core.ui.rememberNow
 import com.delulutopia.core.ui.signatureOf
 import kotlinx.coroutines.delay
@@ -159,7 +162,9 @@ private fun DraftWrite(vm: WriteViewModel, editor: RichEditorState) {
 
     val atts = vm.attachments!!
     val voice = rememberVoiceRecording { bytes, ms -> atts.add(Uploader.Kind.Audio, Source.Made(bytes, "audio/mp4"), "voice.m4a", ms) }
-    val canSend = (!vm.empty || atts.done.isNotEmpty()) && !atts.uploading && !voice.recording
+    // Subscription Tiers CM-1–CM-7: an over-limit draft is kept, and refused until something goes (ST13).
+    val limits = stripLimits(home?.plan, mediaOf(atts.items))
+    val canSend = (!vm.empty || atts.done.isNotEmpty()) && !atts.uploading && !voice.recording && limits?.block == null
     val savedLine = when {
         saveState.status == DraftSaver.Status.Error -> t("common.draftNotSaved")
         saveState.savedAt != null && saveState.status != DraftSaver.Status.Conflict -> t("common.draftSaved", "time" to Time.time(saveState.savedAt))
@@ -168,6 +173,7 @@ private fun DraftWrite(vm: WriteViewModel, editor: RichEditorState) {
 
     WriteFrame(
         vm = vm,
+        limits = limits,
         editor = editor,
         title = t("letters.to", "friend" to friend),
         subtitle = savedLine,
@@ -251,7 +257,10 @@ private fun EditWrite(vm: WriteViewModel, editor: RichEditorState) {
     val initialIds = remember { letter.attachments.joinToString(",") { it.id } }
     val initialBody = remember { letter.body }
     val changed = vm.body != initialBody || atts.done.joinToString(",") { it.id } != initialIds || atts.uploading || vm.stamp?.slug != letter.stamp?.slug
-    val canSend = !late && !busy && (!vm.empty || atts.done.isNotEmpty()) && !atts.uploading && !voice.recording
+    // ST6: the edit spends only the photos it adds; the per-message limit counts them all.
+    val originalIds = remember { letter.attachments.map { it.id }.toSet() }
+    val limits = stripLimits(home?.plan, mediaOf(atts.items, originalIds))
+    val canSend = !late && !busy && (!vm.empty || atts.done.isNotEmpty()) && !atts.uploading && !voice.recording && limits?.block == null
     val back = {
         if (changed) {
             confirmDiscard = true
@@ -264,6 +273,7 @@ private fun EditWrite(vm: WriteViewModel, editor: RichEditorState) {
 
     WriteFrame(
         vm = vm,
+        limits = limits,
         editor = editor,
         title = t("write.editingSentLetter", "countdown" to Time.countdown(left)),
         subtitle = if (late) t("write.arrivesAtTime", "time" to arrives) else t("write.arrivesAtChange", "time" to arrives),
@@ -370,6 +380,7 @@ private fun WriteFrame(
     late: Boolean = false,
     error: String? = null,
     reference: (@Composable () -> Unit)? = null,
+    limits: StripLimits? = null,
 ) {
     val atts = vm.attachments!!
     var stampOpen by remember { mutableStateOf(false) }
@@ -459,6 +470,7 @@ private fun WriteFrame(
                 onRemove = onRemove,
                 voice = voice,
                 doodle = DoodleAdd(full = atts.has("doodle")) { doodleOpen = true },
+                limits = limits,
             )
         }
         EditorToolbar(editor, Modifier.background(DlTheme.colors.letterEnvelope), enabled = !late) { emojiOpen = true }

@@ -88,6 +88,9 @@ import com.delulutopia.core.ui.media.VoiceState
 import com.delulutopia.core.ui.media.rememberVoiceRecording
 import com.delulutopia.core.ui.noteInk
 import com.delulutopia.core.ui.noteInkQuiet
+import com.delulutopia.core.ui.plan.StripLimits
+import com.delulutopia.core.ui.plan.mediaOf
+import com.delulutopia.core.ui.plan.stripLimits
 import com.delulutopia.core.ui.rememberNow
 import kotlinx.coroutines.launch
 
@@ -130,7 +133,8 @@ private fun Compose(vm: ComposeViewModel, editor: RichEditorState) {
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { scope.launch { vm.checkNewer()?.let(editor::set) } }
     val atts = vm.attachments!!
     val voice = rememberVoiceRecording { bytes, ms -> atts.add(Uploader.Kind.Audio, Source.Made(bytes, "audio/mp4"), "voice.m4a", ms) }
-    val canPost = vm.title.isNotBlank() && !vm.empty && !atts.uploading && !voice.recording
+    val limits = stripLimits(home.home?.plan, mediaOf(atts.items))
+    val canPost = vm.title.isNotBlank() && !vm.empty && !atts.uploading && !voice.recording && limits?.block == null
     val savedLine = when {
         saveState.status == DraftSaver.Status.Error -> t("common.draftNotSaved")
         saveState.savedAt != null && saveState.status != DraftSaver.Status.Conflict -> t("common.draftSaved", "time" to Time.time(saveState.savedAt))
@@ -139,6 +143,7 @@ private fun Compose(vm: ComposeViewModel, editor: RichEditorState) {
     Frame(
         vm,
         editor,
+        limits = limits,
         title = t("discussions.newDiscussion"),
         subtitle = savedLine,
         subtitleError = saveState.status == DraftSaver.Status.Error,
@@ -203,13 +208,17 @@ private fun Edit(vm: ComposeViewModel, editor: RichEditorState) {
     var confirm by remember { mutableStateOf(false) }
     val changed = vm.title.trim() != d.title || vm.colour.name.lowercase() != (d.color ?: "lemon") || vm.body != d.body ||
         atts.done.joinToString(",") { it.id } != initialIds || atts.uploading
-    val canSave = !busy && vm.title.isNotBlank() && !vm.empty && !atts.uploading && !voice.recording
+    val homeState by vm.homeState.collectAsStateWithLifecycle()
+    val originalIds = remember { d.attachments.map { it.id }.toSet() }
+    val limits = stripLimits(homeState.home?.plan, mediaOf(atts.items, originalIds))
+    val canSave = !busy && vm.title.isNotBlank() && !vm.empty && !atts.uploading && !voice.recording && limits?.block == null
     val back = { if (changed) confirm = true else nav.back() }
     BackHandler { back() }
     val arrived = d.state == "ARRIVED"
     Frame(
         vm,
         editor,
+        limits = limits,
         title = t("discussions.editingADiscussion"),
         subtitle = if (arrived) {
             t("discussions.arrivedAt", "time" to Time.clock(d.arrivesAt))
@@ -276,6 +285,7 @@ private fun Frame(
     voice: VoiceState,
     onRemove: (Item, Int) -> Unit,
     error: String? = null,
+    limits: StripLimits? = null,
 ) {
     var emojiOpen by remember { mutableStateOf(false) }
     val pair = DlTheme.colors.notes.getValue(vm.colour)
@@ -343,7 +353,7 @@ private fun Frame(
             }
             Pin(20.dp, Modifier.align(Alignment.TopCenter).offset(y = (-17).dp))
         }
-        AttachmentStrip(attachments = vm.attachments!!, onRemove = onRemove, voice = voice)
+        AttachmentStrip(attachments = vm.attachments!!, onRemove = onRemove, voice = voice, limits = limits)
         EditorToolbar(editor, Modifier.background(DlTheme.colors.letterEnvelope)) { emojiOpen = true }
     }
     if (emojiOpen) EmojiPickerSheet(t("editor.emoji"), onPick = { editor.insert(it) }, onDismiss = { emojiOpen = false })

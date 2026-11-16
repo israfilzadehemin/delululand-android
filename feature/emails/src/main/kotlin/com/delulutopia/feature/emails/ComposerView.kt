@@ -56,6 +56,8 @@ import com.delulutopia.core.ui.media.VideoAdd
 import com.delulutopia.core.ui.media.rememberVoiceRecording
 import com.delulutopia.core.ui.media.tooLong
 import com.delulutopia.core.ui.media.videoMs
+import com.delulutopia.core.ui.plan.mediaOf
+import com.delulutopia.core.ui.plan.stripLimits
 import kotlinx.coroutines.launch
 
 /**
@@ -93,7 +95,10 @@ internal fun ComposerView(composer: EmailComposer, credits: EmailCredits?, onSen
     val length = count(normalize(composer.text))
     val outOfCredits = credits != null && credits.left <= 0
     val something = composer.text.isNotBlank() || atts.items.isNotEmpty()
-    val canSend = (!composer.withSubject || composer.subject.isNotBlank()) && something && !atts.uploading && !voice.recording && !outOfCredits && !sending
+    val homeState by composer.homeState.collectAsStateWithLifecycle()
+    val limits = stripLimits(homeState.home?.plan, mediaOf(atts.items))
+    val canSend = (!composer.withSubject || composer.subject.isNotBlank()) && something && !atts.uploading && !voice.recording && !outOfCredits && !sending &&
+        limits?.block == null
     val saved = when {
         saveState.status == DraftSaver.Status.Error -> t("common.draftNotSaved")
         saveState.savedAt != null && saveState.status != DraftSaver.Status.Conflict &&
@@ -154,6 +159,7 @@ internal fun ComposerView(composer: EmailComposer, credits: EmailCredits?, onSen
             video = VideoAdd(full = atts.has("video"), onRecord = { recorderOpen = true }, onPick = { addVideo(it, null) }),
             background = Color.Transparent,
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+            limits = limits,
         )
         videoError?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error) }
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
