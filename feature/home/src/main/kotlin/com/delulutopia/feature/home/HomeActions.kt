@@ -40,5 +40,8 @@ interface HomeActions {
         data class Conflict(val current: Board) : PostResult
 
         data class Failed(val message: String) : PostResult
+
+        /** Subscription Tiers BD-2: today's doodles went elsewhere while the pad was open. */
+        data class Capped(val renewsAt: String) : PostResult
     }
 }

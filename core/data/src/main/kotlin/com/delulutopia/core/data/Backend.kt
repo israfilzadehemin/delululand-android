@@ -25,7 +25,19 @@ class Backend @Inject constructor(
     private val config: ServerConfig,
     val json: Json,
 ) {
-    suspend fun <T> run(block: suspend DelulutopiaApi.() -> T): T = caller.call { api.block() }
+    suspend fun <T> run(block: suspend DelulutopiaApi.() -> T): T = try {
+        caller.call { api.block() }
+    } catch (e: ApiException) {
+        refusalListeners.forEach { it(e) }
+        throw e
+    }
+
+    private val refusalListeners = java.util.concurrent.CopyOnWriteArrayList<(ApiException) -> Unit>()
+
+    /** Told about every refusal before the screen sees it (HomeRepository refreshes the plan on a tier limit). */
+    fun onRefusal(listener: (ApiException) -> Unit) {
+        refusalListeners += listener
+    }
 
     /** Absolute URL of an API media path (`/api/attachments/…`). */
     fun url(path: String): String = if (path.startsWith("http")) path else config.baseUrl().trimEnd('/') + "/" + path.trimStart('/')

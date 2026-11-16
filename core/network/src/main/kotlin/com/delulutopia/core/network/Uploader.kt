@@ -83,7 +83,16 @@ class Uploader @Inject constructor(
             .addFormDataPart("file", filename, ProgressBody(stream, onProgress))
             .build()
         val request = Request.Builder().url(config.baseUrl().trimEnd('/') + "/" + path.trimStart('/')).post(form).build()
-        val call = client.newBuilder().callTimeout(kind.timeoutS, TimeUnit.SECONDS).build().newCall(request)
+        // ST4: a Premium video is up to 400 MB and a minute of encode on the server, so its wait grows with the limit.
+        val call = if (kind == Kind.Video) {
+            client.newBuilder()
+                .callTimeout(maxOf(kind.timeoutS, VideoLimits.mb * 2L), TimeUnit.SECONDS)
+                .readTimeout(maxOf(60L, VideoLimits.seconds * 10L), TimeUnit.SECONDS)
+                .build()
+                .newCall(request)
+        } else {
+            client.newBuilder().callTimeout(kind.timeoutS, TimeUnit.SECONDS).build().newCall(request)
+        }
         val (code, body) = call.await()
         val obj = runCatching { json.parseToJsonElement(body).jsonObject }.getOrNull()
         if (code == 201) {
@@ -137,11 +146,10 @@ class Uploader @Inject constructor(
     companion object {
         const val PHOTO_MAX = 10L * 1024 * 1024
         const val AUDIO_MAX = 60L * 1024 * 1024
-        const val VIDEO_MAX = 100L * 1024 * 1024
         const val DOODLE_MAX = 2L * 1024 * 1024
         val PHOTO_TOO_LARGE: String get() = t("media.photoTooLarge")
         val AUDIO_TOO_LARGE: String get() = t("media.audioTooLarge")
-        val VIDEO_TOO_LARGE: String get() = t("media.videoTooLarge")
+        val VIDEO_TOO_LARGE: String get() = t("media.videoTooLarge", "mb" to VideoLimits.mb)
         val DOODLE_TOO_LARGE: String get() = t("media.doodleTooLarge")
         val UPLOAD_FAILED: String get() = t("media.uploadFailed")
         val UPLOAD_TIMED_OUT: String get() = t("media.uploadTimedOut")
@@ -150,7 +158,7 @@ class Uploader @Inject constructor(
         fun precheck(kind: Kind, size: Long): String? = when {
             kind == Kind.Photo && size > PHOTO_MAX -> PHOTO_TOO_LARGE
             kind == Kind.Audio && size > AUDIO_MAX -> AUDIO_TOO_LARGE
-            kind == Kind.Video && size > VIDEO_MAX -> VIDEO_TOO_LARGE
+            kind == Kind.Video && size > VideoLimits.maxBytes -> VIDEO_TOO_LARGE
             kind == Kind.Doodle && size > DOODLE_MAX -> DOODLE_TOO_LARGE
             else -> null
         }

@@ -73,7 +73,7 @@ class UploaderTest {
     fun `a file over the kind's limit is refused before anything is sent`() = runTest {
         val e = assertThrows(ApiException::class.java) {
             kotlinx.coroutines.runBlocking {
-                uploader.upload("api/attachments", Uploader.Kind.Video, Uploader.VIDEO_MAX + 1, { error("must not open") }, "v.mp4", "video/mp4") {}
+                uploader.upload("api/attachments", Uploader.Kind.Video, VideoLimits.maxBytes + 1, { error("must not open") }, "v.mp4", "video/mp4") {}
             }
         }
         assertThat(e.code).isEqualTo("TOO_LARGE")

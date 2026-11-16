@@ -28,6 +28,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -43,6 +44,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.AbsoluteAlignment
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.shadow
@@ -71,6 +73,7 @@ import com.delulutopia.core.data.Time
 import com.delulutopia.core.designsystem.component.DlBottomSheet
 import com.delulutopia.core.designsystem.component.DlFilledButton
 import com.delulutopia.core.designsystem.component.DlOutlinedButton
+import com.delulutopia.core.designsystem.component.DlTextButton
 import com.delulutopia.core.designsystem.component.LocalServerBaseUrl
 import com.delulutopia.core.designsystem.component.resolveMedia
 import com.delulutopia.core.designsystem.icon.WebIcons
@@ -116,6 +119,11 @@ internal fun BoardTile(home: Home, nowMs: Long, vm: HomeActions) {
     var conflict by remember { mutableStateOf<Pending?>(null) }
     var picking by remember { mutableStateOf(false) }
     var drawn by remember { mutableStateOf<String?>(null) }
+    // Subscription Tiers BD-1: Free at the day's cap; viewing, reacting and commenting stay (ST9).
+    val plan = home.plan
+    val noDoodles = plan?.left?.boardDoodles == 0
+    val capLine = if (noDoodles && plan != null) t("limits.noDoodles") + " · " + t("limits.renews", "time" to Time.time(plan.renewsAt)) else null
+    var capped by remember { mutableStateOf<String?>(null) }
 
     // B12, Q5: remember which version was NEW when Home showed it; tell the server once, unfolded.
     var ribbon by remember { mutableStateOf(if (home.boardNew && board != null) board.version else null) }
@@ -149,6 +157,10 @@ internal fun BoardTile(home: Home, nowMs: Long, vm: HomeActions) {
                 }
                 is HomeActions.PostResult.Conflict -> conflict = Pending(png, r.current, edit)
                 is HomeActions.PostResult.Failed -> notice(r.message)
+                is HomeActions.PostResult.Capped -> {
+                    conflict = null
+                    capped = r.renewsAt
+                }
             }
             busy = false
         }
@@ -209,12 +221,25 @@ internal fun BoardTile(home: Home, nowMs: Long, vm: HomeActions) {
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
                 ) {
-                    DrawButton(WebIcons.Doodle, t("home.edit"), if (boardMine) t("board.editMine") else t("board.editFriends", "friend" to friend)) {
+                    DrawButton(
+                        WebIcons.Doodle,
+                        t("home.edit"),
+                        if (boardMine) t("board.editMine") else t("board.editFriends", "friend" to friend),
+                        enabled = !noDoodles,
+                    ) {
                         drawing =
                             "edit"
                     }
-                    DrawButton(WebIcons.Write, t("board.draw"), null) { drawing = "new" }
+                    DrawButton(WebIcons.Write, t("board.draw"), null, enabled = !noDoodles) { drawing = "new" }
                     IconButton(onClick = { vm.setBoardMini(true) }) { Icon(WebIcons.ChevronUp, t("board.foldTheBoard")) }
+                }
+                capLine?.let {
+                    Text(
+                        it,
+                        Modifier.fillMaxWidth(),
+                        style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.SemiBold),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
                 }
             }
             else -> Box(Modifier.fillMaxWidth()) {
@@ -225,7 +250,7 @@ internal fun BoardTile(home: Home, nowMs: Long, vm: HomeActions) {
                         horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
                         Text(t("board.theBoardIsEmpty"), style = DlTheme.type.letterBody.copy(fontSize = 17.sp), color = Color(0xFF48536C))
-                        DlFilledButton(t("board.drawTheFirstDoodle"), { drawing = "new" }, icon = WebIcons.Write)
+                        DlFilledButton(t("board.drawTheFirstDoodle"), { drawing = "new" }, icon = WebIcons.Write, enabled = !noDoodles)
                     }
                 }
                 IconButton(onClick = {
@@ -241,6 +266,7 @@ internal fun BoardTile(home: Home, nowMs: Long, vm: HomeActions) {
             home = home,
             vm = vm,
             canReact = canReact,
+            canDraw = !noDoodles,
             onReact = { picking = true },
             onClose = { viewing = false },
             onDraw = { mode ->
@@ -277,6 +303,23 @@ internal fun BoardTile(home: Home, nowMs: Long, vm: HomeActions) {
                 drawing = null
                 notice(t("board.couldntOpenDoodle"))
             },
+        )
+    }
+
+    capped?.let { renews ->
+        // BD-2: M3 basic dialog; the drawing stays unless Discard.
+        AlertDialog(
+            onDismissRequest = { capped = null },
+            title = { Text(t("board.limitTitle"), style = MaterialTheme.typography.titleLarge) },
+            text = { Text(t("board.limitBody", "time" to Time.time(renews)), style = MaterialTheme.typography.bodyMedium) },
+            confirmButton = { DlTextButton(t("doodle.keepDrawing"), { capped = null }) },
+            dismissButton = {
+                DlTextButton(t("doodle.discard"), {
+                    capped = null
+                    drawing = null
+                })
+            },
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
         )
     }
 
@@ -458,14 +501,14 @@ private fun WhoDot(authorId: Int) {
 }
 
 @Composable
-private fun DrawButton(icon: ImageVector, text: String, description: String?, onClick: () -> Unit) {
-    val seal = MaterialTheme.colorScheme.primary
+private fun DrawButton(icon: ImageVector, text: String, description: String?, enabled: Boolean = true, onClick: () -> Unit) {
+    val seal = if (enabled) MaterialTheme.colorScheme.primary else DlTheme.colors.inkDisabled
     Row(
         Modifier
             .height(44.dp)
             .clip(RoundedCornerShape(22.dp))
             .border(1.dp, seal, RoundedCornerShape(22.dp))
-            .clickable(role = Role.Button, onClick = onClick)
+            .clickable(enabled = enabled, role = Role.Button, onClick = onClick)
             .then(if (description != null) Modifier.semantics { contentDescription = description } else Modifier)
             .padding(horizontal = 16.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -606,7 +649,16 @@ internal fun BoardNote(board: Board, home: Home, vm: HomeActions, viewer: Boolea
 
 /** B8: the doodle full screen, who drew it and when, React, Edit and Draw new. */
 @Composable
-private fun BoardViewer(board: Board, home: Home, vm: HomeActions, canReact: Boolean, onReact: () -> Unit, onClose: () -> Unit, onDraw: (String) -> Unit) {
+private fun BoardViewer(
+    board: Board,
+    home: Home,
+    vm: HomeActions,
+    canReact: Boolean,
+    onReact: () -> Unit,
+    onClose: () -> Unit,
+    onDraw: (String) -> Unit,
+    canDraw: Boolean = true,
+) {
     val c = DlTheme.colors
     val base = LocalServerBaseUrl.current
     val friend = home.friendName
@@ -670,8 +722,8 @@ private fun BoardViewer(board: Board, home: Home, vm: HomeActions, canReact: Boo
                             if (mark != null) HandReaction(mark, 28.dp) else ReactSlot(c.onLightbox, c.onLightbox, size = 32.dp)
                         }
                     }
-                    ViewerButton(WebIcons.Doodle, t("home.edit"), outlined = true) { onDraw("edit") }
-                    ViewerButton(WebIcons.Write, t("board.drawNew"), outlined = false) { onDraw("new") }
+                    ViewerButton(WebIcons.Doodle, t("home.edit"), outlined = true, enabled = canDraw) { onDraw("edit") }
+                    ViewerButton(WebIcons.Write, t("board.drawNew"), outlined = false, enabled = canDraw) { onDraw("new") }
                 }
             }
         }
@@ -679,14 +731,15 @@ private fun BoardViewer(board: Board, home: Home, vm: HomeActions, canReact: Boo
 }
 
 @Composable
-private fun ViewerButton(icon: ImageVector, text: String, outlined: Boolean, onClick: () -> Unit) {
+private fun ViewerButton(icon: ImageVector, text: String, outlined: Boolean, enabled: Boolean = true, onClick: () -> Unit) {
     val c = DlTheme.colors
     Row(
         Modifier
+            .alpha(if (enabled) 1f else 0.4f)
             .height(44.dp)
             .clip(RoundedCornerShape(22.dp))
             .then(if (outlined) Modifier.border(1.dp, c.onLightbox, RoundedCornerShape(22.dp)) else Modifier.background(c.onLightbox))
-            .clickable(role = Role.Button, onClick = onClick)
+            .clickable(enabled = enabled, role = Role.Button, onClick = onClick)
             .padding(horizontal = 14.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(6.dp),

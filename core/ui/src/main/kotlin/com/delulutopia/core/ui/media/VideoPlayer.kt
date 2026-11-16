@@ -43,11 +43,15 @@ import coil3.compose.AsyncImage
 import com.delulutopia.core.designsystem.icon.WebIcons
 import com.delulutopia.core.designsystem.theme.DlTheme
 import com.delulutopia.core.i18n.t
+import com.delulutopia.core.network.VideoLimits
 import com.delulutopia.core.ui.httpClient
 
-/** Emails Q12: at most 15 s; the server allows 15.5 s for a container that runs past the stop. */
-const val MAX_VIDEO_MS = 15_000L
-val VIDEO_TOO_LONG: String get() = t("media.videoTooLong")
+/**
+ * Emails Q12, Subscription Tiers ST4: at most the tier's length (15 s Free, 60 s Premium); the
+ * server allows half a second more for a container that runs past the stop.
+ */
+val MAX_VIDEO_MS: Long get() = VideoLimits.maxMs
+val VIDEO_TOO_LONG: String get() = t("media.videoTooLong", "n" to VideoLimits.seconds)
 
 /** A picked video's length, or null when the phone cannot tell (the server decides then). */
 fun videoMs(context: Context, uri: Uri): Long? {

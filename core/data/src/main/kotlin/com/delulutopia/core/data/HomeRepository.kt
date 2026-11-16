@@ -3,6 +3,7 @@ package com.delulutopia.core.data
 import com.delulutopia.core.i18n.I18n
 import com.delulutopia.core.i18n.Lang
 import com.delulutopia.core.network.ApiException
+import com.delulutopia.core.network.VideoLimits
 import com.delulutopia.core.network.model.Home
 import com.delulutopia.core.network.model.Mood
 import javax.inject.Inject
@@ -41,6 +42,15 @@ class HomeRepository @Inject constructor(private val backend: Backend) {
     val state: StateFlow<State> = _state.asStateFlow()
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+
+    init {
+        // Subscription Tiers CM-8, BD-2: a limit refusal means the plan here is stale; refetch it.
+        backend.onRefusal { if (it.code in TIER_LIMITS) refreshSoon() }
+    }
+
+    private companion object {
+        val TIER_LIMITS = setOf("PHOTO_LIMIT", "PHOTO_DAILY_LIMIT", "VIDEO_DAILY_LIMIT", "DOODLE_DAILY_LIMIT", "NO_CREDITS")
+    }
     private var started: Job? = null
     private val mutex = Mutex()
     private var refresher: Refresher? = null
@@ -78,6 +88,7 @@ class HomeRepository @Inject constructor(private val backend: Backend) {
             val home = backend.run { home() }
             // L8: the account's language wins on every device.
             Lang.parse(home.me.language)?.let { if (it != I18n.lang) I18n.set(it) }
+            home.plan?.let { VideoLimits.set(it.limits.videoSeconds, it.limits.videoMb) }
             _state.update { it.copy(home = home, offline = false) }
             refresher?.armDeadline()
         } catch (e: ApiException) {

@@ -34,6 +34,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -61,6 +64,7 @@ import com.delulutopia.core.designsystem.motion.enter
 import com.delulutopia.core.designsystem.theme.DlTheme
 import com.delulutopia.core.i18n.t
 import com.delulutopia.core.network.Uploader
+import com.delulutopia.core.ui.plan.StripLimits
 
 /** Emails only (Q11–Q13): record or pick one video; [full] while the email already carries one. */
 class VideoAdd(val full: Boolean, val onRecord: () -> Unit, val onPick: (Uri) -> Unit)
@@ -84,9 +88,20 @@ fun AttachmentStrip(
     video: VideoAdd? = null,
     background: Color = MaterialTheme.colorScheme.surface,
     contentPadding: PaddingValues = PaddingValues(start = 12.dp, end = 12.dp, top = 14.dp, bottom = 10.dp),
+    /** Subscription Tiers CM-1–CM-7: what the plan still allows; null limits nothing here. */
+    limits: StripLimits? = null,
 ) {
+    var capped by remember { mutableStateOf<String?>(null) }
     val photosPicker = rememberLauncherForActivityResult(ActivityResultContracts.PickMultipleVisualMedia()) { uris ->
-        uris.forEach { attachments.add(Uploader.Kind.Photo, Source.Picked(it), nameOf(it, "photo.jpg")) }
+        // CM-2: the first ones that fit are added, and the notice says how many.
+        val room = limits?.photoRoom ?: uris.size
+        val kept = uris.take(room)
+        capped = if (limits != null && kept.size < uris.size) {
+            limits.addedNotice(kept.size, uris.size, attachments.items.count { it.kind == "photo" })
+        } else {
+            null
+        }
+        kept.forEach { attachments.add(Uploader.Kind.Photo, Source.Picked(it), nameOf(it, "photo.jpg")) }
     }
     val audioPicker = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         uri?.let { attachments.add(Uploader.Kind.Audio, Source.Picked(it), nameOf(it, "audio.m4a")) }
@@ -126,7 +141,7 @@ fun AttachmentStrip(
                 }
             }
             Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                AddButton(WebIcons.Photo, t("media.addPhoto"), enabled) {
+                AddButton(WebIcons.Photo, t("media.addPhoto"), enabled && (limits == null || limits.photoRoom > 0)) {
                     photosPicker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
                 }
                 if (voice.recording) {
@@ -158,11 +173,41 @@ fun AttachmentStrip(
                     )
                 }
                 if (video != null) {
-                    AddButton(WebIcons.Video, t("media.recordAVideo"), enabled && !video.full, onClick = video.onRecord)
-                    AddButton(WebIcons.VideoFile, t("media.pickAVideo"), enabled && !video.full) {
+                    val videoOk = limits == null || limits.videoRoom
+                    AddButton(WebIcons.Video, t("media.recordAVideo"), enabled && !video.full && videoOk, onClick = video.onRecord)
+                    AddButton(WebIcons.VideoFile, t("media.pickAVideo"), enabled && !video.full && videoOk) {
                         videoPicker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.VideoOnly))
                     }
                 }
+            }
+        }
+        limits?.blockText?.let { text ->
+            // CM-7: error banner above Send.
+            Text(
+                text,
+                Modifier
+                    .fillMaxWidth()
+                    .padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 6.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(MaterialTheme.colorScheme.errorContainer)
+                    .padding(horizontal = 12.dp, vertical = 10.dp),
+                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                color = MaterialTheme.colorScheme.onErrorContainer,
+            )
+        }
+        limits?.line?.let { line ->
+            // CM-1–CM-5: one supporting line; error ink at none.
+            Text(
+                line,
+                Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 2.dp),
+                style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.SemiBold),
+                color = if (limits.lineIsZero) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        capped?.let { text ->
+            Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp), verticalAlignment = Alignment.CenterVertically) {
+                Text(text, Modifier.weight(1f), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                IconButton(onClick = { capped = null }) { Icon(WebIcons.Close, t("media.dismiss"), Modifier.size(14.dp)) }
             }
         }
         attachments.errors.forEach { (key, text) ->
