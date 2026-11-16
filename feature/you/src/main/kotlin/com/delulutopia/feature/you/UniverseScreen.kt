@@ -207,7 +207,8 @@ private fun ReadOnly(vm: UniverseViewModel, view: UniverseView) {
                 Text(creator.username, fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
             }
         }
-    }    PlanOf(vm, view)
+    }
+    PlanOf(vm, view)
 }
 
 /** Subscription Tiers PL-1: the same section for both citizens; Home's plan carries today's numbers. */
