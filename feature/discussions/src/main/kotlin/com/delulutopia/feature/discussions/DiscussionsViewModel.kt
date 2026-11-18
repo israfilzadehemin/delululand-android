@@ -104,13 +104,14 @@ class DiscussionsViewModel @AssistedInject constructor(
     }
 
     /** The keyset order (O2, A5): the later of arrival and latest update, or the archive time. */
-    private fun sortKey(r: DRow): Pair<Long, Long> = if (archived) {
+    private fun sortKey(r: DRow): Pair<Long, String> = if (archived) {
         (Time.ms(r.archivedAt) ?: 0) to r.id
     } else {
         maxOf(Time.ms(r.arrivesAt) ?: 0, Time.ms(r.activityAt) ?: 0) to r.id
     }
 
-    private fun below(a: Pair<Long, Long>, b: Pair<Long, Long>) = a.first < b.first || (a.first == b.first && a.second < b.second)
+    /** Public ids carry no order (doc "Delululand — Public IDs"); comparing them only settles same-millisecond ties. */
+    private fun below(a: Pair<Long, String>, b: Pair<Long, String>) = a.first < b.first || (a.first == b.first && a.second < b.second)
 
     private companion object {
         const val PAGE = 20

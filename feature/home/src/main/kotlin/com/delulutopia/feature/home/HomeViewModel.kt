@@ -97,7 +97,7 @@ class HomeViewModel @Inject constructor(
 
     // Letters
 
-    override suspend fun cancel(id: Long): LetterActions.CancelResult = letters.cancel(id)
+    override suspend fun cancel(id: String): LetterActions.CancelResult = letters.cancel(id)
 
     // Board (doc "Delululand — Board")
 

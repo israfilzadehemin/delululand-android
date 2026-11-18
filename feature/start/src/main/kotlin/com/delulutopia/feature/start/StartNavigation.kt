@@ -8,7 +8,7 @@ import kotlinx.serialization.Serializable
 /** The signed-out graph (S0, S1, Create, Join). A session takes the app to the shell. */
 @Serializable data object EntryDestination
 
-@Serializable data class PinDestination(val userId: Int)
+@Serializable data class PinDestination(val userId: String)
 
 @Serializable data object CreateDestination
 

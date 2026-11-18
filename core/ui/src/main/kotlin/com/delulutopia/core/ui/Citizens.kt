@@ -8,27 +8,28 @@ import com.delulutopia.core.designsystem.theme.DlTheme
 import com.delulutopia.core.network.model.Citizen
 
 /**
- * Writer colour key (web components/whoOf.ts): the universe's first citizen (lowest id) is "a"
- * (terracotta), the other "b" (sage). Until Home has loaded, user 1 is "a".
+ * Writer colour key (web components/whoOf.ts): the universe's first citizen (the creator) is "a"
+ * (terracotta), the other "b" (sage). Ids are public UUIDs with no order (doc "Delululand — Public
+ * IDs"), so the app provides the creator's id. Until it is known, everyone is "a".
  */
-val LocalFirstCitizen = staticCompositionLocalOf<Int?> { null }
+val LocalFirstCitizen = staticCompositionLocalOf<String?> { null }
 
 enum class Who { A, B }
 
 @Composable
 @ReadOnlyComposable
-fun whoOf(userId: Int?): Who {
+fun whoOf(userId: String?): Who {
     val first = LocalFirstCitizen.current
-    return if ((if (first == null) userId == 1 else userId == first)) Who.A else Who.B
+    return if (first == null || userId == first) Who.A else Who.B
 }
 
 @Composable
 @ReadOnlyComposable
-fun signatureOf(userId: Int?): Color = if (whoOf(userId) == Who.A) DlTheme.colors.userA else DlTheme.colors.userB
+fun signatureOf(userId: String?): Color = if (whoOf(userId) == Who.A) DlTheme.colors.userA else DlTheme.colors.userB
 
 @Composable
 @ReadOnlyComposable
-fun tintOf(userId: Int?): Color = if (whoOf(userId) == Who.A) DlTheme.colors.userATint else DlTheme.colors.userBTint
+fun tintOf(userId: String?): Color = if (whoOf(userId) == Who.A) DlTheme.colors.userATint else DlTheme.colors.userBTint
 
 @Composable
 @ReadOnlyComposable

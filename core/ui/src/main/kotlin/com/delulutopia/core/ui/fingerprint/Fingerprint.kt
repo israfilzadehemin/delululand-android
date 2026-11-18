@@ -31,24 +31,24 @@ object Fingerprint {
 
     private fun prefs(context: Context) = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
 
-    private fun alias(userId: Int) = "dl_pin_$userId"
+    private fun alias(userId: String) = "dl_pin_$userId"
 
     /** A strong biometric is enrolled and usable on this phone. */
     fun available(context: Context): Boolean = BiometricManager.from(context).canAuthenticate(BIOMETRIC_STRONG) == BiometricManager.BIOMETRIC_SUCCESS
 
-    fun isOn(context: Context, userId: Int): Boolean = prefs(context).contains(PIN + userId)
+    fun isOn(context: Context, userId: String): Boolean = prefs(context).contains(PIN + userId)
 
     /** X1: offered once per citizen on this phone. */
-    fun offered(context: Context, userId: Int): Boolean = prefs(context).getBoolean(OFFERED + userId, false)
+    fun offered(context: Context, userId: String): Boolean = prefs(context).getBoolean(OFFERED + userId, false)
 
-    fun markOffered(context: Context, userId: Int) = prefs(context).edit().putBoolean(OFFERED + userId, true).apply()
+    fun markOffered(context: Context, userId: String) = prefs(context).edit().putBoolean(OFFERED + userId, true).apply()
 
-    fun turnOff(context: Context, userId: Int) {
+    fun turnOff(context: Context, userId: String) {
         prefs(context).edit().remove(PIN + userId).apply()
         runCatching { KeyStore.getInstance(STORE).apply { load(null) }.deleteEntry(alias(userId)) }
     }
 
-    private fun key(userId: Int, create: Boolean): SecretKey? {
+    private fun key(userId: String, create: Boolean): SecretKey? {
         val store = KeyStore.getInstance(STORE).apply { load(null) }
         (store.getKey(alias(userId), null) as? SecretKey)?.let { if (!create) return it }
         if (!create) return null
@@ -81,7 +81,7 @@ object Fingerprint {
     }
 
     /** Asks for a fingerprint, then keeps [pin] for [userId]; [onDone] says whether it is on. */
-    fun turnOn(activity: FragmentActivity, userId: Int, pin: String, title: String, onDone: (Boolean) -> Unit) {
+    fun turnOn(activity: FragmentActivity, userId: String, pin: String, title: String, onDone: (Boolean) -> Unit) {
         val cipher = runCatching {
             Cipher.getInstance("AES/GCM/NoPadding").apply { init(Cipher.ENCRYPT_MODE, key(userId, create = true)) }
         }.getOrElse {
@@ -100,7 +100,7 @@ object Fingerprint {
     }
 
     /** Asks for a fingerprint and hands back the kept PIN; [onFail] for Use PIN, cancel or a lost key. */
-    fun unlock(activity: FragmentActivity, userId: Int, title: String, onPin: (String) -> Unit, onFail: () -> Unit) {
+    fun unlock(activity: FragmentActivity, userId: String, title: String, onPin: (String) -> Unit, onFail: () -> Unit) {
         val sealed = prefs(activity).getString(PIN + userId, null)?.let { Base64.decode(it, Base64.NO_WRAP) }
         if (sealed == null || sealed.size <= 12) return onFail()
         val cipher = try {
@@ -119,5 +119,5 @@ object Fingerprint {
     }
 
     /** What a just-entered PIN waits in until the signed-in app offers fingerprint unlock (X1). */
-    @Volatile var justEntered: Pair<Int, String>? = null
+    @Volatile var justEntered: Pair<String, String>? = null
 }

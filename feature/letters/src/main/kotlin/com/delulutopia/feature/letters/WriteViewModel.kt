@@ -49,7 +49,7 @@ class WriteViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
 ) : ViewModel() {
     private val route = handle.toRoute<WriteRoute>()
-    val editId: Long? = route.editId
+    val editId: String? = route.editId
     val homeState: StateFlow<HomeRepository.State> = home.state
 
     sealed interface Load {
@@ -60,7 +60,7 @@ class WriteViewModel @Inject constructor(
         data class Ready(val body: Doc) : Load
 
         /** Edit mode on a letter that can no longer be edited: show the letter instead. */
-        data class NotEditable(val id: Long) : Load
+        data class NotEditable(val id: String) : Load
     }
 
     var load by mutableStateOf<Load>(Load.Loading)
@@ -69,7 +69,7 @@ class WriteViewModel @Inject constructor(
         private set
     var stamp by mutableStateOf<StampMark?>(null)
         private set
-    var pinned by mutableStateOf<Long?>(null)
+    var pinned by mutableStateOf<String?>(null)
         private set
     var attachments by mutableStateOf<Attachments?>(null)
         private set
@@ -116,7 +116,7 @@ class WriteViewModel @Inject constructor(
         load = Load.Ready(d.body)
     }
 
-    private suspend fun loadEdit(id: Long) {
+    private suspend fun loadEdit(id: String) {
         val l = try {
             backend.run { letter(id) }
         } catch (_: ApiException) {
@@ -148,7 +148,7 @@ class WriteViewModel @Inject constructor(
         saver?.touch()
     }
 
-    fun pin(id: Long?) {
+    fun pin(id: String?) {
         if (id == pinned) return
         pinned = id
         saver?.touch()
@@ -176,7 +176,7 @@ class WriteViewModel @Inject constructor(
         return d.body
     }
 
-    private fun apply(doc: Doc, version: Int, savedAt: String?, pin: Long?, st: StampMark?, atts: List<Att>) {
+    private fun apply(doc: Doc, version: Int, savedAt: String?, pin: String?, st: StampMark?, atts: List<Att>) {
         body = doc
         empty = doc.isEmptyDoc()
         saver?.load(version, savedAt)
@@ -305,7 +305,7 @@ class WriteViewModel @Inject constructor(
     }
 
     /** Showing a letter here fetches it in full, which marks it read (T8), as opening it does. */
-    fun loadReferenced(id: Long) {
+    fun loadReferenced(id: String) {
         if (referenced?.id == id) return
         viewModelScope.launch { runCatching { backend.run { letter(id) } }.onSuccess { referenced = it } }
     }

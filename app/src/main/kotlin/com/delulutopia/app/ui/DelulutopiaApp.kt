@@ -285,7 +285,9 @@ fun DelulutopiaApp(
     val destination = backStack?.destination
     val top = TopDestination.entries.firstOrNull { destination.isOn(it.route::class) }
     val brand = home?.universe?.name ?: session.universe.name
-    val firstCitizen = home?.let { h -> listOfNotNull(h.me.id, h.friend?.id).min() } ?: listOfNotNull(session.me.id, session.friend?.id).min()
+    // The creator is the first citizen (whoOf); public ids carry no order.
+    val firstCitizen = home?.let { h -> creatorOf(h.me.id, h.friend?.id, h.universe.isCreator) }
+        ?: creatorOf(session.me.id, session.friend?.id, session.universe.isCreator)
     val notify = rememberNotifyAccess()
     val leafSurfaces = remember { LeafSurfaces() }
     val pendingOpen by PendingOpen.path.collectAsStateWithLifecycle()
@@ -404,10 +406,15 @@ private fun NavHostController.navigateToTop(route: Any) {
     }
 }
 
-/** "/letters/12", "/discussions/3", "/emails/7" (the push's click targets) as routes. */
+/** "/letters/<id>", "/discussions/<id>", "/emails/<id>" (the push's click targets) as routes. */
+
+/** The first citizen: me when I made the universe (or live alone in it), else the friend. */
+internal fun creatorOf(me: String, friend: String?, iAmCreator: Boolean?): String = if (friend == null || iAmCreator != false) me else friend
+
+/** A push or widget link to its screen; the id is a public id, used as given (doc "Delululand — Public IDs"). */
 internal fun routeOf(path: String): Any? {
     val parts = path.trim('/').split('/')
-    val id = parts.getOrNull(1)?.toLongOrNull() ?: return null
+    val id = parts.getOrNull(1)?.takeIf { it.isNotEmpty() } ?: return null
     return when (parts[0]) {
         "letters" -> LetterRoute(id)
         "discussions" -> DiscussionRoute(id)

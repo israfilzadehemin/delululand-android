@@ -339,7 +339,7 @@ class FingerprintPinViewModel @Inject constructor(private val account: AccountRe
     var busy by mutableStateOf(false)
         private set
 
-    fun check(userId: Int, pin: String, brand: String, onOk: (String) -> Unit) {
+    fun check(userId: String, pin: String, brand: String, onOk: (String) -> Unit) {
         busy = true
         viewModelScope.launch {
             try {

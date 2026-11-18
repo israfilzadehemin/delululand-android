@@ -7,7 +7,6 @@ import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
-import kotlinx.serialization.json.long
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -253,7 +252,7 @@ class FlowsE2ETest {
         }
         step("friend replies, live") {
             val items = friend.call("GET", "api/emails/threads").obj["items"]!!.jsonArray
-            val id = items.first { it.jsonObject["subject"]!!.jsonPrimitive.content == "E2E subject" }.jsonObject["id"]!!.jsonPrimitive.long
+            val id = items.first { it.jsonObject["subject"]!!.jsonPrimitive.content == "E2E subject" }.jsonObject["id"]!!.jsonPrimitive.content
             friend.reply(id, "Reply from two")
             see("Reply from two", 30_000)
         }

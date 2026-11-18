@@ -148,7 +148,7 @@ fun LettersList(
         }
     }
     val friendName = friend?.nickname ?: t("common.friend")
-    val senderOf = { row: LetterRow -> if (row.direction == "to") me?.id ?: 1 else friend?.id ?: 2 }
+    val senderOf = { row: LetterRow -> if (row.direction == "to") me?.id else friend?.id }
     val played = rememberPlayed()
     Box(Modifier.fillMaxSize()) {
         // Thumbnails sit in a two-column grid whose tiles share their row's height (web .dl-ltiles: CSS grid stretch).

@@ -41,6 +41,7 @@ private const val STEP_MAX_MS = 45
  * underline. Each paragraph takes the direction of its first strong character (the platform does
  * this for plain text). An empty paragraph keeps a short gap, not a full empty line. [reveal] writes
  * the letter onto the page word by word: every word is laid out from the start, only its ink fades in.
+ * http(s):// and www. runs are tappable links (LK3); the letter format itself has no links.
  */
 @Composable
 fun LetterBody(
@@ -58,12 +59,13 @@ fun LetterBody(
         if (reveal) ink.animateTo(words.toFloat(), tween((step * words).toInt() + 300, easing = LinearEasing)) else ink.snapTo(words.toFloat())
     }
     val shown = ink.value
+    val open = rememberLinkOpener()
     var index = 0
     Column(modifier) {
         doc.content.forEach { block ->
             when (block) {
                 is Paragraph -> {
-                    val (text, n) = paragraphText(block, index, shown, colour)
+                    val (text, n) = paragraphText(block, index, shown, colour, open)
                     index += n
                     if (block.content.isNullOrEmpty()) {
                         Spacer(
@@ -80,7 +82,7 @@ fun LetterBody(
                             Spacer(Modifier.width(10.dp))
                             Column {
                                 item.content.filterIsInstance<Paragraph>().forEach { p ->
-                                    val (text, n) = paragraphText(p, index, shown, colour)
+                                    val (text, n) = paragraphText(p, index, shown, colour, open)
                                     index += n
                                     Text(text, style = style, color = colour)
                                 }
@@ -104,7 +106,7 @@ private fun countWords(doc: Doc): Int {
 }
 
 /** A paragraph as styled text; words past [shown] (a word index) are transparent ink. Returns its word count. */
-private fun paragraphText(p: Paragraph, start: Int, shown: Float, colour: Color): Pair<AnnotatedString, Int> {
+private fun paragraphText(p: Paragraph, start: Int, shown: Float, colour: Color, open: (String) -> Unit): Pair<AnnotatedString, Int> {
     var i = start
     val text = buildAnnotatedString {
         p.content.orEmpty().forEach { t: TextNode ->
@@ -126,5 +128,5 @@ private fun paragraphText(p: Paragraph, start: Int, shown: Float, colour: Color)
             }
         }
     }
-    return text to (i - start)
+    return text.withLinks(open) to (i - start)
 }

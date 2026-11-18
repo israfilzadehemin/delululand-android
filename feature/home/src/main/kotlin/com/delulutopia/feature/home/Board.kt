@@ -83,6 +83,7 @@ import com.delulutopia.core.i18n.formatNumber
 import com.delulutopia.core.i18n.t
 import com.delulutopia.core.network.model.Board
 import com.delulutopia.core.network.model.Home
+import com.delulutopia.core.ui.LinkedText
 import com.delulutopia.core.ui.LocalNotice
 import com.delulutopia.core.ui.NewChip
 import com.delulutopia.core.ui.ageWords
@@ -132,7 +133,7 @@ internal fun BoardTile(home: Home, nowMs: Long, vm: HomeActions) {
         if (!mini && home.boardNew && board != null) vm.boardSeen(board.version)
     }
 
-    val nameOf = { authorId: Int -> if (authorId == home.me.id) t("board.you") else friend }
+    val nameOf = { authorId: String -> if (authorId == home.me.id) t("board.you") else friend }
     // web BoardTile byline: the author's name in bold inside the language's own sentence.
     val bylineKey = { b: Board ->
         val me = b.authorId == home.me.id
@@ -496,7 +497,7 @@ private fun Corner(board: Board, canReact: Boolean, mark: BoardReaction?, drawn:
 }
 
 @Composable
-private fun WhoDot(authorId: Int) {
+private fun WhoDot(authorId: String) {
     Box(Modifier.size(14.dp).border(3.dp, signatureOf(authorId), CircleShape))
 }
 
@@ -554,7 +555,7 @@ internal fun BoardNote(board: Board, home: Home, vm: HomeActions, viewer: Boolea
                     .background(Brush.verticalGradient(0.7f to face, 1f to deep), RoundedCornerShape(2.dp))
                     .padding(start = 16.dp, end = 40.dp, top = 16.dp, bottom = 10.dp),
             ) {
-                Text(comment.text, style = DlTheme.type.boardNote.copy(fontSize = 23.sp), color = ink)
+                LinkedText(comment.text, style = DlTheme.type.boardNote.copy(fontSize = 23.sp), color = ink)
                 Text(
                     "— ${if (mine) t("board.you") else friend}",
                     Modifier.fillMaxWidth().padding(top = 4.dp),

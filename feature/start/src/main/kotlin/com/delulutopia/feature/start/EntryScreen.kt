@@ -42,7 +42,7 @@ import com.delulutopia.core.i18n.t
 
 @Composable
 fun EntryRoute(
-    onOpenPin: (userId: Int) -> Unit,
+    onOpenPin: (userId: String) -> Unit,
     onCreate: () -> Unit,
     onJoin: () -> Unit,
     viewModel: EntryViewModel = hiltViewModel(),
@@ -69,7 +69,7 @@ fun EntryScreen(
     onRetry: () -> Unit,
     onForget: () -> Unit,
     onDismissWelcome: () -> Unit,
-    onOpenPin: (Int) -> Unit,
+    onOpenPin: (String) -> Unit,
     onCreate: () -> Unit,
     onJoin: () -> Unit,
 ) {
@@ -142,7 +142,7 @@ private fun Landing(state: EntryViewModel.Content.Landing, onKeyChange: (String)
 }
 
 @Composable
-private fun Cards(state: EntryViewModel.Content.Cards, onOpenPin: (Int) -> Unit, onJoin: () -> Unit, onForget: () -> Unit) {
+private fun Cards(state: EntryViewModel.Content.Cards, onOpenPin: (String) -> Unit, onJoin: () -> Unit, onForget: () -> Unit) {
     Column(
         Modifier
             .fillMaxSize()

@@ -36,7 +36,7 @@ class Arrivals @Inject constructor(@ApplicationContext private val context: Cont
 
     private fun done(kind: String): MutableSet<String> = prefs.getStringSet(kind, emptySet())!!.toMutableSet()
 
-    private fun remember(kind: String, ids: List<Long>) {
+    private fun remember(kind: String, ids: List<String>) {
         val all = (done(kind) + ids.map { it.toString() }).toList().takeLast(200).toSet()
         prefs.edit().putStringSet(kind, all).apply()
     }

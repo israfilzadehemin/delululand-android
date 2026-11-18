@@ -36,22 +36,32 @@ class EmailsScreenshotTest {
 
     private fun home(left: Int) = Home(
         serverNow = at(0),
-        me = Citizen(1, "Emin"),
-        friend = Citizen(2, "Leyla"),
+        me = Citizen("1", "Emin"),
+        friend = Citizen("2", "Leyla"),
         emailCredits = EmailCredits(10, 10 - left, left, at(60 * 24 * 3)),
-        universe = UniverseInfo(1, "Delulutopia", isCreator = true),
+        universe = UniverseInfo("1", "Delulutopia", isCreator = true),
     )
 
     private val rows = listOf(
-        ThreadRow(1, "Weekend plans", 1, at(-300), at(-5), lastSenderId = 2, lastText = "Saturday works, let's do the market", emailCount = 4, unread = 1),
-        ThreadRow(2, "Photos from the trip", 2, at(-3000), at(-900), lastSenderId = 1, lastMedia = ThreadMedia(photos = 3), emailCount = 2),
-        ThreadRow(3, "Recipe", 1, at(-9000), at(-8000), lastSenderId = 2, lastText = "The secret is the cardamom", emailCount = 7),
+        ThreadRow(
+            "1",
+            "Weekend plans",
+            "1",
+            at(-300),
+            at(-5),
+            lastSenderId = "2",
+            lastText = "Saturday works, let's do the market",
+            emailCount = 4,
+            unread = 1,
+        ),
+        ThreadRow("2", "Photos from the trip", "2", at(-3000), at(-900), lastSenderId = "1", lastMedia = ThreadMedia(photos = 3), emailCount = 2),
+        ThreadRow("3", "Recipe", "1", at(-9000), at(-8000), lastSenderId = "2", lastText = "The secret is the cardamom", emailCount = 7),
     )
 
     private fun shot(name: String, rows: List<ThreadRow>, left: Int = 7, dark: Boolean = false) {
         compose.setContent {
             DelulutopiaTheme(darkTheme = dark) {
-                CompositionLocalProvider(LocalFirstCitizen provides 1) {
+                CompositionLocalProvider(LocalFirstCitizen provides "1") {
                     Surface(color = MaterialTheme.colorScheme.surface) {
                         EmailsList(rows, hasMore = false, draftEmpty = true, home = home(left), onMore = {})
                     }

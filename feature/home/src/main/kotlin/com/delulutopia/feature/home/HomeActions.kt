@@ -22,7 +22,7 @@ interface HomeActions {
 
     suspend fun deleteMood(key: String): String?
 
-    suspend fun cancel(id: Long): LetterActions.CancelResult
+    suspend fun cancel(id: String): LetterActions.CancelResult
 
     fun boardSeen(version: Int)
 

@@ -48,7 +48,7 @@ class HomeScreenshotTest {
 
         override suspend fun deleteMood(key: String): String? = null
 
-        override suspend fun cancel(id: Long) = LetterActions.CancelResult.Done
+        override suspend fun cancel(id: String) = LetterActions.CancelResult.Done
 
         override fun boardSeen(version: Int) = Unit
 
@@ -65,11 +65,11 @@ class HomeScreenshotTest {
 
     private fun at(minutes: Long) = Instant.ofEpochMilli(now + minutes * 60_000).toString()
 
-    private val me = Citizen(1, "Emin", mood = "HAPPY", moodSetAt = at(-120), timezone = "Europe/Warsaw")
-    private val leyla = Citizen(2, "Leyla", mood = "CALM", moodSetAt = at(-25), timezone = "Asia/Tehran")
+    private val me = Citizen("1", "Emin", mood = "HAPPY", moodSetAt = at(-120), timezone = "Europe/Warsaw")
+    private val leyla = Citizen("2", "Leyla", mood = "CALM", moodSetAt = at(-25), timezone = "Asia/Tehran")
 
-    private fun row(id: Long, direction: String, sent: Long, window: Long, arrives: Long, read: Long? = null, line: String) = Row(
-        id = id,
+    private fun row(id: Int, direction: String, sent: Long, window: Long, arrives: Long, read: Long? = null, line: String) = Row(
+        id = id.toString(),
         direction = direction,
         state = "",
         sentAt = at(sent),
@@ -92,14 +92,14 @@ class HomeScreenshotTest {
             row(22, "to", -20, -15, 43, line = "On its way"),
             row(23, "to", -90, -85, -30, line = "About the parking spot, and a small confession"),
         ),
-        board = Board(3, 2, at(-120), "/api/board/3.png", reaction = "love", comment = BoardComment("Lovely sun!", at(-60))),
-        universe = UniverseInfo(1, "Delulutopia", isCreator = true),
+        board = Board(3, "2", at(-120), "/api/board/3.png", reaction = "love", comment = BoardComment("Lovely sun!", at(-60))),
+        universe = UniverseInfo("1", "Delulutopia", isCreator = true),
     )
 
     private fun shot(name: String, home: Home?, dark: Boolean = false, offline: Boolean = false) {
         compose.setContent {
             DelulutopiaTheme(darkTheme = dark) {
-                CompositionLocalProvider(LocalFirstCitizen provides 1) {
+                CompositionLocalProvider(LocalFirstCitizen provides "1") {
                     Surface(color = MaterialTheme.colorScheme.surface) {
                         HomeScreen(HomeRepository.State(home = home, offline = offline), Fake)
                     }
@@ -115,7 +115,13 @@ class HomeScreenshotTest {
 
     @Test fun waiting() = shot(
         "waiting",
-        full.copy(friend = null, from = emptyList(), to = emptyList(), board = null, universe = UniverseInfo(1, "Moonbase", isCreator = true, waiting = true)),
+        full.copy(
+            friend = null,
+            from = emptyList(),
+            to = emptyList(),
+            board = null,
+            universe = UniverseInfo("1", "Moonbase", isCreator = true, waiting = true),
+        ),
     )
 
     @Test fun empty_dark() = shot("empty_dark", full.copy(from = emptyList(), to = emptyList(), board = null), dark = true)

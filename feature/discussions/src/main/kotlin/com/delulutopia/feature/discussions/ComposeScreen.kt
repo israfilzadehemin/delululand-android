@@ -100,7 +100,7 @@ import kotlinx.coroutines.launch
  * strip and the formatting bar. Post is on when the title and the body both have something.
  */
 @Composable
-fun ComposeScreen(editId: Long?) {
+fun ComposeScreen(editId: String?) {
     val vm = hiltViewModel<ComposeViewModel, ComposeViewModel.Factory>(key = "compose-$editId", creationCallback = { it.create(editId) })
     val nav = LocalAppNav.current
     when (val load = vm.load) {

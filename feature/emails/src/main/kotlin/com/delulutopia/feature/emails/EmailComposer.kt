@@ -115,7 +115,7 @@ class EmailComposer(
             return SendResult.Failed(t("common.notSent"))
         }
         return try {
-            val sent = backend.run { if (key == "new") sendNewEmail(DraftVersionBody(version)) else reply(key.toLong(), DraftVersionBody(version)) }
+            val sent = backend.run { if (key == "new") sendNewEmail(DraftVersionBody(version)) else reply(key, DraftVersionBody(version)) }
             val next = runCatching { backend.run { emailDraft(key) } }.getOrElse { EmailDraft(version = version + 1, savedAt = sent.email.sentAt) }
             apply(next)
             trimmed = false

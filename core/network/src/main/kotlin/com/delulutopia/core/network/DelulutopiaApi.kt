@@ -28,6 +28,7 @@ import com.delulutopia.core.network.model.EntryView
 import com.delulutopia.core.network.model.Home
 import com.delulutopia.core.network.model.HomeCounts
 import com.delulutopia.core.network.model.HomeSession
+import com.delulutopia.core.network.model.Id
 import com.delulutopia.core.network.model.InviteRequest
 import com.delulutopia.core.network.model.JoinRequest
 import com.delulutopia.core.network.model.KeyCode
@@ -187,22 +188,22 @@ interface DelulutopiaApi {
     suspend fun send(@Body body: DraftVersionBody): Sent
 
     @GET("api/letters/{id}")
-    suspend fun letter(@Path("id") id: Long): LetterFull
+    suspend fun letter(@Path("id") id: Id): LetterFull
 
     @GET("api/letters")
     suspend fun letters(@Query("cursor") cursor: String? = null, @Query("limit") limit: Int? = null, @Query("direction") direction: String? = null): LetterPage
 
     @DELETE("api/letters/{id}")
-    suspend fun cancelLetter(@Path("id") id: Long): DraftVersion
+    suspend fun cancelLetter(@Path("id") id: Id): DraftVersion
 
     @PUT("api/letters/{id}")
-    suspend fun sendAgain(@Path("id") id: Long, @Body body: SendAgainBody): LetterFull
+    suspend fun sendAgain(@Path("id") id: Id, @Body body: SendAgainBody): LetterFull
 
     @DELETE("api/letters/{id}/edit")
-    suspend fun discardEdit(@Path("id") id: Long)
+    suspend fun discardEdit(@Path("id") id: Id)
 
     @POST("api/letters/{id}/edit/keep-in-draft")
-    suspend fun keepInDraft(@Path("id") id: Long, @Body body: BodyOnly): DraftVersion
+    suspend fun keepInDraft(@Path("id") id: Id, @Body body: BodyOnly): DraftVersion
 
     @GET("api/stamps")
     suspend fun stamps(): StampCatalogue
@@ -212,43 +213,43 @@ interface DelulutopiaApi {
     suspend fun discussions(@Query("cursor") cursor: String? = null, @Query("limit") limit: Int? = null, @Query("archived") archived: Boolean? = null): DPage
 
     @GET("api/discussions/{id}")
-    suspend fun discussion(@Path("id") id: Long): DFull
+    suspend fun discussion(@Path("id") id: Id): DFull
 
     @GET("api/discussions/{id}/comments")
     suspend fun comments(
-        @Path("id") id: Long,
+        @Path("id") id: Id,
         @Query("cursor") cursor: String? = null,
         @Query("limit") limit: Int? = null,
         @Query("from") from: String? = null,
     ): DComments
 
     @POST("api/discussions/{id}/comments")
-    suspend fun comment(@Path("id") id: Long, @Body body: TextBody): DComment
+    suspend fun comment(@Path("id") id: Id, @Body body: TextBody): DComment
 
     @PATCH("api/discussions/{id}/comments/{commentId}")
-    suspend fun editComment(@Path("id") id: Long, @Path("commentId") commentId: Long, @Body body: TextBody): DComment
+    suspend fun editComment(@Path("id") id: Id, @Path("commentId") commentId: Id, @Body body: TextBody): DComment
 
     @DELETE("api/discussions/{id}/comments/{commentId}")
-    suspend fun deleteComment(@Path("id") id: Long, @Path("commentId") commentId: Long)
+    suspend fun deleteComment(@Path("id") id: Id, @Path("commentId") commentId: Id)
 
     @POST("api/discussions/{id}/seen")
-    suspend fun discussionSeen(@Path("id") id: Long)
+    suspend fun discussionSeen(@Path("id") id: Id)
 
     /** Cancel inside the window and Delete at any time: the same call. */
     @DELETE("api/discussions/{id}")
-    suspend fun deleteDiscussion(@Path("id") id: Long)
+    suspend fun deleteDiscussion(@Path("id") id: Id)
 
     @PUT("api/discussions/{id}")
-    suspend fun editDiscussion(@Path("id") id: Long, @Body body: EditDiscussionBody): DFull
+    suspend fun editDiscussion(@Path("id") id: Id, @Body body: EditDiscussionBody): DFull
 
     @DELETE("api/discussions/{id}/edit")
-    suspend fun discardDiscussionEdit(@Path("id") id: Long)
+    suspend fun discardDiscussionEdit(@Path("id") id: Id)
 
     @POST("api/discussions/{id}/archive")
-    suspend fun archive(@Path("id") id: Long): DFull
+    suspend fun archive(@Path("id") id: Id): DFull
 
     @DELETE("api/discussions/{id}/archive")
-    suspend fun unarchive(@Path("id") id: Long): DFull
+    suspend fun unarchive(@Path("id") id: Id): DFull
 
     @GET("api/discussions/draft")
     suspend fun discussionDraft(): DDraft
@@ -267,13 +268,13 @@ interface DelulutopiaApi {
     suspend fun threads(@Query("cursor") cursor: String? = null, @Query("limit") limit: Int? = null): ThreadPage
 
     @GET("api/emails/threads/{id}")
-    suspend fun thread(@Path("id") id: Long): ThreadFull
+    suspend fun thread(@Path("id") id: Id): ThreadFull
 
     @GET("api/emails/threads/{id}/emails")
-    suspend fun olderEmails(@Path("id") id: Long, @Query("cursor") cursor: String, @Query("limit") limit: Int = 20): EmailList
+    suspend fun olderEmails(@Path("id") id: Id, @Query("cursor") cursor: String, @Query("limit") limit: Int = 20): EmailList
 
     @POST("api/emails/threads/{id}/seen")
-    suspend fun threadSeen(@Path("id") id: Long)
+    suspend fun threadSeen(@Path("id") id: Id)
 
     @GET("api/emails/credits")
     suspend fun credits(): EmailCredits
@@ -291,14 +292,14 @@ interface DelulutopiaApi {
     suspend fun sendNewEmail(@Body body: DraftVersionBody): EmailSent
 
     @POST("api/emails/threads/{id}/emails")
-    suspend fun reply(@Path("id") id: Long, @Body body: DraftVersionBody): EmailSent
+    suspend fun reply(@Path("id") id: Id, @Body body: DraftVersionBody): EmailSent
 
     // Reactions: target = discussions | comments | emails
     @PUT("api/reactions/{target}/{id}")
-    suspend fun react(@Path("target") target: String, @Path("id") id: Long, @Body body: EmojiBody): Reactions
+    suspend fun react(@Path("target") target: String, @Path("id") id: Id, @Body body: EmojiBody): Reactions
 
     @HTTP(method = "DELETE", path = "api/reactions/{target}/{id}", hasBody = true)
-    suspend fun unreact(@Path("target") target: String, @Path("id") id: Long, @Body body: EmojiBody): Reactions
+    suspend fun unreact(@Path("target") target: String, @Path("id") id: Id, @Body body: EmojiBody): Reactions
 
     // Profile and settings
     @GET("api/me/profile")

@@ -26,6 +26,7 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.json.JsonPrimitive
 
 /** Display order: oldest first by (createdAt, id), as the server pages them (FS-D12). */
+/** Oldest first by time; ids carry no order (doc "Delululand — Public IDs") and only settle same-millisecond ties. */
 internal val byTime = compareBy<DComment>({ it.createdAt }, { it.id })
 
 /**
@@ -34,15 +35,17 @@ internal val byTime = compareBy<DComment>({ it.createdAt }, { it.id })
  * newest (from the very first when `olderCursor` is null); own posts newer than it stay unless
  * deleted here.
  */
-internal fun reconcile(held: List<DComment>, snap: DComments, posted: List<DComment>, gone: Set<Long>): List<DComment> {
+internal fun reconcile(held: List<DComment>, snap: DComments, posted: List<DComment>, gone: Set<String>): List<DComment> {
     val items = snap.items.filter { it.id !in gone }
     val oldest = snap.items.minWithOrNull(byTime)
+    val newest = snap.items.maxWithOrNull(byTime)
     val covers = { c: DComment -> snap.olderCursor == null || (oldest != null && byTime.compare(c, oldest) >= 0) }
-    val maxId = snap.items.maxOfOrNull { it.id } ?: 0
-    val out = LinkedHashMap<Long, DComment>()
+    // Own posts the snapshot predates: newer than everything in it (public ids carry no order).
+    val after = { c: DComment -> newest == null || byTime.compare(c, newest) > 0 }
+    val out = LinkedHashMap<String, DComment>()
     held.forEach { if (!covers(it) && it.id !in gone) out[it.id] = it }
     items.forEach { out[it.id] = it }
-    posted.forEach { if (it.id > maxId && it.id !in gone && it.id !in out) out[it.id] = it }
+    posted.forEach { if (after(it) && it.id !in gone && it.id !in out) out[it.id] = it }
     return out.values.sortedWith(byTime)
 }
 
@@ -54,13 +57,13 @@ internal fun reconcile(held: List<DComment>, snap: DComments, posted: List<DComm
  */
 @HiltViewModel(assistedFactory = DiscussionViewModel.Factory::class)
 class DiscussionViewModel @AssistedInject constructor(
-    @Assisted val id: Long,
+    @Assisted val id: String,
     private val backend: Backend,
     private val homeRepo: HomeRepository,
 ) : ViewModel() {
     @AssistedFactory
     interface Factory {
-        fun create(id: Long): DiscussionViewModel
+        fun create(id: String): DiscussionViewModel
     }
 
     val home: StateFlow<HomeRepository.State> = homeRepo.state
@@ -82,14 +85,14 @@ class DiscussionViewModel @AssistedInject constructor(
     var comments by mutableStateOf<List<DComment>>(emptyList())
         private set
     private var posted = listOf<DComment>()
-    private val gone = mutableSetOf<Long>()
+    private val gone = mutableSetOf<String>()
     private var olderCursor: String? = null
     private var olderLoaded = false
     var loadingOlder by mutableStateOf(false)
         private set
     var olderFailed by mutableStateOf(false)
         private set
-    private var seenNewest: Long? = null
+    private var seenNewest: String? = null
     private var rangeJob: Job? = null
 
     /** Where "See older comments" continues from, or null when everything is shown. */
@@ -217,7 +220,7 @@ class DiscussionViewModel @AssistedInject constructor(
         }
     }
 
-    private fun drop(commentId: Long) {
+    private fun drop(commentId: String) {
         gone += commentId
         comments = comments.filterNot { it.id == commentId }
     }
