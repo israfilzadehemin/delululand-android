@@ -44,7 +44,15 @@ object VoiceSpeed {
         val n = if (s % 1f == 0f) s.toInt().toString() else s.toString()
         if (lang != Lang.FA) return "$n×"
         val b = StringBuilder()
-        for (c in n) b.append(if (c in '0'..'9') '۰' + (c - '0') else if (c == '.') '٫' else c)
+        for (c in n) {
+            b.append(
+                when {
+                    c in '0'..'9' -> '۰' + (c - '0')
+                    c == '.' -> '٫'
+                    else -> c
+                },
+            )
+        }
         return "$b×"
     }
 
