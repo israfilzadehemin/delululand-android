@@ -7,6 +7,7 @@ import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.media3.common.MediaItem
+import androidx.media3.common.PlaybackParameters
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.okhttp.OkHttpDataSource
@@ -56,9 +57,13 @@ object OnePlayer {
             player = p
         }
 
-    /** Play [target] from where it was (or from the start), stopping anything else. */
-    fun play(context: Context, target: String) {
+    /**
+     * Play [target] from where it was (or from the start), stopping anything else. [speed] is the voice
+     * note speed (doc "Delululand — Voice Note Speed"); draft pills play at 1×. Pitch stays 1 (VS6).
+     */
+    fun play(context: Context, target: String, speed: Float = 1f) {
         val p = player(context)
+        p.playbackParameters = PlaybackParameters(speed)
         if (url != target) {
             p.setMediaItem(MediaItem.fromUri(target))
             p.prepare()
@@ -66,6 +71,11 @@ object OnePlayer {
             positionMs = 0
         }
         p.play()
+    }
+
+    /** VS5: a new speed applies at once, from the current position, to whatever is loaded. */
+    fun setSpeed(speed: Float) {
+        player?.playbackParameters = PlaybackParameters(speed)
     }
 
     fun pause() {
