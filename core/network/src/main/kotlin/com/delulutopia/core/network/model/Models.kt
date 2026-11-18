@@ -8,6 +8,12 @@ import kotlinx.serialization.Serializable
  * Instants are ISO-8601 UTC strings; Instants.kt parses them.
  */
 
+/**
+ * A public id (doc "Delululand — Public IDs"): a random UUID the server gives every letter,
+ * discussion, comment, email thread, email, user and universe. Opaque: compared, never parsed or ordered.
+ */
+typealias Id = String
+
 @Serializable
 data class Att(
     val id: String,
@@ -39,7 +45,7 @@ data class LetterMedia(val photos: Int = 0, val audios: Int = 0, val doodles: In
 /** A letter list row; `state` is IN_REACH | IN_TRANSIT | DELIVERED | READ. */
 @Serializable
 data class Row(
-    val id: Long,
+    val id: Id,
     /** to | from */
     val direction: String,
     val state: String,
@@ -53,15 +59,15 @@ data class Row(
     val moodEmoji: String? = null,
     val moodLabel: String? = null,
     val stamp: StampMark? = null,
-    val replyToId: Long? = null,
+    val replyToId: Id? = null,
 )
 
 @Serializable
-data class ReplyRef(val id: Long, val direction: String, val sentAt: String, val firstLine: String? = null, val media: LetterMedia? = null)
+data class ReplyRef(val id: Id, val direction: String, val sentAt: String, val firstLine: String? = null, val media: LetterMedia? = null)
 
 @Serializable
 data class LetterFull(
-    val id: Long,
+    val id: Id,
     val direction: String,
     val state: String,
     val sentAt: String,
@@ -74,7 +80,7 @@ data class LetterFull(
     val moodEmoji: String? = null,
     val moodLabel: String? = null,
     val stamp: StampMark? = null,
-    val replyToId: Long? = null,
+    val replyToId: Id? = null,
     val body: Doc = Doc.EMPTY,
     val attachments: List<Att> = emptyList(),
     val canEdit: Boolean = false,
@@ -91,7 +97,7 @@ data class LetterPage(val items: List<Row>, val nextCursor: String? = null)
 /** A citizen as Home sees them. */
 @Serializable
 data class Citizen(
-    val id: Int,
+    val id: Id,
     val nickname: String,
     val avatarUrl: String? = null,
     val mood: String? = null,
@@ -155,11 +161,11 @@ data class HomeCounts(
 @Serializable
 data class Board(
     val version: Int,
-    val authorId: Int,
+    val authorId: Id,
     val createdAt: String,
     val url: String,
     val reaction: String? = null,
-    val editedFrom: Int? = null,
+    val editedFrom: Id? = null,
     val comment: BoardComment? = null,
 )
 
@@ -169,7 +175,7 @@ data class BoardComment(val text: String, val createdAt: String)
 // Emails (doc "Delululand — Emails" §4)
 
 @Serializable
-data class EmailArrival(val id: Long, val threadId: Long, val subject: String, val sentAt: String)
+data class EmailArrival(val id: Id, val threadId: Id, val subject: String, val sentAt: String)
 
 @Serializable
 data class EmailCredits(val limit: Int, val used: Int, val left: Int, val renewsAt: String)
@@ -179,12 +185,12 @@ data class ThreadMedia(val photos: Int = 0, val audios: Int = 0, val videos: Int
 
 @Serializable
 data class ThreadRow(
-    val id: Long,
+    val id: Id,
     val subject: String,
-    val startedBy: Int,
+    val startedBy: Id,
     val createdAt: String,
     val lastEmailAt: String,
-    val lastSenderId: Int? = null,
+    val lastSenderId: Id? = null,
     val lastText: String? = null,
     val lastMedia: ThreadMedia? = null,
     val emailCount: Int = 0,
@@ -195,9 +201,9 @@ data class ThreadRow(
 
 @Serializable
 data class Email(
-    val id: Long,
-    val threadId: Long,
-    val senderId: Int,
+    val id: Id,
+    val threadId: Id,
+    val senderId: Id,
     val text: String = "",
     val sentAt: String,
     val readAt: String? = null,
@@ -229,14 +235,14 @@ data class EmailDraft(
 // Reactions (doc "Delululand — Reactions")
 
 @Serializable
-data class Reaction(val emoji: String, val userIds: List<Int>)
+data class Reaction(val emoji: String, val userIds: List<Id>)
 
 @Serializable
 data class Reactions(val reactions: List<Reaction>)
 
 @Serializable
 data class ReactionNotice(
-    val userId: Int,
+    val userId: Id,
     val emoji: String,
     /** discussion | comment | email */
     val target: String,
@@ -250,15 +256,15 @@ data class ReactionNotice(
 // Discussions (doc "Delululand — Discussions" §5)
 
 @Serializable
-data class DiscussionArrival(val id: Long, val title: String, val arrivesAt: String)
+data class DiscussionArrival(val id: Id, val title: String, val arrivesAt: String)
 
 @Serializable
 data class DMedia(val photos: Int = 0, val audios: Int = 0)
 
 @Serializable
 data class DRow(
-    val id: Long,
-    val authorId: Int,
+    val id: Id,
+    val authorId: Id,
     val mine: Boolean,
     val color: String? = null,
     /** IN_REACH | IN_TRANSIT | ARRIVED */
@@ -278,13 +284,13 @@ data class DRow(
     val editedAt: String? = null,
     val activityAt: String? = null,
     val archivedAt: String? = null,
-    val archivedBy: Int? = null,
+    val archivedBy: Id? = null,
 )
 
 @Serializable
 data class DComment(
-    val id: Long,
-    val authorId: Int,
+    val id: Id,
+    val authorId: Id,
     val text: String,
     val createdAt: String,
     val editedAt: String? = null,
@@ -296,8 +302,8 @@ data class DComments(val items: List<DComment>, val olderCursor: String? = null)
 
 @Serializable
 data class DFull(
-    val id: Long,
-    val authorId: Int,
+    val id: Id,
+    val authorId: Id,
     val mine: Boolean,
     val color: String? = null,
     val state: String,
@@ -314,7 +320,7 @@ data class DFull(
     val editedAt: String? = null,
     val activityAt: String? = null,
     val archivedAt: String? = null,
-    val archivedBy: Int? = null,
+    val archivedBy: Id? = null,
     val body: Doc = Doc.EMPTY,
     val attachments: List<Att> = emptyList(),
     val canCancel: Boolean = false,
@@ -340,13 +346,13 @@ data class DDraft(
 )
 
 @Serializable
-data class DPosted(val id: Long, val postedAt: String, val windowEndsAt: String, val arrivesAt: String)
+data class DPosted(val id: Id, val postedAt: String, val windowEndsAt: String, val arrivesAt: String)
 
 @Serializable
 data class Draft(
     val body: Doc = Doc.EMPTY,
     val attachments: List<Att> = emptyList(),
-    val pinnedLetterId: Long? = null,
+    val pinnedLetterId: Id? = null,
     val stamp: StampMark? = null,
     val version: Int = 0,
     val savedAt: String? = null,
@@ -356,7 +362,7 @@ data class Draft(
 data class Saved(val version: Int, val savedAt: String)
 
 @Serializable
-data class Sent(val id: Long, val sentAt: String, val windowEndsAt: String, val arrivesAt: String)
+data class Sent(val id: Id, val sentAt: String, val windowEndsAt: String, val arrivesAt: String)
 
 @Serializable
 data class DraftVersion(val draftVersion: Int)
@@ -365,7 +371,7 @@ data class DraftVersion(val draftVersion: Int)
 
 @Serializable
 data class Profile(
-    val id: Int,
+    val id: Id,
     val username: String,
     val firstName: String? = null,
     val lastName: String? = null,
@@ -383,11 +389,11 @@ data class NotifySection(val key: String, val enabled: Boolean, val events: List
 data class NotifySettings(val paused: Boolean, val sections: List<NotifySection>)
 
 @Serializable
-data class UniverseCreator(val id: Int, val username: String)
+data class UniverseCreator(val id: Id, val username: String)
 
 @Serializable
 data class UniverseView(
-    val id: Int,
+    val id: Id,
     val name: String,
     val welcome: String,
     val creator: UniverseCreator? = null,

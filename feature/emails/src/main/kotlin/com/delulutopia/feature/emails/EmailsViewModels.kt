@@ -92,14 +92,14 @@ class EmailsViewModel @Inject constructor(private val backend: Backend, home: Ho
  */
 @HiltViewModel(assistedFactory = ThreadViewModel.Factory::class)
 class ThreadViewModel @AssistedInject constructor(
-    @Assisted val id: Long,
+    @Assisted val id: String,
     private val backend: Backend,
     private val homeRepo: HomeRepository,
     @ApplicationContext context: Context,
 ) : ViewModel() {
     @AssistedFactory
     interface Factory {
-        fun create(id: Long): ThreadViewModel
+        fun create(id: String): ThreadViewModel
     }
 
     val home: StateFlow<HomeRepository.State> = homeRepo.state
@@ -116,7 +116,7 @@ class ThreadViewModel @AssistedInject constructor(
 
     var ui by mutableStateOf<Ui>(Ui.Loading)
         private set
-    private var known by mutableStateOf<Map<Long, Email>>(emptyMap())
+    private var known by mutableStateOf<Map<String, Email>>(emptyMap())
     private var olderCursor: String? = null
     private var olderLoaded = false
     var loadingOlder by mutableStateOf(false)

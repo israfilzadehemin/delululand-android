@@ -43,9 +43,9 @@ class AccountRepository @Inject constructor(
         runCatching { caller.call { api.forgetEntry() } }
     }
 
-    suspend fun login(userId: Int, pin: String) = withThrottleRetry("PIN_THROTTLED") { api.login(LoginRequest(userId, pin)) }
+    suspend fun login(userId: String, pin: String) = withThrottleRetry("PIN_THROTTLED") { api.login(LoginRequest(userId, pin)) }
 
-    suspend fun createPin(userId: Int, pin: String) = withThrottleRetry("PIN_THROTTLED") { api.createPin(LoginRequest(userId, pin)) }
+    suspend fun createPin(userId: String, pin: String) = withThrottleRetry("PIN_THROTTLED") { api.createPin(LoginRequest(userId, pin)) }
 
     suspend fun checkInvite(invite: String) = caller.call { api.checkInvite(InviteRequest(invite)) }
 

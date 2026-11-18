@@ -40,14 +40,14 @@ const val TITLE_MAX = 120
  */
 @HiltViewModel(assistedFactory = ComposeViewModel.Factory::class)
 class ComposeViewModel @AssistedInject constructor(
-    @Assisted val editId: Long?,
+    @Assisted val editId: String?,
     private val backend: Backend,
     private val home: HomeRepository,
     @ApplicationContext private val context: Context,
 ) : ViewModel() {
     @AssistedFactory
     interface Factory {
-        fun create(editId: Long?): ComposeViewModel
+        fun create(editId: String?): ComposeViewModel
     }
 
     val homeState: StateFlow<HomeRepository.State> = home.state
@@ -59,7 +59,7 @@ class ComposeViewModel @AssistedInject constructor(
 
         data class Ready(val body: Doc) : Load
 
-        data class NotEditable(val id: Long) : Load
+        data class NotEditable(val id: String) : Load
     }
 
     var load by mutableStateOf<Load>(Load.Loading)
@@ -104,7 +104,7 @@ class ComposeViewModel @AssistedInject constructor(
         load = Load.Ready(d.body)
     }
 
-    private suspend fun loadEdit(id: Long) {
+    private suspend fun loadEdit(id: String) {
         val d = try {
             backend.run { discussion(id) }
         } catch (_: ApiException) {
@@ -177,7 +177,7 @@ class ComposeViewModel @AssistedInject constructor(
     }
 
     sealed interface PostResult {
-        data class Posted(val id: Long) : PostResult
+        data class Posted(val id: String) : PostResult
 
         data object Conflict : PostResult
 

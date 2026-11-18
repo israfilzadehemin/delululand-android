@@ -129,7 +129,7 @@ private fun openable(r: LetterRow, nowMs: Long): Boolean {
  * letter is fetched (its read mark) only once it has settled on screen.
  */
 @Composable
-fun LetterScreen(id: Long, vm: LettersViewModel = hiltViewModel()) {
+fun LetterScreen(id: String, vm: LettersViewModel = hiltViewModel()) {
     val nav = LocalAppNav.current
     val rowsState by vm.rows.collectAsStateWithLifecycle()
     val homeState by vm.home.collectAsStateWithLifecycle()

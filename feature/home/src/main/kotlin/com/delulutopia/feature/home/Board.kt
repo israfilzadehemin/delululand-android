@@ -132,7 +132,7 @@ internal fun BoardTile(home: Home, nowMs: Long, vm: HomeActions) {
         if (!mini && home.boardNew && board != null) vm.boardSeen(board.version)
     }
 
-    val nameOf = { authorId: Int -> if (authorId == home.me.id) t("board.you") else friend }
+    val nameOf = { authorId: String -> if (authorId == home.me.id) t("board.you") else friend }
     // web BoardTile byline: the author's name in bold inside the language's own sentence.
     val bylineKey = { b: Board ->
         val me = b.authorId == home.me.id
@@ -496,7 +496,7 @@ private fun Corner(board: Board, canReact: Boolean, mark: BoardReaction?, drawn:
 }
 
 @Composable
-private fun WhoDot(authorId: Int) {
+private fun WhoDot(authorId: String) {
     Box(Modifier.size(14.dp).border(3.dp, signatureOf(authorId), CircleShape))
 }
 

@@ -14,14 +14,14 @@ data class EnterRequest(val code: String)
 data class Entered(val name: String, val welcome: String)
 
 @Serializable
-data class UserCard(val id: Int, val nickname: String, val avatarUrl: String? = null, val hasPin: Boolean)
+data class UserCard(val id: Id, val nickname: String, val avatarUrl: String? = null, val hasPin: Boolean)
 
 /** UV-4: the universe behind the entry pass. */
 @Serializable
 data class EntryView(val name: String, val welcome: String, val canJoin: Boolean, val users: List<UserCard>)
 
 @Serializable
-data class LoginRequest(val userId: Int, val pin: String)
+data class LoginRequest(val userId: Id, val pin: String)
 
 @Serializable
 data class InviteRequest(val invite: String)
@@ -42,7 +42,7 @@ data class CreateUniverseRequest(
 data class CreatedUniverse(val code: String, val universe: UniverseRef)
 
 @Serializable
-data class UniverseRef(val id: Int, val name: String)
+data class UniverseRef(val id: Id, val name: String)
 
 @Serializable
 data class JoinRequest(val username: String, val timezone: String, val pin: String, val language: String? = null)
@@ -56,7 +56,7 @@ data class LanguageBody(val language: String)
 data class HomeSession(val me: Person, val friend: Person? = null, val universe: UniverseInfo)
 
 @Serializable
-data class Person(val id: Int, val nickname: String, val avatarUrl: String? = null, val timezone: String? = null)
+data class Person(val id: Id, val nickname: String, val avatarUrl: String? = null, val timezone: String? = null)
 
 @Serializable
-data class UniverseInfo(val id: Int, val name: String, val isCreator: Boolean = false, val waiting: Boolean = false)
+data class UniverseInfo(val id: Id, val name: String, val isCreator: Boolean = false, val waiting: Boolean = false)

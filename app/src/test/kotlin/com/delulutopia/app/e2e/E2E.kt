@@ -118,10 +118,12 @@ class Friend(private val base: String = E2E.server!!, private val id: Int = E2E.
     fun signIn(): Friend {
         ok(call("POST", "api/entry", """{"code":"${E2E.KEY}"}"""), "entry")
         val users = ok(call("GET", "api/universe/entry"), "cards").obj["users"]!!.jsonArray
-        val me = users.first { it.jsonObject["id"]!!.jsonPrimitive.int == id }.jsonObject
+        // Cards come oldest first; their ids are public ids (doc "Delululand — Public IDs").
+        val me = users[id - 1].jsonObject
+        val userId = me["id"]!!.jsonPrimitive.content
         val hasPin = me["hasPin"]!!.jsonPrimitive.content == "true"
         val path = if (hasPin) "api/auth/login" else "api/auth/pin"
-        ok(call("POST", path, """{"userId":$id,"pin":"$pin"}"""), "pin")
+        ok(call("POST", path, """{"userId":"$userId","pin":"$pin"}"""), "pin")
         return this
     }
 
@@ -130,37 +132,37 @@ class Friend(private val base: String = E2E.server!!, private val id: Int = E2E.
     fun quote(s: String) = json.encodeToString(kotlinx.serialization.serializer<String>(), s)
 
     /** A letter to A; returns its id. */
-    fun sendLetter(text: String): Long {
+    fun sendLetter(text: String): String {
         val v = ok(call("GET", "api/draft"), "draft").obj["version"]!!.jsonPrimitive.int
         val saved = ok(call("PUT", "api/draft", """{"body":${doc(text)},"pinnedLetterId":null,"stampSlug":null,"version":$v}"""), "save draft").obj
         val sv = saved["version"]!!.jsonPrimitive.int
-        return ok(call("POST", "api/letters", """{"draftVersion":$sv}"""), "send").obj["id"]!!.jsonPrimitive.long
+        return ok(call("POST", "api/letters", """{"draftVersion":$sv}"""), "send").obj["id"]!!.jsonPrimitive.content
     }
 
     /** A discussion by B; returns its id. */
-    fun postDiscussion(title: String, text: String, color: String = "mint"): Long {
+    fun postDiscussion(title: String, text: String, color: String = "mint"): String {
         val v = ok(call("GET", "api/discussions/draft"), "d draft").obj["version"]!!.jsonPrimitive.int
         val sv = ok(
             call("PUT", "api/discussions/draft", """{"title":${quote(title)},"body":${doc(text)},"version":$v,"color":"$color"}"""),
             "save d draft",
         ).obj["version"]!!.jsonPrimitive.int
-        return ok(call("POST", "api/discussions", """{"draftVersion":$sv}"""), "post").obj["id"]!!.jsonPrimitive.long
+        return ok(call("POST", "api/discussions", """{"draftVersion":$sv}"""), "post").obj["id"]!!.jsonPrimitive.content
     }
 
-    fun comment(discussionId: Long, text: String): Long =
-        ok(call("POST", "api/discussions/$discussionId/comments", """{"text":${quote(text)}}"""), "comment").obj["id"]!!.jsonPrimitive.long
+    fun comment(discussionId: String, text: String): String =
+        ok(call("POST", "api/discussions/$discussionId/comments", """{"text":${quote(text)}}"""), "comment").obj["id"]!!.jsonPrimitive.content
 
-    fun react(target: String, id: Long, emoji: String) = ok(call("PUT", "api/reactions/$target/$id", """{"emoji":${quote(emoji)}}"""), "react")
+    fun react(target: String, id: String, emoji: String) = ok(call("PUT", "api/reactions/$target/$id", """{"emoji":${quote(emoji)}}"""), "react")
 
     /** A new email thread from B; returns the thread id. */
-    fun email(subject: String, text: String): Long {
+    fun email(subject: String, text: String): String {
         val v = ok(call("GET", "api/emails/drafts/new"), "e draft").obj["version"]!!.jsonPrimitive.int
         val sv = ok(call("PUT", "api/emails/drafts/new", """{"subject":${quote(subject)},"text":${quote(text)},"version":$v}"""), "save e draft")
             .obj["version"]!!.jsonPrimitive.int
-        return ok(call("POST", "api/emails/threads", """{"draftVersion":$sv}"""), "send email").obj["thread"]!!.jsonObject["id"]!!.jsonPrimitive.long
+        return ok(call("POST", "api/emails/threads", """{"draftVersion":$sv}"""), "send email").obj["thread"]!!.jsonObject["id"]!!.jsonPrimitive.content
     }
 
-    fun reply(threadId: Long, text: String) {
+    fun reply(threadId: String, text: String) {
         val v = ok(call("GET", "api/emails/drafts/$threadId"), "r draft").obj["version"]!!.jsonPrimitive.int
         val sv = ok(call("PUT", "api/emails/drafts/$threadId", """{"subject":"","text":${quote(text)},"version":$v}"""), "save r draft")
             .obj["version"]!!.jsonPrimitive.int

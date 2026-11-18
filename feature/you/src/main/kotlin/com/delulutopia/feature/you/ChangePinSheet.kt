@@ -111,7 +111,7 @@ fun ChangePinSheet(onClose: () -> Unit, onChanged: (String) -> Unit, vm: ChangeP
 
 /** X1: "Enter your PIN" before fingerprint unlock is turned on. */
 @Composable
-fun FingerprintPinSheet(userId: Int, onClose: () -> Unit, onPin: (String) -> Unit, vm: FingerprintPinViewModel = hiltViewModel()) {
+fun FingerprintPinSheet(userId: String, onClose: () -> Unit, onPin: (String) -> Unit, vm: FingerprintPinViewModel = hiltViewModel()) {
     val brand = LocalBrand.current
     DlBottomSheet(onDismissRequest = { if (!vm.busy) onClose() }) {
         Column(

@@ -32,22 +32,22 @@ class LettersScreenshotTest {
 
     private fun at(minutes: Long) = Instant.ofEpochMilli(now + minutes * 60_000).toString()
 
-    private val me = Citizen(1, "Emin", draftEmpty = false)
-    private val leyla = Citizen(2, "Leyla")
+    private val me = Citizen("1", "Emin", draftEmpty = false)
+    private val leyla = Citizen("2", "Leyla")
 
     private val rows = listOf(
-        Row(1, "to", "", at(-1), at(4), at(59), firstLine = "I found the kind of notebook you described"),
-        Row(2, "from", "", at(-80), at(-75), at(-20), firstLine = "Dear Emin, the week went by slower than I expected", media = LetterMedia(photos = 2)),
-        Row(3, "from", "", at(-10), at(-5), at(50), firstLine = "Secret"),
-        Row(4, "to", "", at(-300), at(-295), at(-240), readAt = at(-200), firstLine = "About the parking spot", replyToId = 2),
-        Row(5, "from", "", at(-900), at(-895), at(-840), readAt = at(-800), firstLine = "", media = LetterMedia(audios = 1)),
-        Row(6, "to", "", at(-30), at(-25), at(-1), firstLine = "Delivered but not read"),
+        Row("1", "to", "", at(-1), at(4), at(59), firstLine = "I found the kind of notebook you described"),
+        Row("2", "from", "", at(-80), at(-75), at(-20), firstLine = "Dear Emin, the week went by slower than I expected", media = LetterMedia(photos = 2)),
+        Row("3", "from", "", at(-10), at(-5), at(50), firstLine = "Secret"),
+        Row("4", "to", "", at(-300), at(-295), at(-240), readAt = at(-200), firstLine = "About the parking spot", replyToId = "2"),
+        Row("5", "from", "", at(-900), at(-895), at(-840), readAt = at(-800), firstLine = "", media = LetterMedia(audios = 1)),
+        Row("6", "to", "", at(-30), at(-25), at(-1), firstLine = "Delivered but not read"),
     )
 
     private fun shot(name: String, state: LettersRepository.State, list: Boolean, dark: Boolean = false) {
         compose.setContent {
             DelulutopiaTheme(darkTheme = dark) {
-                CompositionLocalProvider(LocalFirstCitizen provides 1) {
+                CompositionLocalProvider(LocalFirstCitizen provides "1") {
                     Surface(color = MaterialTheme.colorScheme.surface) {
                         LettersList(state, me, leyla, list, {}, {})
                     }

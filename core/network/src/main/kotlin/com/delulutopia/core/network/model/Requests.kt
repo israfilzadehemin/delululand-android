@@ -21,7 +21,7 @@ import kotlinx.serialization.json.JsonPrimitive
 
 /** `pinnedLetterId` and `stampSlug` are sent as null to clear them (hence JSON values, not nullable fields). */
 @Serializable data class SaveDraftBody(val body: Doc, val pinnedLetterId: JsonElement, val stampSlug: JsonElement, val version: Int) {
-    constructor(body: Doc, pinnedLetterId: Long?, stampSlug: String?, version: Int) : this(body, orNull(pinnedLetterId), orNull(stampSlug), version)
+    constructor(body: Doc, pinnedLetterId: Id?, stampSlug: String?, version: Int) : this(body, orNull(pinnedLetterId), orNull(stampSlug), version)
 }
 
 @Serializable data class DraftVersionBody(val draftVersion: Int)

@@ -51,8 +51,8 @@ class LettersViewModel @Inject constructor(
     val home: StateFlow<HomeRepository.State> = homeRepo.state
     val list: StateFlow<Boolean> = prefs.lettersList
 
-    private val _letters = MutableStateFlow<Map<Long, LetterUi>>(emptyMap())
-    val letters: StateFlow<Map<Long, LetterUi>> = _letters.asStateFlow()
+    private val _letters = MutableStateFlow<Map<String, LetterUi>>(emptyMap())
+    val letters: StateFlow<Map<String, LetterUi>> = _letters.asStateFlow()
     private val polls = mutableMapOf<Long, Job>()
 
     init {
@@ -70,18 +70,18 @@ class LettersViewModel @Inject constructor(
     fun loadMore() = repo.loadMore()
 
     /** S7: fetch a letter (the recipient's first fetch at or after arrival is its read mark, T8). */
-    fun open(id: Long) {
+    fun open(id: String) {
         if (_letters.value[id] is LetterUi.Shown) return
         _letters.update { it + (id to (it[id] ?: LetterUi.Loading)) }
         reload(id)
     }
 
     /** Back on a letter (after editing it in its window): show what the server holds now. */
-    fun refresh(id: Long) {
+    fun refresh(id: String) {
         if (_letters.value[id] is LetterUi.Shown) reload(id)
     }
 
-    private fun reload(id: Long) {
+    private fun reload(id: String) {
         viewModelScope.launch {
             val ui = try {
                 val letter = backend.run { letter(id) }
@@ -109,7 +109,7 @@ class LettersViewModel @Inject constructor(
     }
 
     /** §3.3: a tap a moment before arrival is retried once at arrivesAt + 300 ms. */
-    private fun retryAt(id: Long, iso: String) {
+    private fun retryAt(id: String, iso: String) {
         val wait = (Time.ms(iso) ?: return) + 300 - Time.now()
         if (wait >= 5 * 60_000) return
         viewModelScope.launch {
@@ -119,7 +119,7 @@ class LettersViewModel @Inject constructor(
     }
 
     /** FS-R7: a sent letter not read yet is re-read every 15 s while the stream is down, and at its arrival. */
-    private fun pollIfWaiting(id: Long, letter: LetterFull) {
+    private fun pollIfWaiting(id: String, letter: LetterFull) {
         polls.remove(id)?.cancel()
         if (letter.direction != "to" || letter.state == LetterState.READ) return
         polls[id] = viewModelScope.launch {
@@ -135,7 +135,7 @@ class LettersViewModel @Inject constructor(
         }
     }
 
-    suspend fun cancel(id: Long): LetterActions.CancelResult {
+    suspend fun cancel(id: String): LetterActions.CancelResult {
         val r = letterActions.cancel(id)
         if (r == LetterActions.CancelResult.Done) {
             _letters.update { it - id }

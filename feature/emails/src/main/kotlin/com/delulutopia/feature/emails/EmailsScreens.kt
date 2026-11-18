@@ -275,7 +275,7 @@ private fun ThreadCard(row: ThreadRow, nowMs: Long, home: Home?) {
 
 /** S14 (web emails/ThreadView.tsx; canvas E-Thread). */
 @Composable
-fun ThreadScreen(id: Long) {
+fun ThreadScreen(id: String) {
     val vm = hiltViewModel<ThreadViewModel, ThreadViewModel.Factory>(key = "thread-$id", creationCallback = { it.create(id) })
     val nav = LocalAppNav.current
     val homeState by vm.home.collectAsStateWithLifecycle()
@@ -316,7 +316,7 @@ private fun ThreadBody(vm: ThreadViewModel, me: Citizen?, friend: Citizen?, home
     val nowMs = rememberNow(30_000)
     val items = vm.items
     val newestId = items.firstOrNull()?.id
-    var toggled by remember { mutableStateOf(setOf<Long>()) }
+    var toggled by remember { mutableStateOf(setOf<String>()) }
     var photo by remember { mutableStateOf<Pair<List<Att>, Int>?>(null) }
     val myNewest = items.firstOrNull { it.senderId == me?.id }
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {

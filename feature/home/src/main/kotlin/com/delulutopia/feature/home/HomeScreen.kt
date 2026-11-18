@@ -137,7 +137,7 @@ private fun HomeContent(home: Home, stale: Boolean, moods: List<Mood>, moodLimit
     val scope = rememberCoroutineScope()
     val nowMs = rememberNow()
     var moodOpen by remember { mutableStateOf(false) }
-    var cancelId by remember { mutableStateOf<Long?>(null) }
+    var cancelId by remember { mutableStateOf<String?>(null) }
     var cancelling by remember { mutableStateOf(false) }
 
     val rows = home.from + home.to

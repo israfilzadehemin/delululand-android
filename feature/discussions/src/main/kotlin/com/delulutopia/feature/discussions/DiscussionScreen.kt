@@ -96,7 +96,7 @@ import kotlinx.coroutines.launch
  * the archived bar; the comments on small notes in the discussion's colour, and the composer.
  */
 @Composable
-fun DiscussionScreen(id: Long) {
+fun DiscussionScreen(id: String) {
     val vm = hiltViewModel<DiscussionViewModel, DiscussionViewModel.Factory>(key = "discussion-$id", creationCallback = { it.create(id) })
     val nav = LocalAppNav.current
     val home by vm.home.collectAsStateWithLifecycle()

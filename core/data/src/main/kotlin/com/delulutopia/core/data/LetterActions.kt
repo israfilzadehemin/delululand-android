@@ -13,7 +13,7 @@ import javax.inject.Singleton
 class LetterActions @Inject constructor(private val backend: Backend, private val home: HomeRepository) {
     enum class CancelResult { Done, TooLate, Failed }
 
-    suspend fun cancel(id: Long): CancelResult = try {
+    suspend fun cancel(id: String): CancelResult = try {
         backend.run { cancelLetter(id) }
         home.load()
         CancelResult.Done

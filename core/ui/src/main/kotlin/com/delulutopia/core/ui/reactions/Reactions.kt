@@ -65,13 +65,13 @@ import kotlinx.coroutines.launch
 
 /** Where reactions go: `discussions`, `comments` or `emails`. Adds or removes mine; answers the new chips. */
 fun interface ReactionsApi {
-    suspend fun toggle(target: String, id: Long, emoji: String, add: Boolean): List<Reaction>
+    suspend fun toggle(target: String, id: String, emoji: String, add: Boolean): List<Reaction>
 }
 
 val LocalReactionsApi = staticCompositionLocalOf<ReactionsApi> { ReactionsApi { _, _, _, _ -> emptyList() } }
 
 /** The chip list with my emoji added or taken away; a chip with nobody left disappears. */
-fun withMine(list: List<Reaction>, emoji: String, me: Int, add: Boolean): List<Reaction> {
+fun withMine(list: List<Reaction>, emoji: String, me: String, add: Boolean): List<Reaction> {
     val i = list.indexOfFirst { it.emoji == emoji }
     if (add) {
         if (i < 0) return list + Reaction(emoji, listOf(me))
@@ -107,7 +107,7 @@ private fun pushRecent(context: Context, emoji: String) {
 @Composable
 fun Reactions(
     target: String,
-    id: Long,
+    id: String,
     reactions: List<Reaction>,
     me: Citizen?,
     friend: Citizen?,
@@ -150,7 +150,7 @@ fun Reactions(
     }
     val myId = me?.id
     val mineOn = { emoji: String -> myId != null && chips.any { it.emoji == emoji && myId in it.userIds } }
-    val names = { users: List<Int> ->
+    val names = { users: List<String> ->
         users.mapNotNull { u ->
             if (u ==
                 me?.id

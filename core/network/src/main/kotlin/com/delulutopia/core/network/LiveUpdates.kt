@@ -16,7 +16,6 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.jsonObject
-import kotlinx.serialization.json.longOrNull
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
@@ -25,7 +24,7 @@ import okhttp3.sse.EventSourceListener
 import okhttp3.sse.EventSources
 
 /** One change in this universe (Backend Refactor Plan items 6–9): its name and at most an id, never content. */
-data class Signal(val name: String, val id: Long?) {
+data class Signal(val name: String, val id: String?) {
     companion object {
         /** The stream (re)opened: anything fetched while it was down may be stale. */
         const val READY = "ready"
@@ -115,8 +114,9 @@ class LiveUpdates @Inject constructor(
         }
     }
 
-    private fun idOf(data: String): Long? = runCatching {
-        (json.parseToJsonElement(data).jsonObject["id"] as? JsonPrimitive)?.longOrNull
+    /** The signal's public id (doc "Delululand — Public IDs"): a string, or null. */
+    private fun idOf(data: String): String? = runCatching {
+        (json.parseToJsonElement(data).jsonObject["id"] as? JsonPrimitive)?.takeIf { it.isString }?.content
     }.getOrNull()
 
     private companion object {
