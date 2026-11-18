@@ -39,7 +39,7 @@ class EmailsScreenshotTest {
         me = Citizen("1", "Emin"),
         friend = Citizen("2", "Leyla"),
         emailCredits = EmailCredits(10, 10 - left, left, at(60 * 24 * 3)),
-        universe = UniverseInfo(1, "Delulutopia", isCreator = true),
+        universe = UniverseInfo("1", "Delulutopia", isCreator = true),
     )
 
     private val rows = listOf(

@@ -92,8 +92,8 @@ class HomeScreenshotTest {
             row(22, "to", -20, -15, 43, line = "On its way"),
             row(23, "to", -90, -85, -30, line = "About the parking spot, and a small confession"),
         ),
-        board = Board(3, 2, at(-120), "/api/board/3.png", reaction = "love", comment = BoardComment("Lovely sun!", at(-60))),
-        universe = UniverseInfo(1, "Delulutopia", isCreator = true),
+        board = Board(3, "2", at(-120), "/api/board/3.png", reaction = "love", comment = BoardComment("Lovely sun!", at(-60))),
+        universe = UniverseInfo("1", "Delulutopia", isCreator = true),
     )
 
     private fun shot(name: String, home: Home?, dark: Boolean = false, offline: Boolean = false) {
@@ -115,7 +115,7 @@ class HomeScreenshotTest {
 
     @Test fun waiting() = shot(
         "waiting",
-        full.copy(friend = null, from = emptyList(), to = emptyList(), board = null, universe = UniverseInfo(1, "Moonbase", isCreator = true, waiting = true)),
+        full.copy(friend = null, from = emptyList(), to = emptyList(), board = null, universe = UniverseInfo("1", "Moonbase", isCreator = true, waiting = true)),
     )
 
     @Test fun empty_dark() = shot("empty_dark", full.copy(from = emptyList(), to = emptyList(), board = null), dark = true)

@@ -70,9 +70,9 @@ class AppShellScreenshotTest {
 
     private companion object {
         val SAMPLE = HomeSession(
-            me = Person(1, "Emin"),
-            friend = Person(2, "Leyla"),
-            universe = UniverseInfo(1, "Delulutopia", isCreator = true),
+            me = Person("1", "Emin"),
+            friend = Person("2", "Leyla"),
+            universe = UniverseInfo("1", "Delulutopia", isCreator = true),
         )
     }
 }

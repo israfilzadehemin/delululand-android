@@ -29,7 +29,7 @@ class StartScreenshotTest {
         name = "Moonbase",
         welcome = Rules.welcomeTemplate("Moonbase"),
         canJoin = true,
-        users = listOf(UserCard(3, "Nigar", null, hasPin = true)),
+        users = listOf(UserCard("3", "Nigar", null, hasPin = true)),
     )
 
     private fun shot(name: String, dark: Boolean = false, content: @Composable () -> Unit) {
@@ -58,7 +58,7 @@ class StartScreenshotTest {
 
     @Test fun pin_wrong() = shot("pin_wrong") {
         PinScreen(
-            PinViewModel.UiState(user = UserCard(1, "Emin", null, true), universe = "Delulutopia", problem = PinViewModel.Problem.Wrong),
+            PinViewModel.UiState(user = UserCard("1", "Emin", null, true), universe = "Delulutopia", problem = PinViewModel.Problem.Wrong),
             {},
             {},
             {},
@@ -67,7 +67,7 @@ class StartScreenshotTest {
 
     @Test fun pin_create_dark() = shot("pin_create_dark", dark = true) {
         PinScreen(
-            PinViewModel.UiState(user = UserCard(2, "Leyla", null, false), index = 1, mode = PinViewModel.Mode.Create, digits = "12"),
+            PinViewModel.UiState(user = UserCard("2", "Leyla", null, false), index = 1, mode = PinViewModel.Mode.Create, digits = "12"),
             {},
             {},
             {},

@@ -176,7 +176,7 @@ class WriteViewModel @Inject constructor(
         return d.body
     }
 
-    private fun apply(doc: Doc, version: Int, savedAt: String?, pin: Long?, st: StampMark?, atts: List<Att>) {
+    private fun apply(doc: Doc, version: Int, savedAt: String?, pin: String?, st: StampMark?, atts: List<Att>) {
         body = doc
         empty = doc.isEmptyDoc()
         saver?.load(version, savedAt)

@@ -53,7 +53,7 @@ class LettersViewModel @Inject constructor(
 
     private val _letters = MutableStateFlow<Map<String, LetterUi>>(emptyMap())
     val letters: StateFlow<Map<String, LetterUi>> = _letters.asStateFlow()
-    private val polls = mutableMapOf<Long, Job>()
+    private val polls = mutableMapOf<String, Job>()
 
     init {
         repo.attach()
