@@ -115,7 +115,13 @@ class HomeScreenshotTest {
 
     @Test fun waiting() = shot(
         "waiting",
-        full.copy(friend = null, from = emptyList(), to = emptyList(), board = null, universe = UniverseInfo("1", "Moonbase", isCreator = true, waiting = true)),
+        full.copy(
+            friend = null,
+            from = emptyList(),
+            to = emptyList(),
+            board = null,
+            universe = UniverseInfo("1", "Moonbase", isCreator = true, waiting = true),
+        ),
     )
 
     @Test fun empty_dark() = shot("empty_dark", full.copy(from = emptyList(), to = emptyList(), board = null), dark = true)
