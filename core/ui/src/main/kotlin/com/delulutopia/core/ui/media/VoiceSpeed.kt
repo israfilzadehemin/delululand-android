@@ -13,7 +13,7 @@ import com.delulutopia.core.i18n.Lang
  * phone (VS4, the "device" preferences like the reaction recents) and applies to every note.
  */
 object VoiceSpeed {
-    val SPEEDS = floatArrayOf(0.5f, 1f, 1.5f, 2f)
+    val SPEEDS: List<Float> = listOf(0.5f, 1f, 1.5f, 2f)
     const val DEFAULT = 1f
     private const val PREFS = "device"
     private const val KEY = "voice-speed"
