@@ -72,6 +72,7 @@ import com.delulutopia.core.network.model.DFull
 import com.delulutopia.core.ui.EditDiscussionRoute
 import com.delulutopia.core.ui.LetterBody
 import com.delulutopia.core.ui.Lightbox
+import com.delulutopia.core.ui.LinkedText
 import com.delulutopia.core.ui.LocalAppNav
 import com.delulutopia.core.ui.LocalBrand
 import com.delulutopia.core.ui.LocalNotice
@@ -641,7 +642,7 @@ private fun CommentItem(
                         )
                     }
                 } else {
-                    Text(c.text, style = MaterialTheme.typography.bodyLarge.copy(fontSize = 15.sp, lineHeight = 22.5.sp), color = noteInk)
+                    LinkedText(c.text, style = MaterialTheme.typography.bodyLarge.copy(fontSize = 15.sp, lineHeight = 22.5.sp), color = noteInk)
                 }
                 Reactions(
                     "comments", c.id, c.reactions, me, friend,

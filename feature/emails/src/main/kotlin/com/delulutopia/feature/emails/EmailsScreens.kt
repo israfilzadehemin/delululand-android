@@ -79,6 +79,7 @@ import com.delulutopia.core.network.model.Email
 import com.delulutopia.core.network.model.Home
 import com.delulutopia.core.network.model.ThreadRow
 import com.delulutopia.core.ui.Lightbox
+import com.delulutopia.core.ui.LinkedText
 import com.delulutopia.core.ui.LocalAppNav
 import com.delulutopia.core.ui.LocalBrand
 import com.delulutopia.core.ui.NewEmailRoute
@@ -468,7 +469,7 @@ private fun EmailCard(
             // web .dl-email-body: indented to the name (44 dp), 15/1.55 text.
             Column(Modifier.padding(start = 44.dp, end = 12.dp, bottom = 12.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 if (e.text.isNotEmpty()) {
-                    Text(
+                    LinkedText(
                         e.text,
                         style = MaterialTheme.typography.bodyLarge.copy(fontSize = 15.sp, lineHeight = 23.25.sp),
                         color = c.mailInk,

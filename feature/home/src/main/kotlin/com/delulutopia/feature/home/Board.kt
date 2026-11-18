@@ -83,6 +83,7 @@ import com.delulutopia.core.i18n.formatNumber
 import com.delulutopia.core.i18n.t
 import com.delulutopia.core.network.model.Board
 import com.delulutopia.core.network.model.Home
+import com.delulutopia.core.ui.LinkedText
 import com.delulutopia.core.ui.LocalNotice
 import com.delulutopia.core.ui.NewChip
 import com.delulutopia.core.ui.ageWords
@@ -554,7 +555,7 @@ internal fun BoardNote(board: Board, home: Home, vm: HomeActions, viewer: Boolea
                     .background(Brush.verticalGradient(0.7f to face, 1f to deep), RoundedCornerShape(2.dp))
                     .padding(start = 16.dp, end = 40.dp, top = 16.dp, bottom = 10.dp),
             ) {
-                Text(comment.text, style = DlTheme.type.boardNote.copy(fontSize = 23.sp), color = ink)
+                LinkedText(comment.text, style = DlTheme.type.boardNote.copy(fontSize = 23.sp), color = ink)
                 Text(
                     "— ${if (mine) t("board.you") else friend}",
                     Modifier.fillMaxWidth().padding(top = 4.dp),
