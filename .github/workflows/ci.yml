@@ -192,6 +192,8 @@ jobs:
           ./gradlew :app:testProdDebugUnitTest --tests 'com.delulutopia.app.e2e.*' -Pdl.e2e=http://localhost:8080/ -Proborazzi.test.record=true --info > e2e.out 2>&1
           code=$?
           grep -E "e2e |FAILED|PASSED|SKIPPED|tests completed|BUILD|OutOfMemory|exit value|Could not complete|crashed" e2e.out
+          # A build that fails before any test runs (compile, resolution): Gradle's own reason.
+          if [ $code -ne 0 ]; then grep -E "^e: |What went wrong|Could not resolve|Execution failed" -A6 e2e.out | head -80; fi
           # Why each case failed or was skipped, from the JUnit reports.
           python3 - <<'PY'
           import glob, re, html

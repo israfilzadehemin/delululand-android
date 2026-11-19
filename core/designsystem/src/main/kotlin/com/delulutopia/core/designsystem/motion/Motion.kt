@@ -1,5 +1,6 @@
 package com.delulutopia.core.designsystem.motion
 
+import android.os.SystemClock
 import android.provider.Settings
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.CubicBezierEasing
@@ -43,9 +44,26 @@ object Motion {
     const val ENTER_MS = 280
     const val PAGE_MS = 300
 
+    /** A page pushed onto the stack slides in over the one below (and out again on Back). */
+    const val STACK_MS = 380
+
+    /** A tab switch: the pages slide side by side toward the tab that was picked. */
+    const val TAB_MS = 320
+
+    /** M3 emphasized curves: decelerate for things arriving, accelerate for things leaving, both for a move. */
+    val EmphasizedDecelerate: Easing = CubicBezierEasing(0.05f, 0.7f, 0.1f, 1f)
+    val EmphasizedAccelerate: Easing = CubicBezierEasing(0.3f, 0f, 0.8f, 0.15f)
+    val Emphasized: Easing = CubicBezierEasing(0.2f, 0f, 0f, 1f)
+
     /** The web's list stagger: 40 ms a row, the ninth and later all at 320 ms. */
     fun stagger(index: Int, stepMs: Int = 40, maxMs: Int = 320): Int = (index * stepMs).coerceAtMost(maxMs)
 }
+
+/**
+ * When the page this element is on finishes sliding into place (uptime ms), while it is sliding in;
+ * null once it has landed or when it appeared without a transition. Provided by the navigation shell.
+ */
+val LocalPageLanding = staticCompositionLocalOf<Long?> { null }
 
 /** False when the phone removes animations; tests can provide false for static frames. */
 val LocalMotion = staticCompositionLocalOf<Boolean?> { null }
@@ -92,6 +110,11 @@ enum class Enter {
 /**
  * Plays [kind] once, [delayMs] after this element first appears. [key] replays it when it changes
  * (the web remounts an element whose kind changed: an arrival "lands" again).
+ *
+ * Content travels with its page: an enter that would start while its page is still sliding in
+ * ([LocalPageLanding]) does not play, so rows and sections do not rise on top of the page's own
+ * move. One timed after the landing (a NEW letter's sheet and postmark out of the envelope) or
+ * keyed by a later change (an arrival) plays as before.
  */
 fun Modifier.enter(
     kind: Enter = Enter.Rise,
@@ -109,6 +132,9 @@ fun Modifier.enter(
     key: Any? = Unit,
 ): Modifier = composed {
     if (!motionOn()) return@composed this
+    val landing = LocalPageLanding.current
+    val withPage = remember(key) { landing != null && SystemClock.uptimeMillis() + delayMs < landing }
+    if (withPage) return@composed this
     val t = remember(key) { Animatable(0f) }
     LaunchedEffect(key) {
         if (delayMs > 0) delay(delayMs.toLong())

@@ -5,7 +5,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onRoot
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.delulutopia.app.ui.DelulutopiaApp
 import com.delulutopia.app.ui.PlaceholderScreen
@@ -19,6 +18,7 @@ import com.delulutopia.core.ui.EmailsRoute
 import com.delulutopia.core.ui.HomeRoute
 import com.delulutopia.core.ui.LettersRoute
 import com.delulutopia.core.ui.YouRoute
+import com.delulutopia.core.ui.page
 import com.github.takahirom.roborazzi.captureRoboImage
 import org.junit.Rule
 import org.junit.Test
@@ -41,11 +41,11 @@ class AppShellScreenshotTest {
         nav = rememberNavController()
         DelulutopiaTheme(darkTheme = dark) {
             DelulutopiaApp(session = SAMPLE, state = HomeRepository.State(), navController = nav) {
-                composable<HomeRoute> { PlaceholderScreen() }
-                composable<LettersRoute> { PlaceholderScreen() }
-                composable<DiscussionsRoute> { PlaceholderScreen() }
-                composable<EmailsRoute> { PlaceholderScreen() }
-                composable<YouRoute> { PlaceholderScreen() }
+                page<HomeRoute> { PlaceholderScreen() }
+                page<LettersRoute> { PlaceholderScreen() }
+                page<DiscussionsRoute> { PlaceholderScreen() }
+                page<EmailsRoute> { PlaceholderScreen() }
+                page<YouRoute> { PlaceholderScreen() }
             }
         }
     }

@@ -3,10 +3,19 @@ package com.delulutopia.app
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
+import android.os.SystemClock
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.EnterExitState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,6 +32,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -37,6 +47,8 @@ import com.delulutopia.app.ui.StartApp
 import com.delulutopia.app.ui.UnreachableScreen
 import com.delulutopia.core.data.SessionState
 import com.delulutopia.core.designsystem.component.LocalServerBaseUrl
+import com.delulutopia.core.designsystem.motion.LocalPageLanding
+import com.delulutopia.core.designsystem.motion.Motion
 import com.delulutopia.core.designsystem.theme.DelulutopiaTheme
 import com.delulutopia.core.designsystem.theme.isDark
 import dagger.hilt.android.AndroidEntryPoint
@@ -83,15 +95,38 @@ class MainActivity : FragmentActivity() {
                                     },
                                 ),
                             ) {
-                                when (val session = ready.session) {
-                                    is SessionState.SignedIn -> SignedInApp(
-                                        session = session.session,
-                                        themeMode = ready.themeMode,
-                                        onThemeModeChange = viewModel::setThemeMode,
-                                        onLogout = viewModel::logout,
-                                    )
-                                    SessionState.Unreachable -> UnreachableScreen(onRetry = viewModel::refreshSession)
-                                    else -> StartApp()
+                                // Into the universe (PIN accepted): the start screens grow past you as the app comes up from just behind them; log out reverses it.
+                                AnimatedContent(
+                                    targetState = ready.session,
+                                    contentKey = { it::class },
+                                    transitionSpec = {
+                                        val inward = targetState is SessionState.SignedIn
+                                        val ms = Motion.STACK_MS
+                                        (
+                                            fadeIn(tween(ms, easing = Motion.EmphasizedDecelerate)) +
+                                                scaleIn(tween(ms, easing = Motion.EmphasizedDecelerate), initialScale = if (inward) 0.94f else 1.06f)
+                                            ) togetherWith (
+                                            fadeOut(tween(ms / 2, easing = Motion.EmphasizedAccelerate)) +
+                                                scaleOut(tween(ms, easing = Motion.EmphasizedAccelerate), targetScale = if (inward) 1.06f else 0.94f)
+                                            )
+                                    },
+                                    label = "session",
+                                ) { session ->
+                                    // Its pages arrive with the zoom: their own enter animations wait for it (LocalPageLanding).
+                                    val arriving = transition.targetState == EnterExitState.Visible && transition.currentState != EnterExitState.Visible
+                                    val landing = remember { if (arriving) SystemClock.uptimeMillis() + Motion.STACK_MS else null }
+                                    CompositionLocalProvider(LocalPageLanding provides landing) {
+                                        when (session) {
+                                            is SessionState.SignedIn -> SignedInApp(
+                                                session = session.session,
+                                                themeMode = ready.themeMode,
+                                                onThemeModeChange = viewModel::setThemeMode,
+                                                onLogout = viewModel::logout,
+                                            )
+                                            SessionState.Unreachable -> UnreachableScreen(onRetry = viewModel::refreshSession)
+                                            else -> StartApp()
+                                        }
+                                    }
                                 }
                             }
                         }

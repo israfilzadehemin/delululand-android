@@ -2,6 +2,7 @@ package com.delulutopia.app.e2e
 
 import android.content.Context
 import android.os.Looper
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.semantics.SemanticsNode
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.getOrNull
@@ -10,6 +11,7 @@ import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.click
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasSetTextAction
@@ -19,6 +21,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTextReplacement
+import androidx.compose.ui.test.performTouchInput
 import androidx.test.core.app.ApplicationProvider
 import com.github.takahirom.roborazzi.captureRoboImage
 import java.net.CookieManager
@@ -264,6 +267,11 @@ class Ui(val test: ComposeUiTest, private val case: String) {
 
     fun gone(text: String, timeoutMs: Long = 20_000) = until(timeoutMs, "\"$text\" to go") { !sees(text) }
 
+    /** Like [see], but the text must also be drawn on screen (a node squashed to 0 dp still "exists"). */
+    fun seeShown(text: String, timeoutMs: Long = 20_000) = until(timeoutMs, "\"$text\" on screen") {
+        runCatching { test.onAllNodes(hasText(text, substring = true), useUnmergedTree = true)[0].assertIsDisplayed() }.isSuccess
+    }
+
     /**
      * Scrolls [node] into view only when none of it shows: performScrollTo never settles on a node
      * drawn a few dp outside its list (the Discussions "Archived · N" link is pulled 6 dp up).
@@ -290,6 +298,14 @@ class Ui(val test: ComposeUiTest, private val case: String) {
         scrollIn(node)
         node.performClick()
         pass(300)
+    }
+
+    /** Closes the topmost bottom sheet with a tap on its scrim near the top (its centre is under the sheet). */
+    fun closeSheet() {
+        val m = hasContentDescription("Close sheet")
+        until(10_000, "a sheet's scrim") { count(m) > 0 }
+        test.onAllNodes(m).let { it[it.fetchSemanticsNodes().size - 1] }.performTouchInput { click(Offset(centerX, top + 48f)) }
+        pass(800)
     }
 
     /** A navigation bar destination (its label is the last node with that text). */

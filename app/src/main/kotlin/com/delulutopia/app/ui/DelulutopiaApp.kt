@@ -2,22 +2,28 @@ package com.delulutopia.app.ui
 
 import android.content.Context
 import androidx.activity.compose.LocalActivity
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.core.CubicBezierEasing
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideIn
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
@@ -26,6 +32,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -34,13 +41,19 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleStartEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
@@ -48,10 +61,8 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.delulutopia.app.R
 import com.delulutopia.app.notify.PendingOpen
 import com.delulutopia.core.data.HomeRepository
 import com.delulutopia.core.designsystem.component.DlBottomSheet
@@ -81,6 +92,9 @@ import com.delulutopia.core.ui.LocalBrand
 import com.delulutopia.core.ui.LocalFirstCitizen
 import com.delulutopia.core.ui.LocalNotice
 import com.delulutopia.core.ui.LocalNoticeAction
+import com.delulutopia.core.ui.LocalPageFrame
+import com.delulutopia.core.ui.PageMotion
+import com.delulutopia.core.ui.StackPage
 import com.delulutopia.core.ui.ThreadRoute
 import com.delulutopia.core.ui.YouRoute
 import com.delulutopia.core.ui.fingerprint.Fingerprint
@@ -93,8 +107,8 @@ import com.delulutopia.core.ui.leaves.leafCeiling
 import com.delulutopia.core.ui.leaves.leafSurface
 import com.delulutopia.core.ui.notify.NotifyPermission
 import com.delulutopia.core.ui.notify.rememberNotifyAccess
+import com.delulutopia.core.ui.page
 import com.delulutopia.core.ui.reactions.LocalReactionsApi
-import com.delulutopia.core.ui.signatureOf
 import com.delulutopia.core.ui.tintOf
 import com.delulutopia.feature.discussions.discussionsGraph
 import com.delulutopia.feature.emails.emailsGraph
@@ -140,7 +154,7 @@ fun SignedInApp(
     }
     CompositionLocalProvider(LocalReactionsApi provides shell.reactions) {
         DelulutopiaApp(session, state, leaves = leaves, overlay = { AfterPin(state.home?.friend?.nickname) }) {
-            composable<HomeRoute> { HomeScreen() }
+            page<HomeRoute> { HomeScreen() }
             lettersGraph()
             discussionsGraph()
             emailsGraph()
@@ -270,9 +284,11 @@ fun DelulutopiaApp(
 
             /**
              * After an action (sent, posted): that list itself, fresh. Not the tab bar's restore,
-             * which brought back the tab's saved stack — the Write or Compose screen just left.
+             * which brought back the tab's saved stack — the Write or Compose screen just left. When
+             * the list is under it on the stack the finished page slides away to reveal it.
              */
             override fun top(route: Any) {
+                if (navController.popBackStack(route, inclusive = false)) return
                 navController.navigate(route) {
                     popUpTo(navController.graph.findStartDestination().id)
                     launchSingleTop = true
@@ -283,7 +299,12 @@ fun DelulutopiaApp(
 
     val backStack by navController.currentBackStackEntryAsState()
     val destination = backStack?.destination
-    val top = TopDestination.entries.firstOrNull { destination.isOn(it.route::class) }
+    val top = topOf(destination)
+    // The pages on screen: one at rest, two while one slides over, off or beside the other.
+    val visible by navController.visibleEntries.collectAsStateWithLifecycle()
+    val rootsOnly = visible.all { topOf(it.destination) != null }
+    // The bar belongs to the tab pages: shown while one is on screen, lit for the tab under the stack.
+    val barTab = top ?: visible.firstNotNullOfOrNull { topOf(it.destination) }
     val brand = home?.universe?.name ?: session.universe.name
     // The creator is the first citizen (whoOf); public ids carry no order.
     val firstCitizen = home?.let { h -> creatorOf(h.me.id, h.friend?.id, h.universe.isCreator) }
@@ -296,6 +317,17 @@ fun DelulutopiaApp(
         PendingOpen.path.value = null
         routeOf(path)?.let { navController.navigate(it) }
     }
+    val density = LocalDensity.current
+    var barPx by remember { mutableIntStateOf(0) }
+    val barHeight = with(density) { barPx.toDp() }
+    val rtl = LocalLayoutDirection.current == LayoutDirection.Rtl
+    val frame: @Composable (NavBackStackEntry, @Composable () -> Unit) -> Unit = { entry, content ->
+        when (val tab = topOf(entry.destination)) {
+            // Home's title is the universe's name (Universe §4).
+            null -> StackPage(content = content)
+            else -> TabPage(if (tab == TopDestination.Home) brand else t(tab.label), barHeight, content)
+        }
+    }
 
     CompositionLocalProvider(
         LocalAppNav provides nav,
@@ -304,95 +336,128 @@ fun DelulutopiaApp(
         LocalBrand provides brand,
         LocalFirstCitizen provides firstCitizen,
         LocalLeafSurfaces provides leafSurfaces,
+        LocalPageFrame provides frame,
     ) {
-        Scaffold(
-            topBar = {
-                when {
-                    // Home's title is the universe's name (Universe §4).
-                    top == TopDestination.Home -> DlTopAppBar(title = brand, modifier = Modifier.leafCeiling())
-                    top != null -> DlTopAppBar(title = t(top.label), modifier = Modifier.leafCeiling())
-                }
-            },
-            bottomBar = {
-                if (top != null) {
-                    DlNavigationBar(Modifier.leafSurface(kind = SurfaceKind.Ground)) {
-                        TopDestination.entries.forEach { item ->
-                            val selected = item == top
-                            val open = { navController.navigateToTop(item.route) }
-                            if (item == TopDestination.You) {
-                                // T5: a dot while this device shows no notifications but some are switched on.
-                                val wanted = home?.notifyPrefs?.let { it.enabled.isNotEmpty() } ?: true
-                                val alert = wanted && notify.permission != NotifyPermission.Granted
-                                DlNavigationYouItem(
-                                    selected = selected,
-                                    onClick = open,
-                                    label = t(item.label),
-                                    alert = alert,
-                                    alertDescription = t("notify.hintOff"),
-                                ) {
-                                    val me = home?.me
-                                    DlRemoteAvatar(
-                                        avatarUrl = me?.avatarUrl ?: session.me.avatarUrl,
-                                        name = me?.nickname ?: session.me.nickname,
-                                        initials = me?.initials() ?: session.me.nickname.take(1).uppercase(),
-                                        signature = tintOf(session.me.id),
-                                        size = 24.dp,
-                                    )
-                                }
-                            } else {
-                                val hasNew = when (item) {
-                                    TopDestination.Letters -> (home?.unreadCount ?: 0) > 0
-                                    TopDestination.Discussions -> (home?.discussionsUnseen ?: 0) > 0
-                                    TopDestination.Emails -> (home?.emailsUnread ?: 0) + (home?.emailsReacted ?: 0) > 0
-                                    else -> false
-                                }
-                                DlNavigationItem(
-                                    selected = selected,
-                                    onClick = open,
-                                    label = t(item.label),
-                                    icon = item.icon!!,
-                                    activeIcon = item.activeIcon!!,
-                                    hasNew = hasNew,
+        Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface)) {
+            if (barTab != null) {
+                // Under the pages while one slides over them (it covers the bar too); on top at rest and between tabs.
+                DlNavigationBar(
+                    Modifier
+                        .align(Alignment.BottomCenter)
+                        .zIndex(if (rootsOnly) 1f else 0f)
+                        .onSizeChanged { barPx = it.height }
+                        .leafSurface(kind = SurfaceKind.Ground),
+                ) {
+                    TopDestination.entries.forEach { item ->
+                        val selected = item == barTab
+                        val open = { navController.navigateToTop(item.route) }
+                        if (item == TopDestination.You) {
+                            // T5: a dot while this device shows no notifications but some are switched on.
+                            val wanted = home?.notifyPrefs?.let { it.enabled.isNotEmpty() } ?: true
+                            val alert = wanted && notify.permission != NotifyPermission.Granted
+                            DlNavigationYouItem(
+                                selected = selected,
+                                onClick = open,
+                                label = t(item.label),
+                                alert = alert,
+                                alertDescription = t("notify.hintOff"),
+                            ) {
+                                val me = home?.me
+                                DlRemoteAvatar(
+                                    avatarUrl = me?.avatarUrl ?: session.me.avatarUrl,
+                                    name = me?.nickname ?: session.me.nickname,
+                                    initials = me?.initials() ?: session.me.nickname.take(1).uppercase(),
+                                    signature = tintOf(session.me.id),
+                                    size = 24.dp,
                                 )
                             }
+                        } else {
+                            val hasNew = when (item) {
+                                TopDestination.Letters -> (home?.unreadCount ?: 0) > 0
+                                TopDestination.Discussions -> (home?.discussionsUnseen ?: 0) > 0
+                                TopDestination.Emails -> (home?.emailsUnread ?: 0) + (home?.emailsReacted ?: 0) > 0
+                                else -> false
+                            }
+                            DlNavigationItem(
+                                selected = selected,
+                                onClick = open,
+                                label = t(item.label),
+                                icon = item.icon!!,
+                                activeIcon = item.activeIcon!!,
+                                hasNew = hasNew,
+                            )
                         }
                     }
                 }
-            },
-            snackbarHost = { DlSnackbarHost(snackbarHostState) },
-            containerColor = MaterialTheme.colorScheme.surface,
-        ) { padding ->
-            // Motion: forward slides in from the right, back from the left, a tab switch rises a little.
-            val isTop: (NavDestination) -> Boolean = { d -> TopDestination.entries.any { d.isOn(it.route::class) } }
+            }
+            // Motion (PageMotion): tab to tab the pages slide side by side toward the picked tab;
+            // deeper pages slide over the stack and back off it (predictive back drags the same slide).
             NavHost(
                 navController,
                 startDestination = HomeRoute,
-                // The bars' space counts as consumed, so a screen's imePadding lifts only by the
-                // part of the keyboard the navigation bar does not already cover.
-                modifier = Modifier.padding(padding).consumeWindowInsets(padding),
+                modifier = Modifier.fillMaxSize(),
                 enterTransition = {
-                    pageIn(
-                        if (isTop(initialState.destination) &&
-                            isTop(targetState.destination)
-                        ) {
-                            0
-                        } else {
-                            32
-                        },
-                        if (isTop(targetState.destination) && isTop(initialState.destination)) 8 else 0,
-                    )
+                    val tabs = tabStep(initialState, targetState)
+                    if (tabs != null) PageMotion.tabIn(tabs, rtl) else PageMotion.push(rtl)
                 },
-                exitTransition = { fadeOut(tween(PAGE_MS / 2)) },
-                popEnterTransition = { pageIn(-32, 0) },
-                popExitTransition = { fadeOut(tween(PAGE_MS / 2)) },
+                exitTransition = {
+                    val tabs = tabStep(initialState, targetState)
+                    if (tabs != null) PageMotion.tabOut(tabs, rtl) else PageMotion.cover()
+                },
+                popEnterTransition = {
+                    val tabs = tabStep(initialState, targetState)
+                    if (tabs != null) PageMotion.tabIn(tabs, rtl) else PageMotion.uncover()
+                },
+                popExitTransition = {
+                    val tabs = tabStep(initialState, targetState)
+                    if (tabs != null) PageMotion.tabOut(tabs, rtl) else PageMotion.pop(rtl)
+                },
             ) {
                 graph(navController)
             }
+            DlSnackbarHost(
+                snackbarHostState,
+                Modifier
+                    .align(Alignment.BottomCenter)
+                    .zIndex(2f)
+                    .then(if (top != null) Modifier.padding(bottom = barHeight) else Modifier.navigationBarsPadding()),
+            )
         }
         // L1: Home and the three lists; the You tab and every opened item have none.
         LeafLayer(leafSurfaces, enabled = leaves, active = top != null && top != TopDestination.You)
         overlay()
     }
+}
+
+/**
+ * A tab page: its top bar (it moves with the page) over the content, and a clear strip at the
+ * bottom where the shell's navigation bar shows through. The content treats the bars' space as
+ * consumed, so a screen's imePadding lifts only by the part of the keyboard the bar does not cover.
+ */
+@Composable
+private fun TabPage(title: String, barHeight: Dp, content: @Composable () -> Unit) {
+    Column(Modifier.fillMaxSize()) {
+        DlTopAppBar(title = title, modifier = Modifier.leafCeiling())
+        Box(
+            Modifier
+                .weight(1f)
+                .fillMaxWidth()
+                .background(MaterialTheme.colorScheme.surface)
+                .consumeWindowInsets(WindowInsets.statusBars)
+                .consumeWindowInsets(PaddingValues(bottom = barHeight))
+                .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Horizontal)),
+        ) { content() }
+        Spacer(Modifier.fillMaxWidth().height(barHeight))
+    }
+}
+
+private fun topOf(destination: NavDestination?): TopDestination? = TopDestination.entries.firstOrNull { destination.isOn(it.route::class) }
+
+/** Between two tabs: whether the target lies toward the end of the bar; null when a page is pushed or popped. */
+private fun tabStep(from: NavBackStackEntry, to: NavBackStackEntry): Boolean? {
+    val a = topOf(from.destination) ?: return null
+    val b = topOf(to.destination) ?: return null
+    return b.ordinal > a.ordinal
 }
 
 private fun NavDestination?.isOn(route: KClass<*>): Boolean = this?.hierarchy?.any { it.hasRoute(route) } == true
@@ -421,17 +486,4 @@ internal fun routeOf(path: String): Any? {
         "emails" -> ThreadRoute(id)
         else -> null
     }
-}
-
-private const val PAGE_MS = 300
-private val EASE_OUT = CubicBezierEasing(0.2f, 0.8f, 0.2f, 1f)
-
-/** dl-page-in: fade in while moving from [dx], [dy] (dp) to rest. */
-private fun pageIn(dx: Int, dy: Int): EnterTransition = fadeIn(tween(PAGE_MS, easing = EASE_OUT)) +
-    slide(dx, dy)
-
-private fun slide(dx: Int, dy: Int): EnterTransition = slideIn(tween(PAGE_MS, easing = EASE_OUT)) { full ->
-    // dp of the 412 dp canvas phone, scaled to this window.
-    val k = full.width / 412f
-    IntOffset((dx * k).toInt(), (dy * k).toInt())
 }

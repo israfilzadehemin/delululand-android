@@ -63,11 +63,19 @@ fun Modifier.leafSurface(id: String? = null, kind: SurfaceKind = SurfaceKind.Fla
     }
 }
 
-/** The pinned top bar: cards under it are out of the band leaves may lie in. */
+/**
+ * The pinned top bar: cards under it are out of the band leaves may lie in. Each tab page has its
+ * own bar and two are on screen while tabs slide; a bar leaving clears the ceiling only if it is
+ * still the one registered, so the arriving bar's stays.
+ */
 fun Modifier.leafCeiling(): Modifier = composed {
     val registry = LocalLeafSurfaces.current ?: return@composed this
-    DisposableEffect(registry) { onDispose { registry.ceiling = null } }
-    onGloballyPositioned { registry.ceiling = it }
+    val mine = remember { arrayOfNulls<LayoutCoordinates>(1) }
+    DisposableEffect(registry) { onDispose { if (registry.ceiling === mine[0]) registry.ceiling = null } }
+    onGloballyPositioned {
+        mine[0] = it
+        registry.ceiling = it
+    }
 }
 
 /**

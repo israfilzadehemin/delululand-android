@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
@@ -42,10 +43,14 @@ import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
@@ -80,6 +85,7 @@ import com.delulutopia.core.ui.Note
 import com.delulutopia.core.ui.ReachBar
 import com.delulutopia.core.ui.ReachButton
 import com.delulutopia.core.ui.initials
+import com.delulutopia.core.ui.lightboxSource
 import com.delulutopia.core.ui.media.AudioPlayer
 import com.delulutopia.core.ui.noteColorOf
 import com.delulutopia.core.ui.noteInk
@@ -157,216 +163,219 @@ private fun Thread(d: DFull, me: Citizen?, friend: Citizen?, vm: DiscussionViewM
     BoxWithConstraints(Modifier.fillMaxSize()) {
         val viewport = maxHeight
         Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
-            // The note grows to fill the screen; the comments follow it (web .dl-paper flex: 1).
-            Column(Modifier.fillMaxWidth().heightIn(min = viewport)) {
-                if (inReach) {
-                    ReachBar(
-                        t("discussions.leftToTakeBack", "countdown" to Time.countdown((Time.ms(d.windowEndsAt) ?: 0) - nowMs)),
-                        Modifier.padding(start = 16.dp, end = 16.dp, bottom = 10.dp),
-                    ) {
-                        ReachButton(t("discussions.cancel"), padded = true) { askTakeBack = true }
-                    }
-                }
-                if (archived) {
-                    val day = Time.day(d.archivedAt)
-                    val line = when (d.archivedBy) {
-                        me?.id -> t("discussions.archivedByYou", "day" to day)
-                        friend?.id -> t("discussions.archivedByFriend", "friend" to archivedBy, "day" to day)
-                        else -> t("discussions.archivedOn", "day" to day)
-                    }
-                    Bar(line) {
-                        if (d.canUnarchive) ReachButton(t("discussions.unarchive"), padded = true) { scope.launch { notice(vm.unarchive()) } }
-                    }
-                }
-                val rule = if (DlTheme.isDark) Color(0x1FECE4D6) else Color(0x1F33323B)
-                val ruleTop = Modifier.drawBehind { drawLine(rule, Offset(0f, 0f), Offset(size.width, 0f), 1.dp.toPx()) }
-                Note(
-                    colour,
-                    Modifier.padding(start = 16.dp, end = 16.dp, top = 12.dp).weight(1f),
-                    pin = 20.dp,
-                    fillHeight = true,
-                ) {
-                    Column(Modifier.fillMaxSize()) {
-                        // web .dl-note--post .dl-discussion-title: Literata 22/1.3, 700.
-                        Text(
-                            d.title,
-                            Modifier.padding(start = 16.dp, end = 52.dp, top = 28.dp),
-                            style = DlTheme.type.noteTitle.copy(fontSize = 22.sp, lineHeight = 28.6.sp, fontWeight = FontWeight.Bold),
-                            color = noteInk,
-                        )
-                        // web .dl-paper-head: avatar 44, name 15/700, times 12; a soft rule under it.
-                        Row(
-                            Modifier
-                                .fillMaxWidth()
-                                .drawBehind { drawLine(rule, Offset(0f, size.height), Offset(size.width, size.height), 1.dp.toPx()) }
-                                .padding(start = 16.dp, end = 16.dp, top = 10.dp, bottom = 12.dp),
-                            horizontalArrangement = Arrangement.spacedBy(12.dp),
-                            verticalAlignment = Alignment.CenterVertically,
+            // The note grows to fill the screen; the comments follow it (web .dl-paper flex: 1, which
+            // never shrinks it below its content: a long thread scrolls instead of squashing the note).
+            GrowColumn(
+                minHeight = viewport,
+                top = {
+                    if (inReach) {
+                        ReachBar(
+                            t("discussions.leftToTakeBack", "countdown" to Time.countdown((Time.ms(d.windowEndsAt) ?: 0) - nowMs)),
+                            Modifier.padding(start = 16.dp, end = 16.dp, bottom = 10.dp),
                         ) {
-                            if (author != null) {
-                                DlRemoteAvatar(
-                                    author.avatarUrl,
-                                    author.nickname,
-                                    tintOf(author.id),
-                                    size = 44.dp,
-                                    initials = author.initials(),
-                                    ring = signatureOf(author.id),
-                                )
-                            }
-                            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                                Text(
-                                    author?.nickname.orEmpty(),
-                                    style = MaterialTheme.typography.titleSmall.copy(fontSize = 15.sp, fontWeight = FontWeight.Bold),
-                                    color = noteInk,
-                                )
-                                Row {
-                                    Text(
-                                        t(
-                                            if (arrived) "discussions.timesArrived" else "discussions.timesArrives",
-                                            "posted" to Time.clock(d.postedAt, nowMs),
-                                            "arrived" to Time.clock(d.arrivesAt, nowMs),
-                                            "arrives" to Time.clock(d.arrivesAt, nowMs),
-                                        ),
-                                        style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp),
-                                        color = noteInkQuiet,
+                            ReachButton(t("discussions.cancel"), padded = true) { askTakeBack = true }
+                        }
+                    }
+                    if (archived) {
+                        val day = Time.day(d.archivedAt)
+                        val line = when (d.archivedBy) {
+                            me?.id -> t("discussions.archivedByYou", "day" to day)
+                            friend?.id -> t("discussions.archivedByFriend", "friend" to archivedBy, "day" to day)
+                            else -> t("discussions.archivedOn", "day" to day)
+                        }
+                        Bar(line) {
+                            if (d.canUnarchive) ReachButton(t("discussions.unarchive"), padded = true) { scope.launch { notice(vm.unarchive()) } }
+                        }
+                    }
+                },
+                grow = { fill ->
+                    val rule = if (DlTheme.isDark) Color(0x1FECE4D6) else Color(0x1F33323B)
+                    val ruleTop = Modifier.drawBehind { drawLine(rule, Offset(0f, 0f), Offset(size.width, 0f), 1.dp.toPx()) }
+                    Note(colour, Modifier.padding(start = 16.dp, end = 16.dp, top = 12.dp), pin = 20.dp) {
+                        Column(Modifier.fillMaxWidth().heightIn(min = (fill - 12.dp).coerceAtLeast(0.dp))) {
+                            // web .dl-note--post .dl-discussion-title: Literata 22/1.3, 700.
+                            Text(
+                                d.title,
+                                Modifier.padding(start = 16.dp, end = 52.dp, top = 28.dp),
+                                style = DlTheme.type.noteTitle.copy(fontSize = 22.sp, lineHeight = 28.6.sp, fontWeight = FontWeight.Bold),
+                                color = noteInk,
+                            )
+                            // web .dl-paper-head: avatar 44, name 15/700, times 12; a soft rule under it.
+                            Row(
+                                Modifier
+                                    .fillMaxWidth()
+                                    .drawBehind { drawLine(rule, Offset(0f, size.height), Offset(size.width, size.height), 1.dp.toPx()) }
+                                    .padding(start = 16.dp, end = 16.dp, top = 10.dp, bottom = 12.dp),
+                                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                if (author != null) {
+                                    DlRemoteAvatar(
+                                        author.avatarUrl,
+                                        author.nickname,
+                                        tintOf(author.id),
+                                        size = 44.dp,
+                                        initials = author.initials(),
+                                        ring = signatureOf(author.id),
                                     )
-                                    if (d.editedAt != null) {
-                                        val label = t("discussions.editedAt", "time" to Time.clock(d.editedAt, nowMs))
+                                }
+                                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                                    Text(
+                                        author?.nickname.orEmpty(),
+                                        style = MaterialTheme.typography.titleSmall.copy(fontSize = 15.sp, fontWeight = FontWeight.Bold),
+                                        color = noteInk,
+                                    )
+                                    Row {
                                         Text(
-                                            " · ${if (showEditedAt) label else t("discussions.edited")}",
-                                            Modifier.clickable { showEditedAt = !showEditedAt }.semantics { contentDescription = label },
+                                            t(
+                                                if (arrived) "discussions.timesArrived" else "discussions.timesArrives",
+                                                "posted" to Time.clock(d.postedAt, nowMs),
+                                                "arrived" to Time.clock(d.arrivesAt, nowMs),
+                                                "arrives" to Time.clock(d.arrivesAt, nowMs),
+                                            ),
                                             style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp),
                                             color = noteInkQuiet,
                                         )
-                                    }
-                                }
-                            }
-                        }
-                        // web .dl-paper-body: 18/20 padding, letter type at 1.4, 0.35 em between paragraphs.
-                        Box(Modifier.weight(1f).fillMaxWidth().padding(horizontal = 20.dp, vertical = 18.dp)) {
-                            LetterBody(
-                                d.body,
-                                style = DlTheme.type.letterBody.copy(lineHeight = 23.8.sp),
-                                colour = noteInk,
-                                paragraphGap = 6.dp,
-                            )
-                        }
-                        if (photos.isNotEmpty() || audios.isNotEmpty() || !arrived) {
-                            // web .dl-paper-foot
-                            Column(
-                                Modifier.fillMaxWidth().then(ruleTop).padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 16.dp),
-                                verticalArrangement = Arrangement.spacedBy(10.dp),
-                            ) {
-                                if (photos.isNotEmpty()) {
-                                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                        photos.forEachIndexed { i, p ->
-                                            AsyncImage(
-                                                model = resolveMedia(base, p.thumbUrl ?: p.url),
-                                                contentDescription = t("discussions.photoOfOpenFullSize", "n" to i + 1, "count" to photos.size),
-                                                modifier = Modifier.size(64.dp).clip(RoundedCornerShape(8.dp)).clickable { photo = i },
-                                                contentScale = ContentScale.Crop,
+                                        if (d.editedAt != null) {
+                                            val label = t("discussions.editedAt", "time" to Time.clock(d.editedAt, nowMs))
+                                            Text(
+                                                " · ${if (showEditedAt) label else t("discussions.edited")}",
+                                                Modifier.clickable { showEditedAt = !showEditedAt }.semantics { contentDescription = label },
+                                                style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp),
+                                                color = noteInkQuiet,
                                             )
                                         }
                                     }
                                 }
-                                audios.forEachIndexed { i, a ->
-                                    AudioPlayer(
-                                        resolveMedia(base, a.url),
-                                        a.durationMs,
-                                        label = if (audios.size >
-                                            1
-                                        ) {
-                                            t("letters.voiceNoteN", "n" to i + 1)
-                                        } else {
-                                            t("reactions.item.voiceNote")
-                                        },
-                                    )
-                                }
-                                if (!arrived) {
-                                    Text(
-                                        t(
-                                            "discussions.arrivesForIn",
-                                            "friend" to (friend?.nickname ?: t("settings.yourFriend")),
-                                            "countdown" to Time.countdown((Time.ms(d.arrivesAt) ?: 0) - nowMs),
-                                        ),
-                                        style = MaterialTheme.typography.labelMedium.copy(
-                                            fontSize = 13.sp,
-                                            fontWeight = FontWeight.SemiBold,
-                                            fontFeatureSettings = "tnum",
-                                        ),
-                                        color = noteInk,
-                                    )
-                                }
                             }
-                        }
-                        // web .dl-paper-reactions
-                        Box(Modifier.fillMaxWidth().then(ruleTop).padding(start = 16.dp, end = 16.dp, top = 10.dp, bottom = 14.dp)) {
-                            Reactions(
-                                "discussions",
-                                d.id,
-                                d.reactions,
-                                me,
-                                friend,
-                                readOnly = archived,
-                                surface = ReactionSurface.Paper,
-                                onChanged = vm::reacted,
-                            )
-                        }
-                    }
-                    Box(Modifier.align(Alignment.TopEnd).padding(top = 8.dp, end = 8.dp)) {
-                        val items = buildList {
-                            if (d.canEdit) add(t("discussions.edit"))
-                            if (d.canArchive) add(t("discussions.archive"))
-                            if (d.canUnarchive) add(t("discussions.unarchive"))
-                            if (d.canDelete) add(t("discussions.delete"))
-                        }
-                        if (items.isNotEmpty()) {
-                            Box {
-                                // web .dl-note-more-btn: 36 x 32, quiet ink, 8 dp radius.
-                                Box(
-                                    Modifier
-                                        .size(36.dp, 32.dp)
-                                        .clip(RoundedCornerShape(8.dp))
-                                        .background(if (menu) noteInk.copy(alpha = 0.08f) else Color.Transparent)
-                                        .clickable { menu = true }
-                                        .semantics { contentDescription = t("discussions.discussionOptions") },
-                                    contentAlignment = Alignment.Center,
+                            // web .dl-paper-body: 18/20 padding, letter type at 1.4, 0.35 em between paragraphs.
+                            Box(Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 18.dp)) {
+                                LetterBody(
+                                    d.body,
+                                    style = DlTheme.type.letterBody.copy(lineHeight = 23.8.sp),
+                                    colour = noteInk,
+                                    paragraphGap = 6.dp,
+                                )
+                            }
+                            // The slack the comments leave goes under the body, so the foot sits at the bottom.
+                            Spacer(Modifier.weight(1f))
+                            if (photos.isNotEmpty() || audios.isNotEmpty() || !arrived) {
+                                // web .dl-paper-foot
+                                Column(
+                                    Modifier.fillMaxWidth().then(ruleTop).padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 16.dp),
+                                    verticalArrangement = Arrangement.spacedBy(10.dp),
                                 ) {
-                                    Text("⋯", fontSize = 20.sp, color = if (menu) noteInk else noteInkQuiet)
-                                }
-                                DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
-                                    items.forEach { label ->
-                                        DropdownMenuItem(
-                                            text = {
-                                                Text(
-                                                    label,
-                                                    color = if (label ==
-                                                        t("discussions.delete")
-                                                    ) {
-                                                        MaterialTheme.colorScheme.error
-                                                    } else {
-                                                        MaterialTheme.colorScheme.onSurface
-                                                    },
+                                    if (photos.isNotEmpty()) {
+                                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                            photos.forEachIndexed { i, p ->
+                                                AsyncImage(
+                                                    model = resolveMedia(base, p.thumbUrl ?: p.url),
+                                                    contentDescription = t("discussions.photoOfOpenFullSize", "n" to i + 1, "count" to photos.size),
+                                                    modifier = Modifier.size(64.dp).lightboxSource(p).clip(RoundedCornerShape(8.dp)).clickable { photo = i },
+                                                    contentScale = ContentScale.Crop,
                                                 )
-                                            },
-                                            onClick = {
-                                                menu = false
-                                                when (label) {
-                                                    t("discussions.edit") -> nav.open(EditDiscussionRoute(d.id))
-                                                    t("discussions.archive") -> scope.launch { notice(vm.archive()) }
-                                                    t("discussions.unarchive") -> scope.launch { notice(vm.unarchive()) }
-                                                    t("discussions.delete") -> askDelete = true
-                                                }
+                                            }
+                                        }
+                                    }
+                                    audios.forEachIndexed { i, a ->
+                                        AudioPlayer(
+                                            resolveMedia(base, a.url),
+                                            a.durationMs,
+                                            label = if (audios.size >
+                                                1
+                                            ) {
+                                                t("letters.voiceNoteN", "n" to i + 1)
+                                            } else {
+                                                t("reactions.item.voiceNote")
                                             },
                                         )
+                                    }
+                                    if (!arrived) {
+                                        Text(
+                                            t(
+                                                "discussions.arrivesForIn",
+                                                "friend" to (friend?.nickname ?: t("settings.yourFriend")),
+                                                "countdown" to Time.countdown((Time.ms(d.arrivesAt) ?: 0) - nowMs),
+                                            ),
+                                            style = MaterialTheme.typography.labelMedium.copy(
+                                                fontSize = 13.sp,
+                                                fontWeight = FontWeight.SemiBold,
+                                                fontFeatureSettings = "tnum",
+                                            ),
+                                            color = noteInk,
+                                        )
+                                    }
+                                }
+                            }
+                            // web .dl-paper-reactions
+                            Box(Modifier.fillMaxWidth().then(ruleTop).padding(start = 16.dp, end = 16.dp, top = 10.dp, bottom = 14.dp)) {
+                                Reactions(
+                                    "discussions",
+                                    d.id,
+                                    d.reactions,
+                                    me,
+                                    friend,
+                                    readOnly = archived,
+                                    surface = ReactionSurface.Paper,
+                                    onChanged = vm::reacted,
+                                )
+                            }
+                        }
+                        Box(Modifier.align(Alignment.TopEnd).padding(top = 8.dp, end = 8.dp)) {
+                            val items = buildList {
+                                if (d.canEdit) add(t("discussions.edit"))
+                                if (d.canArchive) add(t("discussions.archive"))
+                                if (d.canUnarchive) add(t("discussions.unarchive"))
+                                if (d.canDelete) add(t("discussions.delete"))
+                            }
+                            if (items.isNotEmpty()) {
+                                Box {
+                                    // web .dl-note-more-btn: 36 x 32, quiet ink, 8 dp radius.
+                                    Box(
+                                        Modifier
+                                            .size(36.dp, 32.dp)
+                                            .clip(RoundedCornerShape(8.dp))
+                                            .background(if (menu) noteInk.copy(alpha = 0.08f) else Color.Transparent)
+                                            .clickable { menu = true }
+                                            .semantics { contentDescription = t("discussions.discussionOptions") },
+                                        contentAlignment = Alignment.Center,
+                                    ) {
+                                        Text("⋯", fontSize = 20.sp, color = if (menu) noteInk else noteInkQuiet)
+                                    }
+                                    DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
+                                        items.forEach { label ->
+                                            DropdownMenuItem(
+                                                text = {
+                                                    Text(
+                                                        label,
+                                                        color = if (label ==
+                                                            t("discussions.delete")
+                                                        ) {
+                                                            MaterialTheme.colorScheme.error
+                                                        } else {
+                                                            MaterialTheme.colorScheme.onSurface
+                                                        },
+                                                    )
+                                                },
+                                                onClick = {
+                                                    menu = false
+                                                    when (label) {
+                                                        t("discussions.edit") -> nav.open(EditDiscussionRoute(d.id))
+                                                        t("discussions.archive") -> scope.launch { notice(vm.archive()) }
+                                                        t("discussions.unarchive") -> scope.launch { notice(vm.unarchive()) }
+                                                        t("discussions.delete") -> askDelete = true
+                                                    }
+                                                },
+                                            )
+                                        }
                                     }
                                 }
                             }
                         }
                     }
-                }
-                Comments(d, me, friend, archived, nowMs, vm) { deletingComment = it }
-            }
+                },
+                bottom = { Comments(d, me, friend, archived, nowMs, vm) { deletingComment = it } },
+            )
         }
     }
 
@@ -426,6 +435,38 @@ private fun Thread(d: DFull, me: Citizen?, friend: Citizen?, vm: DiscussionViewM
             onDismiss = { deletingComment = null },
             busy = busy,
         )
+    }
+}
+
+/**
+ * A column at least [minHeight] tall whose [grow] slot takes the room [top] and [bottom] leave (web
+ * flex: 1 on a min-height page). Column weight cannot do this inside a scroll: with no height limit
+ * it hands the weighted child exactly the leftover room, 0 once the comments outgrow the screen, so
+ * the note vanished. Here [grow] gets the leftover as the height to fill and is measured with no
+ * upper limit, so it is never smaller than its content.
+ */
+@Composable
+private fun GrowColumn(
+    minHeight: Dp,
+    top: @Composable () -> Unit,
+    grow: @Composable (fill: Dp) -> Unit,
+    bottom: @Composable () -> Unit,
+) {
+    SubcomposeLayout(Modifier.fillMaxWidth()) { c ->
+        val loose = c.copy(minWidth = 0, minHeight = 0, maxHeight = Constraints.Infinity)
+        val tops = subcompose("top", top).map { it.measure(loose) }
+        val bottoms = subcompose("bottom", bottom).map { it.measure(loose) }
+        val used = tops.sumOf { it.height } + bottoms.sumOf { it.height }
+        val fill = (minHeight.roundToPx() - used).coerceAtLeast(0).toDp()
+        val grows = subcompose("grow") { grow(fill) }.map { it.measure(loose) }
+        val height = maxOf(minHeight.roundToPx(), used + grows.sumOf { it.height })
+        layout(c.maxWidth, height) {
+            var y = 0
+            (tops + grows + bottoms).forEach {
+                it.placeRelative(0, y)
+                y += it.height
+            }
+        }
     }
 }
 

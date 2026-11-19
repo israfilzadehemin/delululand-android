@@ -2,7 +2,7 @@ package com.delulutopia.feature.start
 
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.composable
+import com.delulutopia.core.ui.page
 import kotlinx.serialization.Serializable
 
 /** The signed-out graph (S0, S1, Create, Join). A session takes the app to the shell. */
@@ -15,20 +15,23 @@ import kotlinx.serialization.Serializable
 @Serializable data object JoinDestination
 
 fun NavGraphBuilder.startGraph(nav: NavHostController) {
+    // Back to the key and cards: the page on top slides off the stack (a fresh Entry if it is not there).
     val toEntry: () -> Unit = {
-        nav.navigate(EntryDestination) {
-            popUpTo(EntryDestination) { inclusive = true }
-            launchSingleTop = true
+        if (!nav.popBackStack(EntryDestination, inclusive = false)) {
+            nav.navigate(EntryDestination) {
+                popUpTo(EntryDestination) { inclusive = true }
+                launchSingleTop = true
+            }
         }
     }
-    composable<EntryDestination> {
+    page<EntryDestination> {
         EntryRoute(
             onOpenPin = { nav.navigate(PinDestination(it)) },
             onCreate = { nav.navigate(CreateDestination) },
             onJoin = { nav.navigate(JoinDestination) },
         )
     }
-    composable<PinDestination> { PinRoute(onBack = toEntry) }
-    composable<CreateDestination> { CreateUniverseRoute(onLeave = toEntry) }
-    composable<JoinDestination> { JoinRoute(onLeave = toEntry) }
+    page<PinDestination> { PinRoute(onBack = toEntry) }
+    page<CreateDestination> { CreateUniverseRoute(onLeave = toEntry) }
+    page<JoinDestination> { JoinRoute(onLeave = toEntry) }
 }
