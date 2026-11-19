@@ -121,8 +121,16 @@ fun DlOutlinedButton(
     modifier: Modifier = Modifier,
     icon: ImageVector? = null,
     enabled: Boolean = true,
+    /** Error-red ink and outline (Danger zone: "Delete my account"). */
+    destructive: Boolean = false,
 ) {
     val press = remember { MutableInteractionSource() }
+    val ink = if (destructive) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
+    val edge = when {
+        !enabled -> MaterialTheme.colorScheme.outlineVariant
+        destructive -> ink
+        else -> MaterialTheme.colorScheme.outline
+    }
     OutlinedButton(
         onClick = onClick,
         modifier = modifier.pressScale(press).defaultMinSize(minHeight = ButtonHeight),
@@ -130,9 +138,9 @@ fun DlOutlinedButton(
         enabled = enabled,
         shape = DlShape.button,
         contentPadding = ContentPadding,
-        border = BorderStroke(1.dp, if (enabled) MaterialTheme.colorScheme.outline else MaterialTheme.colorScheme.outlineVariant),
+        border = BorderStroke(1.dp, edge),
         colors = ButtonDefaults.outlinedButtonColors(
-            contentColor = MaterialTheme.colorScheme.primary,
+            contentColor = ink,
             disabledContentColor = DlTheme.colors.inkDisabled,
         ),
     ) { ButtonContent(text, icon) }

@@ -52,6 +52,26 @@ fun orNull(v: String?): JsonElement = v?.let { JsonPrimitive(it) } ?: JsonNull
 
 @Serializable data class ChangePinBody(val currentPin: String, val newPin: String)
 
+/** Doc "Delululand — Data Deletion" §5.1. `platform` goes to the ledger only. */
+@Serializable data class DeleteMeBody(val pin: String, val platform: String)
+
+@Serializable data class DeleteUniverseBody(val pin: String, val name: String, val platform: String)
+
+@Serializable
+data class DeletionCounts(
+    val letters: Int = 0,
+    val emails: Int = 0,
+    val discussions: Int = 0,
+    val comments: Int = 0,
+    val photos: Int = 0,
+    val voice: Int = 0,
+    val videos: Int = 0,
+    val doodles: Int = 0,
+)
+
+/** `scope`: USER (second citizen) or UNIVERSE (creator). */
+@Serializable data class DeletionPreview(val scope: String, val universe: String, val friend: String? = null, val counts: DeletionCounts = DeletionCounts())
+
 /** `PUT /api/push/devices` (Android Build B3): this install's FCM token. */
 @Serializable data class PushDeviceBody(val platform: String, val token: String, val appId: String? = null)
 

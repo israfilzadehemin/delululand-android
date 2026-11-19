@@ -60,6 +60,9 @@ class MainViewModel @Inject constructor(
         viewModelScope.launch { settings.setThemeMode(mode) }
     }
 
+    /** "Done" on the goodbye screen after a deletion: back to the start. */
+    fun leaveGoodbye() = session.leaveGoodbye()
+
     fun logout() {
         viewModelScope.launch { session.logout() }
     }

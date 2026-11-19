@@ -355,7 +355,7 @@ private fun ListRow(row: LetterRow, nowMs: Long, friendName: String, who: Who) {
     ) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                Direction(if (to) t("letters.toFriend", "friend" to friendName) else t("letters.fromFriend", "friend" to friendName), who)
+                Direction(if (to) toLabel(row, friendName) else t("letters.fromFriend", "friend" to friendName), who)
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                     if (!incoming && row.replyToId != null) ReplyMark()
                     Text(
@@ -471,14 +471,14 @@ private fun Thumb(row: LetterRow, nowMs: Long, friendName: String, who: Who, ind
                             }
                         }
                     }
-                    Direction(if (to) t("letters.toFriend", "friend" to friendName) else t("letters.fromFriend", "friend" to friendName), who)
+                    Direction(if (to) toLabel(row, friendName) else t("letters.fromFriend", "friend" to friendName), who)
                 }
             } else {
                 Row(Modifier.fillMaxWidth().heightIn(min = 36.dp), horizontalArrangement = Arrangement.SpaceBetween) {
                     Box(Modifier.weight(1f).padding(top = 2.dp)) {
                         Direction(
                             if (to) {
-                                t("letters.toFriend", "friend" to friendName)
+                                toLabel(row, friendName)
                             } else {
                                 t(
                                     "letters.fromFriend",
@@ -598,3 +598,7 @@ internal fun TileFold(flap: Color, modifier: Modifier, fold: Dp = FOLD) {
         drawPath(back, flap)
     }
 }
+
+/** DL-5: my letters to a citizen who has since left say so instead of naming the new friend. */
+private fun toLabel(row: LetterRow, friendName: String): String =
+    if (row.toFormer) t("letters.toFormer") else t("letters.toFriend", "friend" to friendName)

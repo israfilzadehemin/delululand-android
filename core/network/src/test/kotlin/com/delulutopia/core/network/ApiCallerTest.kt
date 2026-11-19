@@ -78,6 +78,26 @@ class ApiCallerTest {
     }
 
     @Test
+    fun `401 after a deletion says goodbye, not log in`() = runTest {
+        for (code in listOf(SessionEvents.GONE_ACCOUNT, SessionEvents.GONE_UNIVERSE)) {
+            val gone = async(Dispatchers.Default, start = CoroutineStart.UNDISPATCHED) { events.gone.first() }
+            server.enqueue(MockResponse.Builder().code(401).body("""{"code":"$code","message":"Gone."}""").build())
+            runCatching { caller.call { api.homeSession() } }
+            assertThat(withContext(Dispatchers.Default) { withTimeout(2_000) { gone.await() } }).isEqualTo(code)
+        }
+    }
+
+    @Test
+    fun `deletion bodies name the platform`() = runTest {
+        server.enqueue(MockResponse.Builder().code(204).build())
+        caller.call { api.deleteUniverse(com.delulutopia.core.network.model.DeleteUniverseBody("123456", "Moonbase", "android")) }
+        val req = server.takeRequest()
+        assertThat(req.method).isEqualTo("DELETE")
+        assertThat(req.url.encodedPath).isEqualTo("/api/universe")
+        assertThat(req.body?.utf8()).isEqualTo("""{"pin":"123456","name":"Moonbase","platform":"android"}""")
+    }
+
+    @Test
     fun `no server is offline`() = runTest {
         server.close()
         val e = runCatching { caller.call { api.entry() } }.exceptionOrNull() as ApiException

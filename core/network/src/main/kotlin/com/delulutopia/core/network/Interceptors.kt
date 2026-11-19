@@ -36,7 +36,27 @@ class SessionEvents {
     private val ended = MutableSharedFlow<Unit>(extraBufferCapacity = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST)
     val sessionEnded: SharedFlow<Unit> = ended
 
+    /**
+     * Doc "Delululand — Data Deletion" F5: the session ended because the account (`ACCOUNT_DELETED`)
+     * or the universe (`UNIVERSE_CLOSED`) was deleted; the app wipes the device and says goodbye.
+     */
+    private val goneCodes = MutableSharedFlow<String>(extraBufferCapacity = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST)
+    val gone: SharedFlow<String> = goneCodes
+
     fun emitEnded() {
         ended.tryEmit(Unit)
+    }
+
+    /** Called with every 401's code: `NO_SESSION` ends the session, the deletion codes say goodbye. */
+    fun on401(code: String) {
+        when (code) {
+            "NO_SESSION" -> emitEnded()
+            GONE_ACCOUNT, GONE_UNIVERSE -> goneCodes.tryEmit(code)
+        }
+    }
+
+    companion object {
+        const val GONE_ACCOUNT = "ACCOUNT_DELETED"
+        const val GONE_UNIVERSE = "UNIVERSE_CLOSED"
     }
 }

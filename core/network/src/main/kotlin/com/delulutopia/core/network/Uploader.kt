@@ -100,7 +100,7 @@ class Uploader @Inject constructor(
             return json.decodeFromString(Att.serializer(), body)
         }
         val c = (obj?.get("code") as? JsonPrimitive)?.contentOrNull ?: "HTTP_$code"
-        if (code == 401 && c == "NO_SESSION") events.emitEnded()
+        if (code == 401) events.on401(c)
         val message = (obj?.get("message") as? JsonPrimitive)?.contentOrNull ?: UPLOAD_FAILED
         throw ApiException(code, c, message, JsonObject(obj.orEmpty().filterKeys { it != "code" && it != "message" }))
     }
