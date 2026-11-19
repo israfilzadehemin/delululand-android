@@ -13,11 +13,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
@@ -59,6 +61,8 @@ fun AudioPlayer(url: String, durationMs: Long?, modifier: Modifier = Modifier, c
 @Composable
 private fun AudioPlayerContent(url: String, durationMs: Long?, modifier: Modifier, compact: Boolean, label: String) {
     val context = LocalContext.current
+    LaunchedEffect(Unit) { VoiceSpeed.load(context) }
+    val speed = VoiceSpeed.speed
     val mine = OnePlayer.url == url
     val playing = mine && OnePlayer.playing
     LaunchedEffect(playing) {
@@ -92,7 +96,7 @@ private fun AudioPlayerContent(url: String, durationMs: Long?, modifier: Modifie
                 .clip(CircleShape)
                 .background(seal)
                 .clickable(role = Role.Button, onClickLabel = if (playing) t("media.pause", "label" to label) else t("media.play", "label" to label)) {
-                    if (playing) OnePlayer.pause() else OnePlayer.play(context, url)
+                    if (playing) OnePlayer.pause() else OnePlayer.play(context, url, speed)
                 }
                 .semantics { contentDescription = if (playing) t("media.pause", "label" to label) else t("media.play", "label" to label) },
             contentAlignment = Alignment.Center,
@@ -128,5 +132,26 @@ private fun AudioPlayerContent(url: String, durationMs: Long?, modifier: Modifie
             style = MaterialTheme.typography.labelMedium.copy(fontSize = 12.sp, fontWeight = FontWeight.SemiBold, fontFeatureSettings = "tnum"),
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
+        // VS3/VS8: the speed chip, always shown; a tap moves to the next speed for every note.
+        val speedLabel = VoiceSpeed.label(speed)
+        val speedA11y = t("media.playbackSpeed", "speed" to speedLabel)
+        Box(
+            Modifier
+                .minimumInteractiveComponentSize()
+                .height(if (compact) 22.dp else 24.dp)
+                .widthIn(min = if (compact) 32.dp else 36.dp)
+                .clip(RoundedCornerShape(12.dp))
+                .border(1.dp, line, RoundedCornerShape(12.dp))
+                .clickable(role = Role.Button, onClickLabel = speedA11y) { VoiceSpeed.set(context, VoiceSpeed.next(speed)) }
+                .semantics { contentDescription = speedA11y }
+                .padding(horizontal = if (compact) 4.dp else 6.dp),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text(
+                speedLabel,
+                style = MaterialTheme.typography.labelMedium.copy(fontSize = 12.sp, fontWeight = FontWeight.Bold, fontFeatureSettings = "tnum"),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
     }
 }
