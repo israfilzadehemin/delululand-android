@@ -11,6 +11,7 @@ import com.google.android.gms.tasks.Task
 import com.google.firebase.FirebaseApp
 import com.google.firebase.messaging.FirebaseMessaging
 import dagger.hilt.android.qualifiers.ApplicationContext
+import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.coroutines.resume
@@ -39,13 +40,16 @@ class PushRegistrar @Inject constructor(
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+    private val started = AtomicBoolean(false)
 
     val available: Boolean get() = FirebaseApp.getApps(context).isNotEmpty()
 
     /** Whether a citizen is signed in here; a push that lands on a signed-out phone is dropped. */
     val signedIn: Boolean get() = prefs.contains(OWNER)
 
+    /** Once per process (the activity's view model calls it on every creation). */
     fun start() {
+        if (!started.compareAndSet(false, true)) return
         scope.launch {
             session.state.collectLatest { state ->
                 when (state) {

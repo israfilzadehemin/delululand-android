@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.delulutopia.app.push.PushRegistrar
 import com.delulutopia.app.settings.DeviceSettingsRepository
 import com.delulutopia.core.data.Backend
 import com.delulutopia.core.data.SessionRepository
@@ -27,6 +28,7 @@ class MainViewModel @Inject constructor(
     private val settings: DeviceSettingsRepository,
     private val session: SessionRepository,
     private val backend: Backend,
+    push: PushRegistrar,
 ) : ViewModel() {
 
     /** The TEST line (Technical Design §3.5): shown on every screen while the API runs shortened timers. */
@@ -38,6 +40,9 @@ class MainViewModel @Inject constructor(
     }.stateIn(viewModelScope, SharingStarted.Eagerly, MainUiState.Loading)
 
     init {
+        // B3: this install's FCM token follows whoever signs in (off without google-services.json).
+        // Started here, not in Application.onCreate, so the API client is built on first use.
+        push.start()
         refreshSession()
         viewModelScope.launch {
             runCatching { backend.run { config() } }.getOrNull()?.takeIf { it.testTiming }?.let { c ->
