@@ -2,7 +2,7 @@ package com.delulutopia.app.e2e
 
 import android.content.Context
 import android.os.Looper
-import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.semantics.SemanticsNode
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.getOrNull
@@ -11,6 +11,7 @@ import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.click
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasSetTextAction
@@ -18,9 +19,9 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
-import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTextReplacement
+import androidx.compose.ui.test.performTouchInput
 import androidx.test.core.app.ApplicationProvider
 import com.github.takahirom.roborazzi.captureRoboImage
 import java.net.CookieManager
@@ -299,12 +300,12 @@ class Ui(val test: ComposeUiTest, private val case: String) {
         pass(300)
     }
 
-    /** Closes the open bottom sheet through its scrim's click action (its centre is under the sheet). */
+    /** Closes the open bottom sheet with a tap on its scrim near the top (its centre is under the sheet). */
     fun closeSheet() {
-        val m = hasContentDescription("Close sheet") and hasClickAction()
+        val m = hasContentDescription("Close sheet")
         until(10_000, "a sheet's scrim") { count(m) > 0 }
-        test.onAllNodes(m)[0].performSemanticsAction(SemanticsActions.OnClick)
-        pass(500)
+        test.onAllNodes(m)[0].performTouchInput { click(Offset(centerX, top + 48f)) }
+        pass(800)
     }
 
     /** A navigation bar destination (its label is the last node with that text). */
