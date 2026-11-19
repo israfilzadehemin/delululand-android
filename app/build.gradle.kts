@@ -13,6 +13,14 @@ plugins {
  * keystore.properties file (git-ignored) may point at one. Without either, release builds are signed
  * with the debug key so the APK still installs, and the CI run says so.
  */
+/*
+ * Push (B3): Firebase reads app/google-services.json (git-ignored; CI writes it from the
+ * DL_GOOGLE_SERVICES_JSON secret before building the APKs). Without it the app builds with push off.
+ */
+if (file("google-services.json").exists()) {
+    apply(plugin = libs.plugins.google.services.get().pluginId)
+}
+
 val keystoreProps = Properties().apply {
     val file = rootProject.file("keystore.properties")
     if (file.exists()) file.inputStream().use { load(it) }
@@ -104,6 +112,8 @@ dependencies {
     implementation(libs.androidx.compose.material3)
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.kotlinx.serialization.json)
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.messaging)
 
     testImplementation(libs.junit4)
     testImplementation(libs.truth)

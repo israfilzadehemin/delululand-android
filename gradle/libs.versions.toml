@@ -31,6 +31,10 @@ camerax = "1.6.2"
 exif = "1.4.2"
 biometric = "1.1.0"
 
+# Push (FCM, Android Build B3); latest on 19 Nov 2026
+firebaseBom = "35.2.0"
+googleServices = "4.5.0"
+
 # Networking and images
 okhttp = "5.5.1"
 retrofit = "3.0.0"
@@ -69,6 +73,9 @@ androidx-compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "u
 androidx-compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 
 androidx-compose-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
+
+firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
+firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging" }
 
 hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
 hilt-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "hilt" }
@@ -124,6 +131,7 @@ ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 roborazzi = { id = "io.github.takahirom.roborazzi", version.ref = "roborazzi" }
 ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlintGradle" }
+google-services = { id = "com.google.gms.google-services", version.ref = "googleServices" }
 
 # Convention plugins (build-logic)
 delulutopia-android-application = { id = "delulutopia.android.application" }

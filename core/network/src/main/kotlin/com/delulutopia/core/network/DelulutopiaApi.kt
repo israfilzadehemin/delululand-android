@@ -45,6 +45,8 @@ import com.delulutopia.core.network.model.NotifyChange
 import com.delulutopia.core.network.model.NotifySettings
 import com.delulutopia.core.network.model.Profile
 import com.delulutopia.core.network.model.ProfileBody
+import com.delulutopia.core.network.model.PushDeviceBody
+import com.delulutopia.core.network.model.PushDeviceRemoveBody
 import com.delulutopia.core.network.model.ReactionBody
 import com.delulutopia.core.network.model.Reactions
 import com.delulutopia.core.network.model.SaveDiscussionDraftBody
@@ -105,6 +107,12 @@ interface DelulutopiaApi {
 
     @POST("api/auth/logout")
     suspend fun logout()
+
+    @PUT("api/push/devices")
+    suspend fun registerPushDevice(@Body body: PushDeviceBody)
+
+    @HTTP(method = "DELETE", path = "api/push/devices", hasBody = true)
+    suspend fun unregisterPushDevice(@Body body: PushDeviceRemoveBody)
 
     @POST("api/me/pin")
     suspend fun changePin(@Body body: ChangePinBody)
