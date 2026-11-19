@@ -2,6 +2,7 @@ package com.delulutopia.app.e2e
 
 import android.content.Context
 import android.os.Looper
+import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.semantics.SemanticsNode
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.getOrNull
@@ -17,6 +18,7 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTextReplacement
 import androidx.test.core.app.ApplicationProvider
@@ -295,6 +297,14 @@ class Ui(val test: ComposeUiTest, private val case: String) {
         scrollIn(node)
         node.performClick()
         pass(300)
+    }
+
+    /** Closes the open bottom sheet through its scrim's click action (its centre is under the sheet). */
+    fun closeSheet() {
+        val m = hasContentDescription("Close sheet") and hasClickAction()
+        until(10_000, "a sheet's scrim") { count(m) > 0 }
+        test.onAllNodes(m)[0].performSemanticsAction(SemanticsActions.OnClick)
+        pass(500)
     }
 
     /** A navigation bar destination (its label is the last node with that text). */

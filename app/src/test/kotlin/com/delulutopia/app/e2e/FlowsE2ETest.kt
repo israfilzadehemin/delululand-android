@@ -200,6 +200,16 @@ class FlowsE2ETest {
             tap("❤")
             seeLabel("❤")
         }
+        step("all emojis sheet") {
+            tapLabel("Add a reaction")
+            pass(500)
+            tapLabel("All emojis")
+            see("All emojis")
+            pass(2_000) // the platform picker loads its emoji data off the main thread
+            shot("emoji_sheet")
+            closeSheet()
+            gone("All emojis")
+        }
         step("friend's discussion and comment arrive") {
             val id = friend.postDiscussion("E2E from two", "Hello from two")
             tapLabel("Back")

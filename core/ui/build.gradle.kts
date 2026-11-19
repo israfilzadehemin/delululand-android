@@ -25,6 +25,8 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.emoji2.emojipicker)
+    // The picker's grid is a RecyclerView (EmojiPicker.kt centres its cells); emoji2 keeps it internal.
+    implementation(libs.androidx.recyclerview)
     implementation(libs.androidx.media3.exoplayer)
     implementation(libs.androidx.media3.ui)
     implementation(libs.androidx.media3.datasource.okhttp)
