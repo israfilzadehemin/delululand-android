@@ -3,6 +3,7 @@ package com.delulutopia.feature.emails
 import android.content.Context
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.delulutopia.core.data.Backend
@@ -12,6 +13,7 @@ import com.delulutopia.core.i18n.t
 import com.delulutopia.core.network.ApiException
 import com.delulutopia.core.network.model.DraftVersionBody
 import com.delulutopia.core.network.model.EmailDraft
+import com.delulutopia.core.network.model.EmailQuote
 import com.delulutopia.core.network.model.EmailSent
 import com.delulutopia.core.network.model.SaveEmailDraftBody
 import com.delulutopia.core.ui.media.Attachments
@@ -46,7 +48,17 @@ class EmailComposer(
         private set
     var attachments by mutableStateOf<Attachments?>(null)
         private set
-    val saver = DraftSaver(scope, save = { v -> backend.run { saveEmailDraft(key, SaveEmailDraftBody(if (withSubject) subject else "", text, v)) } })
+
+    /** Email Replies RE10: the email this reply answers, saved with the draft. */
+    var replyTo by mutableStateOf<EmailQuote?>(null)
+        private set
+
+    /** RE8: bumped when a reply is picked, so the bar puts the cursor in the field. */
+    var focusAsk by mutableIntStateOf(0)
+        private set
+    val saver = DraftSaver(scope, save = { v ->
+        backend.run { saveEmailDraft(key, SaveEmailDraftBody(if (withSubject) subject else "", text, v, if (withSubject) null else replyTo?.id)) }
+    })
 
     fun load() {
         scope.launch {
@@ -62,6 +74,7 @@ class EmailComposer(
     fun apply(d: EmailDraft) {
         subject = d.subject
         text = d.text
+        replyTo = d.replyTo
         saver.load(d.version, d.savedAt)
         val atts = attachments
         if (atts == null) {
@@ -76,6 +89,20 @@ class EmailComposer(
         val (next, cut) = clamp(raw)
         trimmed = cut && count(normalize(raw)) - count(text) > 1
         text = next
+        saver.touch()
+    }
+
+    /** RE6–RE8: answer this email; a new pick replaces the last. */
+    fun pickReply(quote: EmailQuote) {
+        if (withSubject) return
+        replyTo = quote
+        saver.touch()
+        focusAsk++
+    }
+
+    /** RE9: × on the strip. */
+    fun cancelReply() {
+        replyTo = null
         saver.touch()
     }
 

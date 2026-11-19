@@ -197,6 +197,22 @@ data class ThreadRow(
     val unread: Int = 0,
     val unseenReactions: Int = 0,
     val lastReaction: ReactionNotice? = null,
+    /** The newest email answers another (doc "Delululand — Email Replies" RE13: the ↩ prefix). */
+    val lastIsReply: Boolean = false,
+)
+
+/**
+ * The quote of a reply (Email Replies RE9, RE11): the answered email's first 120 characters on one
+ * line (null without text), its media counts and the first photo's thumbnail or the video's poster.
+ */
+@Serializable
+data class EmailQuote(
+    val id: Id,
+    val senderId: Id,
+    val text: String? = null,
+    val media: ThreadMedia? = null,
+    val thumbUrl: String? = null,
+    val sentAt: String,
 )
 
 @Serializable
@@ -209,6 +225,8 @@ data class Email(
     val readAt: String? = null,
     val attachments: List<Att> = emptyList(),
     val reactions: List<Reaction> = emptyList(),
+    /** The email this one answers (RE11); null for a plain email. */
+    val replyTo: EmailQuote? = null,
 )
 
 @Serializable
@@ -230,6 +248,8 @@ data class EmailDraft(
     val attachments: List<Att> = emptyList(),
     val version: Int = 0,
     val savedAt: String? = null,
+    /** A thread draft's reply target (RE10). */
+    val replyTo: EmailQuote? = null,
 )
 
 // Reactions (doc "Delululand — Reactions")

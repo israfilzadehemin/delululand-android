@@ -3,7 +3,10 @@ package com.delulutopia.feature.emails
 import com.delulutopia.core.data.Time
 import com.delulutopia.core.i18n.t
 import com.delulutopia.core.i18n.tn
+import com.delulutopia.core.network.model.Email
 import com.delulutopia.core.network.model.EmailCredits
+import com.delulutopia.core.network.model.EmailQuote
+import com.delulutopia.core.network.model.ThreadMedia
 import java.text.BreakIterator
 
 /** Emails Q4, Q5: plain text, counted in grapheme clusters, at most 1024. */
@@ -52,3 +55,39 @@ fun mediaWords(photos: Int, audios: Int, videos: Int): String? = when {
 }
 
 fun emailCountWords(n: Int): String = tn("emails.count", n)
+
+/** The quote of an email already on screen, built the way the server builds `replyTo` (Email Replies RE11). */
+fun quoteOf(e: Email): EmailQuote {
+    val photos = e.attachments.count { it.kind == "photo" }
+    val audios = e.attachments.count { it.kind == "audio" }
+    val videos = e.attachments.count { it.kind == "video" }
+    val oneLine = e.text.replace(Regex("\\s+"), " ").trim()
+    val text = if (oneLine.isEmpty()) null else oneLine.take(oneLine.offsetByCodePoints(0, minOf(120, oneLine.codePointCount(0, oneLine.length))))
+    return EmailQuote(
+        id = e.id,
+        senderId = e.senderId,
+        text = text,
+        media = ThreadMedia(photos, audios, videos),
+        thumbUrl = e.attachments.firstOrNull { (it.kind == "photo" || it.kind == "video") && it.thumbUrl != null }?.thumbUrl,
+        sentAt = e.sentAt,
+    )
+}
+
+/** RE9, RE11: the quote's text, else "Photo" / "Voice note" / "Video". */
+fun quoteLine(q: EmailQuote): String =
+    q.text ?: q.media?.let { mediaWords(it.photos, it.audios, it.videos) } ?: ""
+
+/** RE6: the distance that arms a reply and the most a bubble follows the finger, in dp. */
+const val SWIPE_ARM_DP = 64f
+const val SWIPE_MAX_DP = 96f
+
+/**
+ * Where the bubble sits for a finger moved by [dx] (dp): toward the column's centre only ([toward]
+ * +1 = right, −1 = left), eased past the arm point, never past the max. Same as web replyGesture.
+ */
+fun swipeOffset(dx: Float, toward: Int): Float {
+    val along = dx * toward
+    if (along <= 0f) return 0f
+    val eased = if (along <= SWIPE_ARM_DP) along else SWIPE_ARM_DP + (along - SWIPE_ARM_DP) * 0.35f
+    return minOf(SWIPE_MAX_DP, eased) * toward
+}
