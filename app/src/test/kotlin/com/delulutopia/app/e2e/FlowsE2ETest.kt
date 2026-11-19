@@ -270,7 +270,8 @@ class FlowsE2ETest {
         }
         step("reply") {
             type("Write a reply", "My reply")
-            tapLast("Send")
+            // Email Bubbles EB8: the docked bar's Send is an icon button.
+            tapLabel("Send", exact = true)
             see("My reply", 30_000)
         }
         step("friend's email arrives") {

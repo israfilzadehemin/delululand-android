@@ -898,5 +898,11 @@
  "media.snap": "Снять",
  "media.takeAPhoto": "Сделать фото",
  "media.yourPhoto": "Твоё фото",
- "media.playbackSpeed": "Скорость воспроизведения {speed}"
+ "media.playbackSpeed": "Скорость воспроизведения {speed}",
+ "emails.emailsOldestFirst": "Имейлы, сначала старые",
+ "emails.today": "Сегодня",
+ "emails.yesterday": "Вчера",
+ "emails.newEmailBelow": "Новый имейл",
+ "emails.attach": "Прикрепить",
+ "emails.closeAttachments": "Закрыть вложения"
 }

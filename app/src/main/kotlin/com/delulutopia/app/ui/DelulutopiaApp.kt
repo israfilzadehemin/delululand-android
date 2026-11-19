@@ -412,6 +412,16 @@ fun DelulutopiaApp(
                     val tabs = tabStep(initialState, targetState)
                     if (tabs != null) PageMotion.tabOut(tabs, rtl) else PageMotion.pop(rtl)
                 },
+                // Email Bubbles BK1: the edge swipe drags the same slide as ← (without these, Navigation's
+                // default predictive pop shrinks the page toward the centre and drops it on release).
+                predictivePopEnterTransition = {
+                    val tabs = tabStep(initialState, targetState)
+                    if (tabs != null) PageMotion.tabIn(tabs, rtl) else PageMotion.uncover()
+                },
+                predictivePopExitTransition = {
+                    val tabs = tabStep(initialState, targetState)
+                    if (tabs != null) PageMotion.tabOut(tabs, rtl) else PageMotion.pop(rtl)
+                },
             ) {
                 graph(navController)
             }
