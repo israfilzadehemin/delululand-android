@@ -41,7 +41,8 @@ fun orNull(v: String?): JsonElement = v?.let { JsonPrimitive(it) } ?: JsonNull
 
 @Serializable data class EditDiscussionBody(val title: String, val body: Doc, val color: String, val attachmentIds: List<String>)
 
-@Serializable data class SaveEmailDraftBody(val subject: String, val text: String, val version: Int)
+/** `replyToId` (Email Replies RE10): a thread draft's target; null (omitted) clears it. */
+@Serializable data class SaveEmailDraftBody(val subject: String, val text: String, val version: Int, val replyToId: String? = null)
 
 @Serializable data class ProfileBody(val username: String, val firstName: String, val lastName: String, val timezone: String)
 

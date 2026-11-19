@@ -1,5 +1,8 @@
 package com.delulutopia.feature.emails
 
+import android.os.Build
+import android.view.HapticFeedbackConstants
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -7,12 +10,14 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.absoluteOffset
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -38,19 +43,27 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -71,6 +84,7 @@ import com.delulutopia.core.designsystem.icon.WebIcons
 import com.delulutopia.core.designsystem.motion.Enter
 import com.delulutopia.core.designsystem.motion.enter
 import com.delulutopia.core.designsystem.motion.float
+import com.delulutopia.core.designsystem.motion.motionOn
 import com.delulutopia.core.designsystem.motion.rememberPlayed
 import com.delulutopia.core.designsystem.motion.rowEnter
 import com.delulutopia.core.designsystem.theme.DlTheme
@@ -99,6 +113,9 @@ import com.delulutopia.core.ui.signatureOf
 import com.delulutopia.core.ui.tintOf
 import java.time.Instant
 import java.time.ZoneId
+import kotlin.math.abs
+import kotlin.math.roundToInt
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 /** S13 Emails (web emails/EmailsScreen.tsx; canvas E-Emails, E-Emails-empty, E-No-credits). */
@@ -221,7 +238,9 @@ private fun ThreadCard(row: ThreadRow, nowMs: Long, home: Home?) {
     val snippet = if (reactionWins(row.lastReaction, reacted, row.lastEmailAt)) {
         noticeLine(row.lastReaction!!, reacted, home?.friend?.nickname ?: t("common.friend"))
     } else {
-        row.lastText ?: row.lastMedia?.let { mediaWords(it.photos, it.audios, it.videos) } ?: ""
+        val words = row.lastText ?: row.lastMedia?.let { mediaWords(it.photos, it.audios, it.videos) } ?: ""
+        // Email Replies RE13: ↩ before a reply's snippet, as Letters B2.
+        if (row.lastIsReply && words.isNotEmpty()) "↩ $words" else words
     }
     val fresh = row.unread + reacted
     val unread = fresh > 0
@@ -337,6 +356,19 @@ private fun ThreadBody(vm: ThreadViewModel, me: Citizen?, friend: Citizen?, home
     if (firstIds.isEmpty()) items.mapTo(firstIds) { it.id }
     var newBelow by remember { mutableStateOf(false) }
     var sentId by remember { mutableStateOf<String?>(null) }
+    // Email Replies RE12: the original flashed after a jump.
+    var flashId by remember { mutableStateOf<String?>(null) }
+    val rtl = LocalLayoutDirection.current == LayoutDirection.Rtl
+    val quoteName = { senderId: String -> if (senderId == me?.id) t("emails.you") else (friend?.takeIf { it.id == senderId }?.nickname ?: "") }
+    val openOriginal = { target: String ->
+        scope.launch {
+            if (vm.ensureLoaded(target)) {
+                lazyIndexOf(vm.items, target)?.let { list.animateScrollToItem(it) }
+                flashId = target
+            }
+        }
+        Unit
+    }
     val newestId = items.firstOrNull()?.id
     LaunchedEffect(newestId) {
         if (newestId == null) return@LaunchedEffect
@@ -369,10 +401,11 @@ private fun ThreadBody(vm: ThreadViewModel, me: Citizen?, friend: Citizen?, home
                     val first = newDay || older?.senderId != e.senderId
                     item(key = e.id) {
                         val fresh = firstIds.isNotEmpty() && e.id !in firstIds
+                        val mine = e.senderId == me?.id
                         Bubble(
                             e,
                             first = first,
-                            mine = e.senderId == me?.id,
+                            mine = mine,
                             me = me,
                             friend = friend,
                             nowMs = nowMs,
@@ -380,6 +413,13 @@ private fun ThreadBody(vm: ThreadViewModel, me: Citizen?, friend: Citizen?, home
                             seen = e.readAt?.takeIf { e.id == myNewest?.id },
                             onPhoto = { photos, at -> photo = photos to at },
                             onReacted = vm::reacted,
+                            quoteName = quoteName,
+                            onOpenQuote = openOriginal,
+                            onReply = { vm.composer.pickReply(quoteOf(e)) },
+                            // RE6: toward the column's centre: right for the friend's, left for mine; Persian mirrors.
+                            toward = (if (mine) -1 else 1) * (if (rtl) -1 else 1),
+                            flash = flashId == e.id,
+                            onFlashed = { if (flashId == e.id) flashId = null },
                             modifier = Modifier
                                 .animateItem(fadeInSpec = null, fadeOutSpec = null)
                                 .then(if (fresh) Modifier.enter(Enter.PopIn, key = e.id) else Modifier),
@@ -414,6 +454,30 @@ private fun ThreadBody(vm: ThreadViewModel, me: Citizen?, friend: Citizen?, home
                     }
                 }
             }
+            // RE12: past five older pages on the way to a quoted email.
+            androidx.compose.animation.AnimatedVisibility(
+                visible = vm.jumping,
+                modifier = Modifier.align(Alignment.TopCenter).padding(top = 8.dp),
+                enter = fadeIn(tween(160)),
+                exit = fadeOut(tween(120)),
+            ) {
+                Row(
+                    Modifier
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(MaterialTheme.colorScheme.primary)
+                        .padding(horizontal = 14.dp, vertical = 7.dp)
+                        .semantics { contentDescription = t("emails.findingOriginal") },
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                ) {
+                    CircularProgressIndicator(Modifier.size(14.dp), color = MaterialTheme.colorScheme.onPrimary, strokeWidth = 2.dp)
+                    Text(
+                        t("emails.findingOriginal"),
+                        style = MaterialTheme.typography.labelLarge.copy(fontSize = 13.sp, fontWeight = FontWeight.ExtraBold),
+                        color = MaterialTheme.colorScheme.onPrimary,
+                    )
+                }
+            }
             // The unscoped overload: inside BoxWithConstraints the Column's scoped one does not apply.
             androidx.compose.animation.AnimatedVisibility(
                 visible = newBelow,
@@ -442,12 +506,28 @@ private fun ThreadBody(vm: ThreadViewModel, me: Citizen?, friend: Citizen?, home
                 }
             }
         }
-        DockedComposer(vm.composer, home?.emailCredits) { sent ->
+        DockedComposer(vm.composer, home?.emailCredits, quoteName) { sent ->
             sentId = sent.email.id
             vm.sent(sent.email)
         }
     }
     photo?.let { (photos, at) -> Lightbox(photos, at, { photo = photos to it }, { photo = null }) }
+}
+
+/**
+ * RE12: the reversed list's index of an email: each email is one item, and a day chip follows the
+ * day's oldest email (it sits above it). Same walk as ThreadBody's.
+ */
+private fun lazyIndexOf(items: List<Email>, target: String): Int? {
+    var index = 0
+    for (i in items.indices) {
+        val e = items[i]
+        if (e.id == target) return index
+        index++
+        val older = items.getOrNull(i + 1)
+        if (older == null || !sameDay(older.sentAt, e.sentAt)) index++
+    }
+    return null
 }
 
 /** EB7: "Today", "Yesterday" or the day (FS-T6 forms), in the viewer's zone. */
@@ -502,9 +582,36 @@ private fun Bubble(
     seen: String?,
     onPhoto: (List<Att>, Int) -> Unit,
     onReacted: () -> Unit,
+    quoteName: (String) -> String,
+    onOpenQuote: (String) -> Unit,
+    onReply: () -> Unit,
+    toward: Int,
+    flash: Boolean,
+    onFlashed: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val base = LocalServerBaseUrl.current
+    val scope = rememberCoroutineScope()
+    val view = LocalView.current
+    val on = motionOn()
+    // RE6: the bubble's sideways offset in dp, and whether the reply is armed.
+    val swipe = remember { Animatable(0f) }
+    var armed by remember { mutableStateOf(false) }
+    val replyNow by rememberUpdatedState(onReply)
+    // RE12: the ring around the original after a jump, 1 s.
+    val ring = remember { Animatable(0f) }
+    LaunchedEffect(flash) {
+        if (!flash) return@LaunchedEffect
+        ring.snapTo(0.55f)
+        if (on) {
+            delay(400)
+            ring.animateTo(0f, tween(600))
+        } else {
+            delay(1_000)
+            ring.snapTo(0f)
+        }
+        onFlashed()
+    }
     val person = if (e.senderId == me?.id) {
         me
     } else if (e.senderId == friend?.id) {
@@ -551,37 +658,94 @@ private fun Bubble(
                 }
             }
         }
-        Column(
-            Modifier
-                .widthIn(max = maxWidth)
-                .clip(shape)
-                .background(tintOf(e.senderId))
-                .border(1.dp, signatureOf(e.senderId).copy(alpha = 0.75f), shape)
-                .padding(start = 12.dp, end = 12.dp, top = 8.dp, bottom = 9.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            if (e.text.isNotEmpty()) {
-                LinkedText(e.text, style = MaterialTheme.typography.bodyLarge.copy(fontSize = 15.sp, lineHeight = 21.75.sp), color = ink)
+        Box(contentAlignment = if (mine) Alignment.CenterEnd else Alignment.CenterStart) {
+            // RE6: the ↩ cue behind the bubble, uncovered as it moves.
+            Box(
+                Modifier
+                    .alpha(minOf(1f, abs(swipe.value) / SWIPE_ARM_DP))
+                    .size(32.dp)
+                    .clip(CircleShape)
+                    .background(DlTheme.colors.letterEnvelope)
+                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, CircleShape),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(WebIcons.Reply, null, Modifier.size(16.dp), tint = ink)
             }
-            video?.let { v -> VideoPlayer(resolveMedia(base, v.url), v.thumbUrl?.let { resolveMedia(base, it) }, v.durationMs, v.width, v.height) }
-            if (photos.isNotEmpty()) {
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    photos.forEachIndexed { i, p ->
-                        AsyncImage(
-                            model = resolveMedia(base, p.thumbUrl ?: p.url),
-                            contentDescription = t("emails.photoOfOpenFullSize", "n" to i + 1, "count" to photos.size),
-                            modifier = Modifier.size(64.dp).lightboxSource(p).clip(RoundedCornerShape(8.dp)).clickable { onPhoto(photos, i) },
-                            contentScale = ContentScale.Crop,
-                        )
+            Column(
+                Modifier
+                    .widthIn(max = maxWidth)
+                    .absoluteOffset { IntOffset((swipe.value * density).roundToInt(), 0) }
+                    .pointerInput(toward) {
+                        var raw = 0f
+                        val settle = {
+                            scope.launch { swipe.animateTo(0f, if (on) tween(220) else tween(0)) }
+                        }
+                        detectHorizontalDragGestures(
+                            onDragStart = {
+                                raw = 0f
+                                armed = false
+                            },
+                            onDragEnd = {
+                                settle()
+                                if (armed) replyNow()
+                                armed = false
+                            },
+                            onDragCancel = {
+                                settle()
+                                armed = false
+                            },
+                        ) { change, amount ->
+                            raw += amount.toDp().value
+                            val offset = swipeOffset(raw, toward)
+                            if (offset != 0f) change.consume()
+                            val nowArmed = abs(offset) >= SWIPE_ARM_DP
+                            if (nowArmed && !armed) {
+                                view.performHapticFeedback(
+                                    if (Build.VERSION.SDK_INT >=
+                                        Build.VERSION_CODES.R
+                                    ) {
+                                        HapticFeedbackConstants.CONFIRM
+                                    } else {
+                                        HapticFeedbackConstants.VIRTUAL_KEY
+                                    },
+                                )
+                            }
+                            armed = nowArmed
+                            scope.launch { swipe.snapTo(offset) }
+                        }
+                    }
+                    .border(3.dp, DlTheme.colors.mailBlue.copy(alpha = ring.value), shape)
+                    .clip(shape)
+                    .background(tintOf(e.senderId))
+                    .border(1.dp, signatureOf(e.senderId).copy(alpha = 0.75f), shape)
+                    .padding(start = 12.dp, end = 12.dp, top = 8.dp, bottom = 9.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                // RE11: the quote at the top inside the bubble.
+                e.replyTo?.let { q -> BubbleQuote(q, quoteName(q.senderId)) { onOpenQuote(q.id) } }
+                if (e.text.isNotEmpty()) {
+                    LinkedText(e.text, style = MaterialTheme.typography.bodyLarge.copy(fontSize = 15.sp, lineHeight = 21.75.sp), color = ink)
+                }
+                video?.let { v -> VideoPlayer(resolveMedia(base, v.url), v.thumbUrl?.let { resolveMedia(base, it) }, v.durationMs, v.width, v.height) }
+                if (photos.isNotEmpty()) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        photos.forEachIndexed { i, p ->
+                            AsyncImage(
+                                model = resolveMedia(base, p.thumbUrl ?: p.url),
+                                contentDescription = t("emails.photoOfOpenFullSize", "n" to i + 1, "count" to photos.size),
+                                modifier = Modifier.size(64.dp).lightboxSource(p).clip(RoundedCornerShape(8.dp)).clickable { onPhoto(photos, i) },
+                                contentScale = ContentScale.Crop,
+                            )
+                        }
                     }
                 }
-            }
-            audios.forEachIndexed { i, a ->
-                AudioPlayer(
-                    resolveMedia(base, a.url),
-                    a.durationMs,
-                    label = if (audios.size > 1) t("letters.voiceNoteN", "n" to i + 1) else t("media.voiceNoteLower"),
-                )
+                audios.forEachIndexed { i, a ->
+                    AudioPlayer(
+                        resolveMedia(base, a.url),
+                        a.durationMs,
+                        label = if (audios.size > 1) t("letters.voiceNoteN", "n" to i + 1) else t("media.voiceNoteLower"),
+                    )
+                }
             }
         }
         Row(
@@ -600,12 +764,34 @@ private fun Bubble(
             val chips = @Composable {
                 Reactions("emails", e.id, e.reactions, me, friend, chipColour = MaterialTheme.colorScheme.surface, compact = true, onChanged = onReacted)
             }
+            // RE7: ↩ beside add-reaction (48 dp touch target around the 28×24 chip).
+            val reply = @Composable {
+                val label = t("emails.reply")
+                Box(
+                    Modifier
+                        .size(width = 40.dp, height = 44.dp)
+                        .clickable(role = Role.Button, onClick = onReply)
+                        .semantics { contentDescription = label },
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Box(
+                        Modifier
+                            .size(width = 28.dp, height = 24.dp)
+                            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(12.dp)),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Icon(WebIcons.Reply, null, Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                }
+            }
             if (mine) {
+                reply()
                 chips()
                 time()
             } else {
                 time()
                 chips()
+                reply()
             }
         }
     }

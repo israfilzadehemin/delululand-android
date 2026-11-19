@@ -31,6 +31,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -42,6 +43,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
@@ -69,6 +72,7 @@ import com.delulutopia.core.designsystem.theme.DlTheme
 import com.delulutopia.core.i18n.t
 import com.delulutopia.core.network.Uploader
 import com.delulutopia.core.network.model.EmailCredits
+import com.delulutopia.core.network.model.EmailQuote
 import com.delulutopia.core.network.model.EmailSent
 import com.delulutopia.core.ui.media.AttachmentStrip
 import com.delulutopia.core.ui.media.Source
@@ -88,7 +92,12 @@ import kotlinx.coroutines.launch
  * joins the credits line; the field grows to six lines. All motion off = the same bar, static.
  */
 @Composable
-internal fun DockedComposer(composer: EmailComposer, credits: EmailCredits?, onSent: (EmailSent) -> Unit) {
+internal fun DockedComposer(
+    composer: EmailComposer,
+    credits: EmailCredits?,
+    quoteName: (String) -> String = { "" },
+    onSent: (EmailSent) -> Unit,
+) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val c = DlTheme.colors
@@ -117,6 +126,14 @@ internal fun DockedComposer(composer: EmailComposer, credits: EmailCredits?, onS
     val focusManager = LocalFocusManager.current
     val keyboard = LocalSoftwareKeyboardController.current
     val focused by focus.collectIsFocusedAsState()
+    // Email Replies RE8: a picked reply puts the cursor in the field (unlike +, EB15).
+    val field = remember { FocusRequester() }
+    LaunchedEffect(composer.focusAsk) {
+        if (composer.focusAsk > 0) {
+            runCatching { field.requestFocus() }
+            keyboard?.show()
+        }
+    }
     val voice = rememberVoiceRecording { bytes, ms -> atts.add(Uploader.Kind.Audio, Source.Made(bytes, "audio/mp4"), "voice.m4a", ms) }
     val addVideo = { uri: Uri, ms: Long? ->
         if (tooLong(ms ?: videoMs(context, uri))) {
@@ -139,7 +156,7 @@ internal fun DockedComposer(composer: EmailComposer, credits: EmailCredits?, onS
     }
     // The tray stays open while it holds something; the bar is open while it is in use.
     val tray = trayAsked || atts.items.isNotEmpty() || voice.recording
-    val open = tray || focused || composer.text.isNotEmpty()
+    val open = tray || focused || composer.text.isNotEmpty() || composer.replyTo != null
     val on = motionOn()
     val plusTurn by animateFloatAsState(if (tray) 45f else 0f, if (on) tween(220, easing = Motion.EaseOut) else tween(0), label = "plus")
     val quiet = MaterialTheme.colorScheme.onSurfaceVariant
@@ -174,6 +191,31 @@ internal fun DockedComposer(composer: EmailComposer, credits: EmailCredits?, onS
         if (composer.trimmed) Text(TRIMMED, style = MaterialTheme.typography.bodySmall)
         videoError?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error) }
         sendError?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error) }
+        // RE9: the strip, opening like the tray.
+        AnimatedVisibility(
+            visible = composer.replyTo != null,
+            enter = if (on) {
+                expandVertically(
+                    tween(260, easing = Motion.EmphasizedDecelerate),
+                    expandFrom = Alignment.Bottom,
+                ) + fadeIn(tween(200, 60))
+            } else {
+                fadeIn(tween(0))
+            },
+            exit = if (on) {
+                shrinkVertically(
+                    tween(180, easing = Motion.EmphasizedAccelerate),
+                    shrinkTowards = Alignment.Bottom,
+                ) + fadeOut(tween(140))
+            } else {
+                fadeOut(tween(0))
+            },
+        ) {
+            // The last target, kept (not state) so the strip still shows while it closes.
+            val last = remember { arrayOfNulls<EmailQuote>(1) }
+            composer.replyTo?.let { last[0] = it }
+            last[0]?.let { q -> ReplyStrip(q, quoteName(q.senderId), onCancel = composer::cancelReply) }
+        }
         // Closed: the credits alone; open: the counter and the saved note join them.
         Row(
             Modifier.fillMaxWidth().animateContentSize(if (on) tween(160) else tween(0)),
@@ -224,6 +266,7 @@ internal fun DockedComposer(composer: EmailComposer, credits: EmailCredits?, onS
                 modifier = Modifier
                     .weight(1f)
                     .heightIn(min = 44.dp)
+                    .focusRequester(field)
                     .animateContentSize(if (on) tween(160, easing = Motion.EaseOut) else tween(0))
                     .background(c.letterEnvelope, shape)
                     .border(1.dp, line, shape)

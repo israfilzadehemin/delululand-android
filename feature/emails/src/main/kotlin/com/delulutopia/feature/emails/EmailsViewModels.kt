@@ -190,6 +190,35 @@ class ThreadViewModel @AssistedInject constructor(
         }
     }
 
+    /** RE12: true while older pages load past the fifth on the way to a quoted email. */
+    var jumping by mutableStateOf(false)
+        private set
+
+    /**
+     * RE12: loads older pages until [target] is among the emails; true when it is. Past five pages
+     * [jumping] turns on for the "Loading…" pill.
+     */
+    suspend fun ensureLoaded(target: String): Boolean {
+        var pages = 0
+        try {
+            while (!known.containsKey(target)) {
+                val c = cursor ?: return false
+                pages++
+                if (pages > JUMP_PILL_AFTER) jumping = true
+                val page = backend.run { olderEmails(id, c, 20) }
+                known = known + page.items.associateBy { it.id }
+                olderCursor = page.olderCursor
+                olderLoaded = true
+            }
+            return true
+        } catch (_: ApiException) {
+            olderFailed = true
+            return false
+        } finally {
+            jumping = false
+        }
+    }
+
     fun sent(e: Email) {
         known = known + (e.id to e)
         viewModelScope.launch { load() }
@@ -204,6 +233,9 @@ class ThreadViewModel @AssistedInject constructor(
         composer.saver.dispose()
     }
 }
+
+/** RE12: past this many older pages a jump shows the "Loading…" pill. */
+const val JUMP_PILL_AFTER = 5
 
 /** S15 New email (FS-E11–E15). */
 @HiltViewModel
