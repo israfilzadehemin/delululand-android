@@ -43,9 +43,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
@@ -227,23 +225,24 @@ private fun ThreadCard(row: ThreadRow, nowMs: Long, home: Home?) {
     }
     val fresh = row.unread + reacted
     val unread = fresh > 0
-    // web .dl-row.dl-mail: a 10 dp mail card, 10/12 padding; unread is tinted with a 3 dp blue edge.
+    // Email Bubbles EB14: the card wears its starter's signature tint, like their bubbles; unread
+    // keeps the blue dot, bold subject and "N new" pill, with the border in the full signature colour.
     val shape = RoundedCornerShape(10.dp)
+    val sig = signatureOf(row.startedBy)
     Row(
         Modifier
             .fillMaxWidth()
             .shadow(1.dp, shape)
             .clip(shape)
-            .background(if (unread) c.mailUnread else c.mailBackground)
-            .drawBehind { if (unread) drawRect(c.mailBlue, size = Size(3.dp.toPx(), size.height)) }
-            .border(1.dp, c.mailLine, shape)
+            .background(tintOf(row.startedBy))
+            .border(if (unread) 2.dp else 1.dp, if (unread) sig else sig.copy(alpha = 0.6f), shape)
             .clickable { nav.open(ThreadRoute(row.id)) }
             .padding(horizontal = 12.dp, vertical = 10.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Box(Modifier.size(36.dp).background(c.mailBlue.copy(alpha = 0.12f), CircleShape), contentAlignment = Alignment.Center) {
-            Icon(WebIcons.Emails, null, Modifier.size(18.dp), tint = c.mailBlue)
+        Box(Modifier.size(36.dp).background(sig.copy(alpha = 0.28f), CircleShape), contentAlignment = Alignment.Center) {
+            Icon(WebIcons.Emails, null, Modifier.size(18.dp), tint = MaterialTheme.colorScheme.onSurface)
         }
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
