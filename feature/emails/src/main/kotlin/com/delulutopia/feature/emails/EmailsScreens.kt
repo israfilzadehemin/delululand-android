@@ -1,6 +1,5 @@
 package com.delulutopia.feature.emails
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -416,7 +415,8 @@ private fun ThreadBody(vm: ThreadViewModel, me: Citizen?, friend: Citizen?, home
                     }
                 }
             }
-            AnimatedVisibility(
+            // The unscoped overload: inside BoxWithConstraints the Column's scoped one does not apply.
+            androidx.compose.animation.AnimatedVisibility(
                 visible = newBelow,
                 modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 8.dp),
                 enter = fadeIn(tween(220)) + slideInVertically(tween(220)) { it / 2 },
