@@ -897,5 +897,6 @@
  "media.choosePhoto": "Выбрать фото",
  "media.snap": "Снять",
  "media.takeAPhoto": "Сделать фото",
- "media.yourPhoto": "Твоё фото"
+ "media.yourPhoto": "Твоё фото",
+ "media.playbackSpeed": "Скорость воспроизведения {speed}"
 }

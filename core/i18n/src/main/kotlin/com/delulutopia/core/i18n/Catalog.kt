@@ -5,7 +5,7 @@ package com.delulutopia.core.i18n
 
 internal object Catalog {
     val en: Map<String, String> by lazy {
-        HashMap<String, String>(1858).apply {
+        HashMap<String, String>(1860).apply {
             en0(this)
             en1(this)
             en2(this)
@@ -523,6 +523,7 @@ internal object Catalog {
         m["media.play"] = "Play {label}"
         m["media.playVideo"] = "Play video"
         m["media.playVoiceNote"] = "Play voice note"
+        m["media.playbackSpeed"] = "Playback speed {speed}"
         m["media.processing"] = "Processing"
         m["media.progress"] = "{time} / {total}"
         m["media.readFailed"] = "This file couldn't be read from your phone"
@@ -625,10 +626,10 @@ internal object Catalog {
         m["notifyEvent.boardNote"] = "Note on your doodle"
         m["notifyEvent.boardReaction"] = "Reaction on your doodle"
         m["notifyEvent.discussionArrived"] = "A discussion arrives"
-        m["notifyEvent.discussionArrivedHint"] = "When {friend}'s discussion reaches you"
     }
 
     private fun en4(m: HashMap<String, String>) {
+        m["notifyEvent.discussionArrivedHint"] = "When {friend}'s discussion reaches you"
         m["notifyEvent.discussionComment"] = "New comment"
         m["notifyEvent.discussionCommentHint"] = "On any discussion"
         m["notifyEvent.discussionReaction"] = "Reaction on your post"
@@ -778,10 +779,10 @@ internal object Catalog {
         m["settings.keyMadeOn"] = "Made {day}. Keys can't be shown again; make a new one if it's lost."
         m["settings.keyNotMade"] = "Couldn't make a new key. Try again."
         m["settings.keysCantBeShown"] = "Keys can't be shown again; make a new one if it's lost."
-        m["settings.language"] = "Language"
     }
 
     private fun en5(m: HashMap<String, String>) {
+        m["settings.language"] = "Language"
         m["settings.languageNotSaved"] = "Couldn't change the language. Try again."
         m["settings.languageNote"] = "Your language on every device you use, and in the notifications you get."
         m["settings.leaves"] = "Falling leaves"
@@ -931,10 +932,10 @@ internal object Catalog {
         m["write.arrivesAtTime"] = "Arrives at {time}"
         m["write.backDiscardChanges"] = "Back, discard changes"
         m["write.backKeepTheDraft"] = "Back, keep the draft"
-        m["write.couldntLoadYourDraftCheck"] = "Couldn't load your draft. Check your connection and try again."
     }
 
     private fun en6(m: HashMap<String, String>) {
+        m["write.couldntLoadYourDraftCheck"] = "Couldn't load your draft. Check your connection and try again."
         m["write.discard"] = "Discard"
         m["write.discardYourChanges"] = "Discard your changes?"
         m["write.editingSentLetter"] = "Editing a sent letter · {countdown} left"
@@ -967,7 +968,7 @@ internal object Catalog {
     }
 
     val az: Map<String, String> by lazy {
-        HashMap<String, String>(1858).apply {
+        HashMap<String, String>(1860).apply {
             az0(this)
             az1(this)
             az2(this)
@@ -1485,6 +1486,7 @@ internal object Catalog {
         m["media.play"] = "Başlat: {label}"
         m["media.playVideo"] = "Videonu başlat"
         m["media.playVoiceNote"] = "Səsli mesaja qulaq as"
+        m["media.playbackSpeed"] = "Səsləndirmə sürəti {speed}"
         m["media.processing"] = "Hazırlanır"
         m["media.progress"] = "{time} / {total}"
         m["media.readFailed"] = "Bu fayl telefonundan oxunmadı"
@@ -1587,10 +1589,10 @@ internal object Catalog {
         m["notifyEvent.boardNote"] = "Cızma-qarana qeyd"
         m["notifyEvent.boardReaction"] = "Cızma-qarana reaksiya"
         m["notifyEvent.discussionArrived"] = "Müzakirə çatır"
-        m["notifyEvent.discussionArrivedHint"] = "Dostunun müzakirəsi sənə çatanda"
     }
 
     private fun az4(m: HashMap<String, String>) {
+        m["notifyEvent.discussionArrivedHint"] = "Dostunun müzakirəsi sənə çatanda"
         m["notifyEvent.discussionComment"] = "Yeni şərh"
         m["notifyEvent.discussionCommentHint"] = "İstənilən müzakirədə"
         m["notifyEvent.discussionReaction"] = "Yazına reaksiya"
@@ -1740,10 +1742,10 @@ internal object Catalog {
         m["settings.keyMadeOn"] = "Yaradılıb: {day}. Açarı bir daha göstərmək olmur; itsə, yenisini yarat."
         m["settings.keyNotMade"] = "Yeni açar yaradılmadı. Bir də yoxla."
         m["settings.keysCantBeShown"] = "Açarı bir daha göstərmək olmur; itsə, yenisini yarat."
-        m["settings.language"] = "Dil"
     }
 
     private fun az5(m: HashMap<String, String>) {
+        m["settings.language"] = "Dil"
         m["settings.languageNotSaved"] = "Dil dəyişmədi. Bir də yoxla."
         m["settings.languageNote"] = "Bütün cihazlarında və gələn bildirişlərdə sənin dilin."
         m["settings.leaves"] = "Tökülən yarpaqlar"
@@ -1893,10 +1895,10 @@ internal object Catalog {
         m["write.arrivesAtTime"] = "Çatacaq: {time}"
         m["write.backDiscardChanges"] = "Geri, dəyişikliklər silinsin"
         m["write.backKeepTheDraft"] = "Geri, qaralama qalsın"
-        m["write.couldntLoadYourDraftCheck"] = "Qaralaman açılmadı. İnternetə bax və bir də yoxla."
     }
 
     private fun az6(m: HashMap<String, String>) {
+        m["write.couldntLoadYourDraftCheck"] = "Qaralaman açılmadı. İnternetə bax və bir də yoxla."
         m["write.discard"] = "Sil"
         m["write.discardYourChanges"] = "Dəyişikliklər silinsin?"
         m["write.editingSentLetter"] = "Göndərilmiş məktubu dəyişirsən · {countdown} qalıb"
@@ -1929,7 +1931,7 @@ internal object Catalog {
     }
 
     val fa: Map<String, String> by lazy {
-        HashMap<String, String>(1858).apply {
+        HashMap<String, String>(1860).apply {
             fa0(this)
             fa1(this)
             fa2(this)
@@ -2447,6 +2449,7 @@ internal object Catalog {
         m["media.play"] = "پخش {label}"
         m["media.playVideo"] = "پخش ویدیو"
         m["media.playVoiceNote"] = "پخش پیام صوتی"
+        m["media.playbackSpeed"] = "سرعت پخش {speed}"
         m["media.processing"] = "در حال آماده‌سازی"
         m["media.progress"] = "{time} / {total}"
         m["media.readFailed"] = "این فایل از گوشیت خونده نشد"
@@ -2549,10 +2552,10 @@ internal object Catalog {
         m["notifyEvent.boardNote"] = "یادداشت روی خط‌خطی‌ات"
         m["notifyEvent.boardReaction"] = "واکنش به خط‌خطی‌ات"
         m["notifyEvent.discussionArrived"] = "یه گفت‌وگو می‌رسه"
-        m["notifyEvent.discussionArrivedHint"] = "وقتی گفت‌وگوی {friend} بهت می‌رسه"
     }
 
     private fun fa4(m: HashMap<String, String>) {
+        m["notifyEvent.discussionArrivedHint"] = "وقتی گفت‌وگوی {friend} بهت می‌رسه"
         m["notifyEvent.discussionComment"] = "نظر تازه"
         m["notifyEvent.discussionCommentHint"] = "روی هر گفت‌وگویی"
         m["notifyEvent.discussionReaction"] = "واکنش به نوشته‌ت"
@@ -2702,10 +2705,10 @@ internal object Catalog {
         m["settings.keyMadeOn"] = "ساخته‌شده: {day}. کلید دوباره نشون داده نمی‌شه؛ اگه گم شد، یه تازه‌ش رو بساز."
         m["settings.keyNotMade"] = "کلید تازه ساخته نشد. دوباره امتحان کن."
         m["settings.keysCantBeShown"] = "کلید دوباره نشون داده نمی‌شه؛ اگه گم شد، یه تازه‌ش رو بساز."
-        m["settings.language"] = "زبان"
     }
 
     private fun fa5(m: HashMap<String, String>) {
+        m["settings.language"] = "زبان"
         m["settings.languageNotSaved"] = "زبان عوض نشد. دوباره امتحان کن."
         m["settings.languageNote"] = "زبانت روی همه‌ی دستگاه‌هات و توی اعلان‌هایی که می‌گیری."
         m["settings.leaves"] = "برگ‌ریزون"
@@ -2855,10 +2858,10 @@ internal object Catalog {
         m["write.arrivesAtTime"] = "ساعت {time} می‌رسه"
         m["write.backDiscardChanges"] = "برگشت، تغییرها دور ریخته بشن"
         m["write.backKeepTheDraft"] = "برگشت، پیش‌نویس بمونه"
-        m["write.couldntLoadYourDraftCheck"] = "پیش‌نویست باز نشد. اینترنتت رو چک کن و دوباره امتحان کن."
     }
 
     private fun fa6(m: HashMap<String, String>) {
+        m["write.couldntLoadYourDraftCheck"] = "پیش‌نویست باز نشد. اینترنتت رو چک کن و دوباره امتحان کن."
         m["write.discard"] = "دور بریز"
         m["write.discardYourChanges"] = "تغییرهات دور ریخته بشن؟"
         m["write.editingSentLetter"] = "داری نامه‌ی فرستاده‌شده رو ویرایش می‌کنی · {countdown} مونده"
@@ -2891,7 +2894,7 @@ internal object Catalog {
     }
 
     val tr: Map<String, String> by lazy {
-        HashMap<String, String>(1858).apply {
+        HashMap<String, String>(1860).apply {
             tr0(this)
             tr1(this)
             tr2(this)
@@ -3409,6 +3412,7 @@ internal object Catalog {
         m["media.play"] = "Oynat: {label}"
         m["media.playVideo"] = "Videoyu oynat"
         m["media.playVoiceNote"] = "Sesli mesajı dinle"
+        m["media.playbackSpeed"] = "Oynatma hızı {speed}"
         m["media.processing"] = "Hazırlanıyor"
         m["media.progress"] = "{time} / {total}"
         m["media.readFailed"] = "Bu dosya telefonundan okunamadı"
@@ -3511,10 +3515,10 @@ internal object Catalog {
         m["notifyEvent.boardNote"] = "Karalamana not"
         m["notifyEvent.boardReaction"] = "Karalamana tepki"
         m["notifyEvent.discussionArrived"] = "Bir sohbet gelince"
-        m["notifyEvent.discussionArrivedHint"] = "Arkadaşının sohbeti sana ulaşınca"
     }
 
     private fun tr4(m: HashMap<String, String>) {
+        m["notifyEvent.discussionArrivedHint"] = "Arkadaşının sohbeti sana ulaşınca"
         m["notifyEvent.discussionComment"] = "Yeni yorum"
         m["notifyEvent.discussionCommentHint"] = "Her sohbette"
         m["notifyEvent.discussionReaction"] = "Yazına tepki"
@@ -3664,10 +3668,10 @@ internal object Catalog {
         m["settings.keyMadeOn"] = "Oluşturuldu: {day}. Anahtar bir daha gösterilemez; kaybolursa yenisini oluştur."
         m["settings.keyNotMade"] = "Yeni anahtar oluşturulamadı. Tekrar dene."
         m["settings.keysCantBeShown"] = "Anahtar bir daha gösterilemez; kaybolursa yenisini oluştur."
-        m["settings.language"] = "Dil"
     }
 
     private fun tr5(m: HashMap<String, String>) {
+        m["settings.language"] = "Dil"
         m["settings.languageNotSaved"] = "Dil değiştirilemedi. Tekrar dene."
         m["settings.languageNote"] = "Kullandığın her cihazda ve gelen bildirimlerde senin dilin."
         m["settings.leaves"] = "Düşen yapraklar"
@@ -3817,10 +3821,10 @@ internal object Catalog {
         m["write.arrivesAtTime"] = "Varış: {time}"
         m["write.backDiscardChanges"] = "Geri, değişiklikler silinsin"
         m["write.backKeepTheDraft"] = "Geri, taslak kalsın"
-        m["write.couldntLoadYourDraftCheck"] = "Taslağın açılamadı. Bağlantını kontrol et ve tekrar dene."
     }
 
     private fun tr6(m: HashMap<String, String>) {
+        m["write.couldntLoadYourDraftCheck"] = "Taslağın açılamadı. Bağlantını kontrol et ve tekrar dene."
         m["write.discard"] = "Sil"
         m["write.discardYourChanges"] = "Değişiklikler silinsin mi?"
         m["write.editingSentLetter"] = "Gönderilmiş mektubu düzenliyorsun · {countdown} kaldı"
@@ -3853,7 +3857,7 @@ internal object Catalog {
     }
 
     val ru: Map<String, String> by lazy {
-        HashMap<String, String>(1886).apply {
+        HashMap<String, String>(1888).apply {
             ru0(this)
             ru1(this)
             ru2(this)
@@ -4385,6 +4389,7 @@ internal object Catalog {
         m["media.play"] = "Включить: {label}"
         m["media.playVideo"] = "Включить видео"
         m["media.playVoiceNote"] = "Включить голосовое"
+        m["media.playbackSpeed"] = "Скорость воспроизведения {speed}"
         m["media.processing"] = "Обработка"
         m["media.progress"] = "{time} / {total}"
         m["media.readFailed"] = "Не удалось прочитать этот файл с телефона"
@@ -4473,10 +4478,10 @@ internal object Catalog {
         m["notify.itOpensFullScreenLike"] = "Откроется на весь экран, как приложение, — на iPhone уведомления приходят только так."
         m["notify.itOpensFullScreenLike2"] = "Откроется на весь экран, как приложение, со своей иконки."
         m["notify.knowTheMomentALetter"] = "Узнавай о письме, как только оно придёт"
-        m["notify.notNow"] = "Не сейчас"
     }
 
     private fun ru4(m: HashMap<String, String>) {
+        m["notify.notNow"] = "Не сейчас"
         m["notify.ok"] = "ОК"
         m["notify.oneNotificationPerLetterAt"] = "Одно уведомление на каждое письмо — в ту же минуту, как оно придёт, даже если сайт закрыт. И больше ничего, никогда."
         m["notify.openItFromThereAnd"] = "Открой оттуда и ещё раз введи PIN-код"
@@ -4626,10 +4631,10 @@ internal object Catalog {
         m["settings.device.unsupported"] = "Не поддерживается"
         m["settings.device.unsupportedSub"] = "Этот браузер не умеет показывать уведомления."
         m["settings.done"] = "Готово"
-        m["settings.entryKey"] = "Ключ входа"
     }
 
     private fun ru5(m: HashMap<String, String>) {
+        m["settings.entryKey"] = "Ключ входа"
         m["settings.fingerprint"] = "Вход по отпечатку"
         m["settings.fingerprintKeep"] = "Оставить вход по отпечатку"
         m["settings.fingerprintKept"] = "Хранится только на этом телефоне и открывается отпечатком пальца."
@@ -4779,10 +4784,10 @@ internal object Catalog {
         m["universe.welcomeHintFollows"] = "Видно под «Добро пожаловать! Это {name}.», когда введён ключ. Меняется вместе с названием, пока ты не изменишь текст."
         m["universe.welcomeMax"] = "До 1500 символов"
         m["universe.welcomeMessage"] = "Приветствие"
-        m["universe.welcomeTo"] = "Добро пожаловать! Это {name}."
     }
 
     private fun ru6(m: HashMap<String, String>) {
+        m["universe.welcomeTo"] = "Добро пожаловать! Это {name}."
         m["universe.writeAFewWords"] = "Напиши пару слов"
         m["universe.xxxxXxxxXxxx"] = "XXXX-XXXX-XXXX"
         m["universe.yourCitizen"] = "Твой профиль"

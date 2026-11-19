@@ -883,5 +883,6 @@
  "media.choosePhoto": "Choose a photo",
  "media.snap": "Snap",
  "media.takeAPhoto": "Take a photo",
- "media.yourPhoto": "Your photo"
+ "media.yourPhoto": "Your photo",
+ "media.playbackSpeed": "Playback speed {speed}"
 }
