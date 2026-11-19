@@ -205,9 +205,13 @@ class FlowsE2ETest {
             tapLabel("Back")
             see("A discussion is on its way", 30_000)
             see("E2E from two", 90_000)
+            // Comments taller than the screen once squashed the note to 0 dp (only comments showed).
+            repeat(6) { friend.comment(id, "Filler $it: " + "a long comment that wraps over several lines on the note. ".repeat(5)) }
             friend.comment(id, "Two says hi")
             tap("E2E from two")
             see("Two says hi", 30_000)
+            seeShown("E2E from two")
+            seeShown("Hello from two")
         }
         step("archive and unarchive") {
             tapLabel("Discussion options")

@@ -264,6 +264,11 @@ class Ui(val test: ComposeUiTest, private val case: String) {
 
     fun gone(text: String, timeoutMs: Long = 20_000) = until(timeoutMs, "\"$text\" to go") { !sees(text) }
 
+    /** Like [see], but the text must also be drawn on screen (a node squashed to 0 dp still "exists"). */
+    fun seeShown(text: String, timeoutMs: Long = 20_000) = until(timeoutMs, "\"$text\" on screen") {
+        runCatching { test.onAllNodes(hasText(text, substring = true), useUnmergedTree = true)[0].assertIsDisplayed() }.isSuccess
+    }
+
     /**
      * Scrolls [node] into view only when none of it shows: performScrollTo never settles on a node
      * drawn a few dp outside its list (the Discussions "Archived · N" link is pulled 6 dp up).
