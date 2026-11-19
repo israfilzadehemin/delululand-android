@@ -99,6 +99,14 @@ class FlowsE2ETest {
         }
         step("custom mood: edit and delete") {
             tapLabel("Edit Testing")
+            // The emoji sheet (keyboard-sized cells) over the mood form; this flow stays under runTest's
+            // 1-minute clock, which a dialog late in a long flow trips.
+            tapLabel("Change it")
+            see("Choose an emoji")
+            pass(2_000) // the platform picker loads its emoji data off the main thread
+            shot("emoji_sheet")
+            closeSheet()
+            gone("Choose an emoji")
             type("Label", "Tested", replace = true)
             tap("Save", exact = true)
             see("Tested")
@@ -199,16 +207,6 @@ class FlowsE2ETest {
             pass(500)
             tap("❤")
             seeLabel("❤")
-        }
-        step("all emojis sheet") {
-            tapLabel("Add a reaction")
-            pass(500)
-            tapLabel("All emojis")
-            see("All emojis")
-            pass(2_000) // the platform picker loads its emoji data off the main thread
-            shot("emoji_sheet")
-            closeSheet()
-            gone("All emojis")
         }
         step("friend's discussion and comment arrive") {
             val id = friend.postDiscussion("E2E from two", "Hello from two")

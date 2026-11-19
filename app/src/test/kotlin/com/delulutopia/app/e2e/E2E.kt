@@ -300,11 +300,11 @@ class Ui(val test: ComposeUiTest, private val case: String) {
         pass(300)
     }
 
-    /** Closes the open bottom sheet with a tap on its scrim near the top (its centre is under the sheet). */
+    /** Closes the topmost bottom sheet with a tap on its scrim near the top (its centre is under the sheet). */
     fun closeSheet() {
         val m = hasContentDescription("Close sheet")
         until(10_000, "a sheet's scrim") { count(m) > 0 }
-        test.onAllNodes(m)[0].performTouchInput { click(Offset(centerX, top + 48f)) }
+        test.onAllNodes(m).let { it[it.fetchSemanticsNodes().size - 1] }.performTouchInput { click(Offset(centerX, top + 48f)) }
         pass(800)
     }
 
