@@ -103,6 +103,7 @@ import com.delulutopia.core.ui.WaxSeal
 import com.delulutopia.core.ui.WriteRoute
 import com.delulutopia.core.ui.firstLineOf
 import com.delulutopia.core.ui.initials
+import com.delulutopia.core.ui.lightboxSource
 import com.delulutopia.core.ui.media.AudioPlayer
 import com.delulutopia.core.ui.rememberNow
 import com.delulutopia.core.ui.signature
@@ -359,7 +360,13 @@ private fun LetterContent(letter: LetterFull, home: Home?, swiped: Boolean, vm: 
                                         AsyncImage(
                                             model = resolveMedia(base, d.url),
                                             contentDescription = t("letters.doodleOpenFullSize"),
-                                            modifier = Modifier.fillMaxWidth().aspectRatio(1f).rotate(0.3f).border(1.dp, line).clickable { doodleOpen = true },
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .aspectRatio(1f)
+                                                .lightboxSource(d)
+                                                .rotate(0.3f)
+                                                .border(1.dp, line)
+                                                .clickable { doodleOpen = true },
                                             contentScale = ContentScale.Fit,
                                         )
                                     }
@@ -370,7 +377,7 @@ private fun LetterContent(letter: LetterFull, home: Home?, swiped: Boolean, vm: 
                                                     resolveMedia(base, p.thumbUrl ?: p.url),
                                                     t("letters.photoOfOpenFullSize", "n" to i + 1, "count" to photos.size),
                                                     if (i % 2 == 0) -1.5f else 1.2f,
-                                                    Modifier.enter(Enter.PopIn, mediaDelay, 300),
+                                                    Modifier.enter(Enter.PopIn, mediaDelay, 300).lightboxSource(p),
                                                 ) { photo = i }
                                             }
                                         }

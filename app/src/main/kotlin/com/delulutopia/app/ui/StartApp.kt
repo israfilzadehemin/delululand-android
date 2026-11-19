@@ -8,26 +8,44 @@ import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavBackStackEntry
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import com.delulutopia.app.R
 import com.delulutopia.core.designsystem.component.DlFilledButton
 import com.delulutopia.core.i18n.t
+import com.delulutopia.core.ui.LocalPageFrame
+import com.delulutopia.core.ui.PageMotion
+import com.delulutopia.core.ui.StackPage
 import com.delulutopia.feature.start.EntryDestination
 import com.delulutopia.feature.start.startGraph
 
-/** Signed out: key, cards, PIN, create and join (feature:start). */
+/** Signed out: key, cards, PIN, create and join (feature:start), a stack like the signed-in pages (PageMotion). */
 @Composable
 fun StartApp() {
     val nav = rememberNavController()
-    NavHost(nav, startDestination = EntryDestination) { startGraph(nav) }
+    val rtl = LocalLayoutDirection.current == LayoutDirection.Rtl
+    val frame: @Composable (NavBackStackEntry, @Composable () -> Unit) -> Unit = { _, content -> StackPage(insets = false, content = content) }
+    CompositionLocalProvider(LocalPageFrame provides frame) {
+        NavHost(
+            nav,
+            startDestination = EntryDestination,
+            enterTransition = { PageMotion.push(rtl) },
+            exitTransition = { PageMotion.cover() },
+            popEnterTransition = { PageMotion.uncover() },
+            popExitTransition = { PageMotion.pop(rtl) },
+        ) { startGraph(nav) }
+    }
 }
 
 /** The start check could not reach the server (no answer, or 5xx). */

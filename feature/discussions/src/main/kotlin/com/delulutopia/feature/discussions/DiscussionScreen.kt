@@ -85,6 +85,7 @@ import com.delulutopia.core.ui.Note
 import com.delulutopia.core.ui.ReachBar
 import com.delulutopia.core.ui.ReachButton
 import com.delulutopia.core.ui.initials
+import com.delulutopia.core.ui.lightboxSource
 import com.delulutopia.core.ui.media.AudioPlayer
 import com.delulutopia.core.ui.noteColorOf
 import com.delulutopia.core.ui.noteInk
@@ -270,7 +271,7 @@ private fun Thread(d: DFull, me: Citizen?, friend: Citizen?, vm: DiscussionViewM
                                                 AsyncImage(
                                                     model = resolveMedia(base, p.thumbUrl ?: p.url),
                                                     contentDescription = t("discussions.photoOfOpenFullSize", "n" to i + 1, "count" to photos.size),
-                                                    modifier = Modifier.size(64.dp).clip(RoundedCornerShape(8.dp)).clickable { photo = i },
+                                                    modifier = Modifier.size(64.dp).lightboxSource(p).clip(RoundedCornerShape(8.dp)).clickable { photo = i },
                                                     contentScale = ContentScale.Crop,
                                                 )
                                             }

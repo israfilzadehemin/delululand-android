@@ -86,6 +86,7 @@ import com.delulutopia.core.ui.NewEmailRoute
 import com.delulutopia.core.ui.ThreadRoute
 import com.delulutopia.core.ui.leaves.SurfaceKind
 import com.delulutopia.core.ui.leaves.leafSurface
+import com.delulutopia.core.ui.lightboxSource
 import com.delulutopia.core.ui.media.AudioPlayer
 import com.delulutopia.core.ui.media.VideoPlayer
 import com.delulutopia.core.ui.reactions.ReactionSummary
@@ -482,7 +483,7 @@ private fun EmailCard(
                             AsyncImage(
                                 model = resolveMedia(base, p.thumbUrl ?: p.url),
                                 contentDescription = t("emails.photoOfOpenFullSize", "n" to i + 1, "count" to photos.size),
-                                modifier = Modifier.size(64.dp).clip(RoundedCornerShape(8.dp)).clickable { onPhoto(photos, i) },
+                                modifier = Modifier.size(64.dp).lightboxSource(p).clip(RoundedCornerShape(8.dp)).clickable { onPhoto(photos, i) },
                                 contentScale = ContentScale.Crop,
                             )
                         }
