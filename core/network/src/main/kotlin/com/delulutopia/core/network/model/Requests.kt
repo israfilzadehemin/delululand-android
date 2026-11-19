@@ -50,3 +50,9 @@ fun orNull(v: String?): JsonElement = v?.let { JsonPrimitive(it) } ?: JsonNull
 @Serializable data class UniverseUpdate(val name: String, val welcome: String)
 
 @Serializable data class ChangePinBody(val currentPin: String, val newPin: String)
+
+/** `PUT /api/push/devices` (Android Build B3): this install's FCM token. */
+@Serializable data class PushDeviceBody(val platform: String, val token: String, val appId: String? = null)
+
+/** `DELETE /api/push/devices`: before log-out. */
+@Serializable data class PushDeviceRemoveBody(val platform: String, val token: String)

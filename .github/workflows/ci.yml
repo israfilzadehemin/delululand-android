@@ -94,6 +94,22 @@ jobs:
       - name: Lint
         run: ./gradlew :app:lintProdDebug
 
+      # B3: Firebase config for the APKs. Written only now, so tests and lint above run without
+      # Firebase; without the secret the APKs build with push off (the summary says which).
+      - name: Firebase config
+        env:
+          GOOGLE_SERVICES_JSON: ${{ secrets.DL_GOOGLE_SERVICES_JSON }}
+        run: |
+          if [ -n "$GOOGLE_SERVICES_JSON" ]; then
+            echo "$GOOGLE_SERVICES_JSON" | base64 -d > app/google-services.json
+            for id in com.delulutopia.app com.delulutopia.app.test com.delulutopia.app.debug com.delulutopia.app.test.debug; do
+              grep -q "\"package_name\": *\"$id\"" app/google-services.json || { echo "::error::google-services.json has no client for $id (register it in Firebase)"; exit 1; }
+            done
+            echo "Push: FCM on (google-services.json from DL_GOOGLE_SERVICES_JSON)." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "Push: FCM off (no DL_GOOGLE_SERVICES_JSON secret)." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
       - name: Build APKs and bundle
         run: ./gradlew assembleStagingDebug assembleProdDebug assembleStagingRelease assembleProdRelease bundleProdRelease
 

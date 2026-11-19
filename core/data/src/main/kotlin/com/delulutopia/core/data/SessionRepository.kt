@@ -5,6 +5,7 @@ import com.delulutopia.core.network.ApiException
 import com.delulutopia.core.network.DelulutopiaApi
 import com.delulutopia.core.network.SessionEvents
 import com.delulutopia.core.network.model.HomeSession
+import com.delulutopia.core.network.model.PushDeviceRemoveBody
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineScope
@@ -31,6 +32,7 @@ sealed interface SessionState {
 class SessionRepository @Inject constructor(
     private val api: DelulutopiaApi,
     private val caller: ApiCaller,
+    private val pushDevice: PushDevice,
     events: SessionEvents,
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
@@ -57,6 +59,10 @@ class SessionRepository @Inject constructor(
 
     /** FS-A11: ends this device's session only; the entry pass stays, so the cards come back. */
     suspend fun logout() {
+        // B3: this phone stops getting the citizen's pushes; the session is still valid for this call.
+        pushDevice.token?.let { token ->
+            runCatching { caller.call { api.unregisterPushDevice(PushDeviceRemoveBody(PushDevice.PLATFORM, token)) } }
+        }
         runCatching { caller.call { api.logout() } }
         _state.value = SessionState.SignedOut
     }

@@ -1,14 +1,7 @@
 package com.delulutopia.app.notify
 
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.PendingIntent
 import android.content.Context
-import android.content.Intent
-import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import com.delulutopia.app.MainActivity
-import com.delulutopia.app.R
 import com.delulutopia.core.data.Time
 import com.delulutopia.core.i18n.t
 import com.delulutopia.core.network.model.Home
@@ -46,13 +39,14 @@ class Arrivals @Inject constructor(@ApplicationContext private val context: Cont
         if (!manager.areNotificationsEnabled()) return
         val on: (String) -> Boolean = { key -> home.notifyPrefs?.let { key in it.enabled } ?: true }
         val friend = home.friend?.nickname ?: return
+        Notices.rememberFriend(context, friend)
 
         if (on("letter.arrived")) {
             val seen = done(LETTERS)
             val rows = home.from.filter { it.state == "DELIVERED" && it.id.toString() !in seen && (Time.ms(it.arrivesAt) ?: 0) >= since }
             remember(LETTERS, rows.map { it.id })
             rows.forEach {
-                post(manager, "letter-${it.id}", LETTERS, t("notify.inTab.letter", "name" to friend), t("notify.inTab.tapToRead"), "/letters/${it.id}")
+                post("letter-${it.id}", "letter.arrived", t("notify.inTab.letter", "name" to friend), t("notify.inTab.tapToRead"), "/letters/${it.id}")
             }
         }
         if (on("discussion.arrived")) {
@@ -60,7 +54,7 @@ class Arrivals @Inject constructor(@ApplicationContext private val context: Cont
             val rows = home.newDiscussions.filter { it.id.toString() !in seen && (Time.ms(it.arrivesAt) ?: 0) >= since }
             remember(DISCUSSIONS, rows.map { it.id })
             rows.forEach {
-                post(manager, "discussion-${it.id}", DISCUSSIONS, t("notify.inTab.discussion", "name" to friend), it.title, "/discussions/${it.id}")
+                post("discussion-${it.id}", "discussion.arrived", t("notify.inTab.discussion", "name" to friend), it.title, "/discussions/${it.id}")
             }
         }
         if (on("email.new")) {
@@ -71,9 +65,8 @@ class Arrivals @Inject constructor(@ApplicationContext private val context: Cont
                 it.threadId
             }.forEach {
                 post(
-                    manager,
                     "email-thread-${it.threadId}",
-                    EMAILS,
+                    "email.new",
                     t("notify.inTab.email", "name" to friend),
                     t("notify.inTab.tapToRead"),
                     "/emails/${it.threadId}",
@@ -82,27 +75,8 @@ class Arrivals @Inject constructor(@ApplicationContext private val context: Cont
         }
     }
 
-    private fun channel(id: String, name: String) {
-        val m = context.getSystemService(NotificationManager::class.java) ?: return
-        if (android.os.Build.VERSION.SDK_INT >= 26) m.createNotificationChannel(NotificationChannel(id, name, NotificationManager.IMPORTANCE_DEFAULT))
-    }
-
-    @Suppress("MissingPermission")
-    private fun post(manager: NotificationManagerCompat, tag: String, kind: String, title: String, body: String, path: String) {
-        channel(kind, kind.replaceFirstChar { it.uppercase() })
-        val intent = Intent(context, MainActivity::class.java)
-            .putExtra(PendingOpen.EXTRA, path)
-            .addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP)
-        val tap = PendingIntent.getActivity(context, tag.hashCode(), intent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
-        val n = NotificationCompat.Builder(context, kind)
-            .setSmallIcon(R.drawable.ic_launcher_monochrome)
-            .setContentTitle(title)
-            .setContentText(body)
-            .setAutoCancel(true)
-            .setContentIntent(tap)
-            .build()
-        runCatching { manager.notify(tag, 0, n) }
-    }
+    /** Same tag and channel as the push for this item (B3), so the two are one notification. */
+    private fun post(tag: String, event: String, title: String, body: String, path: String) = Notices.post(context, tag, event, title, body, path)
 
     private companion object {
         /** One poll interval of slack, so an item that arrived just before the first look still counts. */

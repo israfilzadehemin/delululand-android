@@ -8,6 +8,7 @@ plugins {
     alias(libs.plugins.hilt) apply false
     alias(libs.plugins.roborazzi) apply false
     alias(libs.plugins.ktlint) apply false
+    alias(libs.plugins.google.services) apply false
 }
 
 // One ktlint for CI and local runs (the same release as the standalone binary).
