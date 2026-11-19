@@ -46,6 +46,8 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
@@ -112,6 +114,8 @@ internal fun DockedComposer(composer: EmailComposer, credits: EmailCredits?, onS
     var videoError by remember { mutableStateOf<String?>(null) }
     var trayAsked by remember { mutableStateOf(false) }
     val focus = remember { MutableInteractionSource() }
+    val focusManager = LocalFocusManager.current
+    val keyboard = LocalSoftwareKeyboardController.current
     val focused by focus.collectIsFocusedAsState()
     val voice = rememberVoiceRecording { bytes, ms -> atts.add(Uploader.Kind.Audio, Source.Made(bytes, "audio/mp4"), "voice.m4a", ms) }
     val addVideo = { uri: Uri, ms: Long? ->
@@ -199,7 +203,14 @@ internal fun DockedComposer(composer: EmailComposer, credits: EmailCredits?, onS
                     .clip(CircleShape)
                     .background(c.letterEnvelope)
                     .border(1.dp, line, CircleShape)
-                    .clickable(role = Role.Button) { trayAsked = !trayAsked }
+                    .clickable(role = Role.Button) {
+                        // Attaching is not typing (EB15): opening the tray puts the keyboard away.
+                        if (!tray) {
+                            focusManager.clearFocus()
+                            keyboard?.hide()
+                        }
+                        trayAsked = !trayAsked
+                    }
                     .semantics { contentDescription = plusLabel },
                 contentAlignment = Alignment.Center,
             ) {
