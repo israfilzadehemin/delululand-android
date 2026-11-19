@@ -232,7 +232,7 @@ jobs:
           cd "$dir"
           git add -A
           git -c user.name="ci" -c user.email="ci@users.noreply.github.com" commit -qm "E2E screenshots for ${BRANCH_DIR} @ ${GITHUB_SHA::7}" || exit 0
-          for i in 1 2 3; do git push -q origin ci-screenshots && break; git pull -q --rebase origin ci-screenshots; done
+          for i in 1 2 3; do git push -q origin ci-screenshots && break; git -c user.name="ci" -c user.email="ci@users.noreply.github.com" pull -q --rebase origin ci-screenshots; done
 
       - name: Flow reports
         if: always()

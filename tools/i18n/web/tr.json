@@ -884,5 +884,11 @@
  "media.snap": "Çek",
  "media.takeAPhoto": "Fotoğraf çek",
  "media.yourPhoto": "Fotoğrafın",
- "media.playbackSpeed": "Oynatma hızı {speed}"
+ "media.playbackSpeed": "Oynatma hızı {speed}",
+ "emails.emailsOldestFirst": "E-postalar, en eskisi başta",
+ "emails.today": "Bugün",
+ "emails.yesterday": "Dün",
+ "emails.newEmailBelow": "Yeni e-posta",
+ "emails.attach": "Ekle",
+ "emails.closeAttachments": "Ekleri kapat"
 }

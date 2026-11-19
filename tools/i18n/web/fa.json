@@ -884,5 +884,11 @@
  "media.snap": "بگیر",
  "media.takeAPhoto": "یه عکس بگیر",
  "media.yourPhoto": "عکست",
- "media.playbackSpeed": "سرعت پخش {speed}"
+ "media.playbackSpeed": "سرعت پخش {speed}",
+ "emails.emailsOldestFirst": "ایمیل‌ها، قدیمی‌ترها اول",
+ "emails.today": "امروز",
+ "emails.yesterday": "دیروز",
+ "emails.newEmailBelow": "ایمیل تازه",
+ "emails.attach": "پیوست",
+ "emails.closeAttachments": "بستن پیوست‌ها"
 }

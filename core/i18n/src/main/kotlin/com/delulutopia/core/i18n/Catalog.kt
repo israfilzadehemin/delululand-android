@@ -5,7 +5,7 @@ package com.delulutopia.core.i18n
 
 internal object Catalog {
     val en: Map<String, String> by lazy {
-        HashMap<String, String>(1860).apply {
+        HashMap<String, String>(1872).apply {
             en0(this)
             en1(this)
             en2(this)
@@ -277,8 +277,10 @@ internal object Catalog {
         m["editor.letterText"] = "Letter text"
         m["editor.underline"] = "Underline"
         m["emails.aNewerVersionWasSaved"] = "A newer version was saved on another device. Load it?"
+        m["emails.attach"] = "Attach"
         m["emails.back"] = "Back"
         m["emails.backToEmails"] = "Back to Emails"
+        m["emails.closeAttachments"] = "Close attachments"
         m["emails.continueNewEmail"] = "Continue your new email"
         m["emails.couldntLoadOlderEmailsTry"] = "Couldn't load older emails. Try again."
         m["emails.couldntLoadYourDraftCheck"] = "Couldn't load your draft. Check your connection and try again."
@@ -289,6 +291,7 @@ internal object Catalog {
         m["emails.email"] = "Email"
         m["emails.emails"] = "Emails"
         m["emails.emailsNewestFirst"] = "Emails, newest first"
+        m["emails.emailsOldestFirst"] = "Emails, oldest first"
         m["emails.fold"] = "Fold"
         m["emails.keepMine"] = "Keep mine"
         m["emails.load"] = "Load"
@@ -303,6 +306,7 @@ internal object Catalog {
         m["emails.meta"] = "{sender} → {recipient} · {time} · {count}"
         m["emails.new"] = "{fresh} new"
         m["emails.newEmail"] = "New email"
+        m["emails.newEmailBelow"] = "New email"
         m["emails.noCredits"] = "No emails left today · renews at {time}"
         m["emails.noEmailsYet"] = "No emails yet."
         m["emails.photoOfOpenFullSize"] = "Photo {n} of {count}, open full size"
@@ -316,14 +320,16 @@ internal object Catalog {
         m["emails.thatIsEverything"] = "That is everything"
         m["emails.thread"] = "Thread"
         m["emails.threadGone"] = "This thread isn't here."
-        m["emails.to"] = "to {name}"
-        m["emails.trimmed"] = "Trimmed to 1024 characters"
-        m["emails.unfold"] = "Unfold"
-        m["emails.writeAReply"] = "Write a reply"
     }
 
     private fun en2(m: HashMap<String, String>) {
+        m["emails.to"] = "to {name}"
+        m["emails.today"] = "Today"
+        m["emails.trimmed"] = "Trimmed to 1024 characters"
+        m["emails.unfold"] = "Unfold"
+        m["emails.writeAReply"] = "Write a reply"
         m["emails.writeAnEmail"] = "Write an email"
+        m["emails.yesterday"] = "Yesterday"
         m["entry.cantReach"] = "Can't reach {brand}. {retry}"
         m["entry.createAUniverse"] = "Create a universe"
         m["entry.createYourCitizen"] = "Create your citizen"
@@ -467,15 +473,15 @@ internal object Catalog {
         m["letters.timesArrived"] = "Sent {sent} · Arrived {arrived}"
         m["letters.timesArrives"] = "Sent {sent} · Arrives {arrives}"
         m["letters.to"] = "To {friend}"
+    }
+
+    private fun en3(m: HashMap<String, String>) {
         m["letters.toEdit"] = "{countdown} to edit"
         m["letters.toFriend"] = "→ To {friend}"
         m["letters.voiceNote"] = "Voice note"
         m["letters.voiceNoteLower"] = "voice note"
         m["letters.voiceNoteN"] = "voice note {n}"
         m["letters.writeALetter"] = "Write a letter"
-    }
-
-    private fun en3(m: HashMap<String, String>) {
         m["letters.writeTheFirstOne"] = "Write the first one."
         m["letters.yesTakeItBack"] = "Yes, take it back"
         m["limits.added"] = "Added {added} of {picked}"
@@ -620,15 +626,15 @@ internal object Catalog {
         m["notify.tapShare"] = "Tap {share} in the browser bar"
         m["notify.thisSwitchesToOnBy"] = "This switches to On by itself once they're allowed."
         m["notify.turnOn"] = "Turn on"
+    }
+
+    private fun en4(m: HashMap<String, String>) {
         m["notify.yourBrowserBlockedNotificationsFor"] = "Your browser blocked notifications for Delulutopia and won't ask again by itself. To allow them:"
         m["notifyEvent.boardDoodle"] = "New doodle"
         m["notifyEvent.boardDoodleHint"] = "{friend} drew on or edited the board"
         m["notifyEvent.boardNote"] = "Note on your doodle"
         m["notifyEvent.boardReaction"] = "Reaction on your doodle"
         m["notifyEvent.discussionArrived"] = "A discussion arrives"
-    }
-
-    private fun en4(m: HashMap<String, String>) {
         m["notifyEvent.discussionArrivedHint"] = "When {friend}'s discussion reaches you"
         m["notifyEvent.discussionComment"] = "New comment"
         m["notifyEvent.discussionCommentHint"] = "On any discussion"
@@ -773,15 +779,15 @@ internal object Catalog {
         m["settings.fingerprintOfferTitle"] = "Unlock with your fingerprint?"
         m["settings.fingerprintOfferYes"] = "Use fingerprint"
         m["settings.fingerprintOn"] = "Fingerprint unlock is on"
+    }
+
+    private fun en5(m: HashMap<String, String>) {
         m["settings.fingerprintSub"] = "Instead of typing your PIN on this phone"
         m["settings.fingerprintTurnOn"] = "Turn on fingerprint unlock"
         m["settings.installApp"] = "Install app"
         m["settings.keyMadeOn"] = "Made {day}. Keys can't be shown again; make a new one if it's lost."
         m["settings.keyNotMade"] = "Couldn't make a new key. Try again."
         m["settings.keysCantBeShown"] = "Keys can't be shown again; make a new one if it's lost."
-    }
-
-    private fun en5(m: HashMap<String, String>) {
         m["settings.language"] = "Language"
         m["settings.languageNotSaved"] = "Couldn't change the language. Try again."
         m["settings.languageNote"] = "Your language on every device you use, and in the notifications you get."
@@ -926,15 +932,15 @@ internal object Catalog {
         m["universe.yourPhoto"] = "Your photo"
         m["universe.yourUniverse"] = "Your universe"
         m["universe.yourUniverseLower"] = "your universe"
+    }
+
+    private fun en6(m: HashMap<String, String>) {
         m["write.aNewerVersionWasSaved"] = "A newer version was saved on another device. Load it?"
         m["write.arrivesAt"] = "Arrives at"
         m["write.arrivesAtChange"] = "Arrives at {time} whatever you change"
         m["write.arrivesAtTime"] = "Arrives at {time}"
         m["write.backDiscardChanges"] = "Back, discard changes"
         m["write.backKeepTheDraft"] = "Back, keep the draft"
-    }
-
-    private fun en6(m: HashMap<String, String>) {
         m["write.couldntLoadYourDraftCheck"] = "Couldn't load your draft. Check your connection and try again."
         m["write.discard"] = "Discard"
         m["write.discardYourChanges"] = "Discard your changes?"
@@ -968,7 +974,7 @@ internal object Catalog {
     }
 
     val az: Map<String, String> by lazy {
-        HashMap<String, String>(1860).apply {
+        HashMap<String, String>(1872).apply {
             az0(this)
             az1(this)
             az2(this)
@@ -1240,8 +1246,10 @@ internal object Catalog {
         m["editor.letterText"] = "Məktubun mətni"
         m["editor.underline"] = "Altından xətt"
         m["emails.aNewerVersionWasSaved"] = "Başqa cihazda daha təzə versiya saxlanıb. Yükləyək?"
+        m["emails.attach"] = "Əlavə et"
         m["emails.back"] = "Geri"
         m["emails.backToEmails"] = "E-məktublara qayıt"
+        m["emails.closeAttachments"] = "Əlavələri bağla"
         m["emails.continueNewEmail"] = "Yeni e-məktubuna davam et"
         m["emails.couldntLoadOlderEmailsTry"] = "Köhnə e-məktublar yüklənmədi. Bir də yoxla."
         m["emails.couldntLoadYourDraftCheck"] = "Qaralaman açılmadı. İnternetə bax və bir də yoxla."
@@ -1252,6 +1260,7 @@ internal object Catalog {
         m["emails.email"] = "E-məktub"
         m["emails.emails"] = "E-məktublar"
         m["emails.emailsNewestFirst"] = "E-məktublar, ən təzələr əvvəldə"
+        m["emails.emailsOldestFirst"] = "E-məktublar, ən köhnələr əvvəldə"
         m["emails.fold"] = "Qatla"
         m["emails.keepMine"] = "Mənimki qalsın"
         m["emails.load"] = "Yüklə"
@@ -1266,6 +1275,7 @@ internal object Catalog {
         m["emails.meta"] = "{sender} → {recipient} · {time} · {count}"
         m["emails.new"] = "{fresh} yeni"
         m["emails.newEmail"] = "Yeni e-məktub"
+        m["emails.newEmailBelow"] = "Yeni e-məktub"
         m["emails.noCredits"] = "Bugünlük e-məktublar bitdi · yenilənmə: {time}"
         m["emails.noEmailsYet"] = "Hələ e-məktub yoxdur."
         m["emails.photoOfOpenFullSize"] = "Foto {n} / {count}, böyüt"
@@ -1279,14 +1289,16 @@ internal object Catalog {
         m["emails.thatIsEverything"] = "Hamısı bu qədər"
         m["emails.thread"] = "Yazışma"
         m["emails.threadGone"] = "Bu yazışma artıq yoxdur."
-        m["emails.to"] = "Kimə: {name}"
-        m["emails.trimmed"] = "1024 simvola qədər qısaldıldı"
-        m["emails.unfold"] = "Aç"
-        m["emails.writeAReply"] = "Cavab yaz"
     }
 
     private fun az2(m: HashMap<String, String>) {
+        m["emails.to"] = "Kimə: {name}"
+        m["emails.today"] = "Bu gün"
+        m["emails.trimmed"] = "1024 simvola qədər qısaldıldı"
+        m["emails.unfold"] = "Aç"
+        m["emails.writeAReply"] = "Cavab yaz"
         m["emails.writeAnEmail"] = "E-məktub yaz"
+        m["emails.yesterday"] = "Dünən"
         m["entry.cantReach"] = "{brand} ilə əlaqə yoxdur. {retry}"
         m["entry.createAUniverse"] = "Öz dünyanı yarat"
         m["entry.createYourCitizen"] = "Sakinini yarat"
@@ -1430,15 +1442,15 @@ internal object Catalog {
         m["letters.timesArrived"] = "Göndərilib: {sent} · Çatıb: {arrived}"
         m["letters.timesArrives"] = "Göndərilib: {sent} · Çatacaq: {arrives}"
         m["letters.to"] = "Kimə: {friend}"
+    }
+
+    private fun az3(m: HashMap<String, String>) {
         m["letters.toEdit"] = "Dəyişməyə {countdown}"
         m["letters.toFriend"] = "→ Kimə: {friend}"
         m["letters.voiceNote"] = "Səsli mesaj"
         m["letters.voiceNoteLower"] = "səsli mesaj"
         m["letters.voiceNoteN"] = "səsli mesaj {n}"
         m["letters.writeALetter"] = "Məktub yaz"
-    }
-
-    private fun az3(m: HashMap<String, String>) {
         m["letters.writeTheFirstOne"] = "İlkini sən yaz."
         m["letters.yesTakeItBack"] = "Hə, geri al"
         m["limits.added"] = "{picked} fotodan {added} əlavə olundu"
@@ -1583,15 +1595,15 @@ internal object Catalog {
         m["notify.tapShare"] = "Brauzer panelində {share} düyməsinə toxun"
         m["notify.thisSwitchesToOnBy"] = "İcazə verən kimi bu özü açılacaq."
         m["notify.turnOn"] = "Aç"
+    }
+
+    private fun az4(m: HashMap<String, String>) {
         m["notify.yourBrowserBlockedNotificationsFor"] = "Brauzerin Delulutopia üçün bildirişləri bağlayıb və özü bir daha soruşmayacaq. İcazə vermək üçün:"
         m["notifyEvent.boardDoodle"] = "Yeni cızma-qara"
         m["notifyEvent.boardDoodleHint"] = "{friend} lövhədə çəkəndə və ya dəyişəndə"
         m["notifyEvent.boardNote"] = "Cızma-qarana qeyd"
         m["notifyEvent.boardReaction"] = "Cızma-qarana reaksiya"
         m["notifyEvent.discussionArrived"] = "Müzakirə çatır"
-    }
-
-    private fun az4(m: HashMap<String, String>) {
         m["notifyEvent.discussionArrivedHint"] = "Dostunun müzakirəsi sənə çatanda"
         m["notifyEvent.discussionComment"] = "Yeni şərh"
         m["notifyEvent.discussionCommentHint"] = "İstənilən müzakirədə"
@@ -1736,15 +1748,15 @@ internal object Catalog {
         m["settings.fingerprintOfferTitle"] = "Barmaq izinlə açılsın?"
         m["settings.fingerprintOfferYes"] = "Barmaq izindən istifadə et"
         m["settings.fingerprintOn"] = "Barmaq izi ilə açma aktivdir"
+    }
+
+    private fun az5(m: HashMap<String, String>) {
         m["settings.fingerprintSub"] = "Bu telefonda PIN kodu yazmaq əvəzinə"
         m["settings.fingerprintTurnOn"] = "Barmaq izi ilə açmanı aktiv et"
         m["settings.installApp"] = "Tətbiqi quraşdır"
         m["settings.keyMadeOn"] = "Yaradılıb: {day}. Açarı bir daha göstərmək olmur; itsə, yenisini yarat."
         m["settings.keyNotMade"] = "Yeni açar yaradılmadı. Bir də yoxla."
         m["settings.keysCantBeShown"] = "Açarı bir daha göstərmək olmur; itsə, yenisini yarat."
-    }
-
-    private fun az5(m: HashMap<String, String>) {
         m["settings.language"] = "Dil"
         m["settings.languageNotSaved"] = "Dil dəyişmədi. Bir də yoxla."
         m["settings.languageNote"] = "Bütün cihazlarında və gələn bildirişlərdə sənin dilin."
@@ -1889,15 +1901,15 @@ internal object Catalog {
         m["universe.yourPhoto"] = "Foton"
         m["universe.yourUniverse"] = "Sənin dünyan"
         m["universe.yourUniverseLower"] = "sənin dünyan"
+    }
+
+    private fun az6(m: HashMap<String, String>) {
         m["write.aNewerVersionWasSaved"] = "Başqa cihazda daha təzə versiya saxlanıb. Yükləyək?"
         m["write.arrivesAt"] = "Çatacaq"
         m["write.arrivesAtChange"] = "Nəyi dəyişsən də, çatacaq: {time}"
         m["write.arrivesAtTime"] = "Çatacaq: {time}"
         m["write.backDiscardChanges"] = "Geri, dəyişikliklər silinsin"
         m["write.backKeepTheDraft"] = "Geri, qaralama qalsın"
-    }
-
-    private fun az6(m: HashMap<String, String>) {
         m["write.couldntLoadYourDraftCheck"] = "Qaralaman açılmadı. İnternetə bax və bir də yoxla."
         m["write.discard"] = "Sil"
         m["write.discardYourChanges"] = "Dəyişikliklər silinsin?"
@@ -1931,7 +1943,7 @@ internal object Catalog {
     }
 
     val fa: Map<String, String> by lazy {
-        HashMap<String, String>(1860).apply {
+        HashMap<String, String>(1872).apply {
             fa0(this)
             fa1(this)
             fa2(this)
@@ -2203,8 +2215,10 @@ internal object Catalog {
         m["editor.letterText"] = "متن نامه"
         m["editor.underline"] = "زیرخط"
         m["emails.aNewerVersionWasSaved"] = "یه نسخه‌ی تازه‌تر روی یه دستگاه دیگه ذخیره شده. بیارمش؟"
+        m["emails.attach"] = "پیوست"
         m["emails.back"] = "برگشت"
         m["emails.backToEmails"] = "برگشت به ایمیل‌ها"
+        m["emails.closeAttachments"] = "بستن پیوست‌ها"
         m["emails.continueNewEmail"] = "ایمیل تازه‌ت رو ادامه بده"
         m["emails.couldntLoadOlderEmailsTry"] = "ایمیل‌های قدیمی‌تر نیومدن. دوباره امتحان کن."
         m["emails.couldntLoadYourDraftCheck"] = "پیش‌نویست باز نشد. اینترنتت رو چک کن و دوباره امتحان کن."
@@ -2215,6 +2229,7 @@ internal object Catalog {
         m["emails.email"] = "ایمیل"
         m["emails.emails"] = "ایمیل‌ها"
         m["emails.emailsNewestFirst"] = "ایمیل‌ها، تازه‌ترها اول"
+        m["emails.emailsOldestFirst"] = "ایمیل‌ها، قدیمی‌ترها اول"
         m["emails.fold"] = "جمع کن"
         m["emails.keepMine"] = "مال خودم بمونه"
         m["emails.load"] = "بیارش"
@@ -2229,6 +2244,7 @@ internal object Catalog {
         m["emails.meta"] = "{sender} به {recipient} · {time} · {count}"
         m["emails.new"] = "{fresh} تازه"
         m["emails.newEmail"] = "ایمیل تازه"
+        m["emails.newEmailBelow"] = "ایمیل تازه"
         m["emails.noCredits"] = "ایمیل‌های امروز تموم شد · ساعت {time} دوباره پر می‌شه"
         m["emails.noEmailsYet"] = "هنوز ایمیلی نیست."
         m["emails.photoOfOpenFullSize"] = "عکس {n} از {count}، بزرگش کن"
@@ -2242,14 +2258,16 @@ internal object Catalog {
         m["emails.thatIsEverything"] = "همه‌ش همین بود"
         m["emails.thread"] = "رشته"
         m["emails.threadGone"] = "این رشته دیگه اینجا نیست."
-        m["emails.to"] = "به {name}"
-        m["emails.trimmed"] = "تا ۱۰۲۴ نویسه کوتاه شد"
-        m["emails.unfold"] = "باز کن"
-        m["emails.writeAReply"] = "یه جواب بنویس"
     }
 
     private fun fa2(m: HashMap<String, String>) {
+        m["emails.to"] = "به {name}"
+        m["emails.today"] = "امروز"
+        m["emails.trimmed"] = "تا ۱۰۲۴ نویسه کوتاه شد"
+        m["emails.unfold"] = "باز کن"
+        m["emails.writeAReply"] = "یه جواب بنویس"
         m["emails.writeAnEmail"] = "یه ایمیل بنویس"
+        m["emails.yesterday"] = "دیروز"
         m["entry.cantReach"] = "به {brand} وصل نمی‌شیم. {retry}"
         m["entry.createAUniverse"] = "دنیای خودت رو بساز"
         m["entry.createYourCitizen"] = "ساکنت رو بساز"
@@ -2393,15 +2411,15 @@ internal object Catalog {
         m["letters.timesArrived"] = "فرستاده‌شده: {sent} · رسیده: {arrived}"
         m["letters.timesArrives"] = "فرستاده‌شده: {sent} · می‌رسه: {arrives}"
         m["letters.to"] = "به {friend}"
+    }
+
+    private fun fa3(m: HashMap<String, String>) {
         m["letters.toEdit"] = "{countdown} تا ویرایش"
         m["letters.toFriend"] = "← به {friend}"
         m["letters.voiceNote"] = "پیام صوتی"
         m["letters.voiceNoteLower"] = "پیام صوتی"
         m["letters.voiceNoteN"] = "پیام صوتی {n}"
         m["letters.writeALetter"] = "یه نامه بنویس"
-    }
-
-    private fun fa3(m: HashMap<String, String>) {
         m["letters.writeTheFirstOne"] = "اولیش رو تو بنویس."
         m["letters.yesTakeItBack"] = "آره، پسش بگیر"
         m["limits.added"] = "{added} از {picked} اضافه شد"
@@ -2546,15 +2564,15 @@ internal object Catalog {
         m["notify.tapShare"] = "توی نوار مرورگر روی {share} بزن"
         m["notify.thisSwitchesToOnBy"] = "وقتی اجازه بدی، این خودش روشن می‌شه."
         m["notify.turnOn"] = "روشن کن"
+    }
+
+    private fun fa4(m: HashMap<String, String>) {
         m["notify.yourBrowserBlockedNotificationsFor"] = "مرورگرت اعلان‌های Delulutopia رو بسته و خودش دیگه نمی‌پرسه. برای اجازه دادن:"
         m["notifyEvent.boardDoodle"] = "خط‌خطی تازه"
         m["notifyEvent.boardDoodleHint"] = "وقتی {friend} روی تخته می‌کشه یا ویرایشش می‌کنه"
         m["notifyEvent.boardNote"] = "یادداشت روی خط‌خطی‌ات"
         m["notifyEvent.boardReaction"] = "واکنش به خط‌خطی‌ات"
         m["notifyEvent.discussionArrived"] = "یه گفت‌وگو می‌رسه"
-    }
-
-    private fun fa4(m: HashMap<String, String>) {
         m["notifyEvent.discussionArrivedHint"] = "وقتی گفت‌وگوی {friend} بهت می‌رسه"
         m["notifyEvent.discussionComment"] = "نظر تازه"
         m["notifyEvent.discussionCommentHint"] = "روی هر گفت‌وگویی"
@@ -2699,15 +2717,15 @@ internal object Catalog {
         m["settings.fingerprintOfferTitle"] = "با اثر انگشتت باز بشه؟"
         m["settings.fingerprintOfferYes"] = "از اثر انگشت استفاده کن"
         m["settings.fingerprintOn"] = "باز کردن با اثر انگشت روشن شد"
+    }
+
+    private fun fa5(m: HashMap<String, String>) {
         m["settings.fingerprintSub"] = "به‌جای زدن رمز روی این گوشی"
         m["settings.fingerprintTurnOn"] = "باز کردن با اثر انگشت رو روشن کن"
         m["settings.installApp"] = "نصب اپ"
         m["settings.keyMadeOn"] = "ساخته‌شده: {day}. کلید دوباره نشون داده نمی‌شه؛ اگه گم شد، یه تازه‌ش رو بساز."
         m["settings.keyNotMade"] = "کلید تازه ساخته نشد. دوباره امتحان کن."
         m["settings.keysCantBeShown"] = "کلید دوباره نشون داده نمی‌شه؛ اگه گم شد، یه تازه‌ش رو بساز."
-    }
-
-    private fun fa5(m: HashMap<String, String>) {
         m["settings.language"] = "زبان"
         m["settings.languageNotSaved"] = "زبان عوض نشد. دوباره امتحان کن."
         m["settings.languageNote"] = "زبانت روی همه‌ی دستگاه‌هات و توی اعلان‌هایی که می‌گیری."
@@ -2852,15 +2870,15 @@ internal object Catalog {
         m["universe.yourPhoto"] = "عکست"
         m["universe.yourUniverse"] = "دنیای تو"
         m["universe.yourUniverseLower"] = "دنیای تو"
+    }
+
+    private fun fa6(m: HashMap<String, String>) {
         m["write.aNewerVersionWasSaved"] = "یه نسخه‌ی تازه‌تر روی یه دستگاه دیگه ذخیره شده. بیارمش؟"
         m["write.arrivesAt"] = "ساعت رسیدن"
         m["write.arrivesAtChange"] = "هر چی هم عوض کنی، ساعت {time} می‌رسه"
         m["write.arrivesAtTime"] = "ساعت {time} می‌رسه"
         m["write.backDiscardChanges"] = "برگشت، تغییرها دور ریخته بشن"
         m["write.backKeepTheDraft"] = "برگشت، پیش‌نویس بمونه"
-    }
-
-    private fun fa6(m: HashMap<String, String>) {
         m["write.couldntLoadYourDraftCheck"] = "پیش‌نویست باز نشد. اینترنتت رو چک کن و دوباره امتحان کن."
         m["write.discard"] = "دور بریز"
         m["write.discardYourChanges"] = "تغییرهات دور ریخته بشن؟"
@@ -2894,7 +2912,7 @@ internal object Catalog {
     }
 
     val tr: Map<String, String> by lazy {
-        HashMap<String, String>(1860).apply {
+        HashMap<String, String>(1872).apply {
             tr0(this)
             tr1(this)
             tr2(this)
@@ -3166,8 +3184,10 @@ internal object Catalog {
         m["editor.letterText"] = "Mektubun metni"
         m["editor.underline"] = "Altı çizili"
         m["emails.aNewerVersionWasSaved"] = "Başka bir cihazda daha yeni bir sürüm kaydedildi. Yükleyelim mi?"
+        m["emails.attach"] = "Ekle"
         m["emails.back"] = "Geri"
         m["emails.backToEmails"] = "E-postalara dön"
+        m["emails.closeAttachments"] = "Ekleri kapat"
         m["emails.continueNewEmail"] = "Yeni e-postana devam et"
         m["emails.couldntLoadOlderEmailsTry"] = "Eski e-postalar yüklenemedi. Tekrar dene."
         m["emails.couldntLoadYourDraftCheck"] = "Taslağın açılamadı. Bağlantını kontrol et ve tekrar dene."
@@ -3178,6 +3198,7 @@ internal object Catalog {
         m["emails.email"] = "E-posta"
         m["emails.emails"] = "E-postalar"
         m["emails.emailsNewestFirst"] = "E-postalar, en yenisi başta"
+        m["emails.emailsOldestFirst"] = "E-postalar, en eskisi başta"
         m["emails.fold"] = "Katla"
         m["emails.keepMine"] = "Benimki kalsın"
         m["emails.load"] = "Yükle"
@@ -3192,6 +3213,7 @@ internal object Catalog {
         m["emails.meta"] = "{sender} → {recipient} · {time} · {count}"
         m["emails.new"] = "{fresh} yeni"
         m["emails.newEmail"] = "Yeni e-posta"
+        m["emails.newEmailBelow"] = "Yeni e-posta"
         m["emails.noCredits"] = "Bugünlük e-postalar bitti · yenileme: {time}"
         m["emails.noEmailsYet"] = "Henüz e-posta yok."
         m["emails.photoOfOpenFullSize"] = "Fotoğraf {n} / {count}, büyüt"
@@ -3205,14 +3227,16 @@ internal object Catalog {
         m["emails.thatIsEverything"] = "Hepsi bu kadar"
         m["emails.thread"] = "Yazışma"
         m["emails.threadGone"] = "Bu yazışma artık yok."
-        m["emails.to"] = "Kime: {name}"
-        m["emails.trimmed"] = "1024 karaktere kısaltıldı"
-        m["emails.unfold"] = "Aç"
-        m["emails.writeAReply"] = "Cevap yaz"
     }
 
     private fun tr2(m: HashMap<String, String>) {
+        m["emails.to"] = "Kime: {name}"
+        m["emails.today"] = "Bugün"
+        m["emails.trimmed"] = "1024 karaktere kısaltıldı"
+        m["emails.unfold"] = "Aç"
+        m["emails.writeAReply"] = "Cevap yaz"
         m["emails.writeAnEmail"] = "E-posta yaz"
+        m["emails.yesterday"] = "Dün"
         m["entry.cantReach"] = "{brand} ile bağlantı kurulamadı. {retry}"
         m["entry.createAUniverse"] = "Kendi dünyanı kur"
         m["entry.createYourCitizen"] = "Sakinini oluştur"
@@ -3356,15 +3380,15 @@ internal object Catalog {
         m["letters.timesArrived"] = "Gönderildi: {sent} · Geldi: {arrived}"
         m["letters.timesArrives"] = "Gönderildi: {sent} · Varış: {arrives}"
         m["letters.to"] = "Kime: {friend}"
+    }
+
+    private fun tr3(m: HashMap<String, String>) {
         m["letters.toEdit"] = "Düzenlemek için {countdown}"
         m["letters.toFriend"] = "→ Kime: {friend}"
         m["letters.voiceNote"] = "Sesli mesaj"
         m["letters.voiceNoteLower"] = "sesli mesaj"
         m["letters.voiceNoteN"] = "sesli mesaj {n}"
         m["letters.writeALetter"] = "Mektup yaz"
-    }
-
-    private fun tr3(m: HashMap<String, String>) {
         m["letters.writeTheFirstOne"] = "İlkini sen yaz."
         m["letters.yesTakeItBack"] = "Evet, geri al"
         m["limits.added"] = "{picked} fotoğraftan {added} tanesi eklendi"
@@ -3509,15 +3533,15 @@ internal object Catalog {
         m["notify.tapShare"] = "Tarayıcı çubuğunda {share} düğmesine dokun"
         m["notify.thisSwitchesToOnBy"] = "İzin verdiğin anda bu kendiliğinden açılır."
         m["notify.turnOn"] = "Aç"
+    }
+
+    private fun tr4(m: HashMap<String, String>) {
         m["notify.yourBrowserBlockedNotificationsFor"] = "Tarayıcın Delulutopia bildirimlerini engelledi ve bir daha kendisi sormayacak. İzin vermek için:"
         m["notifyEvent.boardDoodle"] = "Yeni karalama"
         m["notifyEvent.boardDoodleHint"] = "{friend} panoya çizince ya da düzenleyince"
         m["notifyEvent.boardNote"] = "Karalamana not"
         m["notifyEvent.boardReaction"] = "Karalamana tepki"
         m["notifyEvent.discussionArrived"] = "Bir sohbet gelince"
-    }
-
-    private fun tr4(m: HashMap<String, String>) {
         m["notifyEvent.discussionArrivedHint"] = "Arkadaşının sohbeti sana ulaşınca"
         m["notifyEvent.discussionComment"] = "Yeni yorum"
         m["notifyEvent.discussionCommentHint"] = "Her sohbette"
@@ -3662,15 +3686,15 @@ internal object Catalog {
         m["settings.fingerprintOfferTitle"] = "Parmak izinle açılsın mı?"
         m["settings.fingerprintOfferYes"] = "Parmak izini kullan"
         m["settings.fingerprintOn"] = "Parmak iziyle açma etkin"
+    }
+
+    private fun tr5(m: HashMap<String, String>) {
         m["settings.fingerprintSub"] = "Bu telefonda şifre yazmak yerine"
         m["settings.fingerprintTurnOn"] = "Parmak iziyle açmayı etkinleştir"
         m["settings.installApp"] = "Uygulamayı yükle"
         m["settings.keyMadeOn"] = "Oluşturuldu: {day}. Anahtar bir daha gösterilemez; kaybolursa yenisini oluştur."
         m["settings.keyNotMade"] = "Yeni anahtar oluşturulamadı. Tekrar dene."
         m["settings.keysCantBeShown"] = "Anahtar bir daha gösterilemez; kaybolursa yenisini oluştur."
-    }
-
-    private fun tr5(m: HashMap<String, String>) {
         m["settings.language"] = "Dil"
         m["settings.languageNotSaved"] = "Dil değiştirilemedi. Tekrar dene."
         m["settings.languageNote"] = "Kullandığın her cihazda ve gelen bildirimlerde senin dilin."
@@ -3815,15 +3839,15 @@ internal object Catalog {
         m["universe.yourPhoto"] = "Fotoğrafın"
         m["universe.yourUniverse"] = "Senin dünyan"
         m["universe.yourUniverseLower"] = "senin dünyan"
+    }
+
+    private fun tr6(m: HashMap<String, String>) {
         m["write.aNewerVersionWasSaved"] = "Başka bir cihazda daha yeni bir sürüm kaydedildi. Yükleyelim mi?"
         m["write.arrivesAt"] = "Varış"
         m["write.arrivesAtChange"] = "Neyi değiştirirsen değiştir, varış: {time}"
         m["write.arrivesAtTime"] = "Varış: {time}"
         m["write.backDiscardChanges"] = "Geri, değişiklikler silinsin"
         m["write.backKeepTheDraft"] = "Geri, taslak kalsın"
-    }
-
-    private fun tr6(m: HashMap<String, String>) {
         m["write.couldntLoadYourDraftCheck"] = "Taslağın açılamadı. Bağlantını kontrol et ve tekrar dene."
         m["write.discard"] = "Sil"
         m["write.discardYourChanges"] = "Değişiklikler silinsin mi?"
@@ -3857,7 +3881,7 @@ internal object Catalog {
     }
 
     val ru: Map<String, String> by lazy {
-        HashMap<String, String>(1888).apply {
+        HashMap<String, String>(1900).apply {
             ru0(this)
             ru1(this)
             ru2(this)
@@ -4131,8 +4155,10 @@ internal object Catalog {
         m["editor.letterText"] = "Текст письма"
         m["editor.underline"] = "Подчёркнутый"
         m["emails.aNewerVersionWasSaved"] = "На другом устройстве сохранена более новая версия. Загрузить её?"
+        m["emails.attach"] = "Прикрепить"
         m["emails.back"] = "Назад"
         m["emails.backToEmails"] = "К имейлам"
+        m["emails.closeAttachments"] = "Закрыть вложения"
         m["emails.continueNewEmail"] = "Продолжить новый имейл"
         m["emails.couldntLoadOlderEmailsTry"] = "Не удалось загрузить предыдущие имейлы. Попробуй ещё раз."
         m["emails.couldntLoadYourDraftCheck"] = "Не удалось открыть черновик. Проверь соединение и попробуй ещё раз."
@@ -4147,6 +4173,7 @@ internal object Catalog {
         m["emails.email"] = "Имейл"
         m["emails.emails"] = "Имейлы"
         m["emails.emailsNewestFirst"] = "Имейлы, сначала новые"
+        m["emails.emailsOldestFirst"] = "Имейлы, сначала старые"
         m["emails.fold"] = "Свернуть"
         m["emails.keepMine"] = "Оставить мою версию"
         m["emails.load"] = "Загрузить"
@@ -4161,6 +4188,7 @@ internal object Catalog {
         m["emails.meta"] = "{sender} → {recipient} · {time} · {count}"
         m["emails.new"] = "Новых: {fresh}"
         m["emails.newEmail"] = "Новый имейл"
+        m["emails.newEmailBelow"] = "Новый имейл"
         m["emails.noCredits"] = "На сегодня имейлы закончились · обновление в {time}"
         m["emails.noEmailsYet"] = "Имейлов пока нет."
         m["emails.photoOfOpenFullSize"] = "Фото {n} из {count}, открыть целиком"
@@ -4168,20 +4196,22 @@ internal object Catalog {
         m["emails.reply"] = "Ответить"
         m["emails.replyLabel"] = "Ответ"
         m["emails.seeOlder"] = "Показать предыдущие"
+    }
+
+    private fun ru2(m: HashMap<String, String>) {
         m["emails.seen"] = "Просмотрено · {time}"
         m["emails.startTheFirstOne"] = "Напиши первый."
         m["emails.subject"] = "Тема"
         m["emails.thatIsEverything"] = "Больше ничего нет"
-    }
-
-    private fun ru2(m: HashMap<String, String>) {
         m["emails.thread"] = "Переписка"
         m["emails.threadGone"] = "Этой переписки больше нет."
         m["emails.to"] = "Кому: {name}"
+        m["emails.today"] = "Сегодня"
         m["emails.trimmed"] = "Сокращено до 1024 символов"
         m["emails.unfold"] = "Развернуть"
         m["emails.writeAReply"] = "Написать ответ"
         m["emails.writeAnEmail"] = "Написать имейл"
+        m["emails.yesterday"] = "Вчера"
         m["entry.cantReach"] = "Нет связи с миром {brand}. {retry}"
         m["entry.createAUniverse"] = "Создай свой мир"
         m["entry.createYourCitizen"] = "Стать жителем"
@@ -4319,15 +4349,15 @@ internal object Catalog {
         m["letters.showAsThumbnails"] = "Показать плиткой"
         m["letters.status.delivered"] = "Статус: доставлено, ещё не прочитано"
         m["letters.status.read"] = "Статус: прочитано"
+    }
+
+    private fun ru3(m: HashMap<String, String>) {
         m["letters.status.sent"] = "Статус: отправлено, ещё не доставлено"
         m["letters.takeItBack"] = "Забрать обратно?"
         m["letters.theLetterLeavesSHome"] = "Письмо сразу исчезнет с главной у адресата, а текст вернётся в твой черновик."
         m["letters.thisLetterIsntHereAnymore"] = "Этого письма больше нет."
         m["letters.thisReplacesYourCurrentDraft"] = "Это заменит твой текущий черновик."
         m["letters.timesArrived"] = "Отправлено: {sent} · Пришло: {arrived}"
-    }
-
-    private fun ru3(m: HashMap<String, String>) {
         m["letters.timesArrives"] = "Отправлено: {sent} · Придёт: {arrives}"
         m["letters.to"] = "Кому: {friend}"
         m["letters.toEdit"] = "Ещё {countdown}, чтобы изменить"
@@ -4472,15 +4502,15 @@ internal object Catalog {
         m["notify.hintOff"] = "Уведомления выключены"
         m["notify.ifYouSayNoHome"] = "Если не разрешить, на главной всё равно будут видны все письма в пути, а заголовок вкладки покажет число непрочитанных."
         m["notify.inTab.discussion"] = "{name}: новое обсуждение"
+    }
+
+    private fun ru4(m: HashMap<String, String>) {
         m["notify.inTab.email"] = "{name}: тебе имейл"
         m["notify.inTab.letter"] = "{name}: тебе письмо"
         m["notify.inTab.tapToRead"] = "Нажми, чтобы прочитать"
         m["notify.itOpensFullScreenLike"] = "Откроется на весь экран, как приложение, — на iPhone уведомления приходят только так."
         m["notify.itOpensFullScreenLike2"] = "Откроется на весь экран, как приложение, со своей иконки."
         m["notify.knowTheMomentALetter"] = "Узнавай о письме, как только оно придёт"
-    }
-
-    private fun ru4(m: HashMap<String, String>) {
         m["notify.notNow"] = "Не сейчас"
         m["notify.ok"] = "ОК"
         m["notify.oneNotificationPerLetterAt"] = "Одно уведомление на каждое письмо — в ту же минуту, как оно придёт, даже если сайт закрыт. И больше ничего, никогда."
@@ -4625,15 +4655,15 @@ internal object Catalog {
         m["settings.device.off"] = "Выкл."
         m["settings.device.offSub"] = "Этот браузер не будет показывать уведомления."
         m["settings.device.offSubPhone"] = "Этот телефон не будет показывать уведомления."
+    }
+
+    private fun ru5(m: HashMap<String, String>) {
         m["settings.device.on"] = "Вкл."
         m["settings.device.onSub"] = "Уведомления приходят в этот браузер."
         m["settings.device.onSubPhone"] = "Уведомления приходят на этот телефон."
         m["settings.device.unsupported"] = "Не поддерживается"
         m["settings.device.unsupportedSub"] = "Этот браузер не умеет показывать уведомления."
         m["settings.done"] = "Готово"
-    }
-
-    private fun ru5(m: HashMap<String, String>) {
         m["settings.entryKey"] = "Ключ входа"
         m["settings.fingerprint"] = "Вход по отпечатку"
         m["settings.fingerprintKeep"] = "Оставить вход по отпечатку"
@@ -4778,15 +4808,15 @@ internal object Catalog {
         m["universe.timeZone"] = "Часовой пояс"
         m["universe.username"] = "Имя пользователя"
         m["universe.welcome.p1"] = "{name} — место, свободное от негатива, ограничений и тягот реального мира. Маленький мир сам по себе, принадлежащий двум взрослым, которые не позволяют взрослой жизни определять их. Место, где можно забыть о реальности, где у воображения нет границ, а творчество свободно, как ветер."
+    }
+
+    private fun ru6(m: HashMap<String, String>) {
         m["universe.welcome.p2"] = "Если ключ от этого места у тебя, значит, ты здесь живёшь. Здесь твой дом. Введи ключ ниже, заходи и позволь миру {name} обнять тебя."
         m["universe.welcome.p3"] = "Но если ключа у тебя нет, значит, тебе здесь не место. Не нарушай волшебство, не разрушай сказку. Пожалуйста, развернись и уходи. Прямо сейчас."
         m["universe.welcomeHint"] = "Видно под «Добро пожаловать! Это {name}.», когда введён ключ."
         m["universe.welcomeHintFollows"] = "Видно под «Добро пожаловать! Это {name}.», когда введён ключ. Меняется вместе с названием, пока ты не изменишь текст."
         m["universe.welcomeMax"] = "До 1500 символов"
         m["universe.welcomeMessage"] = "Приветствие"
-    }
-
-    private fun ru6(m: HashMap<String, String>) {
         m["universe.welcomeTo"] = "Добро пожаловать! Это {name}."
         m["universe.writeAFewWords"] = "Напиши пару слов"
         m["universe.xxxxXxxxXxxx"] = "XXXX-XXXX-XXXX"

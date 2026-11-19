@@ -884,5 +884,11 @@
  "media.snap": "Snap",
  "media.takeAPhoto": "Take a photo",
  "media.yourPhoto": "Your photo",
- "media.playbackSpeed": "Playback speed {speed}"
+ "media.playbackSpeed": "Playback speed {speed}",
+ "emails.emailsOldestFirst": "Emails, oldest first",
+ "emails.today": "Today",
+ "emails.yesterday": "Yesterday",
+ "emails.newEmailBelow": "New email",
+ "emails.attach": "Attach",
+ "emails.closeAttachments": "Close attachments"
 }

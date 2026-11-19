@@ -1,12 +1,15 @@
 package com.delulutopia.feature.emails
 
-import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -15,9 +18,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -34,6 +37,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -44,10 +48,11 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -71,7 +76,6 @@ import com.delulutopia.core.designsystem.motion.float
 import com.delulutopia.core.designsystem.motion.rememberPlayed
 import com.delulutopia.core.designsystem.motion.rowEnter
 import com.delulutopia.core.designsystem.theme.DlTheme
-import com.delulutopia.core.i18n.formatNumber
 import com.delulutopia.core.i18n.t
 import com.delulutopia.core.network.model.Att
 import com.delulutopia.core.network.model.Citizen
@@ -89,14 +93,15 @@ import com.delulutopia.core.ui.leaves.leafSurface
 import com.delulutopia.core.ui.lightboxSource
 import com.delulutopia.core.ui.media.AudioPlayer
 import com.delulutopia.core.ui.media.VideoPlayer
-import com.delulutopia.core.ui.reactions.ReactionSummary
-import com.delulutopia.core.ui.reactions.ReactionSurface
 import com.delulutopia.core.ui.reactions.Reactions
 import com.delulutopia.core.ui.reactions.noticeLine
 import com.delulutopia.core.ui.reactions.reactionWins
 import com.delulutopia.core.ui.rememberNow
 import com.delulutopia.core.ui.signatureOf
 import com.delulutopia.core.ui.tintOf
+import java.time.Instant
+import java.time.ZoneId
+import kotlinx.coroutines.launch
 
 /** S13 Emails (web emails/EmailsScreen.tsx; canvas E-Emails, E-Emails-empty, E-No-credits). */
 @Composable
@@ -313,75 +318,193 @@ fun ThreadScreen(id: String) {
     }
 }
 
+/**
+ * The emails as chat bubbles (doc "Delululand — Email Bubbles"; web ThreadView): oldest at the top,
+ * the newest just above the docked reply bar (EB3, EB8). The list is laid out from the bottom
+ * (reverseLayout), so it opens at the newest and keeps the reader's place when older ones load.
+ */
 @Composable
 private fun ThreadBody(vm: ThreadViewModel, me: Citizen?, friend: Citizen?, home: Home?) {
     val nowMs = rememberNow(30_000)
+    // Newest first: item 0 sits at the bottom of the reversed list.
     val items = vm.items
-    val newestId = items.firstOrNull()?.id
-    var toggled by remember { mutableStateOf(setOf<String>()) }
     var photo by remember { mutableStateOf<Pair<List<Att>, Int>?>(null) }
     val myNewest = items.firstOrNull { it.senderId == me?.id }
-    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        // web .dl-ethread-reply: 4/16/12 around the reply composer.
-        Box(Modifier.padding(top = 4.dp, bottom = 4.dp)) {
-            ComposerView(vm.composer, home?.emailCredits) { sent ->
-                toggled = emptySet()
-                vm.sent(sent.email)
-            }
+    val list = rememberLazyListState()
+    val scope = rememberCoroutineScope()
+    // EB10/EB11: emails that arrive after the first paint grow in; the pill shows when scrolled up.
+    // Not state: the emails of the first paint, kept once, so later ones are told apart.
+    val firstIds = remember { mutableSetOf<String>() }
+    if (firstIds.isEmpty()) items.mapTo(firstIds) { it.id }
+    var newBelow by remember { mutableStateOf(false) }
+    var sentId by remember { mutableStateOf<String?>(null) }
+    val newestId = items.firstOrNull()?.id
+    LaunchedEffect(newestId) {
+        if (newestId == null) return@LaunchedEffect
+        val near = list.firstVisibleItemIndex <= 1
+        if (near || newestId == sentId) {
+            list.animateScrollToItem(0)
+            newBelow = false
+        } else if (items.first().senderId != me?.id) {
+            newBelow = true
         }
-        items.forEach { e ->
-            val open = (e.id == newestId) != (e.id in toggled)
-            EmailCard(e, open, me, friend, nowMs, onToggle = {
-                toggled = if (e.id in
-                    toggled
-                ) {
-                    toggled - e.id
-                } else {
-                    toggled + e.id
-                }
-            }, onPhoto = { list, i -> photo = list to i }, onReacted = vm::reacted, seen = e.readAt?.takeIf { e.id == myNewest?.id })
-        }
-        // web .dl-emails-end: centred, 12 dp around.
-        Column(
-            Modifier.fillMaxWidth().padding(vertical = 4.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            if (vm.cursor != null) {
-                DlGhostButton(if (vm.loadingOlder) t("emails.loadingOlder") else t("emails.seeOlder"), vm::seeOlder, enabled = !vm.loadingOlder)
-            } else if (items.size > 20) {
-                Text(
-                    t("emails.thatIsEverything"),
-                    style = MaterialTheme.typography.bodySmall.copy(fontSize = 13.sp),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-            if (vm.olderFailed) {
-                Text(
-                    t("emails.couldntLoadOlderEmailsTry"),
-                    style = MaterialTheme.typography.bodySmall.copy(fontSize = 13.sp),
-                    color = MaterialTheme.colorScheme.error,
-                )
-            }
-        }
-        Box(Modifier.height(96.dp))
     }
-    photo?.let { (list, i) -> Lightbox(list, i, { photo = list to it }, { photo = null }) }
+    LaunchedEffect(list) {
+        snapshotFlow { list.firstVisibleItemIndex }.collect { if (it == 0) newBelow = false }
+    }
+    Column(Modifier.fillMaxSize()) {
+        BoxWithConstraints(Modifier.weight(1f).fillMaxWidth()) {
+            // EB9: 80 % of the column, at most 420 dp (tablet panes).
+            val maxBubble = minOf(maxWidth * 0.8f, 420.dp)
+            LazyColumn(
+                Modifier.fillMaxSize().semantics { contentDescription = t("emails.emailsOldestFirst") },
+                state = list,
+                reverseLayout = true,
+                contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 12.dp),
+                verticalArrangement = Arrangement.spacedBy(6.dp, Alignment.Bottom),
+            ) {
+                items.forEachIndexed { i, e ->
+                    val older = items.getOrNull(i + 1)
+                    val newDay = older == null || !sameDay(older.sentAt, e.sentAt)
+                    // EB5: a run is one sender's emails in a row on one day; its first bubble has the name.
+                    val first = newDay || older?.senderId != e.senderId
+                    item(key = e.id) {
+                        val fresh = firstIds.isNotEmpty() && e.id !in firstIds
+                        Bubble(
+                            e,
+                            first = first,
+                            mine = e.senderId == me?.id,
+                            me = me,
+                            friend = friend,
+                            nowMs = nowMs,
+                            maxWidth = maxBubble,
+                            seen = e.readAt?.takeIf { e.id == myNewest?.id },
+                            onPhoto = { photos, at -> photo = photos to at },
+                            onReacted = vm::reacted,
+                            modifier = Modifier
+                                .animateItem(fadeInSpec = null, fadeOutSpec = null)
+                                .then(if (fresh) Modifier.enter(Enter.PopIn, key = e.id) else Modifier),
+                        )
+                    }
+                    if (newDay) {
+                        item(key = "day-${e.sentAt.take(10)}-${e.id}") { DayChip(dayLabel(e.sentAt, nowMs)) }
+                    }
+                }
+                item(key = "older") {
+                    Column(
+                        Modifier.fillMaxWidth().padding(bottom = 4.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        if (vm.cursor != null) {
+                            DlGhostButton(if (vm.loadingOlder) t("emails.loadingOlder") else t("emails.seeOlder"), vm::seeOlder, enabled = !vm.loadingOlder)
+                        } else if (items.size > 20) {
+                            Text(
+                                t("emails.thatIsEverything"),
+                                style = MaterialTheme.typography.bodySmall.copy(fontSize = 13.sp),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                        if (vm.olderFailed) {
+                            Text(
+                                t("emails.couldntLoadOlderEmailsTry"),
+                                style = MaterialTheme.typography.bodySmall.copy(fontSize = 13.sp),
+                                color = MaterialTheme.colorScheme.error,
+                            )
+                        }
+                    }
+                }
+            }
+            // The unscoped overload: inside BoxWithConstraints the Column's scoped one does not apply.
+            androidx.compose.animation.AnimatedVisibility(
+                visible = newBelow,
+                modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 8.dp),
+                enter = fadeIn(tween(220)) + slideInVertically(tween(220)) { it / 2 },
+                exit = fadeOut(tween(160)),
+            ) {
+                Row(
+                    Modifier
+                        .heightIn(min = 36.dp)
+                        .clip(RoundedCornerShape(18.dp))
+                        .background(MaterialTheme.colorScheme.primary)
+                        .clickable {
+                            newBelow = false
+                            scope.launch { list.animateScrollToItem(0) }
+                        }
+                        .padding(horizontal = 14.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                    Text(
+                        "↓ " + t("emails.newEmailBelow"),
+                        style = MaterialTheme.typography.labelLarge.copy(fontSize = 13.sp, fontWeight = FontWeight.ExtraBold),
+                        color = MaterialTheme.colorScheme.onPrimary,
+                    )
+                }
+            }
+        }
+        DockedComposer(vm.composer, home?.emailCredits) { sent ->
+            sentId = sent.email.id
+            vm.sent(sent.email)
+        }
+    }
+    photo?.let { (photos, at) -> Lightbox(photos, at, { photo = photos to it }, { photo = null }) }
+}
+
+/** EB7: "Today", "Yesterday" or the day (FS-T6 forms), in the viewer's zone. */
+private fun dayLabel(iso: String, nowMs: Long): String {
+    val zone = ZoneId.systemDefault()
+    val day = Time.ms(iso)?.let { Instant.ofEpochMilli(it).atZone(zone).toLocalDate() } ?: return ""
+    val today = Instant.ofEpochMilli(nowMs).atZone(zone).toLocalDate()
+    return when (day) {
+        today -> t("emails.today")
+        today.minusDays(1) -> t("emails.yesterday")
+        else -> Time.day(iso, nowMs)
+    }
+}
+
+private fun sameDay(a: String, b: String): Boolean {
+    val zone = ZoneId.systemDefault()
+    val x = Time.ms(a) ?: return false
+    val y = Time.ms(b) ?: return false
+    return Instant.ofEpochMilli(x).atZone(zone).toLocalDate() == Instant.ofEpochMilli(y).atZone(zone).toLocalDate()
 }
 
 @Composable
-private fun EmailCard(
+private fun DayChip(label: String) {
+    Box(Modifier.fillMaxWidth().padding(top = 10.dp, bottom = 4.dp), contentAlignment = Alignment.Center) {
+        Text(
+            label,
+            Modifier
+                .clip(RoundedCornerShape(10.dp))
+                .background(DlTheme.colors.letterEnvelope)
+                .padding(horizontal = 10.dp, vertical = 3.dp)
+                .semantics { heading() },
+            style = MaterialTheme.typography.labelMedium.copy(fontSize = 12.sp, fontWeight = FontWeight.Bold),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+}
+
+/**
+ * One email as a bubble: fill and border in the sender's signature (EB1, the avatar ring's colour),
+ * on the viewer's side (EB2), every one open (EB4); the run's first bubble points at its avatar with
+ * a 4 dp corner (EB5). Under it the time, "Seen" on my newest read one, and the reactions (EB6).
+ */
+@Composable
+private fun Bubble(
     e: Email,
-    open: Boolean,
+    first: Boolean,
+    mine: Boolean,
     me: Citizen?,
     friend: Citizen?,
     nowMs: Long,
-    onToggle: () -> Unit,
+    maxWidth: Dp,
+    seen: String?,
     onPhoto: (List<Att>, Int) -> Unit,
     onReacted: () -> Unit,
-    seen: String? = null,
+    modifier: Modifier = Modifier,
 ) {
-    val c = DlTheme.colors
     val base = LocalServerBaseUrl.current
     val person = if (e.senderId == me?.id) {
         me
@@ -390,129 +513,101 @@ private fun EmailCard(
     } else {
         null
     }
-    val mine = e.senderId == me?.id
     val photos = e.attachments.filter { it.kind == "photo" }
     val audios = e.attachments.filter { it.kind == "audio" }
     val video = e.attachments.firstOrNull { it.kind == "video" }
-    // web .dl-email.dl-mail: a 10 dp mail card; mine in the grey-blue.
-    val shape = RoundedCornerShape(10.dp)
+    val tail = if (first) 4.dp else 16.dp
+    val shape = RoundedCornerShape(topStart = if (mine) 16.dp else tail, topEnd = if (mine) tail else 16.dp, bottomEnd = 16.dp, bottomStart = 16.dp)
+    val ink = MaterialTheme.colorScheme.onSurface
     Column(
-        Modifier
-            .fillMaxWidth()
-            .shadow(1.dp, shape)
-            .clip(shape)
-            .background(if (mine) c.mailMine else c.mailBackground)
-            .border(1.dp, c.mailLine, shape)
-            // Fold & open (Motion doc): the card's height eases instead of jumping.
-            .animateContentSize(tween(260)),
+        modifier.fillMaxWidth().padding(top = if (first) 6.dp else 0.dp),
+        horizontalAlignment = if (mine) Alignment.End else Alignment.Start,
     ) {
-        Row(
-            Modifier
-                .fillMaxWidth()
-                .heightIn(min = 44.dp)
-                .clickable(onClick = onToggle)
-                .padding(horizontal = 12.dp, vertical = 8.dp)
-                .semantics { contentDescription = if (open) t("emails.fold") else t("emails.unfold") },
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            if (person !=
-                null
+        if (first && person != null) {
+            Row(
+                Modifier.padding(bottom = 3.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
             ) {
-                DlRemoteAvatar(
-                    person.avatarUrl,
-                    person.nickname,
-                    tintOf(person.id),
-                    size = 24.dp,
-                    ringWidth = 1.5.dp,
-                    initials = person.nickname.take(1).uppercase(),
-                    ring = signatureOf(person.id),
-                )
-            }
-            Text(
-                person?.nickname.orEmpty(),
-                if (open) Modifier.weight(1f) else Modifier,
-                style = MaterialTheme.typography.labelLarge.copy(fontSize = 13.sp, fontWeight = FontWeight.Bold),
-                color = c.mailInk,
-            )
-            if (open) {
-                Text(
-                    t("emails.to", "name" to if (mine) friend?.nickname.orEmpty() else me?.nickname.orEmpty()),
-                    style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            } else {
-                val t = e.text.replace(Regex("\\s+"), " ").trim()
-                val snippet = t.ifEmpty { mediaWords(photos.size, audios.size, if (video != null) 1 else 0).orEmpty() }
-                Text(
-                    snippet,
-                    Modifier.weight(1f),
-                    style = MaterialTheme.typography.bodySmall.copy(fontSize = 13.sp),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-                val icons = listOfNotNull(
-                    if (photos.isNotEmpty()) "📷${if (photos.size > 1) " ${formatNumber(photos.size)}" else ""}" else null,
-                    if (audios.isNotEmpty()) "🎙${if (audios.size > 1) " ${formatNumber(audios.size)}" else ""}" else null,
-                    if (video != null) "🎬" else null,
-                )
-                if (icons.isNotEmpty()) Text(icons.joinToString(" "), fontSize = 12.sp)
-                ReactionSummary(e.reactions)
-            }
-            Text(
-                Time.clock(e.sentAt, nowMs),
-                style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp, fontFeatureSettings = "tnum"),
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-        if (open) {
-            // web .dl-email-body: indented to the name (44 dp), 15/1.55 text.
-            Column(Modifier.padding(start = 44.dp, end = 12.dp, bottom = 12.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                if (e.text.isNotEmpty()) {
-                    LinkedText(
-                        e.text,
-                        style = MaterialTheme.typography.bodyLarge.copy(fontSize = 15.sp, lineHeight = 23.25.sp),
-                        color = c.mailInk,
+                val avatar = @Composable {
+                    DlRemoteAvatar(
+                        person.avatarUrl,
+                        person.nickname,
+                        tintOf(person.id),
+                        size = 24.dp,
+                        ringWidth = 1.5.dp,
+                        initials = person.nickname.take(1).uppercase(),
+                        ring = signatureOf(person.id),
                     )
                 }
-                video?.let { v -> VideoPlayer(resolveMedia(base, v.url), v.thumbUrl?.let { resolveMedia(base, it) }, v.durationMs, v.width, v.height) }
-                if (photos.isNotEmpty()) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        photos.forEachIndexed { i, p ->
-                            AsyncImage(
-                                model = resolveMedia(base, p.thumbUrl ?: p.url),
-                                contentDescription = t("emails.photoOfOpenFullSize", "n" to i + 1, "count" to photos.size),
-                                modifier = Modifier.size(64.dp).lightboxSource(p).clip(RoundedCornerShape(8.dp)).clickable { onPhoto(photos, i) },
-                                contentScale = ContentScale.Crop,
-                            )
-                        }
+                val name = @Composable {
+                    Text(person.nickname, style = MaterialTheme.typography.labelLarge.copy(fontSize = 13.sp, fontWeight = FontWeight.ExtraBold), color = ink)
+                }
+                if (mine) {
+                    name()
+                    avatar()
+                } else {
+                    avatar()
+                    name()
+                }
+            }
+        }
+        Column(
+            Modifier
+                .widthIn(max = maxWidth)
+                .clip(shape)
+                .background(tintOf(e.senderId))
+                .border(1.dp, signatureOf(e.senderId).copy(alpha = 0.75f), shape)
+                .padding(start = 12.dp, end = 12.dp, top = 8.dp, bottom = 9.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            if (e.text.isNotEmpty()) {
+                LinkedText(e.text, style = MaterialTheme.typography.bodyLarge.copy(fontSize = 15.sp, lineHeight = 21.75.sp), color = ink)
+            }
+            video?.let { v -> VideoPlayer(resolveMedia(base, v.url), v.thumbUrl?.let { resolveMedia(base, it) }, v.durationMs, v.width, v.height) }
+            if (photos.isNotEmpty()) {
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    photos.forEachIndexed { i, p ->
+                        AsyncImage(
+                            model = resolveMedia(base, p.thumbUrl ?: p.url),
+                            contentDescription = t("emails.photoOfOpenFullSize", "n" to i + 1, "count" to photos.size),
+                            modifier = Modifier.size(64.dp).lightboxSource(p).clip(RoundedCornerShape(8.dp)).clickable { onPhoto(photos, i) },
+                            contentScale = ContentScale.Crop,
+                        )
                     }
                 }
-                audios.forEachIndexed { i, a ->
-                    AudioPlayer(
-                        resolveMedia(base, a.url),
-                        a.durationMs,
-                        label = if (audios.size >
-                            1
-                        ) {
-                            t("letters.voiceNoteN", "n" to i + 1)
-                        } else {
-                            t("media.voiceNoteLower")
-                        },
-                    )
-                }
-                Reactions("emails", e.id, e.reactions, me, friend, chipColour = c.mailBackground, surface = ReactionSurface.Mail, onChanged = onReacted)
+            }
+            audios.forEachIndexed { i, a ->
+                AudioPlayer(
+                    resolveMedia(base, a.url),
+                    a.durationMs,
+                    label = if (audios.size > 1) t("letters.voiceNoteN", "n" to i + 1) else t("media.voiceNoteLower"),
+                )
             }
         }
-        seen?.let {
-            Text(
-                t("emails.seen", "time" to Time.clock(it, nowMs)),
-                Modifier.fillMaxWidth().padding(start = 12.dp, end = 12.dp, bottom = 8.dp).offset(y = (-4).dp),
-                style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp),
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.End,
-            )
+        Row(
+            Modifier.widthIn(max = maxWidth).padding(top = 2.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            val time = @Composable {
+                val stamp = Time.clock(e.sentAt, nowMs) + (seen?.let { " · " + t("emails.seen", "time" to Time.clock(it, nowMs)) } ?: "")
+                Text(
+                    stamp,
+                    style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp, fontFeatureSettings = "tnum"),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            val chips = @Composable {
+                Reactions("emails", e.id, e.reactions, me, friend, chipColour = MaterialTheme.colorScheme.surface, compact = true, onChanged = onReacted)
+            }
+            if (mine) {
+                chips()
+                time()
+            } else {
+                time()
+                chips()
+            }
         }
     }
 }
