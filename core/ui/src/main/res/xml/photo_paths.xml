@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <paths>
     <cache-path name="photos" path="photos/" />
+    <!-- Camera (doc "Delululand — Camera"): photos and videos the camera app takes for a message. -->
+    <cache-path name="camera" path="camera/" />
 </paths>

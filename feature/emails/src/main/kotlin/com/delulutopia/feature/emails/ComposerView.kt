@@ -1,9 +1,6 @@
 package com.delulutopia.feature.emails
 
 import android.net.Uri
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.PickVisualMediaRequest
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -81,7 +78,6 @@ internal fun ComposerView(composer: EmailComposer, credits: EmailCredits?, onSen
     LifecycleEventEffect(Lifecycle.Event.ON_STOP) { composer.saver.flushOnHide() }
     var sending by remember { mutableStateOf(false) }
     var sendError by remember { mutableStateOf<String?>(null) }
-    var recorderOpen by remember { mutableStateOf(false) }
     var videoError by remember { mutableStateOf<String?>(null) }
     val voice = rememberVoiceRecording { bytes, ms -> atts.add(Uploader.Kind.Audio, Source.Made(bytes, "audio/mp4"), "voice.m4a", ms) }
     val addVideo = { uri: Uri, ms: Long? ->
@@ -91,7 +87,6 @@ internal fun ComposerView(composer: EmailComposer, credits: EmailCredits?, onSen
             atts.add(Uploader.Kind.Video, Source.Picked(uri), "video.mp4", ms)
         }
     }
-    val videoPicker = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri -> uri?.let { addVideo(it, null) } }
     val length = count(normalize(composer.text))
     val outOfCredits = credits != null && credits.left <= 0
     val something = composer.text.isNotBlank() || atts.items.isNotEmpty()
@@ -156,7 +151,7 @@ internal fun ComposerView(composer: EmailComposer, credits: EmailCredits?, onSen
                 item.att?.let { a -> composer.deleteAttachment(a.id) { atts.restore(item, index) } }
             },
             voice = voice,
-            video = VideoAdd(full = atts.has("video"), onRecord = { recorderOpen = true }, onPick = { addVideo(it, null) }),
+            video = VideoAdd(full = atts.has("video"), onPick = { addVideo(it, null) }),
             background = Color.Transparent,
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
             limits = limits,
@@ -188,19 +183,6 @@ internal fun ComposerView(composer: EmailComposer, credits: EmailCredits?, onSen
             )
         }
         sendError?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error) }
-    }
-    if (recorderOpen) {
-        VideoRecorderSheet(
-            onUse = { uri, ms ->
-                recorderOpen = false
-                atts.add(Uploader.Kind.Video, Source.Picked(uri), "video.mp4", ms)
-            },
-            onPick = {
-                recorderOpen = false
-                videoPicker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.VideoOnly))
-            },
-            onClose = { recorderOpen = false },
-        )
     }
     if (saveState.status == DraftSaver.Status.Conflict) {
         DlDialog(

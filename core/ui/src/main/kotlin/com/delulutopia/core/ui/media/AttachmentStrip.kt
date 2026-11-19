@@ -28,6 +28,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -66,8 +68,11 @@ import com.delulutopia.core.i18n.t
 import com.delulutopia.core.network.Uploader
 import com.delulutopia.core.ui.plan.StripLimits
 
-/** Emails only (Q11–Q13): record or pick one video; [full] while the email already carries one. */
-class VideoAdd(val full: Boolean, val onRecord: () -> Unit, val onPick: (Uri) -> Unit)
+/**
+ * Emails only (Q11–Q13): record (the Camera menu, doc "Delululand — Camera" CA8) or pick one video;
+ * [full] while the email already carries one. Both land in [onPick], which checks the length.
+ */
+class VideoAdd(val full: Boolean, val onPick: (Uri) -> Unit)
 
 /** Letters only (Doodles D1, D2): open the pad; [full] while the letter already carries its one doodle. */
 class DoodleAdd(val full: Boolean, val onOpen: () -> Unit)
@@ -107,6 +112,18 @@ fun AttachmentStrip(
         uri?.let { attachments.add(Uploader.Kind.Audio, Source.Picked(it), nameOf(it, "audio.m4a")) }
     }
     val videoPicker = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri -> uri?.let { video?.onPick?.invoke(it) } }
+    var noCamera by remember { mutableStateOf(false) }
+    // CA9: a shot is one more photo, under the same limits as picked ones.
+    val camera = rememberCameraCapture(
+        onPhoto = { uri ->
+            if (limits == null || limits.photoRoom > 0) {
+                capped = null
+                attachments.add(Uploader.Kind.Photo, Source.Picked(uri), "photo.jpg")
+            }
+        },
+        onVideo = { uri -> video?.onPick?.invoke(uri) },
+        onNoCamera = { noCamera = true },
+    )
     val items = attachments.items
     val photoCount = items.count { it.kind == "photo" }
     Column(modifier.fillMaxWidth()) {
@@ -141,9 +158,18 @@ fun AttachmentStrip(
                 }
             }
             Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                AddButton(WebIcons.Photo, t("media.addPhoto"), enabled && (limits == null || limits.photoRoom > 0)) {
+                val photoOk = limits == null || limits.photoRoom > 0
+                val videoOk = video != null && !video.full && (limits == null || limits.videoRoom)
+                AddButton(WebIcons.Photo, t("media.addPhoto"), enabled && photoOk) {
                     photosPicker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
                 }
+                CameraButton(
+                    enabled = enabled && (photoOk || videoOk),
+                    photoOk = photoOk,
+                    video = if (video != null) videoOk else null,
+                    onPhoto = camera.photo,
+                    onVideo = camera.video,
+                )
                 if (voice.recording) {
                     Row(
                         Modifier
@@ -173,9 +199,7 @@ fun AttachmentStrip(
                     )
                 }
                 if (video != null) {
-                    val videoOk = limits == null || limits.videoRoom
-                    AddButton(WebIcons.Video, t("media.recordAVideo"), enabled && !video.full && videoOk, onClick = video.onRecord)
-                    AddButton(WebIcons.VideoFile, t("media.pickAVideo"), enabled && !video.full && videoOk) {
+                    AddButton(WebIcons.VideoFile, t("media.pickAVideo"), enabled && videoOk) {
                         videoPicker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.VideoOnly))
                     }
                 }
@@ -210,6 +234,12 @@ fun AttachmentStrip(
                 IconButton(onClick = { capped = null }) { Icon(WebIcons.Close, t("media.dismiss"), Modifier.size(14.dp)) }
             }
         }
+        if (noCamera) {
+            Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp), verticalAlignment = Alignment.CenterVertically) {
+                Text(t("media.noCameraApp"), Modifier.weight(1f), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)
+                IconButton(onClick = { noCamera = false }) { Icon(WebIcons.Close, t("media.dismiss"), Modifier.size(14.dp)) }
+            }
+        }
         attachments.errors.forEach { (key, text) ->
             Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp), verticalAlignment = Alignment.CenterVertically) {
                 Text(text, Modifier.weight(1f), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)
@@ -220,6 +250,40 @@ fun AttachmentStrip(
 }
 
 private fun nameOf(uri: Uri, fallback: String): String = uri.lastPathSegment?.substringAfterLast('/')?.takeIf { '.' in it } ?: fallback
+
+/**
+ * Camera CA8: one button; its menu holds Take a photo and, in emails ([video] not null), Record a
+ * video. Each item goes quiet at its limit (CA9). The camera app does the rest (CA2).
+ */
+@Composable
+private fun CameraButton(enabled: Boolean, photoOk: Boolean, video: Boolean?, onPhoto: () -> Unit, onVideo: () -> Unit) {
+    var open by remember { mutableStateOf(false) }
+    Box {
+        AddButton(WebIcons.Camera, t("media.camera"), enabled) { open = true }
+        DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
+            DropdownMenuItem(
+                text = { Text(t("media.takeAPhoto")) },
+                leadingIcon = { Icon(WebIcons.Camera, null, Modifier.size(20.dp)) },
+                enabled = photoOk,
+                onClick = {
+                    open = false
+                    onPhoto()
+                },
+            )
+            if (video != null) {
+                DropdownMenuItem(
+                    text = { Text(t("media.recordAVideo")) },
+                    leadingIcon = { Icon(WebIcons.Video, null, Modifier.size(20.dp)) },
+                    enabled = video,
+                    onClick = {
+                        open = false
+                        onVideo()
+                    },
+                )
+            }
+        }
+    }
+}
 
 @Composable
 private fun AddButton(icon: ImageVector, label: String, enabled: Boolean, onClick: () -> Unit) {

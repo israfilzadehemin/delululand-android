@@ -5,7 +5,7 @@ package com.delulutopia.core.i18n
 
 internal object Catalog {
     val en: Map<String, String> by lazy {
-        HashMap<String, String>(1846).apply {
+        HashMap<String, String>(1860).apply {
             en0(this)
             en1(this)
             en2(this)
@@ -498,9 +498,11 @@ internal object Catalog {
         m["media.allow"] = "Allow"
         m["media.attachAudioFile"] = "Attach audio file"
         m["media.audioTooLarge"] = "This audio file is larger than 60 MB"
+        m["media.camera"] = "Camera"
         m["media.cameraOff"] = "Camera is off · Allow it in your browser settings"
         m["media.cameraOffPhone"] = "Camera is off · Allow it in Settings"
         m["media.cameraPreview"] = "Camera preview"
+        m["media.choosePhoto"] = "Choose a photo"
         m["media.close"] = "Close"
         m["media.dismiss"] = "Dismiss"
         m["media.doodle"] = "Doodle"
@@ -509,6 +511,7 @@ internal object Catalog {
         m["media.drawADoodle"] = "Draw a doodle"
         m["media.flip"] = "Flip"
         m["media.microphoneIsOffAllowIt"] = "Microphone is off · Allow it in your browser settings"
+        m["media.noCameraApp"] = "No camera app found on this phone"
         m["media.notNow"] = "Not now"
         m["media.notesStopAtFiveMinutes"] = "Notes stop at five minutes and play on any phone. If you say no, you can still attach an audio file."
         m["media.oneDoodlePerLetter"] = "One doodle per letter"
@@ -533,11 +536,13 @@ internal object Catalog {
         m["media.removeVoiceNote"] = "Remove voice note"
         m["media.retake"] = "Retake"
         m["media.scrubBarOf"] = "Scrub bar, {time} of {total}"
+        m["media.snap"] = "Snap"
         m["media.start"] = "● Start"
         m["media.startRecording"] = "Start recording"
         m["media.stop"] = "Stop"
         m["media.stop2"] = "■ Stop"
         m["media.stopRecording"] = "Stop recording"
+        m["media.takeAPhoto"] = "Take a photo"
         m["media.uploadFailed"] = "Upload failed. Try again."
         m["media.uploadTimedOut"] = "The upload took too long. Try again."
         m["media.uploading"] = "Uploading"
@@ -549,6 +554,7 @@ internal object Catalog {
         m["media.voiceNoteLower"] = "voice note"
         m["media.yourBrowserAsksOnceFor"] = "Your browser asks once for the microphone."
         m["media.yourPhoneAsksOnce"] = "Your phone asks once for the microphone."
+        m["media.yourPhoto"] = "Your photo"
         m["media.yourRecording"] = "Your recording"
         m["mood.ANGRY"] = "Angry"
         m["mood.ANXIOUS"] = "Anxious"
@@ -620,6 +626,9 @@ internal object Catalog {
         m["notifyEvent.boardNote"] = "Note on your doodle"
         m["notifyEvent.boardReaction"] = "Reaction on your doodle"
         m["notifyEvent.discussionArrived"] = "A discussion arrives"
+    }
+
+    private fun en4(m: HashMap<String, String>) {
         m["notifyEvent.discussionArrivedHint"] = "When {friend}'s discussion reaches you"
         m["notifyEvent.discussionComment"] = "New comment"
         m["notifyEvent.discussionCommentHint"] = "On any discussion"
@@ -627,9 +636,6 @@ internal object Catalog {
         m["notifyEvent.discussionReactionHint"] = "On your discussions and comments"
         m["notifyEvent.emailNew"] = "New email"
         m["notifyEvent.emailNewHint"] = "Every email from {friend}"
-    }
-
-    private fun en4(m: HashMap<String, String>) {
         m["notifyEvent.emailReaction"] = "Reaction on your email"
         m["notifyEvent.letterArrived"] = "A letter arrives"
         m["notifyEvent.letterArrivedHint"] = "When {friend}'s letter reaches you"
@@ -773,6 +779,9 @@ internal object Catalog {
         m["settings.keyMadeOn"] = "Made {day}. Keys can't be shown again; make a new one if it's lost."
         m["settings.keyNotMade"] = "Couldn't make a new key. Try again."
         m["settings.keysCantBeShown"] = "Keys can't be shown again; make a new one if it's lost."
+    }
+
+    private fun en5(m: HashMap<String, String>) {
         m["settings.language"] = "Language"
         m["settings.languageNotSaved"] = "Couldn't change the language. Try again."
         m["settings.languageNote"] = "Your language on every device you use, and in the notifications you get."
@@ -780,9 +789,6 @@ internal object Catalog {
         m["settings.leavesReduced"] = "Falling leaves · off while your device asks for reduced motion"
         m["settings.leavesReducedPhone"] = "Falling leaves · off while your phone removes animations"
         m["settings.logOut"] = "Log out"
-    }
-
-    private fun en5(m: HashMap<String, String>) {
         m["settings.makeANewKey"] = "Make a new key"
         m["settings.makeANewKey2"] = "Make a new key?"
         m["settings.name"] = "Name"
@@ -926,6 +932,9 @@ internal object Catalog {
         m["write.arrivesAtTime"] = "Arrives at {time}"
         m["write.backDiscardChanges"] = "Back, discard changes"
         m["write.backKeepTheDraft"] = "Back, keep the draft"
+    }
+
+    private fun en6(m: HashMap<String, String>) {
         m["write.couldntLoadYourDraftCheck"] = "Couldn't load your draft. Check your connection and try again."
         m["write.discard"] = "Discard"
         m["write.discardYourChanges"] = "Discard your changes?"
@@ -933,9 +942,6 @@ internal object Catalog {
         m["write.feeling"] = "Feeling {feeling}"
         m["write.getsTheLetterAsYou"] = "{friend} gets the letter as you first sent it, at {arrives}. The text you changed is still here."
         m["write.hide"] = "Hide"
-    }
-
-    private fun en6(m: HashMap<String, String>) {
         m["write.inMin"] = "· in {minutes} min"
         m["write.keepMine"] = "Keep mine"
         m["write.keepTextInDraft"] = "Keep text in draft"
@@ -962,7 +968,7 @@ internal object Catalog {
     }
 
     val az: Map<String, String> by lazy {
-        HashMap<String, String>(1846).apply {
+        HashMap<String, String>(1860).apply {
             az0(this)
             az1(this)
             az2(this)
@@ -1455,9 +1461,11 @@ internal object Catalog {
         m["media.allow"] = "İcazə ver"
         m["media.attachAudioFile"] = "Səs faylı əlavə et"
         m["media.audioTooLarge"] = "Bu səs faylı 60 MB-dan böyükdür"
+        m["media.camera"] = "Kamera"
         m["media.cameraOff"] = "Kamera bağlıdır · Brauzerin ayarlarında icazə ver"
         m["media.cameraOffPhone"] = "Kamera bağlıdır · Ayarlarda icazə ver"
         m["media.cameraPreview"] = "Kameranın görüntüsü"
+        m["media.choosePhoto"] = "Foto seç"
         m["media.close"] = "Bağla"
         m["media.dismiss"] = "Bağla"
         m["media.doodle"] = "Cızma-qara"
@@ -1466,6 +1474,7 @@ internal object Catalog {
         m["media.drawADoodle"] = "Cızma-qara çək"
         m["media.flip"] = "Çevir"
         m["media.microphoneIsOffAllowIt"] = "Mikrofon bağlıdır · Brauzerin ayarlarında icazə ver"
+        m["media.noCameraApp"] = "Bu telefonda kamera tətbiqi tapılmadı"
         m["media.notNow"] = "İndi yox"
         m["media.notesStopAtFiveMinutes"] = "Səsli mesajlar beş dəqiqədə dayanır və istənilən telefonda açılır. İcazə verməsən də, səs faylı əlavə edə bilərsən."
         m["media.oneDoodlePerLetter"] = "Hər məktuba bir cızma-qara"
@@ -1490,11 +1499,13 @@ internal object Catalog {
         m["media.removeVoiceNote"] = "Səsli mesajı çıxar"
         m["media.retake"] = "Yenidən çək"
         m["media.scrubBarOf"] = "İrəli-geri çək, {time} / {total}"
+        m["media.snap"] = "Çək"
         m["media.start"] = "● Başla"
         m["media.startRecording"] = "Yazmağa başla"
         m["media.stop"] = "Dayan"
         m["media.stop2"] = "■ Dayan"
         m["media.stopRecording"] = "Yazmağı dayandır"
+        m["media.takeAPhoto"] = "Foto çək"
         m["media.uploadFailed"] = "Yüklənmədi. Bir də yoxla."
         m["media.uploadTimedOut"] = "Yükləmə çox uzun çəkdi. Bir də yoxla."
         m["media.uploading"] = "Yüklənir"
@@ -1506,6 +1517,7 @@ internal object Catalog {
         m["media.voiceNoteLower"] = "səsli mesaj"
         m["media.yourBrowserAsksOnceFor"] = "Brauzerin mikrofon üçün bir dəfə icazə istəyəcək."
         m["media.yourPhoneAsksOnce"] = "Telefonun mikrofon üçün bir dəfə icazə istəyəcək."
+        m["media.yourPhoto"] = "Sənin fotoun"
         m["media.yourRecording"] = "Sənin yazdığın"
         m["mood.ANGRY"] = "Əsəbiyəm"
         m["mood.ANXIOUS"] = "Narahatam"
@@ -1577,6 +1589,9 @@ internal object Catalog {
         m["notifyEvent.boardNote"] = "Cızma-qarana qeyd"
         m["notifyEvent.boardReaction"] = "Cızma-qarana reaksiya"
         m["notifyEvent.discussionArrived"] = "Müzakirə çatır"
+    }
+
+    private fun az4(m: HashMap<String, String>) {
         m["notifyEvent.discussionArrivedHint"] = "Dostunun müzakirəsi sənə çatanda"
         m["notifyEvent.discussionComment"] = "Yeni şərh"
         m["notifyEvent.discussionCommentHint"] = "İstənilən müzakirədə"
@@ -1584,9 +1599,6 @@ internal object Catalog {
         m["notifyEvent.discussionReactionHint"] = "Müzakirələrinə və şərhlərinə"
         m["notifyEvent.emailNew"] = "Yeni e-məktub"
         m["notifyEvent.emailNewHint"] = "Dostundan gələn hər e-məktub"
-    }
-
-    private fun az4(m: HashMap<String, String>) {
         m["notifyEvent.emailReaction"] = "E-məktubuna reaksiya"
         m["notifyEvent.letterArrived"] = "Məktub çatır"
         m["notifyEvent.letterArrivedHint"] = "Dostunun məktubu sənə çatanda"
@@ -1730,6 +1742,9 @@ internal object Catalog {
         m["settings.keyMadeOn"] = "Yaradılıb: {day}. Açarı bir daha göstərmək olmur; itsə, yenisini yarat."
         m["settings.keyNotMade"] = "Yeni açar yaradılmadı. Bir də yoxla."
         m["settings.keysCantBeShown"] = "Açarı bir daha göstərmək olmur; itsə, yenisini yarat."
+    }
+
+    private fun az5(m: HashMap<String, String>) {
         m["settings.language"] = "Dil"
         m["settings.languageNotSaved"] = "Dil dəyişmədi. Bir də yoxla."
         m["settings.languageNote"] = "Bütün cihazlarında və gələn bildirişlərdə sənin dilin."
@@ -1737,9 +1752,6 @@ internal object Catalog {
         m["settings.leavesReduced"] = "Tökülən yarpaqlar · cihazın az hərəkət istədiyi üçün bağlıdır"
         m["settings.leavesReducedPhone"] = "Tökülən yarpaqlar · telefonda animasiyalar söndürüldüyü üçün bağlıdır"
         m["settings.logOut"] = "Çıxış"
-    }
-
-    private fun az5(m: HashMap<String, String>) {
         m["settings.makeANewKey"] = "Yeni açar yarat"
         m["settings.makeANewKey2"] = "Yeni açar yaradılsın?"
         m["settings.name"] = "Ad"
@@ -1883,6 +1895,9 @@ internal object Catalog {
         m["write.arrivesAtTime"] = "Çatacaq: {time}"
         m["write.backDiscardChanges"] = "Geri, dəyişikliklər silinsin"
         m["write.backKeepTheDraft"] = "Geri, qaralama qalsın"
+    }
+
+    private fun az6(m: HashMap<String, String>) {
         m["write.couldntLoadYourDraftCheck"] = "Qaralaman açılmadı. İnternetə bax və bir də yoxla."
         m["write.discard"] = "Sil"
         m["write.discardYourChanges"] = "Dəyişikliklər silinsin?"
@@ -1890,9 +1905,6 @@ internal object Catalog {
         m["write.feeling"] = "Əhval: {feeling}"
         m["write.getsTheLetterAsYou"] = "{friend} məktubu ilk göndərdiyin kimi alacaq, çatma vaxtı: {arrives}. Dəyişdiyin mətn isə burada qalır."
         m["write.hide"] = "Gizlət"
-    }
-
-    private fun az6(m: HashMap<String, String>) {
         m["write.inMin"] = "· {minutes} dəq sonra"
         m["write.keepMine"] = "Mənimki qalsın"
         m["write.keepTextInDraft"] = "Mətni qaralamada saxla"
@@ -1919,7 +1931,7 @@ internal object Catalog {
     }
 
     val fa: Map<String, String> by lazy {
-        HashMap<String, String>(1846).apply {
+        HashMap<String, String>(1860).apply {
             fa0(this)
             fa1(this)
             fa2(this)
@@ -2412,9 +2424,11 @@ internal object Catalog {
         m["media.allow"] = "اجازه بده"
         m["media.attachAudioFile"] = "فایل صوتی بذار"
         m["media.audioTooLarge"] = "این فایل صوتی از ۶۰ مگابایت بزرگ‌تره"
+        m["media.camera"] = "دوربین"
         m["media.cameraOff"] = "دوربین خاموشه · توی تنظیمات مرورگرت اجازه بده"
         m["media.cameraOffPhone"] = "دوربین خاموشه · توی تنظیمات اجازه بده"
         m["media.cameraPreview"] = "تصویر دوربین"
+        m["media.choosePhoto"] = "یه عکس انتخاب کن"
         m["media.close"] = "بستن"
         m["media.dismiss"] = "باشه"
         m["media.doodle"] = "خط‌خطی"
@@ -2423,6 +2437,7 @@ internal object Catalog {
         m["media.drawADoodle"] = "یه خط‌خطی بکش"
         m["media.flip"] = "برگردون"
         m["media.microphoneIsOffAllowIt"] = "میکروفون خاموشه · توی تنظیمات مرورگرت اجازه بده"
+        m["media.noCameraApp"] = "روی این گوشی برنامه‌ی دوربین پیدا نشد"
         m["media.notNow"] = "الان نه"
         m["media.notesStopAtFiveMinutes"] = "پیام‌های صوتی سر پنج دقیقه تموم می‌شن و روی هر گوشی‌ای پخش می‌شن. اگه اجازه ندی، باز هم می‌تونی فایل صوتی بذاری."
         m["media.oneDoodlePerLetter"] = "برای هر نامه یه خط‌خطی"
@@ -2447,11 +2462,13 @@ internal object Catalog {
         m["media.removeVoiceNote"] = "پیام صوتی رو بردار"
         m["media.retake"] = "دوباره بگیر"
         m["media.scrubBarOf"] = "نوار جلو و عقب، {time} از {total}"
+        m["media.snap"] = "بگیر"
         m["media.start"] = "● شروع"
         m["media.startRecording"] = "شروع ضبط"
         m["media.stop"] = "توقف"
         m["media.stop2"] = "■ توقف"
         m["media.stopRecording"] = "توقف ضبط"
+        m["media.takeAPhoto"] = "یه عکس بگیر"
         m["media.uploadFailed"] = "آپلود نشد. دوباره امتحان کن."
         m["media.uploadTimedOut"] = "آپلود خیلی طول کشید. دوباره امتحان کن."
         m["media.uploading"] = "در حال آپلود"
@@ -2463,6 +2480,7 @@ internal object Catalog {
         m["media.voiceNoteLower"] = "پیام صوتی"
         m["media.yourBrowserAsksOnceFor"] = "مرورگرت یه بار برای میکروفون اجازه می‌گیره."
         m["media.yourPhoneAsksOnce"] = "گوشیت یه بار برای میکروفون اجازه می‌گیره."
+        m["media.yourPhoto"] = "عکست"
         m["media.yourRecording"] = "ضبط تو"
         m["mood.ANGRY"] = "عصبانی‌ام"
         m["mood.ANXIOUS"] = "دلشوره دارم"
@@ -2534,6 +2552,9 @@ internal object Catalog {
         m["notifyEvent.boardNote"] = "یادداشت روی خط‌خطی‌ات"
         m["notifyEvent.boardReaction"] = "واکنش به خط‌خطی‌ات"
         m["notifyEvent.discussionArrived"] = "یه گفت‌وگو می‌رسه"
+    }
+
+    private fun fa4(m: HashMap<String, String>) {
         m["notifyEvent.discussionArrivedHint"] = "وقتی گفت‌وگوی {friend} بهت می‌رسه"
         m["notifyEvent.discussionComment"] = "نظر تازه"
         m["notifyEvent.discussionCommentHint"] = "روی هر گفت‌وگویی"
@@ -2541,9 +2562,6 @@ internal object Catalog {
         m["notifyEvent.discussionReactionHint"] = "روی گفت‌وگوها و نظرهات"
         m["notifyEvent.emailNew"] = "ایمیل تازه"
         m["notifyEvent.emailNewHint"] = "هر ایمیلی که {friend} می‌فرسته"
-    }
-
-    private fun fa4(m: HashMap<String, String>) {
         m["notifyEvent.emailReaction"] = "واکنش به ایمیلت"
         m["notifyEvent.letterArrived"] = "یه نامه می‌رسه"
         m["notifyEvent.letterArrivedHint"] = "وقتی نامه‌ی {friend} بهت می‌رسه"
@@ -2687,6 +2705,9 @@ internal object Catalog {
         m["settings.keyMadeOn"] = "ساخته‌شده: {day}. کلید دوباره نشون داده نمی‌شه؛ اگه گم شد، یه تازه‌ش رو بساز."
         m["settings.keyNotMade"] = "کلید تازه ساخته نشد. دوباره امتحان کن."
         m["settings.keysCantBeShown"] = "کلید دوباره نشون داده نمی‌شه؛ اگه گم شد، یه تازه‌ش رو بساز."
+    }
+
+    private fun fa5(m: HashMap<String, String>) {
         m["settings.language"] = "زبان"
         m["settings.languageNotSaved"] = "زبان عوض نشد. دوباره امتحان کن."
         m["settings.languageNote"] = "زبانت روی همه‌ی دستگاه‌هات و توی اعلان‌هایی که می‌گیری."
@@ -2694,9 +2715,6 @@ internal object Catalog {
         m["settings.leavesReduced"] = "برگ‌ریزون · خاموشه چون دستگاهت حرکت کمتر خواسته"
         m["settings.leavesReducedPhone"] = "برگ‌ریزون · خاموشه چون گوشیت انیمیشن‌ها رو برداشته"
         m["settings.logOut"] = "خروج"
-    }
-
-    private fun fa5(m: HashMap<String, String>) {
         m["settings.makeANewKey"] = "یه کلید تازه بساز"
         m["settings.makeANewKey2"] = "کلید تازه ساخته بشه؟"
         m["settings.name"] = "اسم"
@@ -2840,6 +2858,9 @@ internal object Catalog {
         m["write.arrivesAtTime"] = "ساعت {time} می‌رسه"
         m["write.backDiscardChanges"] = "برگشت، تغییرها دور ریخته بشن"
         m["write.backKeepTheDraft"] = "برگشت، پیش‌نویس بمونه"
+    }
+
+    private fun fa6(m: HashMap<String, String>) {
         m["write.couldntLoadYourDraftCheck"] = "پیش‌نویست باز نشد. اینترنتت رو چک کن و دوباره امتحان کن."
         m["write.discard"] = "دور بریز"
         m["write.discardYourChanges"] = "تغییرهات دور ریخته بشن؟"
@@ -2847,9 +2868,6 @@ internal object Catalog {
         m["write.feeling"] = "حال: {feeling}"
         m["write.getsTheLetterAsYou"] = "{friend} نامه رو همون‌طور که اول فرستادی، ساعت {arrives} می‌گیره. متنی که عوض کردی هنوز اینجاست."
         m["write.hide"] = "جمعش کن"
-    }
-
-    private fun fa6(m: HashMap<String, String>) {
         m["write.inMin"] = "· {minutes} دقیقه‌ی دیگه"
         m["write.keepMine"] = "مال خودم بمونه"
         m["write.keepTextInDraft"] = "متن رو توی پیش‌نویس نگه دار"
@@ -2876,7 +2894,7 @@ internal object Catalog {
     }
 
     val tr: Map<String, String> by lazy {
-        HashMap<String, String>(1846).apply {
+        HashMap<String, String>(1860).apply {
             tr0(this)
             tr1(this)
             tr2(this)
@@ -3369,9 +3387,11 @@ internal object Catalog {
         m["media.allow"] = "İzin ver"
         m["media.attachAudioFile"] = "Ses dosyası ekle"
         m["media.audioTooLarge"] = "Bu ses dosyası 60 MB sınırını aşıyor"
+        m["media.camera"] = "Kamera"
         m["media.cameraOff"] = "Kamera kapalı · Tarayıcı ayarlarından izin ver"
         m["media.cameraOffPhone"] = "Kamera kapalı · Ayarlar’dan izin ver"
         m["media.cameraPreview"] = "Kamera görüntüsü"
+        m["media.choosePhoto"] = "Fotoğraf seç"
         m["media.close"] = "Kapat"
         m["media.dismiss"] = "Kapat"
         m["media.doodle"] = "Karalama"
@@ -3380,6 +3400,7 @@ internal object Catalog {
         m["media.drawADoodle"] = "Karalama çiz"
         m["media.flip"] = "Çevir"
         m["media.microphoneIsOffAllowIt"] = "Mikrofon kapalı · Tarayıcı ayarlarından izin ver"
+        m["media.noCameraApp"] = "Bu telefonda kamera uygulaması bulunamadı"
         m["media.notNow"] = "Şimdi değil"
         m["media.notesStopAtFiveMinutes"] = "Sesli mesajlar beş dakikada durur ve her telefonda çalar. İzin vermezsen de ses dosyası ekleyebilirsin."
         m["media.oneDoodlePerLetter"] = "Her mektuba bir karalama"
@@ -3404,11 +3425,13 @@ internal object Catalog {
         m["media.removeVoiceNote"] = "Sesli mesajı kaldır"
         m["media.retake"] = "Yeniden çek"
         m["media.scrubBarOf"] = "İlerleme çubuğu, {time} / {total}"
+        m["media.snap"] = "Çek"
         m["media.start"] = "● Başlat"
         m["media.startRecording"] = "Kayda başla"
         m["media.stop"] = "Durdur"
         m["media.stop2"] = "■ Durdur"
         m["media.stopRecording"] = "Kaydı durdur"
+        m["media.takeAPhoto"] = "Fotoğraf çek"
         m["media.uploadFailed"] = "Yüklenemedi. Tekrar dene."
         m["media.uploadTimedOut"] = "Yükleme çok uzun sürdü. Tekrar dene."
         m["media.uploading"] = "Yükleniyor"
@@ -3420,6 +3443,7 @@ internal object Catalog {
         m["media.voiceNoteLower"] = "sesli mesaj"
         m["media.yourBrowserAsksOnceFor"] = "Tarayıcın mikrofon için bir kez izin isteyecek."
         m["media.yourPhoneAsksOnce"] = "Telefonun mikrofon için bir kez izin isteyecek."
+        m["media.yourPhoto"] = "Fotoğrafın"
         m["media.yourRecording"] = "Kaydın"
         m["mood.ANGRY"] = "Sinirliyim"
         m["mood.ANXIOUS"] = "Endişeliyim"
@@ -3491,6 +3515,9 @@ internal object Catalog {
         m["notifyEvent.boardNote"] = "Karalamana not"
         m["notifyEvent.boardReaction"] = "Karalamana tepki"
         m["notifyEvent.discussionArrived"] = "Bir sohbet gelince"
+    }
+
+    private fun tr4(m: HashMap<String, String>) {
         m["notifyEvent.discussionArrivedHint"] = "Arkadaşının sohbeti sana ulaşınca"
         m["notifyEvent.discussionComment"] = "Yeni yorum"
         m["notifyEvent.discussionCommentHint"] = "Her sohbette"
@@ -3498,9 +3525,6 @@ internal object Catalog {
         m["notifyEvent.discussionReactionHint"] = "Sohbetlerine ve yorumlarına"
         m["notifyEvent.emailNew"] = "Yeni e-posta"
         m["notifyEvent.emailNewHint"] = "Arkadaşından gelen her e-posta"
-    }
-
-    private fun tr4(m: HashMap<String, String>) {
         m["notifyEvent.emailReaction"] = "E-postana tepki"
         m["notifyEvent.letterArrived"] = "Bir mektup gelince"
         m["notifyEvent.letterArrivedHint"] = "Arkadaşının mektubu sana ulaşınca"
@@ -3644,6 +3668,9 @@ internal object Catalog {
         m["settings.keyMadeOn"] = "Oluşturuldu: {day}. Anahtar bir daha gösterilemez; kaybolursa yenisini oluştur."
         m["settings.keyNotMade"] = "Yeni anahtar oluşturulamadı. Tekrar dene."
         m["settings.keysCantBeShown"] = "Anahtar bir daha gösterilemez; kaybolursa yenisini oluştur."
+    }
+
+    private fun tr5(m: HashMap<String, String>) {
         m["settings.language"] = "Dil"
         m["settings.languageNotSaved"] = "Dil değiştirilemedi. Tekrar dene."
         m["settings.languageNote"] = "Kullandığın her cihazda ve gelen bildirimlerde senin dilin."
@@ -3651,9 +3678,6 @@ internal object Catalog {
         m["settings.leavesReduced"] = "Düşen yapraklar · cihazın az hareket istediği için kapalı"
         m["settings.leavesReducedPhone"] = "Düşen yapraklar · telefonda animasyonlar kapalı olduğu için kapalı"
         m["settings.logOut"] = "Çıkış yap"
-    }
-
-    private fun tr5(m: HashMap<String, String>) {
         m["settings.makeANewKey"] = "Yeni anahtar oluştur"
         m["settings.makeANewKey2"] = "Yeni anahtar oluşturulsun mu?"
         m["settings.name"] = "Ad"
@@ -3797,6 +3821,9 @@ internal object Catalog {
         m["write.arrivesAtTime"] = "Varış: {time}"
         m["write.backDiscardChanges"] = "Geri, değişiklikler silinsin"
         m["write.backKeepTheDraft"] = "Geri, taslak kalsın"
+    }
+
+    private fun tr6(m: HashMap<String, String>) {
         m["write.couldntLoadYourDraftCheck"] = "Taslağın açılamadı. Bağlantını kontrol et ve tekrar dene."
         m["write.discard"] = "Sil"
         m["write.discardYourChanges"] = "Değişiklikler silinsin mi?"
@@ -3804,9 +3831,6 @@ internal object Catalog {
         m["write.feeling"] = "Ruh hâli: {feeling}"
         m["write.getsTheLetterAsYou"] = "{friend} mektubu ilk gönderdiğin hâliyle alacak, varış: {arrives}. Değiştirdiğin metin burada duruyor."
         m["write.hide"] = "Gizle"
-    }
-
-    private fun tr6(m: HashMap<String, String>) {
         m["write.inMin"] = "· {minutes} dk sonra"
         m["write.keepMine"] = "Benimki kalsın"
         m["write.keepTextInDraft"] = "Metni taslakta tut"
@@ -3833,7 +3857,7 @@ internal object Catalog {
     }
 
     val ru: Map<String, String> by lazy {
-        HashMap<String, String>(1874).apply {
+        HashMap<String, String>(1888).apply {
             ru0(this)
             ru1(this)
             ru2(this)
@@ -4340,9 +4364,11 @@ internal object Catalog {
         m["media.allow"] = "Разрешить"
         m["media.attachAudioFile"] = "Прикрепить аудиофайл"
         m["media.audioTooLarge"] = "Этот аудиофайл больше 60 МБ"
+        m["media.camera"] = "Камера"
         m["media.cameraOff"] = "Камера выключена · Разреши её в настройках браузера"
         m["media.cameraOffPhone"] = "Камера выключена · Разреши её в настройках"
         m["media.cameraPreview"] = "Изображение с камеры"
+        m["media.choosePhoto"] = "Выбрать фото"
         m["media.close"] = "Закрыть"
         m["media.dismiss"] = "Закрыть"
         m["media.doodle"] = "Рисунок"
@@ -4351,6 +4377,7 @@ internal object Catalog {
         m["media.drawADoodle"] = "Нарисовать"
         m["media.flip"] = "Сменить камеру"
         m["media.microphoneIsOffAllowIt"] = "Микрофон выключен · Разреши его в настройках браузера"
+        m["media.noCameraApp"] = "На этом телефоне не нашлось приложения камеры"
         m["media.notNow"] = "Не сейчас"
         m["media.notesStopAtFiveMinutes"] = "Голосовые длятся до пяти минут и открываются на любом телефоне. Если не разрешить, можно прикрепить аудиофайл."
         m["media.oneDoodlePerLetter"] = "Один рисунок на письмо"
@@ -4375,11 +4402,13 @@ internal object Catalog {
         m["media.removeVoiceNote"] = "Убрать голосовое"
         m["media.retake"] = "Переснять"
         m["media.scrubBarOf"] = "Перемотка, {time} из {total}"
+        m["media.snap"] = "Снять"
         m["media.start"] = "● Начать"
         m["media.startRecording"] = "Начать запись"
         m["media.stop"] = "Стоп"
         m["media.stop2"] = "■ Стоп"
         m["media.stopRecording"] = "Остановить запись"
+        m["media.takeAPhoto"] = "Сделать фото"
         m["media.uploadFailed"] = "Не удалось загрузить. Попробуй ещё раз."
         m["media.uploadTimedOut"] = "Загрузка заняла слишком много времени. Попробуй ещё раз."
         m["media.uploading"] = "Загрузка"
@@ -4391,6 +4420,7 @@ internal object Catalog {
         m["media.voiceNoteLower"] = "голосовое"
         m["media.yourBrowserAsksOnceFor"] = "Браузер один раз спросит разрешение на микрофон."
         m["media.yourPhoneAsksOnce"] = "Телефон один раз спросит разрешение на микрофон."
+        m["media.yourPhoto"] = "Твоё фото"
         m["media.yourRecording"] = "Твоя запись"
         m["mood.ANGRY"] = "Злюсь"
         m["mood.ANXIOUS"] = "Тревожно"
@@ -4448,6 +4478,9 @@ internal object Catalog {
         m["notify.itOpensFullScreenLike"] = "Откроется на весь экран, как приложение, — на iPhone уведомления приходят только так."
         m["notify.itOpensFullScreenLike2"] = "Откроется на весь экран, как приложение, со своей иконки."
         m["notify.knowTheMomentALetter"] = "Узнавай о письме, как только оно придёт"
+    }
+
+    private fun ru4(m: HashMap<String, String>) {
         m["notify.notNow"] = "Не сейчас"
         m["notify.ok"] = "ОК"
         m["notify.oneNotificationPerLetterAt"] = "Одно уведомление на каждое письмо — в ту же минуту, как оно придёт, даже если сайт закрыт. И больше ничего, никогда."
@@ -4455,9 +4488,6 @@ internal object Catalog {
         m["notify.share"] = "Поделиться"
         m["notify.tapShare"] = "Нажми «{share}» в панели браузера"
         m["notify.thisSwitchesToOnBy"] = "Как только разрешишь, это включится само."
-    }
-
-    private fun ru4(m: HashMap<String, String>) {
         m["notify.turnOn"] = "Включить"
         m["notify.yourBrowserBlockedNotificationsFor"] = "Браузер заблокировал уведомления Delulutopia и сам больше не спросит. Чтобы разрешить:"
         m["notifyEvent.boardDoodle"] = "Новый рисунок"
@@ -4601,6 +4631,9 @@ internal object Catalog {
         m["settings.device.unsupported"] = "Не поддерживается"
         m["settings.device.unsupportedSub"] = "Этот браузер не умеет показывать уведомления."
         m["settings.done"] = "Готово"
+    }
+
+    private fun ru5(m: HashMap<String, String>) {
         m["settings.entryKey"] = "Ключ входа"
         m["settings.fingerprint"] = "Вход по отпечатку"
         m["settings.fingerprintKeep"] = "Оставить вход по отпечатку"
@@ -4608,9 +4641,6 @@ internal object Catalog {
         m["settings.fingerprintOfferText"] = "В следующий раз вместо PIN-кода просто коснись сканера. PIN-код останется на этом телефоне и откроется только отпечатком пальца. Выключить можно в разделе «Я»."
         m["settings.fingerprintOfferTitle"] = "Открывать по отпечатку?"
         m["settings.fingerprintOfferYes"] = "Использовать отпечаток"
-    }
-
-    private fun ru5(m: HashMap<String, String>) {
         m["settings.fingerprintOn"] = "Вход по отпечатку включён"
         m["settings.fingerprintSub"] = "Вместо PIN-кода на этом телефоне"
         m["settings.fingerprintTurnOn"] = "Включить вход по отпечатку"
@@ -4754,6 +4784,9 @@ internal object Catalog {
         m["universe.welcomeHintFollows"] = "Видно под «Добро пожаловать! Это {name}.», когда введён ключ. Меняется вместе с названием, пока ты не изменишь текст."
         m["universe.welcomeMax"] = "До 1500 символов"
         m["universe.welcomeMessage"] = "Приветствие"
+    }
+
+    private fun ru6(m: HashMap<String, String>) {
         m["universe.welcomeTo"] = "Добро пожаловать! Это {name}."
         m["universe.writeAFewWords"] = "Напиши пару слов"
         m["universe.xxxxXxxxXxxx"] = "XXXX-XXXX-XXXX"
@@ -4761,9 +4794,6 @@ internal object Catalog {
         m["universe.yourInvite"] = "Твоё приглашение"
         m["universe.yourPhoto"] = "Твоё фото"
         m["universe.yourUniverse"] = "Твой мир"
-    }
-
-    private fun ru6(m: HashMap<String, String>) {
         m["universe.yourUniverseLower"] = "твой мир"
         m["write.aNewerVersionWasSaved"] = "На другом устройстве сохранена более новая версия. Загрузить её?"
         m["write.arrivesAt"] = "Придёт"
