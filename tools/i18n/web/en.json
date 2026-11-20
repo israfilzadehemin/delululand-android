@@ -962,5 +962,13 @@
  "deletion.public.lost": "Lost your key or PIN? Write to {email} with your universe’s name and your username; we delete within 30 days.",
  "deletion.public.title": "Delete your Delulutopia account",
  "deletion.questions": "Questions: {email}",
- "letters.toFormer": "→ To a former citizen"
+ "letters.toFormer": "→ To a former citizen",
+ "media.photoExpired": "Photo expired",
+ "media.videoExpired": "Video expired",
+ "media.doodleExpired": "Doodle expired",
+ "media.voiceExpired": "Voice note expired · {time}",
+ "retention.kept_one": "Attachments are kept for {n} day",
+ "retention.kept_other": "Attachments are kept for {n} days",
+ "retention.removed_one": "Attachments are removed {n} day after sending",
+ "retention.removed_other": "Attachments are removed {n} days after sending"
 }

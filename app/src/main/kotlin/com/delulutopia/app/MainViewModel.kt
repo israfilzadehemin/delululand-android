@@ -11,6 +11,7 @@ import com.delulutopia.core.data.Backend
 import com.delulutopia.core.data.SessionRepository
 import com.delulutopia.core.data.SessionState
 import com.delulutopia.core.designsystem.theme.ThemeMode
+import com.delulutopia.core.ui.media.Retention
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.SharingStarted
@@ -45,7 +46,13 @@ class MainViewModel @Inject constructor(
         push.start()
         refreshSession()
         viewModelScope.launch {
-            runCatching { backend.run { config() } }.getOrNull()?.takeIf { it.testTiming }?.let { c ->
+            val config = runCatching { backend.run { config() } }.getOrNull()
+            // Attachment Retention AR14: the days the compose notices and captions name.
+            config?.retention?.let {
+                Retention.letterDays = it.letterDays
+                Retention.otherDays = it.otherDays
+            }
+            config?.takeIf { it.testTiming }?.let { c ->
                 testBanner = "TEST · DELAY ${durationWords(c.delay)} · WINDOW ${durationWords(c.window)}" +
                     (c.discussionDelay?.let { " · DISCUSSIONS ${durationWords(it)}" } ?: "")
             }

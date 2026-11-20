@@ -83,6 +83,7 @@ import com.delulutopia.core.ui.editor.RichEditorState
 import com.delulutopia.core.ui.editor.rememberRichEditor
 import com.delulutopia.core.ui.media.AttachmentStrip
 import com.delulutopia.core.ui.media.Item
+import com.delulutopia.core.ui.media.RetentionScope
 import com.delulutopia.core.ui.media.Source
 import com.delulutopia.core.ui.media.VoiceState
 import com.delulutopia.core.ui.media.rememberVoiceRecording
@@ -353,7 +354,7 @@ private fun Frame(
             }
             Pin(20.dp, Modifier.align(Alignment.TopCenter).offset(y = (-17).dp))
         }
-        AttachmentStrip(attachments = vm.attachments!!, onRemove = onRemove, voice = voice, limits = limits)
+        AttachmentStrip(attachments = vm.attachments!!, onRemove = onRemove, voice = voice, limits = limits, retention = RetentionScope.Other)
         EditorToolbar(editor, Modifier.background(DlTheme.colors.letterEnvelope)) { emojiOpen = true }
     }
     if (emojiOpen) EmojiPickerSheet(t("editor.emoji"), onPick = { editor.insert(it) }, onDismiss = { emojiOpen = false })

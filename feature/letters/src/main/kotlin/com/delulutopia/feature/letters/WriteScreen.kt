@@ -104,6 +104,7 @@ import com.delulutopia.core.ui.editor.rememberRichEditor
 import com.delulutopia.core.ui.media.AttachmentStrip
 import com.delulutopia.core.ui.media.DoodleAdd
 import com.delulutopia.core.ui.media.Item
+import com.delulutopia.core.ui.media.RetentionScope
 import com.delulutopia.core.ui.media.Source
 import com.delulutopia.core.ui.media.VoiceState
 import com.delulutopia.core.ui.media.rememberVoiceRecording
@@ -471,6 +472,7 @@ private fun WriteFrame(
                 voice = voice,
                 doodle = DoodleAdd(full = atts.has("doodle")) { doodleOpen = true },
                 limits = limits,
+                retention = RetentionScope.Letter,
             )
         }
         EditorToolbar(editor, Modifier.background(DlTheme.colors.letterEnvelope), enabled = !late) { emojiOpen = true }
