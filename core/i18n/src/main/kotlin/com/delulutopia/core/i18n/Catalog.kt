@@ -5,7 +5,7 @@ package com.delulutopia.core.i18n
 
 internal object Catalog {
     val en: Map<String, String> by lazy {
-        HashMap<String, String>(2032).apply {
+        HashMap<String, String>(2054).apply {
             en0(this)
             en1(this)
             en2(this)
@@ -342,6 +342,7 @@ internal object Catalog {
         m["emails.back"] = "Back"
         m["emails.backToEmails"] = "Back to Emails"
         m["emails.bubbleLabel"] = "{name}, {time}. Enter for actions"
+        m["emails.cancelEmail"] = "Cancel email"
         m["emails.cancelReply"] = "Cancel reply"
         m["emails.closeAttachments"] = "Close attachments"
         m["emails.continueNewEmail"] = "Continue your new email"
@@ -375,8 +376,13 @@ internal object Catalog {
         m["emails.new"] = "{fresh} new"
         m["emails.newEmail"] = "New email"
         m["emails.newEmailBelow"] = "New email"
+        m["emails.noAnswer"] = "The server didn't answer in time."
+        m["emails.noConnection"] = "No connection. Check your internet and try again."
         m["emails.noCredits"] = "No emails left today · renews at {time}"
         m["emails.noEmailsYet"] = "No emails yet."
+        m["emails.notSent"] = "Not sent"
+        m["emails.notSentOptions"] = "Not sent. Options"
+        m["emails.notSentTitle"] = "Email not sent"
         m["emails.photoOfOpenFullSize"] = "Photo {n} of {count}, open full size"
         m["emails.pickAThreadToRead"] = "Pick a thread to read it here."
         m["emails.react"] = "React"
@@ -386,8 +392,12 @@ internal object Catalog {
         m["emails.reply"] = "Reply"
         m["emails.replyLabel"] = "Reply"
         m["emails.replyingTo"] = "Replying to {name}"
+        m["emails.resolveUnsent"] = "Retry or cancel the unsent email first"
+        m["emails.retry"] = "Retry"
         m["emails.seeOlder"] = "See older"
         m["emails.seen"] = "Seen {time}"
+        m["emails.sendingStatus"] = "Sending"
+        m["emails.serverError"] = "Something went wrong on our side."
         m["emails.startTheFirstOne"] = "Start the first one."
         m["emails.subject"] = "Subject"
         m["emails.thatIsEverything"] = "That is everything"
@@ -397,6 +407,7 @@ internal object Catalog {
         m["emails.today"] = "Today"
         m["emails.trimmed"] = "Trimmed to 1024 characters"
         m["emails.unfold"] = "Unfold"
+        m["emails.waitPrevious"] = "Sending the previous email…"
         m["emails.writeAReply"] = "Write a reply"
         m["emails.writeAnEmail"] = "Write an email"
         m["emails.yesterday"] = "Yesterday"
@@ -462,6 +473,9 @@ internal object Catalog {
         m["home.onItsWayArrives"] = "On its way · arrives {arrives}"
         m["home.onItsWayArrives2"] = "On its way, arrives {arrives}"
         m["home.oneTap"] = "One tap sets it."
+    }
+
+    private fun en3(m: HashMap<String, String>) {
         m["home.oneTapFriend"] = "One tap sets it. {friend} sees it right away, not after an hour."
         m["home.page"] = "page"
         m["home.pinChanged"] = "PIN changed"
@@ -473,9 +487,6 @@ internal object Catalog {
         m["home.sProfile"] = "{nickname}'s profile"
         m["home.set"] = "· set {age}"
         m["home.setYourMood"] = "Set your mood"
-    }
-
-    private fun en3(m: HashMap<String, String>) {
         m["home.to"] = "To {nickname}"
         m["home.waiting"] = "Send {name}'s key to the one person you want here."
         m["home.waitingCreator"] = "Send {name}'s key to the one person you want here. Lost it? Make a new one."
@@ -615,6 +626,9 @@ internal object Catalog {
         m["media.removeVideo"] = "Remove video"
         m["media.removeVoiceNote"] = "Remove voice note"
         m["media.retake"] = "Retake"
+    }
+
+    private fun en4(m: HashMap<String, String>) {
         m["media.scrubBarOf"] = "Scrub bar, {time} of {total}"
         m["media.snap"] = "Snap"
         m["media.start"] = "● Start"
@@ -626,9 +640,6 @@ internal object Catalog {
         m["media.uploadFailed"] = "Upload failed. Try again."
         m["media.uploadTimedOut"] = "The upload took too long. Try again."
         m["media.uploading"] = "Uploading"
-    }
-
-    private fun en4(m: HashMap<String, String>) {
         m["media.use"] = "Use"
         m["media.video"] = "Video"
         m["media.videoExpired"] = "Video expired"
@@ -768,6 +779,9 @@ internal object Catalog {
         m["profile.choosePhoto"] = "Choose photo"
         m["profile.dragToMovePinchOr"] = "Drag to move · pinch or slide to zoom"
         m["profile.keepIt"] = "Keep it"
+    }
+
+    private fun en5(m: HashMap<String, String>) {
         m["profile.localTime"] = "Local time"
         m["profile.matches"] = "Matches"
         m["profile.mood"] = "Mood"
@@ -779,9 +793,6 @@ internal object Catalog {
         m["profile.noMoodYet"] = "No mood yet"
         m["profile.noNameAdded"] = "No name added"
         m["profile.noTimeZoneMatches"] = "No time zone matches “{trim}”."
-    }
-
-    private fun en5(m: HashMap<String, String>) {
         m["profile.photoNotRemoved"] = "Couldn't remove your photo. Try again."
         m["profile.photoNotUpdated"] = "Couldn't update your photo. Try again."
         m["profile.photoPositionDragOrUse"] = "Photo position: drag or use the arrow keys"
@@ -921,6 +932,9 @@ internal object Catalog {
         m["stamps.chooseAStamp"] = "Choose a stamp"
         m["stamps.close"] = "Close"
         m["stamps.couldntLoadTheStampsCheck"] = "Couldn't load the stamps. Check your connection and try again."
+    }
+
+    private fun en6(m: HashMap<String, String>) {
         m["stamps.loadingStamps"] = "Loading stamps…"
         m["stamps.noStamp"] = "No stamp"
         m["stamps.nothingFound"] = "Nothing found"
@@ -932,9 +946,6 @@ internal object Catalog {
         m["stamps.stampThemes"] = "Stamp themes"
         m["tabs.discussions"] = "Discussions"
         m["tabs.emails"] = "Emails"
-    }
-
-    private fun en6(m: HashMap<String, String>) {
         m["tabs.home"] = "Home"
         m["tabs.letters"] = "Letters"
         m["tabs.new"] = "New"
@@ -1054,7 +1065,7 @@ internal object Catalog {
     }
 
     val az: Map<String, String> by lazy {
-        HashMap<String, String>(2032).apply {
+        HashMap<String, String>(2054).apply {
             az0(this)
             az1(this)
             az2(this)
@@ -1391,6 +1402,7 @@ internal object Catalog {
         m["emails.back"] = "Geri"
         m["emails.backToEmails"] = "E-məktublara qayıt"
         m["emails.bubbleLabel"] = "{name}, {time}. Seçimlər üçün Enter"
+        m["emails.cancelEmail"] = "E-məktubu ləğv et"
         m["emails.cancelReply"] = "Cavabı ləğv et"
         m["emails.closeAttachments"] = "Əlavələri bağla"
         m["emails.continueNewEmail"] = "Yeni e-məktubuna davam et"
@@ -1424,8 +1436,13 @@ internal object Catalog {
         m["emails.new"] = "{fresh} yeni"
         m["emails.newEmail"] = "Yeni e-məktub"
         m["emails.newEmailBelow"] = "Yeni e-məktub"
+        m["emails.noAnswer"] = "Server vaxtında cavab vermədi."
+        m["emails.noConnection"] = "Bağlantı yoxdur. İnterneti yoxla və bir də cəhd et."
         m["emails.noCredits"] = "Bugünlük e-məktublar bitdi · yenilənmə: {time}"
         m["emails.noEmailsYet"] = "Hələ e-məktub yoxdur."
+        m["emails.notSent"] = "Göndərilmədi"
+        m["emails.notSentOptions"] = "Göndərilmədi. Seçimlər"
+        m["emails.notSentTitle"] = "E-məktub göndərilmədi"
         m["emails.photoOfOpenFullSize"] = "Foto {n} / {count}, böyüt"
         m["emails.pickAThreadToRead"] = "Oxumaq üçün bir yazışma seç."
         m["emails.react"] = "Reaksiya ver"
@@ -1435,8 +1452,12 @@ internal object Catalog {
         m["emails.reply"] = "Cavab yaz"
         m["emails.replyLabel"] = "Cavab"
         m["emails.replyingTo"] = "Cavab: {name}"
+        m["emails.resolveUnsent"] = "Əvvəlcə göndərilməyən e-məktubu bir də göndər və ya ləğv et"
+        m["emails.retry"] = "Bir də göndər"
         m["emails.seeOlder"] = "Köhnələrə bax"
         m["emails.seen"] = "Görüldü · {time}"
+        m["emails.sendingStatus"] = "Göndərilir"
+        m["emails.serverError"] = "Bizim tərəfdə nəsə səhv getdi."
         m["emails.startTheFirstOne"] = "İlkini sən yaz."
         m["emails.subject"] = "Mövzu"
         m["emails.thatIsEverything"] = "Hamısı bu qədər"
@@ -1446,6 +1467,7 @@ internal object Catalog {
         m["emails.today"] = "Bu gün"
         m["emails.trimmed"] = "1024 simvola qədər qısaldıldı"
         m["emails.unfold"] = "Aç"
+        m["emails.waitPrevious"] = "Əvvəlki e-məktub göndərilir…"
         m["emails.writeAReply"] = "Cavab yaz"
         m["emails.writeAnEmail"] = "E-məktub yaz"
         m["emails.yesterday"] = "Dünən"
@@ -1511,6 +1533,9 @@ internal object Catalog {
         m["home.onItsWayArrives"] = "Yoldadır · çatacaq: {arrives}"
         m["home.onItsWayArrives2"] = "Yoldadır, çatacaq: {arrives}"
         m["home.oneTap"] = "Bir toxunuş kifayətdir."
+    }
+
+    private fun az3(m: HashMap<String, String>) {
         m["home.oneTapFriend"] = "Bir toxunuş kifayətdir. {friend} bunu dərhal görür, bir saat sonra yox."
         m["home.page"] = "səhifə"
         m["home.pinChanged"] = "PIN kod dəyişdi"
@@ -1522,9 +1547,6 @@ internal object Catalog {
         m["home.sProfile"] = "Profil: {nickname}"
         m["home.set"] = "· {age} seçilib"
         m["home.setYourMood"] = "Əhvalını seç"
-    }
-
-    private fun az3(m: HashMap<String, String>) {
         m["home.to"] = "Kimə: {nickname}"
         m["home.waiting"] = "{name} dünyasının açarını burada görmək istədiyin tək insana göndər."
         m["home.waitingCreator"] = "{name} dünyasının açarını burada görmək istədiyin tək insana göndər. İtirmisən? Yenisini yarat."
@@ -1664,6 +1686,9 @@ internal object Catalog {
         m["media.removeVideo"] = "Videonu çıxar"
         m["media.removeVoiceNote"] = "Səsli mesajı çıxar"
         m["media.retake"] = "Yenidən çək"
+    }
+
+    private fun az4(m: HashMap<String, String>) {
         m["media.scrubBarOf"] = "İrəli-geri çək, {time} / {total}"
         m["media.snap"] = "Çək"
         m["media.start"] = "● Başla"
@@ -1675,9 +1700,6 @@ internal object Catalog {
         m["media.uploadFailed"] = "Yüklənmədi. Bir də yoxla."
         m["media.uploadTimedOut"] = "Yükləmə çox uzun çəkdi. Bir də yoxla."
         m["media.uploading"] = "Yüklənir"
-    }
-
-    private fun az4(m: HashMap<String, String>) {
         m["media.use"] = "Bunu götür"
         m["media.video"] = "Video"
         m["media.videoExpired"] = "Videonun vaxtı bitib"
@@ -1817,6 +1839,9 @@ internal object Catalog {
         m["profile.choosePhoto"] = "Foto seç"
         m["profile.dragToMovePinchOr"] = "Yerini dəyişmək üçün sürüşdür · böyütmək üçün iki barmaqla aç və ya sürgünü çək"
         m["profile.keepIt"] = "Qalsın"
+    }
+
+    private fun az5(m: HashMap<String, String>) {
         m["profile.localTime"] = "Yerli vaxt"
         m["profile.matches"] = "Uyğun gələnlər"
         m["profile.mood"] = "Əhval"
@@ -1828,9 +1853,6 @@ internal object Catalog {
         m["profile.noMoodYet"] = "Hələ əhval yoxdur"
         m["profile.noNameAdded"] = "Ad yazılmayıb"
         m["profile.noTimeZoneMatches"] = "«{trim}» üzrə saat qurşağı tapılmadı."
-    }
-
-    private fun az5(m: HashMap<String, String>) {
         m["profile.photoNotRemoved"] = "Foton silinmədi. Bir də yoxla."
         m["profile.photoNotUpdated"] = "Foton dəyişmədi. Bir də yoxla."
         m["profile.photoPositionDragOrUse"] = "Fotonun yeri: sürüşdür və ya ox düymələrindən istifadə et"
@@ -1970,6 +1992,9 @@ internal object Catalog {
         m["stamps.chooseAStamp"] = "Marka seç"
         m["stamps.close"] = "Bağla"
         m["stamps.couldntLoadTheStampsCheck"] = "Markalar yüklənmədi. İnternetə bax və bir də yoxla."
+    }
+
+    private fun az6(m: HashMap<String, String>) {
         m["stamps.loadingStamps"] = "Markalar yüklənir…"
         m["stamps.noStamp"] = "Markasız"
         m["stamps.nothingFound"] = "Heç nə tapılmadı"
@@ -1981,9 +2006,6 @@ internal object Catalog {
         m["stamps.stampThemes"] = "Marka mövzuları"
         m["tabs.discussions"] = "Müzakirələr"
         m["tabs.emails"] = "E-məktublar"
-    }
-
-    private fun az6(m: HashMap<String, String>) {
         m["tabs.home"] = "Əsas səhifə"
         m["tabs.letters"] = "Məktublar"
         m["tabs.new"] = "Yeni"
@@ -2103,7 +2125,7 @@ internal object Catalog {
     }
 
     val fa: Map<String, String> by lazy {
-        HashMap<String, String>(2032).apply {
+        HashMap<String, String>(2054).apply {
             fa0(this)
             fa1(this)
             fa2(this)
@@ -2440,6 +2462,7 @@ internal object Catalog {
         m["emails.back"] = "برگشت"
         m["emails.backToEmails"] = "برگشت به ایمیل‌ها"
         m["emails.bubbleLabel"] = "{name}، {time}. برای گزینه‌ها Enter"
+        m["emails.cancelEmail"] = "لغو ایمیل"
         m["emails.cancelReply"] = "لغو پاسخ"
         m["emails.closeAttachments"] = "بستن پیوست‌ها"
         m["emails.continueNewEmail"] = "ایمیل تازه‌ت رو ادامه بده"
@@ -2473,8 +2496,13 @@ internal object Catalog {
         m["emails.new"] = "{fresh} تازه"
         m["emails.newEmail"] = "ایمیل تازه"
         m["emails.newEmailBelow"] = "ایمیل تازه"
+        m["emails.noAnswer"] = "سرور به‌موقع جواب نداد."
+        m["emails.noConnection"] = "اینترنت وصل نیست. اتصالت رو چک کن و دوباره امتحان کن."
         m["emails.noCredits"] = "ایمیل‌های امروز تموم شد · ساعت {time} دوباره پر می‌شه"
         m["emails.noEmailsYet"] = "هنوز ایمیلی نیست."
+        m["emails.notSent"] = "فرستاده نشد"
+        m["emails.notSentOptions"] = "فرستاده نشد. گزینه‌ها"
+        m["emails.notSentTitle"] = "ایمیل فرستاده نشد"
         m["emails.photoOfOpenFullSize"] = "عکس {n} از {count}، بزرگش کن"
         m["emails.pickAThreadToRead"] = "یه رشته انتخاب کن تا اینجا بخونیش."
         m["emails.react"] = "واکنش بده"
@@ -2484,8 +2512,12 @@ internal object Catalog {
         m["emails.reply"] = "جواب بده"
         m["emails.replyLabel"] = "جواب"
         m["emails.replyingTo"] = "پاسخ به {name}"
+        m["emails.resolveUnsent"] = "اول ایمیل فرستاده‌نشده رو دوباره بفرست یا لغوش کن"
+        m["emails.retry"] = "دوباره بفرست"
         m["emails.seeOlder"] = "قدیمی‌ترها"
         m["emails.seen"] = "دیده شد · {time}"
+        m["emails.sendingStatus"] = "در حال فرستادن"
+        m["emails.serverError"] = "یه مشکلی از طرف ما پیش اومد."
         m["emails.startTheFirstOne"] = "اولیش رو تو بنویس."
         m["emails.subject"] = "موضوع"
         m["emails.thatIsEverything"] = "همه‌ش همین بود"
@@ -2495,6 +2527,7 @@ internal object Catalog {
         m["emails.today"] = "امروز"
         m["emails.trimmed"] = "تا ۱۰۲۴ نویسه کوتاه شد"
         m["emails.unfold"] = "باز کن"
+        m["emails.waitPrevious"] = "ایمیل قبلی داره فرستاده می‌شه…"
         m["emails.writeAReply"] = "یه جواب بنویس"
         m["emails.writeAnEmail"] = "یه ایمیل بنویس"
         m["emails.yesterday"] = "دیروز"
@@ -2560,6 +2593,9 @@ internal object Catalog {
         m["home.onItsWayArrives"] = "توی راهه · می‌رسه: {arrives}"
         m["home.onItsWayArrives2"] = "توی راهه، می‌رسه: {arrives}"
         m["home.oneTap"] = "یه ضربه کافیه."
+    }
+
+    private fun fa3(m: HashMap<String, String>) {
         m["home.oneTapFriend"] = "یه ضربه کافیه. {friend} همون لحظه می‌بینه، نه یه ساعت بعد."
         m["home.page"] = "صفحه"
         m["home.pinChanged"] = "رمز عوض شد"
@@ -2571,9 +2607,6 @@ internal object Catalog {
         m["home.sProfile"] = "پروفایل {nickname}"
         m["home.set"] = "· {age} گذاشته شد"
         m["home.setYourMood"] = "حال‌وهوات رو بذار"
-    }
-
-    private fun fa3(m: HashMap<String, String>) {
         m["home.to"] = "به {nickname}"
         m["home.waiting"] = "کلید {name} رو بفرست برای همون یه نفری که می‌خوای اینجا باشه."
         m["home.waitingCreator"] = "کلید {name} رو بفرست برای همون یه نفری که می‌خوای اینجا باشه. گمش کردی؟ یه تازه‌ش رو بساز."
@@ -2713,6 +2746,9 @@ internal object Catalog {
         m["media.removeVideo"] = "ویدیو رو بردار"
         m["media.removeVoiceNote"] = "پیام صوتی رو بردار"
         m["media.retake"] = "دوباره بگیر"
+    }
+
+    private fun fa4(m: HashMap<String, String>) {
         m["media.scrubBarOf"] = "نوار جلو و عقب، {time} از {total}"
         m["media.snap"] = "بگیر"
         m["media.start"] = "● شروع"
@@ -2724,9 +2760,6 @@ internal object Catalog {
         m["media.uploadFailed"] = "آپلود نشد. دوباره امتحان کن."
         m["media.uploadTimedOut"] = "آپلود خیلی طول کشید. دوباره امتحان کن."
         m["media.uploading"] = "در حال آپلود"
-    }
-
-    private fun fa4(m: HashMap<String, String>) {
         m["media.use"] = "همینو بذار"
         m["media.video"] = "ویدیو"
         m["media.videoExpired"] = "ویدیو منقضی شده"
@@ -2866,6 +2899,9 @@ internal object Catalog {
         m["profile.choosePhoto"] = "انتخاب عکس"
         m["profile.dragToMovePinchOr"] = "بکش تا جابه‌جا بشه · برای بزرگ‌نمایی دو انگشتی باز کن یا اسلایدر رو بکش"
         m["profile.keepIt"] = "بمونه"
+    }
+
+    private fun fa5(m: HashMap<String, String>) {
         m["profile.localTime"] = "ساعت محلی"
         m["profile.matches"] = "نتیجه‌ها"
         m["profile.mood"] = "حال‌وهوا"
@@ -2877,9 +2913,6 @@ internal object Catalog {
         m["profile.noMoodYet"] = "هنوز حال‌وهوایی نیست"
         m["profile.noNameAdded"] = "اسمی نذاشتی"
         m["profile.noTimeZoneMatches"] = "هیچ منطقه‌ی زمانی با «{trim}» جور نیست."
-    }
-
-    private fun fa5(m: HashMap<String, String>) {
         m["profile.photoNotRemoved"] = "عکست حذف نشد. دوباره امتحان کن."
         m["profile.photoNotUpdated"] = "عکست عوض نشد. دوباره امتحان کن."
         m["profile.photoPositionDragOrUse"] = "جای عکس: بکشش یا از کلیدهای جهت استفاده کن"
@@ -3019,6 +3052,9 @@ internal object Catalog {
         m["stamps.chooseAStamp"] = "یه تمبر انتخاب کن"
         m["stamps.close"] = "بستن"
         m["stamps.couldntLoadTheStampsCheck"] = "تمبرها نیومدن. اینترنتت رو چک کن و دوباره امتحان کن."
+    }
+
+    private fun fa6(m: HashMap<String, String>) {
         m["stamps.loadingStamps"] = "تمبرها دارن میان…"
         m["stamps.noStamp"] = "بدون تمبر"
         m["stamps.nothingFound"] = "چیزی پیدا نشد"
@@ -3030,9 +3066,6 @@ internal object Catalog {
         m["stamps.stampThemes"] = "دسته‌های تمبر"
         m["tabs.discussions"] = "گفت‌وگوها"
         m["tabs.emails"] = "ایمیل‌ها"
-    }
-
-    private fun fa6(m: HashMap<String, String>) {
         m["tabs.home"] = "خانه"
         m["tabs.letters"] = "نامه‌ها"
         m["tabs.new"] = "تازه"
@@ -3152,7 +3185,7 @@ internal object Catalog {
     }
 
     val tr: Map<String, String> by lazy {
-        HashMap<String, String>(2032).apply {
+        HashMap<String, String>(2054).apply {
             tr0(this)
             tr1(this)
             tr2(this)
@@ -3489,6 +3522,7 @@ internal object Catalog {
         m["emails.back"] = "Geri"
         m["emails.backToEmails"] = "E-postalara dön"
         m["emails.bubbleLabel"] = "{name}, {time}. Seçenekler için Enter"
+        m["emails.cancelEmail"] = "E-postayı iptal et"
         m["emails.cancelReply"] = "Yanıtı iptal et"
         m["emails.closeAttachments"] = "Ekleri kapat"
         m["emails.continueNewEmail"] = "Yeni e-postana devam et"
@@ -3522,8 +3556,13 @@ internal object Catalog {
         m["emails.new"] = "{fresh} yeni"
         m["emails.newEmail"] = "Yeni e-posta"
         m["emails.newEmailBelow"] = "Yeni e-posta"
+        m["emails.noAnswer"] = "Sunucu zamanında yanıt vermedi."
+        m["emails.noConnection"] = "Bağlantı yok. İnternetini kontrol edip tekrar dene."
         m["emails.noCredits"] = "Bugünlük e-postalar bitti · yenileme: {time}"
         m["emails.noEmailsYet"] = "Henüz e-posta yok."
+        m["emails.notSent"] = "Gönderilemedi"
+        m["emails.notSentOptions"] = "Gönderilemedi. Seçenekler"
+        m["emails.notSentTitle"] = "E-posta gönderilemedi"
         m["emails.photoOfOpenFullSize"] = "Fotoğraf {n} / {count}, büyüt"
         m["emails.pickAThreadToRead"] = "Okumak için bir yazışma seç."
         m["emails.react"] = "Tepki ver"
@@ -3533,8 +3572,12 @@ internal object Catalog {
         m["emails.reply"] = "Cevap yaz"
         m["emails.replyLabel"] = "Cevap"
         m["emails.replyingTo"] = "Yanıt: {name}"
+        m["emails.resolveUnsent"] = "Önce gönderilemeyen e-postayı tekrar gönder ya da iptal et"
+        m["emails.retry"] = "Tekrar gönder"
         m["emails.seeOlder"] = "Öncekileri gör"
         m["emails.seen"] = "Görüldü · {time}"
+        m["emails.sendingStatus"] = "Gönderiliyor"
+        m["emails.serverError"] = "Bizim tarafta bir şeyler ters gitti."
         m["emails.startTheFirstOne"] = "İlkini sen yaz."
         m["emails.subject"] = "Konu"
         m["emails.thatIsEverything"] = "Hepsi bu kadar"
@@ -3544,6 +3587,7 @@ internal object Catalog {
         m["emails.today"] = "Bugün"
         m["emails.trimmed"] = "1024 karaktere kısaltıldı"
         m["emails.unfold"] = "Aç"
+        m["emails.waitPrevious"] = "Önceki e-posta gönderiliyor…"
         m["emails.writeAReply"] = "Cevap yaz"
         m["emails.writeAnEmail"] = "E-posta yaz"
         m["emails.yesterday"] = "Dün"
@@ -3609,6 +3653,9 @@ internal object Catalog {
         m["home.onItsWayArrives"] = "Yolda · varış: {arrives}"
         m["home.onItsWayArrives2"] = "Yolda, varış: {arrives}"
         m["home.oneTap"] = "Tek dokunuş yeter."
+    }
+
+    private fun tr3(m: HashMap<String, String>) {
         m["home.oneTapFriend"] = "Tek dokunuş yeter. {friend} bunu hemen görür, bir saat sonra değil."
         m["home.page"] = "sayfa"
         m["home.pinChanged"] = "Şifre değişti"
@@ -3620,9 +3667,6 @@ internal object Catalog {
         m["home.sProfile"] = "Profil: {nickname}"
         m["home.set"] = "· {age} seçildi"
         m["home.setYourMood"] = "Ruh hâlini seç"
-    }
-
-    private fun tr3(m: HashMap<String, String>) {
         m["home.to"] = "Kime: {nickname}"
         m["home.waiting"] = "{name} dünyasının anahtarını burada görmek istediğin tek kişiye gönder."
         m["home.waitingCreator"] = "{name} dünyasının anahtarını burada görmek istediğin tek kişiye gönder. Kaybettin mi? Yenisini oluştur."
@@ -3762,6 +3806,9 @@ internal object Catalog {
         m["media.removeVideo"] = "Videoyu kaldır"
         m["media.removeVoiceNote"] = "Sesli mesajı kaldır"
         m["media.retake"] = "Yeniden çek"
+    }
+
+    private fun tr4(m: HashMap<String, String>) {
         m["media.scrubBarOf"] = "İlerleme çubuğu, {time} / {total}"
         m["media.snap"] = "Çek"
         m["media.start"] = "● Başlat"
@@ -3773,9 +3820,6 @@ internal object Catalog {
         m["media.uploadFailed"] = "Yüklenemedi. Tekrar dene."
         m["media.uploadTimedOut"] = "Yükleme çok uzun sürdü. Tekrar dene."
         m["media.uploading"] = "Yükleniyor"
-    }
-
-    private fun tr4(m: HashMap<String, String>) {
         m["media.use"] = "Bunu kullan"
         m["media.video"] = "Video"
         m["media.videoExpired"] = "Videonun süresi doldu"
@@ -3915,6 +3959,9 @@ internal object Catalog {
         m["profile.choosePhoto"] = "Fotoğraf seç"
         m["profile.dragToMovePinchOr"] = "Taşımak için sürükle · yakınlaştırmak için iki parmakla aç ya da kaydır"
         m["profile.keepIt"] = "Kalsın"
+    }
+
+    private fun tr5(m: HashMap<String, String>) {
         m["profile.localTime"] = "Yerel saat"
         m["profile.matches"] = "Eşleşenler"
         m["profile.mood"] = "Ruh hâli"
@@ -3926,9 +3973,6 @@ internal object Catalog {
         m["profile.noMoodYet"] = "Henüz ruh hâli yok"
         m["profile.noNameAdded"] = "Ad eklenmedi"
         m["profile.noTimeZoneMatches"] = "“{trim}” ile eşleşen saat dilimi yok."
-    }
-
-    private fun tr5(m: HashMap<String, String>) {
         m["profile.photoNotRemoved"] = "Fotoğrafın kaldırılamadı. Tekrar dene."
         m["profile.photoNotUpdated"] = "Fotoğrafın güncellenemedi. Tekrar dene."
         m["profile.photoPositionDragOrUse"] = "Fotoğrafın yeri: sürükle ya da ok tuşlarını kullan"
@@ -4068,6 +4112,9 @@ internal object Catalog {
         m["stamps.chooseAStamp"] = "Pul seç"
         m["stamps.close"] = "Kapat"
         m["stamps.couldntLoadTheStampsCheck"] = "Pullar yüklenemedi. Bağlantını kontrol et ve tekrar dene."
+    }
+
+    private fun tr6(m: HashMap<String, String>) {
         m["stamps.loadingStamps"] = "Pullar yükleniyor…"
         m["stamps.noStamp"] = "Pulsuz"
         m["stamps.nothingFound"] = "Hiçbir şey bulunamadı"
@@ -4079,9 +4126,6 @@ internal object Catalog {
         m["stamps.stampThemes"] = "Pul temaları"
         m["tabs.discussions"] = "Sohbetler"
         m["tabs.emails"] = "E-postalar"
-    }
-
-    private fun tr6(m: HashMap<String, String>) {
         m["tabs.home"] = "Ana sayfa"
         m["tabs.letters"] = "Mektuplar"
         m["tabs.new"] = "Yeni"
@@ -4201,7 +4245,7 @@ internal object Catalog {
     }
 
     val ru: Map<String, String> by lazy {
-        HashMap<String, String>(2068).apply {
+        HashMap<String, String>(2090).apply {
             ru0(this)
             ru1(this)
             ru2(this)
@@ -4540,6 +4584,7 @@ internal object Catalog {
         m["emails.back"] = "Назад"
         m["emails.backToEmails"] = "К имейлам"
         m["emails.bubbleLabel"] = "{name}, {time}. Enter — действия"
+        m["emails.cancelEmail"] = "Отменить имейл"
         m["emails.cancelReply"] = "Отменить ответ"
         m["emails.closeAttachments"] = "Закрыть вложения"
         m["emails.continueNewEmail"] = "Продолжить новый имейл"
@@ -4577,8 +4622,13 @@ internal object Catalog {
         m["emails.new"] = "Новых: {fresh}"
         m["emails.newEmail"] = "Новый имейл"
         m["emails.newEmailBelow"] = "Новый имейл"
+        m["emails.noAnswer"] = "Сервер не ответил вовремя."
+        m["emails.noConnection"] = "Нет соединения. Проверь интернет и попробуй ещё раз."
         m["emails.noCredits"] = "На сегодня имейлы закончились · обновление в {time}"
         m["emails.noEmailsYet"] = "Имейлов пока нет."
+        m["emails.notSent"] = "Не отправлен"
+        m["emails.notSentOptions"] = "Не отправлен. Действия"
+        m["emails.notSentTitle"] = "Имейл не отправлен"
         m["emails.photoOfOpenFullSize"] = "Фото {n} из {count}, открыть целиком"
         m["emails.pickAThreadToRead"] = "Выбери переписку, чтобы прочитать её здесь."
         m["emails.react"] = "Реакция"
@@ -4588,8 +4638,12 @@ internal object Catalog {
         m["emails.reply"] = "Ответить"
         m["emails.replyLabel"] = "Ответ"
         m["emails.replyingTo"] = "Ответ: {name}"
+        m["emails.resolveUnsent"] = "Сначала отправь ещё раз или отмени неотправленный имейл"
+        m["emails.retry"] = "Отправить ещё раз"
         m["emails.seeOlder"] = "Показать предыдущие"
         m["emails.seen"] = "Просмотрено · {time}"
+        m["emails.sendingStatus"] = "Отправляется"
+        m["emails.serverError"] = "Что-то пошло не так на нашей стороне."
         m["emails.startTheFirstOne"] = "Напиши первый."
         m["emails.subject"] = "Тема"
         m["emails.thatIsEverything"] = "Больше ничего нет"
@@ -4599,6 +4653,7 @@ internal object Catalog {
         m["emails.today"] = "Сегодня"
         m["emails.trimmed"] = "Сокращено до 1024 символов"
         m["emails.unfold"] = "Развернуть"
+        m["emails.waitPrevious"] = "Отправляется предыдущий имейл…"
         m["emails.writeAReply"] = "Написать ответ"
         m["emails.writeAnEmail"] = "Написать имейл"
         m["emails.yesterday"] = "Вчера"
@@ -4658,6 +4713,9 @@ internal object Catalog {
         m["home.no"] = "Нет"
         m["home.noMoodYet"] = "Настроения пока нет"
         m["home.notSavedTryAgain"] = "Не удалось сохранить. Попробуй ещё раз."
+    }
+
+    private fun ru3(m: HashMap<String, String>) {
         m["home.nothingInThePostYet"] = "В почте пока пусто"
         m["home.ofDeleteOneToAdd"] = "{limit} из {limit} — удали одно, чтобы добавить новое"
         m["home.ofDigits"] = "{label}: {count} из {pinlength}"
@@ -4669,9 +4727,6 @@ internal object Catalog {
         m["home.pinChanged"] = "PIN-код изменён"
         m["home.pinStep.confirm"] = "Повтори новый PIN-код"
         m["home.pinStep.current"] = "Текущий PIN-код"
-    }
-
-    private fun ru3(m: HashMap<String, String>) {
         m["home.pinStep.new"] = "Новый PIN-код"
         m["home.previousMoods"] = "Предыдущие настроения"
         m["home.readAt"] = "Прочитано · {time}"
@@ -4811,6 +4866,9 @@ internal object Catalog {
         m["media.photoTooLarge"] = "Это фото больше 10 МБ"
         m["media.pickAVideo"] = "Выбрать видео"
         m["media.play"] = "Включить: {label}"
+    }
+
+    private fun ru4(m: HashMap<String, String>) {
         m["media.playVideo"] = "Включить видео"
         m["media.playVoiceNote"] = "Включить голосовое"
         m["media.playbackSpeed"] = "Скорость воспроизведения {speed}"
@@ -4822,9 +4880,6 @@ internal object Catalog {
         m["media.recordAVoiceNote"] = "Записать голосовое"
         m["media.removeDoodle"] = "Убрать рисунок"
         m["media.removePhoto"] = "Убрать фото {n}"
-    }
-
-    private fun ru4(m: HashMap<String, String>) {
         m["media.removeVideo"] = "Убрать видео"
         m["media.removeVoiceNote"] = "Убрать голосовое"
         m["media.retake"] = "Переснять"
@@ -4964,6 +5019,9 @@ internal object Catalog {
         m["plan.perMessage"] = "{n} в сообщении · {daily} в день"
         m["plan.photos"] = "Фото"
         m["plan.premium"] = "Премиум"
+    }
+
+    private fun ru5(m: HashMap<String, String>) {
         m["plan.renews"] = "Обновление в {time}"
         m["plan.title"] = "Тариф"
         m["plan.today"] = "Сегодня"
@@ -4975,9 +5033,6 @@ internal object Catalog {
         m["profile.back"] = "Назад"
         m["profile.cancel"] = "Отмена"
         m["profile.changePhoto"] = "Сменить фото"
-    }
-
-    private fun ru5(m: HashMap<String, String>) {
         m["profile.choosePhoto"] = "Выбрать фото"
         m["profile.dragToMovePinchOr"] = "Перетащи, чтобы сдвинуть · сведи пальцы или потяни ползунок, чтобы приблизить"
         m["profile.keepIt"] = "Оставить"
@@ -5117,6 +5172,9 @@ internal object Catalog {
         m["settings.theme.dark"] = "Ночь"
         m["settings.theme.darkSub"] = "Сумеречная бумага, кремовые чернила"
         m["settings.theme.light"] = "День"
+    }
+
+    private fun ru6(m: HashMap<String, String>) {
         m["settings.theme.lightSub"] = "Бумага и тёмно-синие чернила"
         m["settings.theme.match"] = "Как на устройстве"
         m["settings.theme.matchSub"] = "Следует за телефоном или компьютером"
@@ -5128,9 +5186,6 @@ internal object Catalog {
         m["settings.universe"] = "Ваш мир"
         m["settings.universeSaved"] = "Мир сохранён"
         m["settings.viewProfile"] = "Открыть профиль"
-    }
-
-    private fun ru6(m: HashMap<String, String>) {
         m["settings.welcomeMessage"] = "Приветствие"
         m["settings.you"] = "Я"
         m["settings.yourFriend"] = "собеседник"

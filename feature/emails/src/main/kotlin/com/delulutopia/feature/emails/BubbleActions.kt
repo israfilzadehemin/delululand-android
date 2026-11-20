@@ -53,14 +53,18 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.paneTitle
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.IntSize
@@ -71,6 +75,8 @@ import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupPositionProvider
 import androidx.compose.ui.window.PopupProperties
 import com.delulutopia.core.designsystem.component.DlBottomSheet
+import com.delulutopia.core.designsystem.component.DlFilledButton
+import com.delulutopia.core.designsystem.component.DlOutlinedButton
 import com.delulutopia.core.designsystem.icon.DlIcons
 import com.delulutopia.core.designsystem.icon.WebIcons
 import com.delulutopia.core.designsystem.motion.motionOn
@@ -159,9 +165,36 @@ fun TextWithTime(text: @Composable ((TextLayoutResult) -> Unit) -> Unit, time: @
     }
 }
 
-/** BA1: the time, small and quiet; on media a white chip. */
+/** BA1: the time, small and quiet; on media a white chip. OS3/OS4: a clock while sending, "Not sent" in red. */
 @Composable
-fun BubbleTime(label: String, modifier: Modifier = Modifier, onMedia: Boolean = false) {
+fun BubbleTime(label: String, modifier: Modifier = Modifier, onMedia: Boolean = false, pending: EmailOutbox.Status? = null) {
+    if (pending == EmailOutbox.Status.Sending) {
+        val sending = t("emails.sendingStatus")
+        Icon(
+            WebIcons.ClockSmall,
+            null,
+            modifier
+                .then(if (onMedia) mediaChip(Color(0x94141620), vertical = 2.dp) else Modifier)
+                .size(if (onMedia) 24.dp else 12.dp)
+                .semantics {
+                    contentDescription = sending
+                    liveRegion = LiveRegionMode.Polite
+                },
+            tint = if (onMedia) Color.White else MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        return
+    }
+    if (pending == EmailOutbox.Status.Failed) {
+        Text(
+            t("emails.notSent"),
+            modifier
+                .then(if (onMedia) mediaChip(MaterialTheme.colorScheme.errorContainer, vertical = 1.dp) else Modifier)
+                .semantics { liveRegion = LiveRegionMode.Polite },
+            style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp, lineHeight = 14.sp, fontWeight = FontWeight.SemiBold),
+            color = MaterialTheme.colorScheme.error,
+        )
+        return
+    }
     if (onMedia) {
         Text(
             label,
@@ -181,6 +214,13 @@ fun BubbleTime(label: String, modifier: Modifier = Modifier, onMedia: Boolean = 
         )
     }
 }
+
+/** The time chip's shape on photos and videos. */
+private fun mediaChip(fill: Color, vertical: Dp): Modifier =
+    Modifier
+        .clip(RoundedCornerShape(8.dp))
+        .background(fill)
+        .padding(horizontal = 6.dp, vertical = vertical)
 
 /** BA2: the ↩ disc on the bubble's free side: a 28 dp face in a 44 dp target. */
 @Composable
@@ -203,6 +243,51 @@ fun ReplyDisc(onReply: () -> Unit, modifier: Modifier = Modifier) {
             contentAlignment = Alignment.Center,
         ) {
             Icon(WebIcons.Reply, null, Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+    }
+}
+
+/** OS4: the red ⚠ disc where ↩ goes, opening the Not sent sheet. Always visible. */
+@Composable
+fun UnsentDisc(onClick: () -> Unit, modifier: Modifier = Modifier) {
+    val label = t("emails.notSentOptions")
+    Box(
+        modifier
+            .size(44.dp)
+            .clip(CircleShape)
+            .clickable(role = Role.Button, onClick = onClick)
+            .semantics { contentDescription = label },
+        contentAlignment = Alignment.Center,
+    ) {
+        Box(
+            Modifier
+                .size(28.dp)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.errorContainer)
+                .border(1.dp, MaterialTheme.colorScheme.error.copy(alpha = 0.5f), CircleShape),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(WebIcons.Alert, null, Modifier.size(16.dp), tint = MaterialTheme.colorScheme.error)
+        }
+    }
+}
+
+/** OS5: why it failed, Retry (only when it can help) and Cancel. */
+@Composable
+fun UnsentSheet(fail: EmailOutbox.Fail, reason: String, onRetry: () -> Unit, onCancel: () -> Unit, onDismiss: () -> Unit) {
+    DlBottomSheet(onDismissRequest = onDismiss) {
+        Column(Modifier.padding(start = 20.dp, end = 20.dp, bottom = 16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                Icon(WebIcons.Alert, null, Modifier.size(22.dp), tint = MaterialTheme.colorScheme.error)
+                Text(
+                    t("emails.notSentTitle"),
+                    Modifier.semantics { heading() },
+                    style = DlTheme.type.noteTitle.copy(fontSize = 19.sp, fontWeight = FontWeight.Bold),
+                )
+            }
+            Text(reason, Modifier.padding(bottom = 8.dp), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            if (fail.retryable) DlFilledButton(t("emails.retry"), onRetry, Modifier.fillMaxWidth())
+            DlOutlinedButton(t("emails.cancelEmail"), onCancel, Modifier.fillMaxWidth(), destructive = true)
         }
     }
 }
