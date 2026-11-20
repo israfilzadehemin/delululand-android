@@ -987,5 +987,17 @@
  "deletion.public.lost": "Потерял ключ или PIN-код? Напиши на {email}, укажи название мира и имя пользователя; удалим в течение 30 дней.",
  "deletion.public.title": "Удалить аккаунт Delulutopia",
  "deletion.questions": "Вопросы: {email}",
- "letters.toFormer": "→ Бывшему жителю"
+ "letters.toFormer": "→ Бывшему жителю",
+ "media.photoExpired": "Срок хранения фото истёк",
+ "media.videoExpired": "Срок хранения видео истёк",
+ "media.doodleExpired": "Срок хранения рисунка истёк",
+ "media.voiceExpired": "Срок хранения голосового истёк · {time}",
+ "retention.kept_one": "Вложения хранятся {n} день",
+ "retention.kept_few": "Вложения хранятся {n} дня",
+ "retention.kept_many": "Вложения хранятся {n} дней",
+ "retention.kept_other": "Вложения хранятся {n} дня",
+ "retention.removed_one": "Вложения удаляются через {n} день после отправки",
+ "retention.removed_few": "Вложения удаляются через {n} дня после отправки",
+ "retention.removed_many": "Вложения удаляются через {n} дней после отправки",
+ "retention.removed_other": "Вложения удаляются через {n} дня после отправки"
 }

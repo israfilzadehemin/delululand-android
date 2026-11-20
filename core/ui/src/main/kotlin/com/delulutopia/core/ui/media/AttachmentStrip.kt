@@ -95,6 +95,8 @@ fun AttachmentStrip(
     contentPadding: PaddingValues = PaddingValues(start = 12.dp, end = 12.dp, top = 14.dp, bottom = 10.dp),
     /** Subscription Tiers CM-1–CM-7: what the plan still allows; null limits nothing here. */
     limits: StripLimits? = null,
+    /** Attachment Retention AR13: which retention the notice under the strip names; null shows none. */
+    retention: RetentionScope? = null,
 ) {
     var capped by remember { mutableStateOf<String?>(null) }
     val photosPicker = rememberLauncherForActivityResult(ActivityResultContracts.PickMultipleVisualMedia()) { uris ->
@@ -205,6 +207,7 @@ fun AttachmentStrip(
                 }
             }
         }
+        retention?.let { RetentionNotice(Retention.days(it)) }
         limits?.blockText?.let { text ->
             // CM-7: error banner above Send.
             Text(

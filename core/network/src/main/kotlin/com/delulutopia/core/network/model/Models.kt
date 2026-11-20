@@ -25,6 +25,8 @@ data class Att(
     val height: Int? = null,
     val durationMs: Long? = null,
     val position: Int = 0,
+    /** Its files are gone (doc "Delululand — Attachment Retention" AR7): the URLs answer 410; show a placeholder. */
+    val expired: Boolean = false,
 )
 
 @Serializable
@@ -214,6 +216,8 @@ data class EmailQuote(
     val text: String? = null,
     val media: ThreadMedia? = null,
     val thumbUrl: String? = null,
+    /** The photo or video it would show has expired (Attachment Retention AR9): the crossed-out icon. */
+    val thumbExpired: Boolean = false,
     val sentAt: String,
 )
 
@@ -460,7 +464,12 @@ data class AppConfig(
     val testTiming: Boolean = false,
     val serverNow: String,
     val vapidPublicKey: String? = null,
+    /** Attachment Retention AR14: days the files of letters / others are kept; absent from an older API. */
+    val retention: RetentionDays? = null,
 )
+
+@Serializable
+data class RetentionDays(val letterDays: Int, val otherDays: Int)
 
 @Serializable
 data class MoodChange(val mood: String, val moodSetAt: String)

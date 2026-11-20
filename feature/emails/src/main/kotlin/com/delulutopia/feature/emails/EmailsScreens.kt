@@ -113,6 +113,9 @@ import com.delulutopia.core.ui.leaves.SurfaceKind
 import com.delulutopia.core.ui.leaves.leafSurface
 import com.delulutopia.core.ui.lightboxSource
 import com.delulutopia.core.ui.media.AudioPlayer
+import com.delulutopia.core.ui.media.ExpiredBlock
+import com.delulutopia.core.ui.media.ExpiredThumb
+import com.delulutopia.core.ui.media.ExpiredVoice
 import com.delulutopia.core.ui.media.VideoPlayer
 import com.delulutopia.core.ui.reactions.noticeLine
 import com.delulutopia.core.ui.reactions.reactionRecents
@@ -929,12 +932,14 @@ private fun BubbleSurface(
     pending: EmailOutbox.Status? = null,
 ) {
     val base = LocalServerBaseUrl.current
-    val photos = e.attachments.filter { it.kind == "photo" }
+    // Attachment Retention AR6: expired files keep their slots; only live photos open in the lightbox.
+    val allPhotos = e.attachments.filter { it.kind == "photo" }
+    val photos = allPhotos.filter { !it.expired }
     val audios = e.attachments.filter { it.kind == "audio" }
     val video = e.attachments.firstOrNull { it.kind == "video" }
     val timeAt = when {
         audios.isNotEmpty() -> TimeAt.Line
-        photos.isNotEmpty() -> TimeAt.Photos
+        allPhotos.isNotEmpty() -> TimeAt.Photos
         video != null -> TimeAt.Video
         e.text.isNotEmpty() -> TimeAt.Text
         else -> TimeAt.Line
@@ -968,14 +973,23 @@ private fun BubbleSurface(
         }
         video?.let { v ->
             Box {
-                VideoPlayer(resolveMedia(base, v.url), v.thumbUrl?.let { resolveMedia(base, it) }, v.durationMs, v.width, v.height)
+                if (v.expired) {
+                    ExpiredBlock("video", Modifier.widthIn(min = 180.dp), minHeight = 110.dp)
+                } else {
+                    VideoPlayer(resolveMedia(base, v.url), v.thumbUrl?.let { resolveMedia(base, it) }, v.durationMs, v.width, v.height)
+                }
                 if (timeAt == TimeAt.Video) BubbleTime(stamp, Modifier.align(Alignment.BottomEnd).padding(5.dp), onMedia = true, pending = pending)
             }
         }
-        if (photos.isNotEmpty()) {
+        if (allPhotos.isNotEmpty()) {
             Box {
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    photos.forEachIndexed { i, p ->
+                    allPhotos.forEach { p ->
+                        if (p.expired) {
+                            ExpiredThumb()
+                            return@forEach
+                        }
+                        val i = photos.indexOf(p)
                         AsyncImage(
                             model = resolveMedia(base, p.thumbUrl ?: p.url),
                             contentDescription = t("emails.photoOfOpenFullSize", "n" to i + 1, "count" to photos.size),
@@ -988,11 +1002,15 @@ private fun BubbleSurface(
             }
         }
         audios.forEachIndexed { i, a ->
-            AudioPlayer(
-                resolveMedia(base, a.url),
-                a.durationMs,
-                label = if (audios.size > 1) t("letters.voiceNoteN", "n" to i + 1) else t("media.voiceNoteLower"),
-            )
+            if (a.expired) {
+                ExpiredVoice(a.durationMs)
+            } else {
+                AudioPlayer(
+                    resolveMedia(base, a.url),
+                    a.durationMs,
+                    label = if (audios.size > 1) t("letters.voiceNoteN", "n" to i + 1) else t("media.voiceNoteLower"),
+                )
+            }
         }
         if (timeAt == TimeAt.Line) BubbleTime(stamp, Modifier.align(Alignment.End).padding(top = 0.dp), pending = pending)
     }

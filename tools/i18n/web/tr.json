@@ -973,5 +973,13 @@
  "deletion.public.lost": "Anahtarını ya da PIN’ini mi kaybettin? Dünyanın adı ve kullanıcı adınla şu adrese yaz: {email}. 30 gün içinde sileriz.",
  "deletion.public.title": "Delulutopia hesabını sil",
  "deletion.questions": "Sorular: {email}",
- "letters.toFormer": "→ Eski bir sakine"
+ "letters.toFormer": "→ Eski bir sakine",
+ "media.photoExpired": "Fotoğrafın süresi doldu",
+ "media.videoExpired": "Videonun süresi doldu",
+ "media.doodleExpired": "Karalamanın süresi doldu",
+ "media.voiceExpired": "Sesli mesajın süresi doldu · {time}",
+ "retention.kept_one": "Ekler {n} gün saklanır",
+ "retention.kept_other": "Ekler {n} gün saklanır",
+ "retention.removed_one": "Ekler gönderildikten {n} gün sonra silinir",
+ "retention.removed_other": "Ekler gönderildikten {n} gün sonra silinir"
 }

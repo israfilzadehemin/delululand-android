@@ -78,6 +78,7 @@ import com.delulutopia.core.network.model.EmailCredits
 import com.delulutopia.core.network.model.EmailQuote
 import com.delulutopia.core.network.model.EmailSent
 import com.delulutopia.core.ui.media.AttachmentStrip
+import com.delulutopia.core.ui.media.RetentionScope
 import com.delulutopia.core.ui.media.Source
 import com.delulutopia.core.ui.media.VIDEO_TOO_LONG
 import com.delulutopia.core.ui.media.VideoAdd
@@ -193,6 +194,7 @@ internal fun DockedComposer(
                 background = Color.Transparent,
                 contentPadding = PaddingValues(horizontal = 4.dp, vertical = 6.dp),
                 limits = limits,
+                retention = RetentionScope.Other,
             )
         }
         if (composer.trimmed) Text(TRIMMED, style = MaterialTheme.typography.bodySmall)

@@ -56,6 +56,8 @@ fun mediaWords(photos: Int, audios: Int, videos: Int): String? = when {
 
 fun emailCountWords(n: Int): String = tn("emails.count", n)
 
+private fun visualOf(e: Email) = e.attachments.firstOrNull { (it.kind == "photo" || it.kind == "video") && it.thumbUrl != null }
+
 /** The quote of an email already on screen, built the way the server builds `replyTo` (Email Replies RE11). */
 fun quoteOf(e: Email): EmailQuote {
     val photos = e.attachments.count { it.kind == "photo" }
@@ -68,7 +70,8 @@ fun quoteOf(e: Email): EmailQuote {
         senderId = e.senderId,
         text = text,
         media = ThreadMedia(photos, audios, videos),
-        thumbUrl = e.attachments.firstOrNull { (it.kind == "photo" || it.kind == "video") && it.thumbUrl != null }?.thumbUrl,
+        thumbUrl = visualOf(e)?.takeUnless { it.expired }?.thumbUrl,
+        thumbExpired = visualOf(e)?.expired == true,
         sentAt = e.sentAt,
     )
 }

@@ -41,6 +41,7 @@ import com.delulutopia.core.designsystem.theme.DlTheme
 import com.delulutopia.core.i18n.t
 import com.delulutopia.core.network.model.EmailQuote
 import com.delulutopia.core.ui.Who
+import com.delulutopia.core.ui.media.ExpiredThumb
 import com.delulutopia.core.ui.whoOf
 
 /**
@@ -143,6 +144,10 @@ private fun QuoteLines(quote: EmailQuote, heading: String, colours: QuoteColours
 
 @Composable
 private fun QuoteThumb(quote: EmailQuote, modifier: Modifier) {
+    if (quote.thumbExpired) {
+        ExpiredThumb(size = 36.dp, modifier = modifier)
+        return
+    }
     val thumb = quote.thumbUrl ?: return
     val base = LocalServerBaseUrl.current
     AsyncImage(

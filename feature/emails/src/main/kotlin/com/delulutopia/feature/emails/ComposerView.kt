@@ -47,6 +47,7 @@ import com.delulutopia.core.network.Uploader
 import com.delulutopia.core.network.model.EmailCredits
 import com.delulutopia.core.network.model.EmailSent
 import com.delulutopia.core.ui.media.AttachmentStrip
+import com.delulutopia.core.ui.media.RetentionScope
 import com.delulutopia.core.ui.media.Source
 import com.delulutopia.core.ui.media.VIDEO_TOO_LONG
 import com.delulutopia.core.ui.media.VideoAdd
@@ -155,6 +156,7 @@ internal fun ComposerView(composer: EmailComposer, credits: EmailCredits?, onSen
             background = Color.Transparent,
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
             limits = limits,
+            retention = RetentionScope.Other,
         )
         videoError?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error) }
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {

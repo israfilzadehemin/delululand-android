@@ -5,7 +5,7 @@ package com.delulutopia.core.i18n
 
 internal object Catalog {
     val en: Map<String, String> by lazy {
-        HashMap<String, String>(2038).apply {
+        HashMap<String, String>(2054).apply {
             en0(this)
             en1(this)
             en2(this)
@@ -596,6 +596,7 @@ internal object Catalog {
         m["media.dismiss"] = "Dismiss"
         m["media.doodle"] = "Doodle"
         m["media.doodleAttached"] = "Doodle attached · one per letter"
+        m["media.doodleExpired"] = "Doodle expired"
         m["media.doodleTooLarge"] = "This doodle is larger than 2 MB"
         m["media.drawADoodle"] = "Draw a doodle"
         m["media.flip"] = "Flip"
@@ -606,6 +607,7 @@ internal object Catalog {
         m["media.oneDoodlePerLetter"] = "One doodle per letter"
         m["media.pause"] = "Pause {label}"
         m["media.pauseVoiceNote"] = "Pause voice note"
+        m["media.photoExpired"] = "Photo expired"
         m["media.photoOf"] = "Photo {n} of {of}"
         m["media.photoTooLarge"] = "This photo is larger than 10 MB"
         m["media.pickAVideo"] = "Pick a video"
@@ -624,11 +626,11 @@ internal object Catalog {
         m["media.removeVideo"] = "Remove video"
         m["media.removeVoiceNote"] = "Remove voice note"
         m["media.retake"] = "Retake"
-        m["media.scrubBarOf"] = "Scrub bar, {time} of {total}"
-        m["media.snap"] = "Snap"
     }
 
     private fun en4(m: HashMap<String, String>) {
+        m["media.scrubBarOf"] = "Scrub bar, {time} of {total}"
+        m["media.snap"] = "Snap"
         m["media.start"] = "● Start"
         m["media.startRecording"] = "Start recording"
         m["media.stop"] = "Stop"
@@ -640,9 +642,11 @@ internal object Catalog {
         m["media.uploading"] = "Uploading"
         m["media.use"] = "Use"
         m["media.video"] = "Video"
+        m["media.videoExpired"] = "Video expired"
         m["media.videoTooLarge"] = "This video is larger than {mb} MB"
         m["media.videoTooLong"] = "This video is longer than {n} seconds"
         m["media.videoWithLength"] = "Video, {length}"
+        m["media.voiceExpired"] = "Voice note expired · {time}"
         m["media.voiceNoteLower"] = "voice note"
         m["media.yourBrowserAsksOnceFor"] = "Your browser asks once for the microphone."
         m["media.yourPhoneAsksOnce"] = "Your phone asks once for the microphone."
@@ -775,13 +779,13 @@ internal object Catalog {
         m["profile.choosePhoto"] = "Choose photo"
         m["profile.dragToMovePinchOr"] = "Drag to move · pinch or slide to zoom"
         m["profile.keepIt"] = "Keep it"
+    }
+
+    private fun en5(m: HashMap<String, String>) {
         m["profile.localTime"] = "Local time"
         m["profile.matches"] = "Matches"
         m["profile.mood"] = "Mood"
         m["profile.moodSince"] = "{mood} · {age}"
-    }
-
-    private fun en5(m: HashMap<String, String>) {
         m["profile.moveAndZoom"] = "Move and zoom"
         m["profile.name"] = "Name"
         m["profile.nameRule"] = "Letters, spaces, - and ’ only"
@@ -834,6 +838,10 @@ internal object Catalog {
         m["reactions.reactWithAnyEmoji"] = "React with any emoji"
         m["reactions.reactions"] = "Reactions"
         m["reactions.reactions2"] = "Reactions: {join}"
+        m["retention.kept_one"] = "Attachments are kept for {n} day"
+        m["retention.kept_other"] = "Attachments are kept for {n} days"
+        m["retention.removed_one"] = "Attachments are removed {n} day after sending"
+        m["retention.removed_other"] = "Attachments are removed {n} days after sending"
         m["settings.about"] = "About"
         m["settings.account"] = "Account"
         m["settings.allow"] = "Allow"
@@ -924,6 +932,9 @@ internal object Catalog {
         m["stamps.chooseAStamp"] = "Choose a stamp"
         m["stamps.close"] = "Close"
         m["stamps.couldntLoadTheStampsCheck"] = "Couldn't load the stamps. Check your connection and try again."
+    }
+
+    private fun en6(m: HashMap<String, String>) {
         m["stamps.loadingStamps"] = "Loading stamps…"
         m["stamps.noStamp"] = "No stamp"
         m["stamps.nothingFound"] = "Nothing found"
@@ -932,9 +943,6 @@ internal object Catalog {
         m["stamps.searchStampsByNameOr"] = "Search stamps by name or keyword"
         m["stamps.stamp"] = "Stamp: {name}"
         m["stamps.stampChangeIt"] = "Stamp: {name}. Change it"
-    }
-
-    private fun en6(m: HashMap<String, String>) {
         m["stamps.stampThemes"] = "Stamp themes"
         m["tabs.discussions"] = "Discussions"
         m["tabs.emails"] = "Emails"
@@ -1057,7 +1065,7 @@ internal object Catalog {
     }
 
     val az: Map<String, String> by lazy {
-        HashMap<String, String>(2038).apply {
+        HashMap<String, String>(2054).apply {
             az0(this)
             az1(this)
             az2(this)
@@ -1648,6 +1656,7 @@ internal object Catalog {
         m["media.dismiss"] = "Bağla"
         m["media.doodle"] = "Cızma-qara"
         m["media.doodleAttached"] = "Cızma-qara əlavə olundu · hər məktuba bir dənə"
+        m["media.doodleExpired"] = "Cızma-qaranın vaxtı bitib"
         m["media.doodleTooLarge"] = "Bu cızma-qara 2 MB-dan böyükdür"
         m["media.drawADoodle"] = "Cızma-qara çək"
         m["media.flip"] = "Çevir"
@@ -1658,6 +1667,7 @@ internal object Catalog {
         m["media.oneDoodlePerLetter"] = "Hər məktuba bir cızma-qara"
         m["media.pause"] = "Dayandır: {label}"
         m["media.pauseVoiceNote"] = "Səsli mesajı dayandır"
+        m["media.photoExpired"] = "Fotonun vaxtı bitib"
         m["media.photoOf"] = "Foto {n} / {of}"
         m["media.photoTooLarge"] = "Bu foto 10 MB-dan böyükdür"
         m["media.pickAVideo"] = "Video seç"
@@ -1676,11 +1686,11 @@ internal object Catalog {
         m["media.removeVideo"] = "Videonu çıxar"
         m["media.removeVoiceNote"] = "Səsli mesajı çıxar"
         m["media.retake"] = "Yenidən çək"
-        m["media.scrubBarOf"] = "İrəli-geri çək, {time} / {total}"
-        m["media.snap"] = "Çək"
     }
 
     private fun az4(m: HashMap<String, String>) {
+        m["media.scrubBarOf"] = "İrəli-geri çək, {time} / {total}"
+        m["media.snap"] = "Çək"
         m["media.start"] = "● Başla"
         m["media.startRecording"] = "Yazmağa başla"
         m["media.stop"] = "Dayan"
@@ -1692,9 +1702,11 @@ internal object Catalog {
         m["media.uploading"] = "Yüklənir"
         m["media.use"] = "Bunu götür"
         m["media.video"] = "Video"
+        m["media.videoExpired"] = "Videonun vaxtı bitib"
         m["media.videoTooLarge"] = "Bu video {mb} MB-dan böyükdür"
         m["media.videoTooLong"] = "Bu video {n} saniyədən uzundur"
         m["media.videoWithLength"] = "Video, {length}"
+        m["media.voiceExpired"] = "Səsli mesajın vaxtı bitib · {time}"
         m["media.voiceNoteLower"] = "səsli mesaj"
         m["media.yourBrowserAsksOnceFor"] = "Brauzerin mikrofon üçün bir dəfə icazə istəyəcək."
         m["media.yourPhoneAsksOnce"] = "Telefonun mikrofon üçün bir dəfə icazə istəyəcək."
@@ -1827,13 +1839,13 @@ internal object Catalog {
         m["profile.choosePhoto"] = "Foto seç"
         m["profile.dragToMovePinchOr"] = "Yerini dəyişmək üçün sürüşdür · böyütmək üçün iki barmaqla aç və ya sürgünü çək"
         m["profile.keepIt"] = "Qalsın"
+    }
+
+    private fun az5(m: HashMap<String, String>) {
         m["profile.localTime"] = "Yerli vaxt"
         m["profile.matches"] = "Uyğun gələnlər"
         m["profile.mood"] = "Əhval"
         m["profile.moodSince"] = "{mood} · {age}"
-    }
-
-    private fun az5(m: HashMap<String, String>) {
         m["profile.moveAndZoom"] = "Yerini və ölçüsünü tənzimlə"
         m["profile.name"] = "Ad"
         m["profile.nameRule"] = "Yalnız hərf, boşluq, - və ’"
@@ -1886,6 +1898,10 @@ internal object Catalog {
         m["reactions.reactWithAnyEmoji"] = "İstənilən emoji ilə reaksiya ver"
         m["reactions.reactions"] = "Reaksiyalar"
         m["reactions.reactions2"] = "Reaksiyalar: {join}"
+        m["retention.kept_one"] = "Əlavələr {n} gün saxlanır"
+        m["retention.kept_other"] = "Əlavələr {n} gün saxlanır"
+        m["retention.removed_one"] = "Əlavələr göndəriləndən {n} gün sonra silinir"
+        m["retention.removed_other"] = "Əlavələr göndəriləndən {n} gün sonra silinir"
         m["settings.about"] = "Haqqında"
         m["settings.account"] = "Hesab"
         m["settings.allow"] = "İcazə ver"
@@ -1976,6 +1992,9 @@ internal object Catalog {
         m["stamps.chooseAStamp"] = "Marka seç"
         m["stamps.close"] = "Bağla"
         m["stamps.couldntLoadTheStampsCheck"] = "Markalar yüklənmədi. İnternetə bax və bir də yoxla."
+    }
+
+    private fun az6(m: HashMap<String, String>) {
         m["stamps.loadingStamps"] = "Markalar yüklənir…"
         m["stamps.noStamp"] = "Markasız"
         m["stamps.nothingFound"] = "Heç nə tapılmadı"
@@ -1984,9 +2003,6 @@ internal object Catalog {
         m["stamps.searchStampsByNameOr"] = "Markanı adına və ya açar sözə görə axtar"
         m["stamps.stamp"] = "Marka: {name}"
         m["stamps.stampChangeIt"] = "Marka: {name}. Dəyiş"
-    }
-
-    private fun az6(m: HashMap<String, String>) {
         m["stamps.stampThemes"] = "Marka mövzuları"
         m["tabs.discussions"] = "Müzakirələr"
         m["tabs.emails"] = "E-məktublar"
@@ -2109,7 +2125,7 @@ internal object Catalog {
     }
 
     val fa: Map<String, String> by lazy {
-        HashMap<String, String>(2038).apply {
+        HashMap<String, String>(2054).apply {
             fa0(this)
             fa1(this)
             fa2(this)
@@ -2700,6 +2716,7 @@ internal object Catalog {
         m["media.dismiss"] = "باشه"
         m["media.doodle"] = "خط‌خطی"
         m["media.doodleAttached"] = "خط‌خطی اضافه شد · برای هر نامه یکی"
+        m["media.doodleExpired"] = "خط‌خطی منقضی شده"
         m["media.doodleTooLarge"] = "این خط‌خطی از ۲ مگابایت بزرگ‌تره"
         m["media.drawADoodle"] = "یه خط‌خطی بکش"
         m["media.flip"] = "برگردون"
@@ -2710,6 +2727,7 @@ internal object Catalog {
         m["media.oneDoodlePerLetter"] = "برای هر نامه یه خط‌خطی"
         m["media.pause"] = "توقف {label}"
         m["media.pauseVoiceNote"] = "توقف پیام صوتی"
+        m["media.photoExpired"] = "عکس منقضی شده"
         m["media.photoOf"] = "عکس {n} از {of}"
         m["media.photoTooLarge"] = "این عکس از ۱۰ مگابایت بزرگ‌تره"
         m["media.pickAVideo"] = "یه ویدیو انتخاب کن"
@@ -2728,11 +2746,11 @@ internal object Catalog {
         m["media.removeVideo"] = "ویدیو رو بردار"
         m["media.removeVoiceNote"] = "پیام صوتی رو بردار"
         m["media.retake"] = "دوباره بگیر"
-        m["media.scrubBarOf"] = "نوار جلو و عقب، {time} از {total}"
-        m["media.snap"] = "بگیر"
     }
 
     private fun fa4(m: HashMap<String, String>) {
+        m["media.scrubBarOf"] = "نوار جلو و عقب، {time} از {total}"
+        m["media.snap"] = "بگیر"
         m["media.start"] = "● شروع"
         m["media.startRecording"] = "شروع ضبط"
         m["media.stop"] = "توقف"
@@ -2744,9 +2762,11 @@ internal object Catalog {
         m["media.uploading"] = "در حال آپلود"
         m["media.use"] = "همینو بذار"
         m["media.video"] = "ویدیو"
+        m["media.videoExpired"] = "ویدیو منقضی شده"
         m["media.videoTooLarge"] = "این ویدیو از {mb} مگابایت بزرگ‌تره"
         m["media.videoTooLong"] = "این ویدیو از {n} ثانیه بلندتره"
         m["media.videoWithLength"] = "ویدیو، {length}"
+        m["media.voiceExpired"] = "پیام صوتی منقضی شده · {time}"
         m["media.voiceNoteLower"] = "پیام صوتی"
         m["media.yourBrowserAsksOnceFor"] = "مرورگرت یه بار برای میکروفون اجازه می‌گیره."
         m["media.yourPhoneAsksOnce"] = "گوشیت یه بار برای میکروفون اجازه می‌گیره."
@@ -2879,13 +2899,13 @@ internal object Catalog {
         m["profile.choosePhoto"] = "انتخاب عکس"
         m["profile.dragToMovePinchOr"] = "بکش تا جابه‌جا بشه · برای بزرگ‌نمایی دو انگشتی باز کن یا اسلایدر رو بکش"
         m["profile.keepIt"] = "بمونه"
+    }
+
+    private fun fa5(m: HashMap<String, String>) {
         m["profile.localTime"] = "ساعت محلی"
         m["profile.matches"] = "نتیجه‌ها"
         m["profile.mood"] = "حال‌وهوا"
         m["profile.moodSince"] = "{mood} · {age}"
-    }
-
-    private fun fa5(m: HashMap<String, String>) {
         m["profile.moveAndZoom"] = "جابه‌جا و بزرگ‌نمایی"
         m["profile.name"] = "اسم"
         m["profile.nameRule"] = "فقط حرف، فاصله، - و ’"
@@ -2938,6 +2958,10 @@ internal object Catalog {
         m["reactions.reactWithAnyEmoji"] = "با هر ایموجی‌ای واکنش بده"
         m["reactions.reactions"] = "واکنش‌ها"
         m["reactions.reactions2"] = "واکنش‌ها: {join}"
+        m["retention.kept_one"] = "پیوست‌ها {n} روز نگه داشته می‌شن"
+        m["retention.kept_other"] = "پیوست‌ها {n} روز نگه داشته می‌شن"
+        m["retention.removed_one"] = "پیوست‌ها {n} روز بعد از فرستادن پاک می‌شن"
+        m["retention.removed_other"] = "پیوست‌ها {n} روز بعد از فرستادن پاک می‌شن"
         m["settings.about"] = "درباره"
         m["settings.account"] = "حساب"
         m["settings.allow"] = "اجازه بده"
@@ -3028,6 +3052,9 @@ internal object Catalog {
         m["stamps.chooseAStamp"] = "یه تمبر انتخاب کن"
         m["stamps.close"] = "بستن"
         m["stamps.couldntLoadTheStampsCheck"] = "تمبرها نیومدن. اینترنتت رو چک کن و دوباره امتحان کن."
+    }
+
+    private fun fa6(m: HashMap<String, String>) {
         m["stamps.loadingStamps"] = "تمبرها دارن میان…"
         m["stamps.noStamp"] = "بدون تمبر"
         m["stamps.nothingFound"] = "چیزی پیدا نشد"
@@ -3036,9 +3063,6 @@ internal object Catalog {
         m["stamps.searchStampsByNameOr"] = "تمبرها رو با اسم یا کلیدواژه پیدا کن"
         m["stamps.stamp"] = "تمبر: {name}"
         m["stamps.stampChangeIt"] = "تمبر: {name}. عوضش کن"
-    }
-
-    private fun fa6(m: HashMap<String, String>) {
         m["stamps.stampThemes"] = "دسته‌های تمبر"
         m["tabs.discussions"] = "گفت‌وگوها"
         m["tabs.emails"] = "ایمیل‌ها"
@@ -3161,7 +3185,7 @@ internal object Catalog {
     }
 
     val tr: Map<String, String> by lazy {
-        HashMap<String, String>(2038).apply {
+        HashMap<String, String>(2054).apply {
             tr0(this)
             tr1(this)
             tr2(this)
@@ -3752,6 +3776,7 @@ internal object Catalog {
         m["media.dismiss"] = "Kapat"
         m["media.doodle"] = "Karalama"
         m["media.doodleAttached"] = "Karalama eklendi · her mektuba bir tane"
+        m["media.doodleExpired"] = "Karalamanın süresi doldu"
         m["media.doodleTooLarge"] = "Bu karalama 2 MB sınırını aşıyor"
         m["media.drawADoodle"] = "Karalama çiz"
         m["media.flip"] = "Çevir"
@@ -3762,6 +3787,7 @@ internal object Catalog {
         m["media.oneDoodlePerLetter"] = "Her mektuba bir karalama"
         m["media.pause"] = "Duraklat: {label}"
         m["media.pauseVoiceNote"] = "Sesli mesajı duraklat"
+        m["media.photoExpired"] = "Fotoğrafın süresi doldu"
         m["media.photoOf"] = "Fotoğraf {n} / {of}"
         m["media.photoTooLarge"] = "Bu fotoğraf 10 MB sınırını aşıyor"
         m["media.pickAVideo"] = "Video seç"
@@ -3780,11 +3806,11 @@ internal object Catalog {
         m["media.removeVideo"] = "Videoyu kaldır"
         m["media.removeVoiceNote"] = "Sesli mesajı kaldır"
         m["media.retake"] = "Yeniden çek"
-        m["media.scrubBarOf"] = "İlerleme çubuğu, {time} / {total}"
-        m["media.snap"] = "Çek"
     }
 
     private fun tr4(m: HashMap<String, String>) {
+        m["media.scrubBarOf"] = "İlerleme çubuğu, {time} / {total}"
+        m["media.snap"] = "Çek"
         m["media.start"] = "● Başlat"
         m["media.startRecording"] = "Kayda başla"
         m["media.stop"] = "Durdur"
@@ -3796,9 +3822,11 @@ internal object Catalog {
         m["media.uploading"] = "Yükleniyor"
         m["media.use"] = "Bunu kullan"
         m["media.video"] = "Video"
+        m["media.videoExpired"] = "Videonun süresi doldu"
         m["media.videoTooLarge"] = "Bu video {mb} MB sınırını aşıyor"
         m["media.videoTooLong"] = "Bu video {n} saniyeden uzun"
         m["media.videoWithLength"] = "Video, {length}"
+        m["media.voiceExpired"] = "Sesli mesajın süresi doldu · {time}"
         m["media.voiceNoteLower"] = "sesli mesaj"
         m["media.yourBrowserAsksOnceFor"] = "Tarayıcın mikrofon için bir kez izin isteyecek."
         m["media.yourPhoneAsksOnce"] = "Telefonun mikrofon için bir kez izin isteyecek."
@@ -3931,13 +3959,13 @@ internal object Catalog {
         m["profile.choosePhoto"] = "Fotoğraf seç"
         m["profile.dragToMovePinchOr"] = "Taşımak için sürükle · yakınlaştırmak için iki parmakla aç ya da kaydır"
         m["profile.keepIt"] = "Kalsın"
+    }
+
+    private fun tr5(m: HashMap<String, String>) {
         m["profile.localTime"] = "Yerel saat"
         m["profile.matches"] = "Eşleşenler"
         m["profile.mood"] = "Ruh hâli"
         m["profile.moodSince"] = "{mood} · {age}"
-    }
-
-    private fun tr5(m: HashMap<String, String>) {
         m["profile.moveAndZoom"] = "Taşı ve yakınlaştır"
         m["profile.name"] = "Ad"
         m["profile.nameRule"] = "Yalnızca harf, boşluk, - ve ’"
@@ -3990,6 +4018,10 @@ internal object Catalog {
         m["reactions.reactWithAnyEmoji"] = "İstediğin emojiyle tepki ver"
         m["reactions.reactions"] = "Tepkiler"
         m["reactions.reactions2"] = "Tepkiler: {join}"
+        m["retention.kept_one"] = "Ekler {n} gün saklanır"
+        m["retention.kept_other"] = "Ekler {n} gün saklanır"
+        m["retention.removed_one"] = "Ekler gönderildikten {n} gün sonra silinir"
+        m["retention.removed_other"] = "Ekler gönderildikten {n} gün sonra silinir"
         m["settings.about"] = "Hakkında"
         m["settings.account"] = "Hesap"
         m["settings.allow"] = "İzin ver"
@@ -4080,6 +4112,9 @@ internal object Catalog {
         m["stamps.chooseAStamp"] = "Pul seç"
         m["stamps.close"] = "Kapat"
         m["stamps.couldntLoadTheStampsCheck"] = "Pullar yüklenemedi. Bağlantını kontrol et ve tekrar dene."
+    }
+
+    private fun tr6(m: HashMap<String, String>) {
         m["stamps.loadingStamps"] = "Pullar yükleniyor…"
         m["stamps.noStamp"] = "Pulsuz"
         m["stamps.nothingFound"] = "Hiçbir şey bulunamadı"
@@ -4088,9 +4123,6 @@ internal object Catalog {
         m["stamps.searchStampsByNameOr"] = "Pulları ada ya da anahtar kelimeye göre ara"
         m["stamps.stamp"] = "Pul: {name}"
         m["stamps.stampChangeIt"] = "Pul: {name}. Değiştir"
-    }
-
-    private fun tr6(m: HashMap<String, String>) {
         m["stamps.stampThemes"] = "Pul temaları"
         m["tabs.discussions"] = "Sohbetler"
         m["tabs.emails"] = "E-postalar"
@@ -4213,7 +4245,7 @@ internal object Catalog {
     }
 
     val ru: Map<String, String> by lazy {
-        HashMap<String, String>(2066).apply {
+        HashMap<String, String>(2090).apply {
             ru0(this)
             ru1(this)
             ru2(this)
@@ -4818,6 +4850,7 @@ internal object Catalog {
         m["media.dismiss"] = "Закрыть"
         m["media.doodle"] = "Рисунок"
         m["media.doodleAttached"] = "Рисунок прикреплён · один на письмо"
+        m["media.doodleExpired"] = "Срок хранения рисунка истёк"
         m["media.doodleTooLarge"] = "Этот рисунок больше 2 МБ"
         m["media.drawADoodle"] = "Нарисовать"
         m["media.flip"] = "Сменить камеру"
@@ -4828,15 +4861,16 @@ internal object Catalog {
         m["media.oneDoodlePerLetter"] = "Один рисунок на письмо"
         m["media.pause"] = "Пауза: {label}"
         m["media.pauseVoiceNote"] = "Поставить голосовое на паузу"
+        m["media.photoExpired"] = "Срок хранения фото истёк"
         m["media.photoOf"] = "Фото {n} из {of}"
         m["media.photoTooLarge"] = "Это фото больше 10 МБ"
         m["media.pickAVideo"] = "Выбрать видео"
         m["media.play"] = "Включить: {label}"
-        m["media.playVideo"] = "Включить видео"
-        m["media.playVoiceNote"] = "Включить голосовое"
     }
 
     private fun ru4(m: HashMap<String, String>) {
+        m["media.playVideo"] = "Включить видео"
+        m["media.playVoiceNote"] = "Включить голосовое"
         m["media.playbackSpeed"] = "Скорость воспроизведения {speed}"
         m["media.processing"] = "Обработка"
         m["media.progress"] = "{time} / {total}"
@@ -4862,9 +4896,11 @@ internal object Catalog {
         m["media.uploading"] = "Загрузка"
         m["media.use"] = "Использовать"
         m["media.video"] = "Видео"
+        m["media.videoExpired"] = "Срок хранения видео истёк"
         m["media.videoTooLarge"] = "Это видео больше {mb} МБ"
         m["media.videoTooLong"] = "Это видео длиннее {n} секунд"
         m["media.videoWithLength"] = "Видео, {length}"
+        m["media.voiceExpired"] = "Срок хранения голосового истёк · {time}"
         m["media.voiceNoteLower"] = "голосовое"
         m["media.yourBrowserAsksOnceFor"] = "Браузер один раз спросит разрешение на микрофон."
         m["media.yourPhoneAsksOnce"] = "Телефон один раз спросит разрешение на микрофон."
@@ -4983,13 +5019,13 @@ internal object Catalog {
         m["plan.perMessage"] = "{n} в сообщении · {daily} в день"
         m["plan.photos"] = "Фото"
         m["plan.premium"] = "Премиум"
+    }
+
+    private fun ru5(m: HashMap<String, String>) {
         m["plan.renews"] = "Обновление в {time}"
         m["plan.title"] = "Тариф"
         m["plan.today"] = "Сегодня"
         m["plan.unlimited"] = "Без ограничений"
-    }
-
-    private fun ru5(m: HashMap<String, String>) {
         m["plan.videoEach"] = "до {seconds} с · {daily} в день"
         m["plan.videos"] = "Видео"
         m["profile.316LettersOrDigits"] = "3–16 букв или цифр, без пробелов"
@@ -5056,6 +5092,14 @@ internal object Catalog {
         m["reactions.reactWithAnyEmoji"] = "Ответить любым эмодзи"
         m["reactions.reactions"] = "Реакции"
         m["reactions.reactions2"] = "Реакции: {join}"
+        m["retention.kept_few"] = "Вложения хранятся {n} дня"
+        m["retention.kept_many"] = "Вложения хранятся {n} дней"
+        m["retention.kept_one"] = "Вложения хранятся {n} день"
+        m["retention.kept_other"] = "Вложения хранятся {n} дня"
+        m["retention.removed_few"] = "Вложения удаляются через {n} дня после отправки"
+        m["retention.removed_many"] = "Вложения удаляются через {n} дней после отправки"
+        m["retention.removed_one"] = "Вложения удаляются через {n} день после отправки"
+        m["retention.removed_other"] = "Вложения удаляются через {n} дня после отправки"
         m["settings.about"] = "О приложении"
         m["settings.account"] = "Аккаунт"
         m["settings.allow"] = "Разрешить"
@@ -5128,6 +5172,9 @@ internal object Catalog {
         m["settings.theme.dark"] = "Ночь"
         m["settings.theme.darkSub"] = "Сумеречная бумага, кремовые чернила"
         m["settings.theme.light"] = "День"
+    }
+
+    private fun ru6(m: HashMap<String, String>) {
         m["settings.theme.lightSub"] = "Бумага и тёмно-синие чернила"
         m["settings.theme.match"] = "Как на устройстве"
         m["settings.theme.matchSub"] = "Следует за телефоном или компьютером"
@@ -5140,9 +5187,6 @@ internal object Catalog {
         m["settings.universeSaved"] = "Мир сохранён"
         m["settings.viewProfile"] = "Открыть профиль"
         m["settings.welcomeMessage"] = "Приветствие"
-    }
-
-    private fun ru6(m: HashMap<String, String>) {
         m["settings.you"] = "Я"
         m["settings.yourFriend"] = "собеседник"
         m["stamps.addAStamp"] = "Добавить марку"
