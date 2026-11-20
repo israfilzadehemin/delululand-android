@@ -22,7 +22,7 @@ class ApiCaller(private val json: Json, private val events: SessionEvents) {
     } catch (e: CancellationException) {
         throw e
     } catch (e: HttpException) {
-        throw toApiException(e).also { if (it.status == 401 && it.code == "NO_SESSION") events.emitEnded() }
+        throw toApiException(e).also { if (it.status == 401) events.on401(it.code) }
     } catch (e: IOException) {
         throw ApiException(0, ApiException.OFFLINE, t("common.cantReachServer"), cause = e)
     } catch (e: SerializationException) {

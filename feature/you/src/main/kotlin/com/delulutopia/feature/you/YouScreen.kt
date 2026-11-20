@@ -256,6 +256,7 @@ fun YouScreen(themeMode: ThemeMode, onLogout: () -> Unit, vm: YouViewModel = hil
         Card {
             DlListItem(t("settings.logOut"), icon = DlIcons.LogOut, showChevron = false, destructive = true, onClick = { confirmLogout = true })
         }
+        DangerZone(brand)
     }
 
     if (changePin) {

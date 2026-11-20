@@ -13,6 +13,9 @@ import com.delulutopia.core.network.model.DDraft
 import com.delulutopia.core.network.model.DFull
 import com.delulutopia.core.network.model.DPage
 import com.delulutopia.core.network.model.DPosted
+import com.delulutopia.core.network.model.DeleteMeBody
+import com.delulutopia.core.network.model.DeleteUniverseBody
+import com.delulutopia.core.network.model.DeletionPreview
 import com.delulutopia.core.network.model.Draft
 import com.delulutopia.core.network.model.DraftVersion
 import com.delulutopia.core.network.model.DraftVersionBody
@@ -116,6 +119,16 @@ interface DelulutopiaApi {
 
     @POST("api/me/pin")
     suspend fun changePin(@Body body: ChangePinBody)
+
+    // Data deletion (doc "Delululand — Data Deletion" §5.1)
+    @GET("api/me/deletion-preview")
+    suspend fun deletionPreview(): DeletionPreview
+
+    @HTTP(method = "DELETE", path = "api/me", hasBody = true)
+    suspend fun deleteMe(@Body body: DeleteMeBody)
+
+    @HTTP(method = "DELETE", path = "api/universe", hasBody = true)
+    suspend fun deleteUniverse(@Body body: DeleteUniverseBody)
 
     // Universe
     @POST("api/invites/check")

@@ -51,6 +51,7 @@ import com.delulutopia.core.designsystem.motion.LocalPageLanding
 import com.delulutopia.core.designsystem.motion.Motion
 import com.delulutopia.core.designsystem.theme.DelulutopiaTheme
 import com.delulutopia.core.designsystem.theme.isDark
+import com.delulutopia.feature.you.GoodbyeScreen
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -124,6 +125,7 @@ class MainActivity : FragmentActivity() {
                                                 onLogout = viewModel::logout,
                                             )
                                             SessionState.Unreachable -> UnreachableScreen(onRetry = viewModel::refreshSession)
+                                            is SessionState.Gone -> GoodbyeScreen(session.reason, session.brand, onDone = viewModel::leaveGoodbye)
                                             else -> StartApp()
                                         }
                                     }

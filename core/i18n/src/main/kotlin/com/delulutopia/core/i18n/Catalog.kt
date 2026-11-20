@@ -5,7 +5,7 @@ package com.delulutopia.core.i18n
 
 internal object Catalog {
     val en: Map<String, String> by lazy {
-        HashMap<String, String>(1882).apply {
+        HashMap<String, String>(1994).apply {
             en0(this)
             en1(this)
             en2(this)
@@ -140,6 +140,64 @@ internal object Catalog {
         m["common.unreadEmails"] = "Unread emails"
         m["common.unreadLetters"] = "Unread letters"
         m["common.wrongPin"] = "Wrong PIN. Try again."
+        m["deletion.confirmMeTitle"] = "Delete your account?"
+        m["deletion.confirmUniverseTitle"] = "Delete {brand}?"
+        m["deletion.continue"] = "Continue"
+        m["deletion.count.comments"] = "Comments"
+        m["deletion.count.discussions"] = "Discussions"
+        m["deletion.count.doodles"] = "Doodles"
+        m["deletion.count.emails"] = "Emails"
+        m["deletion.count.letters"] = "Letters"
+        m["deletion.count.photos"] = "Photos"
+        m["deletion.count.videos"] = "Videos"
+        m["deletion.count.voice"] = "Voice notes"
+        m["deletion.dangerZone"] = "Danger zone"
+        m["deletion.deleteMyAccount"] = "Delete my account"
+        m["deletion.deleteUniverse"] = "Delete {brand}"
+        m["deletion.done"] = "Done"
+        m["deletion.failed"] = "Couldn’t delete. Nothing was changed. Try again."
+        m["deletion.friendLoses"] = "{friend} will lose their account too."
+        m["deletion.friendNotified"] = "{friend} gets a notification."
+        m["deletion.goodbye.accountText"] = "Everything you wrote in {brand} has been deleted from this device and our server. Thank you for the letters."
+        m["deletion.goodbye.accountTitle"] = "Your account is gone"
+        m["deletion.goodbye.closedText"] = "Its creator deleted it. Your account and everything in it are gone. Nothing is left on this device."
+        m["deletion.goodbye.closedTitle"] = "{brand} was closed"
+        m["deletion.goodbye.deletedText"] = "It was deleted on another device. Nothing is left on this one."
+        m["deletion.goodbye.deletedTitle"] = "This account was deleted"
+        m["deletion.goodbye.universeText"] = "Both accounts and everything in {brand} have been deleted. Thank you for the letters."
+        m["deletion.goodbye.universeTitle"] = "{brand} is gone"
+        m["deletion.keep"] = "Keep my account"
+    }
+
+    private fun en1(m: HashMap<String, String>) {
+        m["deletion.keptMember"] = "{friend} keeps {brand} and what they wrote. We keep only a record that a deletion happened — no names, no content. Backups clear within 30 days."
+        m["deletion.keptOwner"] = "We keep only a record that a deletion happened — no names, no content. Backups clear within 30 days."
+        m["deletion.list.memberRest"] = "your reactions, moods and board drawings"
+        m["deletion.list.profile"] = "your profile, photo and PIN"
+        m["deletion.list.profileAlone"] = "your account, profile and PIN"
+        m["deletion.list.profiles"] = "both accounts, profiles and PINs"
+        m["deletion.list.universeRest"] = "custom moods, the board, the key and the plan"
+        m["deletion.memberText"] = "Deletes your account and everything you wrote in {brand}, for good. {friend} keeps the universe."
+        m["deletion.ok"] = "OK"
+        m["deletion.ownerAloneText"] = "You created {brand}. Deleting it removes your account and everything in it, for good."
+        m["deletion.ownerText"] = "You created {brand}. Deleting it removes both accounts, yours and {friend}’s, and everything in it, for good."
+        m["deletion.pinLine"] = "Deleted on the 6th digit. This can’t be undone."
+        m["deletion.pinTitle"] = "Enter your PIN to delete"
+        m["deletion.privacy"] = "Privacy policy"
+        m["deletion.public.continue"] = "Continue with my key"
+        m["deletion.public.deleted1"] = "Your profile, photo, PIN and settings"
+        m["deletion.public.deleted2"] = "Everything you wrote: letters, emails, discussions, comments, reactions, doodles, photos, voice notes and videos"
+        m["deletion.public.deleted3"] = "If you created the universe: the whole universe, including the other citizen’s account"
+        m["deletion.public.deletedH"] = "What is deleted"
+        m["deletion.public.howTo"] = "Enter your universe’s key and your PIN, then open You › Danger zone at the bottom of the page."
+        m["deletion.public.intro"] = "You can delete your account here without installing the app. You’ll need your universe’s key and your PIN."
+        m["deletion.public.kept"] = "A record that a deletion happened (an internal number, the date and counts — no names, no content) for 3 years. Backups clear within 30 days; server logs within 14 days."
+        m["deletion.public.keptH"] = "What we keep"
+        m["deletion.public.lost"] = "Lost your key or PIN? Write to {email} with your universe’s name and your username; we delete within 30 days."
+        m["deletion.public.title"] = "Delete your Delulutopia account"
+        m["deletion.questions"] = "Questions: {email}"
+        m["deletion.thisDeletes"] = "This deletes, for good:"
+        m["deletion.typeName"] = "Type {brand} to confirm"
         m["discussions.aDiscussionIsOnIts"] = "A discussion is on its way"
         m["discussions.aDiscussionIsOnIts2"] = "A discussion is on its way, arrives {arrives}"
         m["discussions.aNewerVersionWasSaved"] = "A newer version was saved on another device. Load it?"
@@ -167,9 +225,6 @@ internal object Catalog {
         m["discussions.cantReachTryAgain"] = "Can't reach {brand}. Try again."
         m["discussions.color.lavender"] = "Lavender"
         m["discussions.color.lemon"] = "Lemon"
-    }
-
-    private fun en1(m: HashMap<String, String>) {
         m["discussions.color.mint"] = "Mint"
         m["discussions.color.peach"] = "Peach"
         m["discussions.color.pink"] = "Pink"
@@ -265,6 +320,9 @@ internal object Catalog {
         m["doodle.keepDrawing"] = "Keep drawing"
         m["doodle.redo"] = "Redo"
         m["doodle.size.bold"] = "Bold"
+    }
+
+    private fun en2(m: HashMap<String, String>) {
         m["doodle.size.fine"] = "Fine"
         m["doodle.size.medium"] = "Medium"
         m["doodle.undo"] = "Undo"
@@ -320,9 +378,6 @@ internal object Catalog {
         m["emails.seeOlder"] = "See older"
         m["emails.seen"] = "Seen {time}"
         m["emails.startTheFirstOne"] = "Start the first one."
-    }
-
-    private fun en2(m: HashMap<String, String>) {
         m["emails.subject"] = "Subject"
         m["emails.thatIsEverything"] = "That is everything"
         m["emails.thread"] = "Thread"
@@ -418,6 +473,9 @@ internal object Catalog {
         m["home.youUniverse"] = "You › Universe"
         m["home.yourOtherBrowsersStayLogged"] = "Your other browsers stay logged in. Forgot the current one? It can be cleared on the server; there is no e-mail reset."
         m["home.yourOtherDevicesStayLogged"] = "Your other devices stay logged in. Forgot the current one? It can be cleared on the server; there is no e-mail reset."
+    }
+
+    private fun en3(m: HashMap<String, String>) {
         m["letters.arrivesAt"] = "Arrives at {time}"
         m["letters.arrivesIn"] = "Arrives in {countdown}"
         m["letters.back"] = "Back"
@@ -473,15 +531,13 @@ internal object Catalog {
         m["letters.status.sent"] = "Status: sent, not yet delivered"
         m["letters.takeItBack"] = "Take it back?"
         m["letters.theLetterLeavesSHome"] = "The letter leaves {friend}'s Home right away and its text goes back into your draft."
-    }
-
-    private fun en3(m: HashMap<String, String>) {
         m["letters.thisLetterIsntHereAnymore"] = "This letter isn't here anymore."
         m["letters.thisReplacesYourCurrentDraft"] = "This replaces your current draft."
         m["letters.timesArrived"] = "Sent {sent} · Arrived {arrived}"
         m["letters.timesArrives"] = "Sent {sent} · Arrives {arrives}"
         m["letters.to"] = "To {friend}"
         m["letters.toEdit"] = "{countdown} to edit"
+        m["letters.toFormer"] = "→ To a former citizen"
         m["letters.toFriend"] = "→ To {friend}"
         m["letters.voiceNote"] = "Voice note"
         m["letters.voiceNoteLower"] = "voice note"
@@ -570,6 +626,9 @@ internal object Catalog {
         m["mood.ANGRY"] = "Angry"
         m["mood.ANXIOUS"] = "Anxious"
         m["mood.BLISSFUL"] = "Blissful"
+    }
+
+    private fun en4(m: HashMap<String, String>) {
         m["mood.BORED"] = "Bored"
         m["mood.BUSY"] = "Busy"
         m["mood.BUTTERFLIES"] = "Butterflies"
@@ -626,9 +685,6 @@ internal object Catalog {
         m["notify.notNow"] = "Not now"
         m["notify.ok"] = "OK"
         m["notify.oneNotificationPerLetterAt"] = "One notification per letter, at the minute it arrives, even when the site is closed. Nothing else, ever."
-    }
-
-    private fun en4(m: HashMap<String, String>) {
         m["notify.openItFromThereAnd"] = "Open it from there and enter your PIN once more"
         m["notify.share"] = "Share"
         m["notify.tapShare"] = "Tap {share} in the browser bar"
@@ -723,6 +779,9 @@ internal object Catalog {
         m["profile.surname"] = "Surname"
         m["profile.takePhoto"] = "Take photo"
         m["profile.thisDevice"] = "This device"
+    }
+
+    private fun en5(m: HashMap<String, String>) {
         m["profile.thisFileIsntAPhoto"] = "This file isn't a photo we can read"
         m["profile.timeZone"] = "Time zone"
         m["profile.timeZones"] = "Time zones"
@@ -779,9 +838,6 @@ internal object Catalog {
         m["settings.entryKey"] = "Entry key"
         m["settings.fingerprint"] = "Fingerprint unlock"
         m["settings.fingerprintKeep"] = "Keep fingerprint unlock"
-    }
-
-    private fun en5(m: HashMap<String, String>) {
         m["settings.fingerprintKept"] = "Kept on this phone only, opened by your fingerprint."
         m["settings.fingerprintOfferText"] = "Next time, touch the sensor instead of typing your PIN. Your PIN stays on this phone, opened only by your fingerprint. You can turn it off in You."
         m["settings.fingerprintOfferTitle"] = "Unlock with your fingerprint?"
@@ -876,6 +932,9 @@ internal object Catalog {
         m["unblock.firefox3"] = "Reload the page and tap Allow again"
         m["unblock.iosApp1"] = "Open the iPhone Settings app"
         m["unblock.iosApp2"] = "Tap Notifications, then Delulutopia"
+    }
+
+    private fun en6(m: HashMap<String, String>) {
         m["unblock.iosApp3"] = "Turn on Allow Notifications"
         m["unblock.safari1"] = "Safari menu › Settings… › Websites"
         m["unblock.safari2"] = "Choose Notifications on the left"
@@ -932,9 +991,6 @@ internal object Catalog {
         m["universe.welcomeTo"] = "Welcome to {name}"
         m["universe.writeAFewWords"] = "Write a few words"
         m["universe.xxxxXxxxXxxx"] = "XXXX-XXXX-XXXX"
-    }
-
-    private fun en6(m: HashMap<String, String>) {
         m["universe.yourCitizen"] = "Your citizen"
         m["universe.yourInvite"] = "Your invite"
         m["universe.yourPhoto"] = "Your photo"
@@ -979,7 +1035,7 @@ internal object Catalog {
     }
 
     val az: Map<String, String> by lazy {
-        HashMap<String, String>(1882).apply {
+        HashMap<String, String>(1994).apply {
             az0(this)
             az1(this)
             az2(this)
@@ -1114,6 +1170,64 @@ internal object Catalog {
         m["common.unreadEmails"] = "Oxunmamış e-məktublar"
         m["common.unreadLetters"] = "Oxunmamış məktublar"
         m["common.wrongPin"] = "PIN kod yanlışdır. Bir də yoxla."
+        m["deletion.confirmMeTitle"] = "Hesabın silinsin?"
+        m["deletion.confirmUniverseTitle"] = "Bu dünya silinsin: {brand}?"
+        m["deletion.continue"] = "Davam et"
+        m["deletion.count.comments"] = "Şərhlər"
+        m["deletion.count.discussions"] = "Müzakirələr"
+        m["deletion.count.doodles"] = "Cızma-qaralar"
+        m["deletion.count.emails"] = "E-məktublar"
+        m["deletion.count.letters"] = "Məktublar"
+        m["deletion.count.photos"] = "Şəkillər"
+        m["deletion.count.videos"] = "Videolar"
+        m["deletion.count.voice"] = "Səsli mesajlar"
+        m["deletion.dangerZone"] = "Təhlükəli zona"
+        m["deletion.deleteMyAccount"] = "Hesabımı sil"
+        m["deletion.deleteUniverse"] = "Dünyanı sil: {brand}"
+        m["deletion.done"] = "Hazırdır"
+        m["deletion.failed"] = "Silinmədi. Heç nə dəyişmədi. Yenə yoxla."
+        m["deletion.friendLoses"] = "Hesabını {friend} də itirəcək."
+        m["deletion.friendNotified"] = "Bildiriş alacaq: {friend}."
+        m["deletion.goodbye.accountText"] = "{brand} dünyasında yazdığın hər şey bu cihazdan və serverimizdən silindi. Məktublar üçün sağ ol."
+        m["deletion.goodbye.accountTitle"] = "Hesabın silindi"
+        m["deletion.goodbye.closedText"] = "Onu yaradan sildi. Hesabın və içindəki hər şey silindi. Bu cihazda heç nə qalmadı."
+        m["deletion.goodbye.closedTitle"] = "Dünya bağlandı: {brand}"
+        m["deletion.goodbye.deletedText"] = "Başqa cihazda silindi. Bu cihazda heç nə qalmadı."
+        m["deletion.goodbye.deletedTitle"] = "Bu hesab silinib"
+        m["deletion.goodbye.universeText"] = "İki hesab da, {brand} dünyasındakı hər şey də silindi. Məktublar üçün sağ ol."
+        m["deletion.goodbye.universeTitle"] = "Dünya silindi: {brand}"
+        m["deletion.keep"] = "Hesabım qalsın"
+    }
+
+    private fun az1(m: HashMap<String, String>) {
+        m["deletion.keptMember"] = "Dünya və yazdıqları qalır: {friend}. Biz yalnız silinmənin olduğu barədə qeyd saxlayırıq — ad yox, məzmun yox. Ehtiyat nüsxələr 30 gün ərzində təmizlənir."
+        m["deletion.keptOwner"] = "Biz yalnız silinmənin olduğu barədə qeyd saxlayırıq — ad yox, məzmun yox. Ehtiyat nüsxələr 30 gün ərzində təmizlənir."
+        m["deletion.list.memberRest"] = "reaksiyaların, əhvalların və lövhədəki cızma-qaraların"
+        m["deletion.list.profile"] = "profilin, şəklin və PIN kodun"
+        m["deletion.list.profileAlone"] = "hesabın, profilin və PIN kodun"
+        m["deletion.list.profiles"] = "iki hesab, profillər və PIN kodlar"
+        m["deletion.list.universeRest"] = "öz əhvallar, lövhə, açar və plan"
+        m["deletion.memberText"] = "Hesabını və {brand} dünyasında yazdığın hər şeyi həmişəlik silir. Dünya qalır: {friend}."
+        m["deletion.ok"] = "Oldu"
+        m["deletion.ownerAloneText"] = "{brand} dünyasını sən yaratmısan. Onu silsən, hesabın və içindəki hər şey həmişəlik silinəcək."
+        m["deletion.ownerText"] = "{brand} dünyasını sən yaratmısan. Onu silsən, iki hesab da — sənin və dostunun ({friend}) — içindəki hər şeylə həmişəlik silinəcək."
+        m["deletion.pinLine"] = "6-cı rəqəmdə silinir. Geri qaytarmaq olmur."
+        m["deletion.pinTitle"] = "Silmək üçün PIN kodunu yaz"
+        m["deletion.privacy"] = "Məxfilik siyasəti"
+        m["deletion.public.continue"] = "Açarımla davam et"
+        m["deletion.public.deleted1"] = "Profilin, şəklin, PIN kodun və ayarların"
+        m["deletion.public.deleted2"] = "Yazdığın hər şey: məktublar, e-məktublar, müzakirələr, şərhlər, reaksiyalar, cızma-qaralar, şəkillər, səsli mesajlar və videolar"
+        m["deletion.public.deleted3"] = "Dünyanı sən yaratmısansa: bütün dünya, o biri vətəndaşın hesabı da daxil"
+        m["deletion.public.deletedH"] = "Nə silinir"
+        m["deletion.public.howTo"] = "Dünyanın açarını və PIN kodunu yaz, sonra səhifənin aşağısında Mən › Təhlükəli zona bölməsini aç."
+        m["deletion.public.intro"] = "Hesabını burada, tətbiqi yükləmədən silə bilərsən. Dünyanın açarı və PIN kodun lazım olacaq."
+        m["deletion.public.kept"] = "Silinmənin olduğu barədə qeyd (daxili nömrə, tarix və saylar — ad yox, məzmun yox) 3 il saxlanır. Ehtiyat nüsxələr 30 gün, server qeydləri 14 gün ərzində təmizlənir."
+        m["deletion.public.keptH"] = "Nə saxlayırıq"
+        m["deletion.public.lost"] = "Açarını və ya PIN kodunu itirmisən? Dünyanın adı və istifadəçi adınla bu ünvana yaz: {email}. 30 gün ərzində silirik."
+        m["deletion.public.title"] = "Delulutopia hesabını sil"
+        m["deletion.questions"] = "Suallar: {email}"
+        m["deletion.thisDeletes"] = "Bunlar həmişəlik silinir:"
+        m["deletion.typeName"] = "Təsdiq üçün yaz: {brand}"
         m["discussions.aDiscussionIsOnIts"] = "Müzakirə yoldadır"
         m["discussions.aDiscussionIsOnIts2"] = "Müzakirə yoldadır, çatacaq: {arrives}"
         m["discussions.aNewerVersionWasSaved"] = "Başqa cihazda daha təzə versiya saxlanıb. Yükləyək?"
@@ -1141,9 +1255,6 @@ internal object Catalog {
         m["discussions.cantReachTryAgain"] = "{brand} ilə əlaqə yoxdur. Bir də yoxla."
         m["discussions.color.lavender"] = "Lavanda"
         m["discussions.color.lemon"] = "Limon"
-    }
-
-    private fun az1(m: HashMap<String, String>) {
         m["discussions.color.mint"] = "Nanə"
         m["discussions.color.peach"] = "Şaftalı"
         m["discussions.color.pink"] = "Çəhrayı"
@@ -1239,6 +1350,9 @@ internal object Catalog {
         m["doodle.keepDrawing"] = "Çəkməyə davam et"
         m["doodle.redo"] = "Bir addım irəli"
         m["doodle.size.bold"] = "Qalın"
+    }
+
+    private fun az2(m: HashMap<String, String>) {
         m["doodle.size.fine"] = "Nazik"
         m["doodle.size.medium"] = "Orta"
         m["doodle.undo"] = "Bir addım geri"
@@ -1294,9 +1408,6 @@ internal object Catalog {
         m["emails.seeOlder"] = "Köhnələrə bax"
         m["emails.seen"] = "Görüldü · {time}"
         m["emails.startTheFirstOne"] = "İlkini sən yaz."
-    }
-
-    private fun az2(m: HashMap<String, String>) {
         m["emails.subject"] = "Mövzu"
         m["emails.thatIsEverything"] = "Hamısı bu qədər"
         m["emails.thread"] = "Yazışma"
@@ -1392,6 +1503,9 @@ internal object Catalog {
         m["home.youUniverse"] = "Mən › Sizin dünyanız"
         m["home.yourOtherBrowsersStayLogged"] = "Digər brauzerlərində hesabın açıq qalır. İndikini unutmusan? Onu serverdə sıfırlamaq olar; e-poçtla bərpa yoxdur."
         m["home.yourOtherDevicesStayLogged"] = "Digər cihazlarında hesabın açıq qalır. İndikini unutmusan? Onu serverdə sıfırlamaq olar; e-poçtla bərpa yoxdur."
+    }
+
+    private fun az3(m: HashMap<String, String>) {
         m["letters.arrivesAt"] = "Çatacaq: {time}"
         m["letters.arrivesIn"] = "Çatmasına {countdown} qalıb"
         m["letters.back"] = "Geri"
@@ -1447,15 +1561,13 @@ internal object Catalog {
         m["letters.status.sent"] = "Vəziyyət: göndərilib, hələ çatmayıb"
         m["letters.takeItBack"] = "Geri alırsan?"
         m["letters.theLetterLeavesSHome"] = "Məktub dostunun Əsas səhifəsindən dərhal çıxacaq, mətni isə qaralamana qayıdacaq."
-    }
-
-    private fun az3(m: HashMap<String, String>) {
         m["letters.thisLetterIsntHereAnymore"] = "Bu məktub artıq yoxdur."
         m["letters.thisReplacesYourCurrentDraft"] = "Bu, indiki qaralamanı əvəz edəcək."
         m["letters.timesArrived"] = "Göndərilib: {sent} · Çatıb: {arrived}"
         m["letters.timesArrives"] = "Göndərilib: {sent} · Çatacaq: {arrives}"
         m["letters.to"] = "Kimə: {friend}"
         m["letters.toEdit"] = "Dəyişməyə {countdown}"
+        m["letters.toFormer"] = "→ Keçmiş vətəndaşa"
         m["letters.toFriend"] = "→ Kimə: {friend}"
         m["letters.voiceNote"] = "Səsli mesaj"
         m["letters.voiceNoteLower"] = "səsli mesaj"
@@ -1544,6 +1656,9 @@ internal object Catalog {
         m["mood.ANGRY"] = "Əsəbiyəm"
         m["mood.ANXIOUS"] = "Narahatam"
         m["mood.BLISSFUL"] = "Xoşbəxtəm"
+    }
+
+    private fun az4(m: HashMap<String, String>) {
         m["mood.BORED"] = "Canım sıxılır"
         m["mood.BUSY"] = "Məşğulam"
         m["mood.BUTTERFLIES"] = "Ürəyim çırpınır"
@@ -1600,9 +1715,6 @@ internal object Catalog {
         m["notify.notNow"] = "İndi yox"
         m["notify.ok"] = "Oldu"
         m["notify.oneNotificationPerLetterAt"] = "Hər məktuba bir bildiriş — çatdığı dəqiqədə, sayt bağlı olsa belə. Başqa heç nə, heç vaxt."
-    }
-
-    private fun az4(m: HashMap<String, String>) {
         m["notify.openItFromThereAnd"] = "Oradan aç və PIN kodunu bir daha yaz"
         m["notify.share"] = "Share"
         m["notify.tapShare"] = "Brauzer panelində {share} düyməsinə toxun"
@@ -1697,6 +1809,9 @@ internal object Catalog {
         m["profile.surname"] = "Soyad"
         m["profile.takePhoto"] = "Şəkil çək"
         m["profile.thisDevice"] = "Bu cihaz"
+    }
+
+    private fun az5(m: HashMap<String, String>) {
         m["profile.thisFileIsntAPhoto"] = "Bu fayl oxuya bildiyimiz foto deyil"
         m["profile.timeZone"] = "Saat qurşağı"
         m["profile.timeZones"] = "Saat qurşaqları"
@@ -1753,9 +1868,6 @@ internal object Catalog {
         m["settings.entryKey"] = "Giriş açarı"
         m["settings.fingerprint"] = "Barmaq izi ilə açma"
         m["settings.fingerprintKeep"] = "Barmaq izi ilə açma qalsın"
-    }
-
-    private fun az5(m: HashMap<String, String>) {
         m["settings.fingerprintKept"] = "Yalnız bu telefonda saxlanır, barmaq izinlə açılır."
         m["settings.fingerprintOfferText"] = "Növbəti dəfə PIN kodu yazmaq əvəzinə sensora toxun. PIN kodun bu telefonda qalır və yalnız barmaq izinlə açılır. Bunu Mən bölməsində deaktiv edə bilərsən."
         m["settings.fingerprintOfferTitle"] = "Barmaq izinlə açılsın?"
@@ -1850,6 +1962,9 @@ internal object Catalog {
         m["unblock.firefox3"] = "Səhifəni yenilə və yenə «İcazə ver»ə toxun"
         m["unblock.iosApp1"] = "iPhone-da Settings tətbiqini aç"
         m["unblock.iosApp2"] = "Notifications, sonra Delulutopia bölməsinə toxun"
+    }
+
+    private fun az6(m: HashMap<String, String>) {
         m["unblock.iosApp3"] = "«Allow Notifications» düyməsini aç"
         m["unblock.safari1"] = "Safari menyusu › Settings… › Websites"
         m["unblock.safari2"] = "Soldan Notifications seç"
@@ -1906,9 +2021,6 @@ internal object Catalog {
         m["universe.welcomeTo"] = "{name} — xoş gəldin!"
         m["universe.writeAFewWords"] = "Bir-iki söz yaz"
         m["universe.xxxxXxxxXxxx"] = "XXXX-XXXX-XXXX"
-    }
-
-    private fun az6(m: HashMap<String, String>) {
         m["universe.yourCitizen"] = "Sənin sakinin"
         m["universe.yourInvite"] = "Dəvətin"
         m["universe.yourPhoto"] = "Foton"
@@ -1953,7 +2065,7 @@ internal object Catalog {
     }
 
     val fa: Map<String, String> by lazy {
-        HashMap<String, String>(1882).apply {
+        HashMap<String, String>(1994).apply {
             fa0(this)
             fa1(this)
             fa2(this)
@@ -2088,6 +2200,64 @@ internal object Catalog {
         m["common.unreadEmails"] = "ایمیل‌های خونده‌نشده"
         m["common.unreadLetters"] = "نامه‌های خونده‌نشده"
         m["common.wrongPin"] = "رمز اشتباهه. دوباره امتحان کن."
+        m["deletion.confirmMeTitle"] = "حسابت پاک بشه؟"
+        m["deletion.confirmUniverseTitle"] = "{brand} پاک بشه؟"
+        m["deletion.continue"] = "ادامه"
+        m["deletion.count.comments"] = "نظرها"
+        m["deletion.count.discussions"] = "گفتگوها"
+        m["deletion.count.doodles"] = "نقاشی‌ها"
+        m["deletion.count.emails"] = "ایمیل‌ها"
+        m["deletion.count.letters"] = "نامه‌ها"
+        m["deletion.count.photos"] = "عکس‌ها"
+        m["deletion.count.videos"] = "ویدیوها"
+        m["deletion.count.voice"] = "پیام‌های صوتی"
+        m["deletion.dangerZone"] = "منطقهٔ خطر"
+        m["deletion.deleteMyAccount"] = "پاک کردن حسابم"
+        m["deletion.deleteUniverse"] = "پاک کردن {brand}"
+        m["deletion.done"] = "تمام"
+        m["deletion.failed"] = "پاک نشد. چیزی تغییر نکرد. دوباره امتحان کن."
+        m["deletion.friendLoses"] = "{friend} هم حسابش رو از دست می‌ده."
+        m["deletion.friendNotified"] = "{friend} یه اعلان می‌گیره."
+        m["deletion.goodbye.accountText"] = "هرچی توی {brand} نوشته بودی از این دستگاه و سرور ما پاک شد. ممنون بابت نامه‌ها."
+        m["deletion.goodbye.accountTitle"] = "حسابت پاک شد"
+        m["deletion.goodbye.closedText"] = "سازنده‌اش پاکش کرد. حسابت و هرچی توش بود پاک شد. چیزی روی این دستگاه نمونده."
+        m["deletion.goodbye.closedTitle"] = "{brand} بسته شد"
+        m["deletion.goodbye.deletedText"] = "روی یه دستگاه دیگه پاک شد. چیزی روی این دستگاه نمونده."
+        m["deletion.goodbye.deletedTitle"] = "این حساب پاک شده"
+        m["deletion.goodbye.universeText"] = "هر دو حساب و هرچی توی {brand} بود پاک شد. ممنون بابت نامه‌ها."
+        m["deletion.goodbye.universeTitle"] = "{brand} پاک شد"
+        m["deletion.keep"] = "حسابم بمونه"
+    }
+
+    private fun fa1(m: HashMap<String, String>) {
+        m["deletion.keptMember"] = "{brand} و نوشته‌های {friend} می‌مونه. ما فقط یادداشتی نگه می‌داریم که حذفی انجام شده، بدون اسم و بدون محتوا. پشتیبان‌ها ظرف ۳۰ روز پاک می‌شن."
+        m["deletion.keptOwner"] = "ما فقط یادداشتی نگه می‌داریم که حذفی انجام شده، بدون اسم و بدون محتوا. پشتیبان‌ها ظرف ۳۰ روز پاک می‌شن."
+        m["deletion.list.memberRest"] = "واکنش‌ها، حالت‌ها و نقاشی‌های تخته‌ات"
+        m["deletion.list.profile"] = "پروفایل، عکس و پینت"
+        m["deletion.list.profileAlone"] = "حساب، پروفایل و پینت"
+        m["deletion.list.profiles"] = "هر دو حساب، پروفایل‌ها و پین‌ها"
+        m["deletion.list.universeRest"] = "حالت‌های ساختگی، تخته، کلید و طرح"
+        m["deletion.memberText"] = "حسابت و هرچی توی {brand} نوشتی برای همیشه پاک می‌شه. دنیا برای {friend} می‌مونه."
+        m["deletion.ok"] = "باشه"
+        m["deletion.ownerAloneText"] = "تو {brand} رو ساختی. با پاک کردنش حسابت و هرچی توشه برای همیشه پاک می‌شه."
+        m["deletion.ownerText"] = "تو {brand} رو ساختی. با پاک کردنش هر دو حساب، مال تو و {friend}، و هرچی توشه برای همیشه پاک می‌شه."
+        m["deletion.pinLine"] = "با رقم ششم پاک می‌شه. برگشت نداره."
+        m["deletion.pinTitle"] = "برای پاک کردن پینت رو بزن"
+        m["deletion.privacy"] = "سیاست حریم خصوصی"
+        m["deletion.public.continue"] = "ادامه با کلیدم"
+        m["deletion.public.deleted1"] = "پروفایل، عکس، پین و تنظیماتت"
+        m["deletion.public.deleted2"] = "هرچی نوشتی: نامه‌ها، ایمیل‌ها، گفتگوها، نظرها، واکنش‌ها، نقاشی‌ها، عکس‌ها، پیام‌های صوتی و ویدیوها"
+        m["deletion.public.deleted3"] = "اگه تو دنیا رو ساختی: کل دنیا، با حساب ساکن دیگه"
+        m["deletion.public.deletedH"] = "چی پاک می‌شه"
+        m["deletion.public.howTo"] = "کلید دنیا و پینت رو بزن، بعد پایین صفحه من › منطقهٔ خطر رو باز کن."
+        m["deletion.public.intro"] = "می‌تونی بدون نصب برنامه حسابت رو همین‌جا پاک کنی. کلید دنیا و پینت لازمه."
+        m["deletion.public.kept"] = "یادداشتی که نشون می‌ده حذفی انجام شده (یک شمارهٔ داخلی، تاریخ و تعدادها، بدون اسم و بدون محتوا) برای ۳ سال. پشتیبان‌ها ظرف ۳۰ روز و گزارش‌های سرور ظرف ۱۴ روز پاک می‌شن."
+        m["deletion.public.keptH"] = "چی نگه می‌داریم"
+        m["deletion.public.lost"] = "کلید یا پینت رو گم کردی؟ با اسم دنیا و نام کاربری‌ات به {email} بنویس؛ ظرف ۳۰ روز پاکش می‌کنیم."
+        m["deletion.public.title"] = "پاک کردن حساب دلولوتوپیا"
+        m["deletion.questions"] = "سوال‌ها: {email}"
+        m["deletion.thisDeletes"] = "این‌ها برای همیشه پاک می‌شن:"
+        m["deletion.typeName"] = "برای تأیید بنویس: {brand}"
         m["discussions.aDiscussionIsOnIts"] = "یه گفت‌وگو توی راهه"
         m["discussions.aDiscussionIsOnIts2"] = "یه گفت‌وگو توی راهه، ساعت {arrives} می‌رسه"
         m["discussions.aNewerVersionWasSaved"] = "یه نسخه‌ی تازه‌تر روی یه دستگاه دیگه ذخیره شده. بیارمش؟"
@@ -2115,9 +2285,6 @@ internal object Catalog {
         m["discussions.cantReachTryAgain"] = "به {brand} وصل نمی‌شیم. دوباره امتحان کن."
         m["discussions.color.lavender"] = "اسطوخودوسی"
         m["discussions.color.lemon"] = "لیمویی"
-    }
-
-    private fun fa1(m: HashMap<String, String>) {
         m["discussions.color.mint"] = "نعنایی"
         m["discussions.color.peach"] = "هلویی"
         m["discussions.color.pink"] = "صورتی"
@@ -2213,6 +2380,9 @@ internal object Catalog {
         m["doodle.keepDrawing"] = "به کشیدن ادامه بده"
         m["doodle.redo"] = "یه قدم جلو"
         m["doodle.size.bold"] = "کلفت"
+    }
+
+    private fun fa2(m: HashMap<String, String>) {
         m["doodle.size.fine"] = "نازک"
         m["doodle.size.medium"] = "متوسط"
         m["doodle.undo"] = "یه قدم عقب"
@@ -2268,9 +2438,6 @@ internal object Catalog {
         m["emails.seeOlder"] = "قدیمی‌ترها"
         m["emails.seen"] = "دیده شد · {time}"
         m["emails.startTheFirstOne"] = "اولیش رو تو بنویس."
-    }
-
-    private fun fa2(m: HashMap<String, String>) {
         m["emails.subject"] = "موضوع"
         m["emails.thatIsEverything"] = "همه‌ش همین بود"
         m["emails.thread"] = "رشته"
@@ -2366,6 +2533,9 @@ internal object Catalog {
         m["home.youUniverse"] = "من › دنیا"
         m["home.yourOtherBrowsersStayLogged"] = "مرورگرهای دیگه‌ت وارد می‌مونن. رمز فعلی یادت رفته؟ می‌شه روی سرور پاکش کرد؛ بازیابی با ایمیل نداریم."
         m["home.yourOtherDevicesStayLogged"] = "دستگاه‌های دیگه‌ت وارد می‌مونن. رمز فعلی یادت رفته؟ می‌شه روی سرور پاکش کرد؛ بازیابی با ایمیل نداریم."
+    }
+
+    private fun fa3(m: HashMap<String, String>) {
         m["letters.arrivesAt"] = "ساعت {time} می‌رسه"
         m["letters.arrivesIn"] = "{countdown} دیگه می‌رسه"
         m["letters.back"] = "برگشت"
@@ -2421,15 +2591,13 @@ internal object Catalog {
         m["letters.status.sent"] = "وضعیت: فرستاده شده، هنوز نرسیده"
         m["letters.takeItBack"] = "پسش می‌گیری؟"
         m["letters.theLetterLeavesSHome"] = "نامه همون لحظه از خانه‌ی {friend} برداشته می‌شه و متنش برمی‌گرده توی پیش‌نویست."
-    }
-
-    private fun fa3(m: HashMap<String, String>) {
         m["letters.thisLetterIsntHereAnymore"] = "این نامه دیگه اینجا نیست."
         m["letters.thisReplacesYourCurrentDraft"] = "این جای پیش‌نویس فعلیت رو می‌گیره."
         m["letters.timesArrived"] = "فرستاده‌شده: {sent} · رسیده: {arrived}"
         m["letters.timesArrives"] = "فرستاده‌شده: {sent} · می‌رسه: {arrives}"
         m["letters.to"] = "به {friend}"
         m["letters.toEdit"] = "{countdown} تا ویرایش"
+        m["letters.toFormer"] = "→ به یک ساکن قبلی"
         m["letters.toFriend"] = "← به {friend}"
         m["letters.voiceNote"] = "پیام صوتی"
         m["letters.voiceNoteLower"] = "پیام صوتی"
@@ -2518,6 +2686,9 @@ internal object Catalog {
         m["mood.ANGRY"] = "عصبانی‌ام"
         m["mood.ANXIOUS"] = "دلشوره دارم"
         m["mood.BLISSFUL"] = "غرق خوشی‌ام"
+    }
+
+    private fun fa4(m: HashMap<String, String>) {
         m["mood.BORED"] = "حوصله‌م سر رفته"
         m["mood.BUSY"] = "سرم شلوغه"
         m["mood.BUTTERFLIES"] = "دلم قنج می‌ره"
@@ -2574,9 +2745,6 @@ internal object Catalog {
         m["notify.notNow"] = "الان نه"
         m["notify.ok"] = "باشه"
         m["notify.oneNotificationPerLetterAt"] = "برای هر نامه یه اعلان، همون دقیقه‌ای که می‌رسه، حتی وقتی سایت بسته‌ست. نه چیز دیگه‌ای، نه هیچ‌وقت."
-    }
-
-    private fun fa4(m: HashMap<String, String>) {
         m["notify.openItFromThereAnd"] = "از اونجا بازش کن و یه بار دیگه رمزت رو وارد کن"
         m["notify.share"] = "Share"
         m["notify.tapShare"] = "توی نوار مرورگر روی {share} بزن"
@@ -2671,6 +2839,9 @@ internal object Catalog {
         m["profile.surname"] = "نام خانوادگی"
         m["profile.takePhoto"] = "عکس بگیر"
         m["profile.thisDevice"] = "این دستگاه"
+    }
+
+    private fun fa5(m: HashMap<String, String>) {
         m["profile.thisFileIsntAPhoto"] = "این فایل عکسی نیست که بتونیم بخونیم"
         m["profile.timeZone"] = "منطقه‌ی زمانی"
         m["profile.timeZones"] = "منطقه‌های زمانی"
@@ -2727,9 +2898,6 @@ internal object Catalog {
         m["settings.entryKey"] = "کلید ورود"
         m["settings.fingerprint"] = "باز کردن با اثر انگشت"
         m["settings.fingerprintKeep"] = "باز کردن با اثر انگشت بمونه"
-    }
-
-    private fun fa5(m: HashMap<String, String>) {
         m["settings.fingerprintKept"] = "فقط روی این گوشی نگه داشته می‌شه و با اثر انگشتت باز می‌شه."
         m["settings.fingerprintOfferText"] = "دفعه‌ی بعد به‌جای زدن رمز، انگشتت رو روی حسگر بذار. رمزت روی همین گوشی می‌مونه و فقط با اثر انگشتت باز می‌شه. می‌تونی از بخش من خاموشش کنی."
         m["settings.fingerprintOfferTitle"] = "با اثر انگشتت باز بشه؟"
@@ -2824,6 +2992,9 @@ internal object Catalog {
         m["unblock.firefox3"] = "صفحه رو دوباره باز کن و باز روی «اجازه بده» بزن"
         m["unblock.iosApp1"] = "برنامه‌ی Settings آیفون رو باز کن"
         m["unblock.iosApp2"] = "روی Notifications بزن، بعد Delulutopia"
+    }
+
+    private fun fa6(m: HashMap<String, String>) {
         m["unblock.iosApp3"] = "«Allow Notifications» رو روشن کن"
         m["unblock.safari1"] = "منوی Safari › Settings… › Websites"
         m["unblock.safari2"] = "از سمت چپ Notifications رو انتخاب کن"
@@ -2880,9 +3051,6 @@ internal object Catalog {
         m["universe.welcomeTo"] = "به {name} خوش اومدی"
         m["universe.writeAFewWords"] = "چند کلمه بنویس"
         m["universe.xxxxXxxxXxxx"] = "XXXX-XXXX-XXXX"
-    }
-
-    private fun fa6(m: HashMap<String, String>) {
         m["universe.yourCitizen"] = "ساکن تو"
         m["universe.yourInvite"] = "دعوت‌نامه‌ت"
         m["universe.yourPhoto"] = "عکست"
@@ -2927,7 +3095,7 @@ internal object Catalog {
     }
 
     val tr: Map<String, String> by lazy {
-        HashMap<String, String>(1882).apply {
+        HashMap<String, String>(1994).apply {
             tr0(this)
             tr1(this)
             tr2(this)
@@ -3062,6 +3230,64 @@ internal object Catalog {
         m["common.unreadEmails"] = "Okunmamış e-postalar"
         m["common.unreadLetters"] = "Okunmamış mektuplar"
         m["common.wrongPin"] = "Şifre yanlış. Tekrar dene."
+        m["deletion.confirmMeTitle"] = "Hesabın silinsin mi?"
+        m["deletion.confirmUniverseTitle"] = "Bu dünya silinsin mi: {brand}"
+        m["deletion.continue"] = "Devam"
+        m["deletion.count.comments"] = "Yorumlar"
+        m["deletion.count.discussions"] = "Tartışmalar"
+        m["deletion.count.doodles"] = "Karalamalar"
+        m["deletion.count.emails"] = "E-postalar"
+        m["deletion.count.letters"] = "Mektuplar"
+        m["deletion.count.photos"] = "Fotoğraflar"
+        m["deletion.count.videos"] = "Videolar"
+        m["deletion.count.voice"] = "Sesli notlar"
+        m["deletion.dangerZone"] = "Tehlikeli bölge"
+        m["deletion.deleteMyAccount"] = "Hesabımı sil"
+        m["deletion.deleteUniverse"] = "Dünyayı sil: {brand}"
+        m["deletion.done"] = "Tamam"
+        m["deletion.failed"] = "Silinemedi. Hiçbir şey değişmedi. Yeniden dene."
+        m["deletion.friendLoses"] = "Hesabını kaybedecek: {friend}."
+        m["deletion.friendNotified"] = "Bildirim alacak: {friend}."
+        m["deletion.goodbye.accountText"] = "Yazdığın her şey bu cihazdan ve sunucumuzdan silindi ({brand}). Mektuplar için teşekkürler."
+        m["deletion.goodbye.accountTitle"] = "Hesabın silindi"
+        m["deletion.goodbye.closedText"] = "Kurucusu onu sildi. Hesabın ve içindeki her şey silindi. Bu cihazda hiçbir şey kalmadı."
+        m["deletion.goodbye.closedTitle"] = "Dünya kapatıldı: {brand}"
+        m["deletion.goodbye.deletedText"] = "Başka bir cihazda silindi. Bu cihazda hiçbir şey kalmadı."
+        m["deletion.goodbye.deletedTitle"] = "Bu hesap silindi"
+        m["deletion.goodbye.universeText"] = "İki hesap ve dünyadaki her şey silindi ({brand}). Mektuplar için teşekkürler."
+        m["deletion.goodbye.universeTitle"] = "Dünya silindi: {brand}"
+        m["deletion.keep"] = "Hesabım kalsın"
+    }
+
+    private fun tr1(m: HashMap<String, String>) {
+        m["deletion.keptMember"] = "Dünya ve yazdıkları kalıyor: {friend}. Biz yalnızca bir silme yapıldığına dair kayıt tutarız — isim yok, içerik yok. Yedekler 30 gün içinde temizlenir."
+        m["deletion.keptOwner"] = "Biz yalnızca bir silme yapıldığına dair kayıt tutarız — isim yok, içerik yok. Yedekler 30 gün içinde temizlenir."
+        m["deletion.list.memberRest"] = "tepkilerin, ruh hallerin ve tahtadaki karalamaların"
+        m["deletion.list.profile"] = "profilin, fotoğrafın ve PIN’in"
+        m["deletion.list.profileAlone"] = "hesabın, profilin ve PIN’in"
+        m["deletion.list.profiles"] = "iki hesap, profiller ve PIN’ler"
+        m["deletion.list.universeRest"] = "kendi ruh halleri, tahta, anahtar ve plan"
+        m["deletion.memberText"] = "Hesabını ve yazdığın her şeyi kalıcı olarak siler ({brand}). Dünya kalıyor: {friend}."
+        m["deletion.ok"] = "Tamam"
+        m["deletion.ownerAloneText"] = "Bu dünyayı sen kurdun ({brand}). Silersen hesabın ve içindeki her şey kalıcı olarak silinir."
+        m["deletion.ownerText"] = "Bu dünyayı sen kurdun ({brand}). Silersen iki hesap da, seninki ve arkadaşınınki ({friend}), içindeki her şeyle kalıcı olarak silinir."
+        m["deletion.pinLine"] = "6. rakamda silinir. Geri alınamaz."
+        m["deletion.pinTitle"] = "Silmek için PIN’ini gir"
+        m["deletion.privacy"] = "Gizlilik politikası"
+        m["deletion.public.continue"] = "Anahtarımla devam et"
+        m["deletion.public.deleted1"] = "Profilin, fotoğrafın, PIN’in ve ayarların"
+        m["deletion.public.deleted2"] = "Yazdığın her şey: mektuplar, e-postalar, tartışmalar, yorumlar, tepkiler, karalamalar, fotoğraflar, sesli notlar ve videolar"
+        m["deletion.public.deleted3"] = "Dünyayı sen kurduysan: diğer sakinin hesabı dahil bütün dünya"
+        m["deletion.public.deletedH"] = "Neler silinir"
+        m["deletion.public.howTo"] = "Dünyanın anahtarını ve PIN’ini gir, sonra sayfanın altındaki Ben › Tehlikeli bölge kısmını aç."
+        m["deletion.public.intro"] = "Hesabını uygulamayı yüklemeden burada silebilirsin. Dünyanın anahtarı ve PIN’in gerekecek."
+        m["deletion.public.kept"] = "Bir silme yapıldığına dair kayıt (iç numara, tarih ve sayılar — isim yok, içerik yok) 3 yıl tutulur. Yedekler 30 gün, sunucu kayıtları 14 gün içinde temizlenir."
+        m["deletion.public.keptH"] = "Neleri tutarız"
+        m["deletion.public.lost"] = "Anahtarını ya da PIN’ini mi kaybettin? Dünyanın adı ve kullanıcı adınla şu adrese yaz: {email}. 30 gün içinde sileriz."
+        m["deletion.public.title"] = "Delulutopia hesabını sil"
+        m["deletion.questions"] = "Sorular: {email}"
+        m["deletion.thisDeletes"] = "Bunlar kalıcı olarak silinir:"
+        m["deletion.typeName"] = "Onaylamak için yaz: {brand}"
         m["discussions.aDiscussionIsOnIts"] = "Bir sohbet yolda"
         m["discussions.aDiscussionIsOnIts2"] = "Bir sohbet yolda, varış: {arrives}"
         m["discussions.aNewerVersionWasSaved"] = "Başka bir cihazda daha yeni bir sürüm kaydedildi. Yükleyelim mi?"
@@ -3089,9 +3315,6 @@ internal object Catalog {
         m["discussions.cantReachTryAgain"] = "{brand} ile bağlantı kurulamadı. Tekrar dene."
         m["discussions.color.lavender"] = "Lavanta"
         m["discussions.color.lemon"] = "Limon"
-    }
-
-    private fun tr1(m: HashMap<String, String>) {
         m["discussions.color.mint"] = "Nane"
         m["discussions.color.peach"] = "Şeftali"
         m["discussions.color.pink"] = "Pembe"
@@ -3187,6 +3410,9 @@ internal object Catalog {
         m["doodle.keepDrawing"] = "Çizmeye devam et"
         m["doodle.redo"] = "Yinele"
         m["doodle.size.bold"] = "Kalın"
+    }
+
+    private fun tr2(m: HashMap<String, String>) {
         m["doodle.size.fine"] = "İnce"
         m["doodle.size.medium"] = "Orta"
         m["doodle.undo"] = "Geri al"
@@ -3242,9 +3468,6 @@ internal object Catalog {
         m["emails.seeOlder"] = "Öncekileri gör"
         m["emails.seen"] = "Görüldü · {time}"
         m["emails.startTheFirstOne"] = "İlkini sen yaz."
-    }
-
-    private fun tr2(m: HashMap<String, String>) {
         m["emails.subject"] = "Konu"
         m["emails.thatIsEverything"] = "Hepsi bu kadar"
         m["emails.thread"] = "Yazışma"
@@ -3340,6 +3563,9 @@ internal object Catalog {
         m["home.youUniverse"] = "Ben › Dünyanız"
         m["home.yourOtherBrowsersStayLogged"] = "Diğer tarayıcılarında oturumun açık kalır. Şu ankini mi unuttun? Sunucuda sıfırlanabilir; e-postayla sıfırlama yok."
         m["home.yourOtherDevicesStayLogged"] = "Diğer cihazlarında oturumun açık kalır. Şu ankini mi unuttun? Sunucuda sıfırlanabilir; e-postayla sıfırlama yok."
+    }
+
+    private fun tr3(m: HashMap<String, String>) {
         m["letters.arrivesAt"] = "Varış: {time}"
         m["letters.arrivesIn"] = "Varmasına {countdown} kaldı"
         m["letters.back"] = "Geri"
@@ -3395,15 +3621,13 @@ internal object Catalog {
         m["letters.status.sent"] = "Durum: gönderildi, henüz ulaşmadı"
         m["letters.takeItBack"] = "Geri alıyor musun?"
         m["letters.theLetterLeavesSHome"] = "Mektup arkadaşının Ana sayfasından hemen çıkar, metni de taslağına geri döner."
-    }
-
-    private fun tr3(m: HashMap<String, String>) {
         m["letters.thisLetterIsntHereAnymore"] = "Bu mektup artık yok."
         m["letters.thisReplacesYourCurrentDraft"] = "Bu, şu anki taslağının yerine geçer."
         m["letters.timesArrived"] = "Gönderildi: {sent} · Geldi: {arrived}"
         m["letters.timesArrives"] = "Gönderildi: {sent} · Varış: {arrives}"
         m["letters.to"] = "Kime: {friend}"
         m["letters.toEdit"] = "Düzenlemek için {countdown}"
+        m["letters.toFormer"] = "→ Eski bir sakine"
         m["letters.toFriend"] = "→ Kime: {friend}"
         m["letters.voiceNote"] = "Sesli mesaj"
         m["letters.voiceNoteLower"] = "sesli mesaj"
@@ -3492,6 +3716,9 @@ internal object Catalog {
         m["mood.ANGRY"] = "Sinirliyim"
         m["mood.ANXIOUS"] = "Endişeliyim"
         m["mood.BLISSFUL"] = "Mutluluktan uçuyorum"
+    }
+
+    private fun tr4(m: HashMap<String, String>) {
         m["mood.BORED"] = "Canım sıkılıyor"
         m["mood.BUSY"] = "Yoğunum"
         m["mood.BUTTERFLIES"] = "İçim kıpır kıpır"
@@ -3548,9 +3775,6 @@ internal object Catalog {
         m["notify.notNow"] = "Şimdi değil"
         m["notify.ok"] = "Tamam"
         m["notify.oneNotificationPerLetterAt"] = "Her mektup için tek bildirim, geldiği dakikada, site kapalıyken bile. Başka hiçbir şey, asla."
-    }
-
-    private fun tr4(m: HashMap<String, String>) {
         m["notify.openItFromThereAnd"] = "Oradan aç ve şifreni bir kez daha gir"
         m["notify.share"] = "Paylaş"
         m["notify.tapShare"] = "Tarayıcı çubuğunda {share} düğmesine dokun"
@@ -3645,6 +3869,9 @@ internal object Catalog {
         m["profile.surname"] = "Soyad"
         m["profile.takePhoto"] = "Fotoğraf çek"
         m["profile.thisDevice"] = "Bu cihaz"
+    }
+
+    private fun tr5(m: HashMap<String, String>) {
         m["profile.thisFileIsntAPhoto"] = "Bu dosya okuyabildiğimiz bir fotoğraf değil"
         m["profile.timeZone"] = "Saat dilimi"
         m["profile.timeZones"] = "Saat dilimleri"
@@ -3701,9 +3928,6 @@ internal object Catalog {
         m["settings.entryKey"] = "Giriş anahtarı"
         m["settings.fingerprint"] = "Parmak iziyle açma"
         m["settings.fingerprintKeep"] = "Parmak iziyle açma kalsın"
-    }
-
-    private fun tr5(m: HashMap<String, String>) {
         m["settings.fingerprintKept"] = "Yalnızca bu telefonda saklanır, parmak izinle açılır."
         m["settings.fingerprintOfferText"] = "Bir dahaki sefere şifreni yazmak yerine sensöre dokun. Şifren bu telefonda kalır ve yalnızca parmak izinle açılır. Ben bölümünden kapatabilirsin."
         m["settings.fingerprintOfferTitle"] = "Parmak izinle açılsın mı?"
@@ -3798,6 +4022,9 @@ internal object Catalog {
         m["unblock.firefox3"] = "Sayfayı yenile ve yeniden İzin ver’e dokun"
         m["unblock.iosApp1"] = "iPhone’da Ayarlar uygulamasını aç"
         m["unblock.iosApp2"] = "Bildirimler’e, sonra Delulutopia’ya dokun"
+    }
+
+    private fun tr6(m: HashMap<String, String>) {
         m["unblock.iosApp3"] = "Bildirimlere İzin Ver’i aç"
         m["unblock.safari1"] = "Safari menüsü › Ayarlar… › Web Siteleri"
         m["unblock.safari2"] = "Soldan Bildirimler’i seç"
@@ -3854,9 +4081,6 @@ internal object Catalog {
         m["universe.welcomeTo"] = "Hoş geldin! Burası {name}."
         m["universe.writeAFewWords"] = "Birkaç kelime yaz"
         m["universe.xxxxXxxxXxxx"] = "XXXX-XXXX-XXXX"
-    }
-
-    private fun tr6(m: HashMap<String, String>) {
         m["universe.yourCitizen"] = "Senin sakinin"
         m["universe.yourInvite"] = "Davetin"
         m["universe.yourPhoto"] = "Fotoğrafın"
@@ -3901,7 +4125,7 @@ internal object Catalog {
     }
 
     val ru: Map<String, String> by lazy {
-        HashMap<String, String>(1910).apply {
+        HashMap<String, String>(2022).apply {
             ru0(this)
             ru1(this)
             ru2(this)
@@ -4036,6 +4260,64 @@ internal object Catalog {
         m["common.unreadEmails"] = "Непрочитанные имейлы"
         m["common.unreadLetters"] = "Непрочитанные письма"
         m["common.wrongPin"] = "Неверный PIN-код. Попробуй ещё раз."
+        m["deletion.confirmMeTitle"] = "Удалить твой аккаунт?"
+        m["deletion.confirmUniverseTitle"] = "Удалить мир {brand}?"
+        m["deletion.continue"] = "Дальше"
+        m["deletion.count.comments"] = "Комментарии"
+        m["deletion.count.discussions"] = "Обсуждения"
+        m["deletion.count.doodles"] = "Рисунки"
+        m["deletion.count.emails"] = "Имейлы"
+        m["deletion.count.letters"] = "Письма"
+        m["deletion.count.photos"] = "Фото"
+        m["deletion.count.videos"] = "Видео"
+        m["deletion.count.voice"] = "Голосовые"
+        m["deletion.dangerZone"] = "Опасная зона"
+        m["deletion.deleteMyAccount"] = "Удалить мой аккаунт"
+        m["deletion.deleteUniverse"] = "Удалить мир {brand}"
+        m["deletion.done"] = "Готово"
+        m["deletion.failed"] = "Не получилось удалить. Ничего не изменилось. Попробуй ещё раз."
+        m["deletion.friendLoses"] = "Аккаунт тоже исчезнет: {friend}."
+        m["deletion.friendNotified"] = "Получит уведомление: {friend}."
+        m["deletion.goodbye.accountText"] = "Всё, что ты написал в мире {brand}, удалено с этого устройства и с нашего сервера. Спасибо за письма."
+        m["deletion.goodbye.accountTitle"] = "Твой аккаунт удалён"
+        m["deletion.goodbye.closedText"] = "Его удалил создатель. Твой аккаунт и всё, что в нём было, удалены. На этом устройстве ничего не осталось."
+        m["deletion.goodbye.closedTitle"] = "Мир {brand} закрыт"
+        m["deletion.goodbye.deletedText"] = "Его удалили на другом устройстве. На этом ничего не осталось."
+        m["deletion.goodbye.deletedTitle"] = "Этот аккаунт удалён"
+        m["deletion.goodbye.universeText"] = "Оба аккаунта и всё, что было в мире {brand}, удалены. Спасибо за письма."
+        m["deletion.goodbye.universeTitle"] = "Мир {brand} удалён"
+        m["deletion.keep"] = "Оставить аккаунт"
+    }
+
+    private fun ru1(m: HashMap<String, String>) {
+        m["deletion.keptMember"] = "Мир {brand} и всё написанное там остаются: {friend}. Мы храним только запись о том, что удаление было, — без имён и содержимого. Резервные копии очищаются в течение 30 дней."
+        m["deletion.keptOwner"] = "Мы храним только запись о том, что удаление было, — без имён и содержимого. Резервные копии очищаются в течение 30 дней."
+        m["deletion.list.memberRest"] = "твои реакции, настроения и рисунки на доске"
+        m["deletion.list.profile"] = "твой профиль, фото и PIN-код"
+        m["deletion.list.profileAlone"] = "твой аккаунт, профиль и PIN-код"
+        m["deletion.list.profiles"] = "оба аккаунта, профили и PIN-коды"
+        m["deletion.list.universeRest"] = "свои настроения, доска, ключ и тариф"
+        m["deletion.memberText"] = "Навсегда удаляет твой аккаунт и всё, что ты написал в мире {brand}. Мир остаётся: {friend}."
+        m["deletion.ok"] = "Хорошо"
+        m["deletion.ownerAloneText"] = "Ты создатель мира {brand}. Если удалить его, навсегда исчезнут твой аккаунт и всё, что в нём есть."
+        m["deletion.ownerText"] = "Ты создатель мира {brand}. Если удалить его, навсегда исчезнут оба аккаунта, твой и ещё один ({friend}), и всё, что в нём есть."
+        m["deletion.pinLine"] = "Удаление на 6-й цифре. Отменить нельзя."
+        m["deletion.pinTitle"] = "Введи PIN-код, чтобы удалить"
+        m["deletion.privacy"] = "Политика конфиденциальности"
+        m["deletion.public.continue"] = "Продолжить с ключом"
+        m["deletion.public.deleted1"] = "Твой профиль, фото, PIN-код и настройки"
+        m["deletion.public.deleted2"] = "Всё, что ты написал: письма, имейлы, обсуждения, комментарии, реакции, рисунки, фото, голосовые и видео"
+        m["deletion.public.deleted3"] = "Если мир создал ты: весь мир, включая аккаунт второго жителя"
+        m["deletion.public.deletedH"] = "Что удаляется"
+        m["deletion.public.howTo"] = "Введи ключ мира и PIN-код, затем открой Я › Опасная зона внизу страницы."
+        m["deletion.public.intro"] = "Здесь можно удалить аккаунт, не устанавливая приложение. Понадобятся ключ мира и твой PIN-код."
+        m["deletion.public.kept"] = "Запись о том, что удаление было (внутренний номер, дата и количество — без имён и содержимого), хранится 3 года. Резервные копии очищаются в течение 30 дней, журналы сервера — в течение 14 дней."
+        m["deletion.public.keptH"] = "Что мы храним"
+        m["deletion.public.lost"] = "Потерял ключ или PIN-код? Напиши на {email}, укажи название мира и имя пользователя; удалим в течение 30 дней."
+        m["deletion.public.title"] = "Удалить аккаунт Delulutopia"
+        m["deletion.questions"] = "Вопросы: {email}"
+        m["deletion.thisDeletes"] = "Навсегда удаляется:"
+        m["deletion.typeName"] = "Чтобы подтвердить, напиши: {brand}"
         m["discussions.aDiscussionIsOnIts"] = "Обсуждение в пути"
         m["discussions.aDiscussionIsOnIts2"] = "Обсуждение в пути, придёт: {arrives}"
         m["discussions.aNewerVersionWasSaved"] = "На другом устройстве сохранена более новая версия. Загрузить её?"
@@ -4063,9 +4345,6 @@ internal object Catalog {
         m["discussions.cantReachTryAgain"] = "Нет связи с миром {brand}. Попробуй ещё раз."
         m["discussions.color.lavender"] = "Лаванда"
         m["discussions.color.lemon"] = "Лимон"
-    }
-
-    private fun ru1(m: HashMap<String, String>) {
         m["discussions.color.mint"] = "Мята"
         m["discussions.color.peach"] = "Персик"
         m["discussions.color.pink"] = "Розовый"
@@ -4161,6 +4440,9 @@ internal object Catalog {
         m["doodle.emptyPaper"] = "Чистый лист"
         m["doodle.eraser"] = "Ластик"
         m["doodle.keepDrawing"] = "Рисовать дальше"
+    }
+
+    private fun ru2(m: HashMap<String, String>) {
         m["doodle.redo"] = "Вернуть"
         m["doodle.size.bold"] = "Толстая"
         m["doodle.size.fine"] = "Тонкая"
@@ -4216,9 +4498,6 @@ internal object Catalog {
         m["emails.noEmailsYet"] = "Имейлов пока нет."
         m["emails.photoOfOpenFullSize"] = "Фото {n} из {count}, открыть целиком"
         m["emails.pickAThreadToRead"] = "Выбери переписку, чтобы прочитать её здесь."
-    }
-
-    private fun ru2(m: HashMap<String, String>) {
         m["emails.reply"] = "Ответить"
         m["emails.replyLabel"] = "Ответ"
         m["emails.replyingTo"] = "Ответ: {name}"
@@ -4314,6 +4593,9 @@ internal object Catalog {
         m["home.waitingCreator"] = "Отправь ключ от мира {name} тому единственному человеку, которого хочешь здесь видеть. Ключ потерян? Создай новый."
         m["home.waitingForSomeoneToJoin"] = "Ждём, когда кто-нибудь придёт"
         m["home.wearing.both"] = "Это настроение сейчас у вас обоих. Если удалить его, оба настроения сбросятся."
+    }
+
+    private fun ru3(m: HashMap<String, String>) {
         m["home.wearing.friend"] = "{friend} сейчас в этом настроении. Если удалить его, настроение сбросится."
         m["home.wearing.me"] = "У тебя сейчас это настроение. Если удалить его, оно сбросится."
         m["home.yesDelete"] = "Да, удалить"
@@ -4369,9 +4651,6 @@ internal object Catalog {
         m["letters.reply"] = "Ответить письмом"
         m["letters.replyToALetter"] = "Ответ на письмо: "
         m["letters.sent"] = "Отправлено: {time}"
-    }
-
-    private fun ru3(m: HashMap<String, String>) {
         m["letters.sent2"] = "Отправлено"
         m["letters.showAsList"] = "Показать списком"
         m["letters.showAsThumbnails"] = "Показать плиткой"
@@ -4386,6 +4665,7 @@ internal object Catalog {
         m["letters.timesArrives"] = "Отправлено: {sent} · Придёт: {arrives}"
         m["letters.to"] = "Кому: {friend}"
         m["letters.toEdit"] = "Ещё {countdown}, чтобы изменить"
+        m["letters.toFormer"] = "→ Бывшему жителю"
         m["letters.toFriend"] = "→ Кому: {friend}"
         m["letters.voiceNote"] = "Голосовое"
         m["letters.voiceNoteLower"] = "голосовое"
@@ -4466,6 +4746,9 @@ internal object Catalog {
         m["media.takeAPhoto"] = "Сделать фото"
         m["media.uploadFailed"] = "Не удалось загрузить. Попробуй ещё раз."
         m["media.uploadTimedOut"] = "Загрузка заняла слишком много времени. Попробуй ещё раз."
+    }
+
+    private fun ru4(m: HashMap<String, String>) {
         m["media.uploading"] = "Загрузка"
         m["media.use"] = "Использовать"
         m["media.video"] = "Видео"
@@ -4522,9 +4805,6 @@ internal object Catalog {
         m["notify.chooseAdd"] = "Выбери «{add}»"
         m["notify.done"] = "Готово"
         m["notify.gotIt"] = "Понятно"
-    }
-
-    private fun ru4(m: HashMap<String, String>) {
         m["notify.hintBlocked"] = "Уведомления заблокированы в настройках браузера"
         m["notify.hintBlockedPhone"] = "Уведомления заблокированы в настройках"
         m["notify.hintOff"] = "Уведомления выключены"
@@ -4619,6 +4899,9 @@ internal object Catalog {
         m["profile.noNameAdded"] = "Имя не указано"
         m["profile.noTimeZoneMatches"] = "По запросу «{trim}» часовых поясов нет."
         m["profile.photoNotRemoved"] = "Не удалось удалить фото. Попробуй ещё раз."
+    }
+
+    private fun ru5(m: HashMap<String, String>) {
         m["profile.photoNotUpdated"] = "Не удалось обновить фото. Попробуй ещё раз."
         m["profile.photoPositionDragOrUse"] = "Положение фото: перетащи или используй стрелки"
         m["profile.photoPositionPinch"] = "Положение фото: перетащи, чтобы сдвинуть, разведи пальцы, чтобы приблизить"
@@ -4675,9 +4958,6 @@ internal object Catalog {
         m["settings.createdBy"] = "Создатель"
         m["settings.device.blocked"] = "Заблокировано"
         m["settings.device.blockedSub"] = "Заблокировано в этом браузере. «Разрешить» покажет, как снять блокировку."
-    }
-
-    private fun ru5(m: HashMap<String, String>) {
         m["settings.device.blockedSubAndroid"] = "Уведомления этого приложения выключены в настройках Android. «Разрешить» откроет их."
         m["settings.device.iosSub"] = "На iPhone добавь мир {brand} на экран «Домой», чтобы получать уведомления."
         m["settings.device.off"] = "Выкл."
@@ -4772,6 +5052,9 @@ internal object Catalog {
         m["tabs.new"] = "Новое"
         m["tabs.you"] = "Я"
         m["tabs.youAttention"] = "Я (уведомления на этом устройстве выключены)"
+    }
+
+    private fun ru6(m: HashMap<String, String>) {
         m["unblock.androidChrome1"] = "Нажми ⋮ справа вверху, затем «Настройки»"
         m["unblock.androidChrome2"] = "Настройки сайтов › Уведомления"
         m["unblock.androidChrome3"] = "Найди этот сайт в списке «Заблокировано» и нажми «Разрешить»"
@@ -4828,9 +5111,6 @@ internal object Catalog {
         m["universe.shareText"] = "Ключ от мира {name}: {key}"
         m["universe.stepOf2"] = "Шаг {step} из 2"
         m["universe.stepOf5"] = "Шаг {step} из 5"
-    }
-
-    private fun ru6(m: HashMap<String, String>) {
         m["universe.thisDevicesZonePickedFor"] = "Взяли часовой пояс этого устройства."
         m["universe.thisIsSKey"] = "Это ключ от мира {name}"
         m["universe.timeZone"] = "Часовой пояс"

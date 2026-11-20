@@ -48,6 +48,15 @@ object Fingerprint {
         runCatching { KeyStore.getInstance(STORE).apply { load(null) }.deleteEntry(alias(userId)) }
     }
 
+    /** Data deletion (DL-1/DL-2): every citizen's fingerprint unlock on this phone goes, keys included. */
+    fun forgetAll(context: Context) {
+        prefs(context).edit().clear().apply()
+        runCatching {
+            val store = KeyStore.getInstance(STORE).apply { load(null) }
+            store.aliases().toList().filter { it.startsWith("dl_pin_") }.forEach { store.deleteEntry(it) }
+        }
+    }
+
     private fun key(userId: String, create: Boolean): SecretKey? {
         val store = KeyStore.getInstance(STORE).apply { load(null) }
         (store.getKey(alias(userId), null) as? SecretKey)?.let { if (!create) return it }

@@ -60,6 +60,8 @@ data class Row(
     val moodLabel: String? = null,
     val stamp: StampMark? = null,
     val replyToId: Id? = null,
+    /** Doc "Delululand — Data Deletion" DL-5: my letter to a citizen who has since left. */
+    val toFormer: Boolean = false,
 )
 
 @Serializable
