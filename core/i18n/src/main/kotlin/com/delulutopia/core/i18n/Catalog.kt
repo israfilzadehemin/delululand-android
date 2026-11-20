@@ -5,7 +5,7 @@ package com.delulutopia.core.i18n
 
 internal object Catalog {
     val en: Map<String, String> by lazy {
-        HashMap<String, String>(2066).apply {
+        HashMap<String, String>(2072).apply {
             en0(this)
             en1(this)
             en2(this)
@@ -606,6 +606,9 @@ internal object Catalog {
         m["media.doodleTooLarge"] = "This doodle is larger than 2 MB"
         m["media.drawADoodle"] = "Draw a doodle"
         m["media.flip"] = "Flip"
+        m["media.groupAudio"] = "Voice & audio · {n}"
+        m["media.groupPhotos"] = "Photos · {n}"
+        m["media.groupVideo"] = "Video · {n}"
         m["media.microphoneIsOffAllowIt"] = "Microphone is off · Allow it in your browser settings"
         m["media.noCameraApp"] = "No camera app found on this phone"
         m["media.notNow"] = "Not now"
@@ -623,12 +626,12 @@ internal object Catalog {
         m["media.playbackSpeed"] = "Playback speed {speed}"
         m["media.processing"] = "Processing"
         m["media.progress"] = "{time} / {total}"
-        m["media.readFailed"] = "This file couldn't be read from your phone"
-        m["media.record"] = "● Record"
-        m["media.recordAVideo"] = "Record a video"
     }
 
     private fun en4(m: HashMap<String, String>) {
+        m["media.readFailed"] = "This file couldn't be read from your phone"
+        m["media.record"] = "● Record"
+        m["media.recordAVideo"] = "Record a video"
         m["media.recordAVoiceNote"] = "Record a voice note"
         m["media.removeDoodle"] = "Remove doodle"
         m["media.removePhoto"] = "Remove photo {n}"
@@ -776,12 +779,12 @@ internal object Catalog {
         m["plan.today"] = "Today"
         m["plan.unlimited"] = "Unlimited"
         m["plan.videoEach"] = "{seconds} s each · {daily} a day"
-        m["plan.videos"] = "Videos"
-        m["profile.316LettersOrDigits"] = "3–16 letters or digits, no spaces"
-        m["profile.allZones"] = "All zones"
     }
 
     private fun en5(m: HashMap<String, String>) {
+        m["plan.videos"] = "Videos"
+        m["profile.316LettersOrDigits"] = "3–16 letters or digits, no spaces"
+        m["profile.allZones"] = "All zones"
         m["profile.back"] = "Back"
         m["profile.cancel"] = "Cancel"
         m["profile.changePhoto"] = "Change photo"
@@ -929,12 +932,12 @@ internal object Catalog {
         m["settings.thisPhone"] = "This phone · {state}"
         m["settings.thisPhoneState"] = "this phone: {device}"
         m["settings.universe"] = "Universe"
-        m["settings.universeSaved"] = "Universe saved"
-        m["settings.viewProfile"] = "View profile"
-        m["settings.welcomeMessage"] = "Welcome message"
     }
 
     private fun en6(m: HashMap<String, String>) {
+        m["settings.universeSaved"] = "Universe saved"
+        m["settings.viewProfile"] = "View profile"
+        m["settings.welcomeMessage"] = "Welcome message"
         m["settings.you"] = "You"
         m["settings.yourFriend"] = "your friend"
         m["stamps.addAStamp"] = "Add a stamp"
@@ -1071,7 +1074,7 @@ internal object Catalog {
     }
 
     val az: Map<String, String> by lazy {
-        HashMap<String, String>(2066).apply {
+        HashMap<String, String>(2072).apply {
             az0(this)
             az1(this)
             az2(this)
@@ -1672,6 +1675,9 @@ internal object Catalog {
         m["media.doodleTooLarge"] = "Bu cızma-qara 2 MB-dan böyükdür"
         m["media.drawADoodle"] = "Cızma-qara çək"
         m["media.flip"] = "Çevir"
+        m["media.groupAudio"] = "Səs · {n}"
+        m["media.groupPhotos"] = "Foto · {n}"
+        m["media.groupVideo"] = "Video · {n}"
         m["media.microphoneIsOffAllowIt"] = "Mikrofon bağlıdır · Brauzerin ayarlarında icazə ver"
         m["media.noCameraApp"] = "Bu telefonda kamera tətbiqi tapılmadı"
         m["media.notNow"] = "İndi yox"
@@ -1689,12 +1695,12 @@ internal object Catalog {
         m["media.playbackSpeed"] = "Səsləndirmə sürəti {speed}"
         m["media.processing"] = "Hazırlanır"
         m["media.progress"] = "{time} / {total}"
-        m["media.readFailed"] = "Bu fayl telefonundan oxunmadı"
-        m["media.record"] = "● Yaz"
-        m["media.recordAVideo"] = "Video çək"
     }
 
     private fun az4(m: HashMap<String, String>) {
+        m["media.readFailed"] = "Bu fayl telefonundan oxunmadı"
+        m["media.record"] = "● Yaz"
+        m["media.recordAVideo"] = "Video çək"
         m["media.recordAVoiceNote"] = "Səsli mesaj yaz"
         m["media.removeDoodle"] = "Cızma-qaranı çıxar"
         m["media.removePhoto"] = "{n}. fotonu çıxar"
@@ -1842,12 +1848,12 @@ internal object Catalog {
         m["plan.today"] = "Bu gün"
         m["plan.unlimited"] = "Limitsiz"
         m["plan.videoEach"] = "hərəsi {seconds} san · gündə {daily}"
-        m["plan.videos"] = "Videolar"
-        m["profile.316LettersOrDigits"] = "3–16 hərf və ya rəqəm, boşluqsuz"
-        m["profile.allZones"] = "Bütün qurşaqlar"
     }
 
     private fun az5(m: HashMap<String, String>) {
+        m["plan.videos"] = "Videolar"
+        m["profile.316LettersOrDigits"] = "3–16 hərf və ya rəqəm, boşluqsuz"
+        m["profile.allZones"] = "Bütün qurşaqlar"
         m["profile.back"] = "Geri"
         m["profile.cancel"] = "Ləğv et"
         m["profile.changePhoto"] = "Fotonu dəyiş"
@@ -1995,12 +2001,12 @@ internal object Catalog {
         m["settings.thisPhone"] = "Bu telefon · {state}"
         m["settings.thisPhoneState"] = "bu telefon: {device}"
         m["settings.universe"] = "Sizin dünyanız"
-        m["settings.universeSaved"] = "Dünya saxlandı"
-        m["settings.viewProfile"] = "Profilə bax"
-        m["settings.welcomeMessage"] = "Salamlama mətni"
     }
 
     private fun az6(m: HashMap<String, String>) {
+        m["settings.universeSaved"] = "Dünya saxlandı"
+        m["settings.viewProfile"] = "Profilə bax"
+        m["settings.welcomeMessage"] = "Salamlama mətni"
         m["settings.you"] = "Mən"
         m["settings.yourFriend"] = "dostun"
         m["stamps.addAStamp"] = "Marka əlavə et"
@@ -2137,7 +2143,7 @@ internal object Catalog {
     }
 
     val fa: Map<String, String> by lazy {
-        HashMap<String, String>(2066).apply {
+        HashMap<String, String>(2072).apply {
             fa0(this)
             fa1(this)
             fa2(this)
@@ -2738,6 +2744,9 @@ internal object Catalog {
         m["media.doodleTooLarge"] = "این خط‌خطی از ۲ مگابایت بزرگ‌تره"
         m["media.drawADoodle"] = "یه خط‌خطی بکش"
         m["media.flip"] = "برگردون"
+        m["media.groupAudio"] = "صدا · {n}"
+        m["media.groupPhotos"] = "عکس · {n}"
+        m["media.groupVideo"] = "ویدیو · {n}"
         m["media.microphoneIsOffAllowIt"] = "میکروفون خاموشه · توی تنظیمات مرورگرت اجازه بده"
         m["media.noCameraApp"] = "روی این گوشی برنامه‌ی دوربین پیدا نشد"
         m["media.notNow"] = "الان نه"
@@ -2755,12 +2764,12 @@ internal object Catalog {
         m["media.playbackSpeed"] = "سرعت پخش {speed}"
         m["media.processing"] = "در حال آماده‌سازی"
         m["media.progress"] = "{time} / {total}"
-        m["media.readFailed"] = "این فایل از گوشیت خونده نشد"
-        m["media.record"] = "● ضبط"
-        m["media.recordAVideo"] = "یه ویدیو بگیر"
     }
 
     private fun fa4(m: HashMap<String, String>) {
+        m["media.readFailed"] = "این فایل از گوشیت خونده نشد"
+        m["media.record"] = "● ضبط"
+        m["media.recordAVideo"] = "یه ویدیو بگیر"
         m["media.recordAVoiceNote"] = "یه پیام صوتی ضبط کن"
         m["media.removeDoodle"] = "خط‌خطی رو بردار"
         m["media.removePhoto"] = "برداشتن عکس {n}"
@@ -2908,12 +2917,12 @@ internal object Catalog {
         m["plan.today"] = "امروز"
         m["plan.unlimited"] = "نامحدود"
         m["plan.videoEach"] = "هر کدوم {seconds} ثانیه · روزی {daily}"
-        m["plan.videos"] = "ویدیوها"
-        m["profile.316LettersOrDigits"] = "۳ تا ۱۶ حرف یا عدد، بدون فاصله"
-        m["profile.allZones"] = "همه‌ی منطقه‌ها"
     }
 
     private fun fa5(m: HashMap<String, String>) {
+        m["plan.videos"] = "ویدیوها"
+        m["profile.316LettersOrDigits"] = "۳ تا ۱۶ حرف یا عدد، بدون فاصله"
+        m["profile.allZones"] = "همه‌ی منطقه‌ها"
         m["profile.back"] = "برگشت"
         m["profile.cancel"] = "لغو"
         m["profile.changePhoto"] = "عوض کردن عکس"
@@ -3061,12 +3070,12 @@ internal object Catalog {
         m["settings.thisPhone"] = "این گوشی · {state}"
         m["settings.thisPhoneState"] = "این گوشی: {device}"
         m["settings.universe"] = "دنیا"
-        m["settings.universeSaved"] = "دنیا ذخیره شد"
-        m["settings.viewProfile"] = "دیدن پروفایل"
-        m["settings.welcomeMessage"] = "پیام خوش‌آمد"
     }
 
     private fun fa6(m: HashMap<String, String>) {
+        m["settings.universeSaved"] = "دنیا ذخیره شد"
+        m["settings.viewProfile"] = "دیدن پروفایل"
+        m["settings.welcomeMessage"] = "پیام خوش‌آمد"
         m["settings.you"] = "من"
         m["settings.yourFriend"] = "دوستت"
         m["stamps.addAStamp"] = "یه تمبر بزن"
@@ -3203,7 +3212,7 @@ internal object Catalog {
     }
 
     val tr: Map<String, String> by lazy {
-        HashMap<String, String>(2066).apply {
+        HashMap<String, String>(2072).apply {
             tr0(this)
             tr1(this)
             tr2(this)
@@ -3804,6 +3813,9 @@ internal object Catalog {
         m["media.doodleTooLarge"] = "Bu karalama 2 MB sınırını aşıyor"
         m["media.drawADoodle"] = "Karalama çiz"
         m["media.flip"] = "Çevir"
+        m["media.groupAudio"] = "Ses · {n}"
+        m["media.groupPhotos"] = "Fotoğraf · {n}"
+        m["media.groupVideo"] = "Video · {n}"
         m["media.microphoneIsOffAllowIt"] = "Mikrofon kapalı · Tarayıcı ayarlarından izin ver"
         m["media.noCameraApp"] = "Bu telefonda kamera uygulaması bulunamadı"
         m["media.notNow"] = "Şimdi değil"
@@ -3821,12 +3833,12 @@ internal object Catalog {
         m["media.playbackSpeed"] = "Oynatma hızı {speed}"
         m["media.processing"] = "Hazırlanıyor"
         m["media.progress"] = "{time} / {total}"
-        m["media.readFailed"] = "Bu dosya telefonundan okunamadı"
-        m["media.record"] = "● Kayıt"
-        m["media.recordAVideo"] = "Video çek"
     }
 
     private fun tr4(m: HashMap<String, String>) {
+        m["media.readFailed"] = "Bu dosya telefonundan okunamadı"
+        m["media.record"] = "● Kayıt"
+        m["media.recordAVideo"] = "Video çek"
         m["media.recordAVoiceNote"] = "Sesli mesaj kaydet"
         m["media.removeDoodle"] = "Karalamayı kaldır"
         m["media.removePhoto"] = "{n}. fotoğrafı kaldır"
@@ -3974,12 +3986,12 @@ internal object Catalog {
         m["plan.today"] = "Bugün"
         m["plan.unlimited"] = "Sınırsız"
         m["plan.videoEach"] = "her biri {seconds} sn · günde {daily}"
-        m["plan.videos"] = "Videolar"
-        m["profile.316LettersOrDigits"] = "3–16 harf ya da rakam, boşluksuz"
-        m["profile.allZones"] = "Tüm saat dilimleri"
     }
 
     private fun tr5(m: HashMap<String, String>) {
+        m["plan.videos"] = "Videolar"
+        m["profile.316LettersOrDigits"] = "3–16 harf ya da rakam, boşluksuz"
+        m["profile.allZones"] = "Tüm saat dilimleri"
         m["profile.back"] = "Geri"
         m["profile.cancel"] = "Vazgeç"
         m["profile.changePhoto"] = "Fotoğrafı değiştir"
@@ -4127,12 +4139,12 @@ internal object Catalog {
         m["settings.thisPhone"] = "Bu telefon · {state}"
         m["settings.thisPhoneState"] = "bu telefon: {device}"
         m["settings.universe"] = "Dünyanız"
-        m["settings.universeSaved"] = "Dünya kaydedildi"
-        m["settings.viewProfile"] = "Profile bak"
-        m["settings.welcomeMessage"] = "Karşılama mesajı"
     }
 
     private fun tr6(m: HashMap<String, String>) {
+        m["settings.universeSaved"] = "Dünya kaydedildi"
+        m["settings.viewProfile"] = "Profile bak"
+        m["settings.welcomeMessage"] = "Karşılama mesajı"
         m["settings.you"] = "Ben"
         m["settings.yourFriend"] = "arkadaşın"
         m["stamps.addAStamp"] = "Pul ekle"
@@ -4269,7 +4281,7 @@ internal object Catalog {
     }
 
     val ru: Map<String, String> by lazy {
-        HashMap<String, String>(2102).apply {
+        HashMap<String, String>(2108).apply {
             ru0(this)
             ru1(this)
             ru2(this)
@@ -4885,15 +4897,18 @@ internal object Catalog {
         m["media.doodleTooLarge"] = "Этот рисунок больше 2 МБ"
         m["media.drawADoodle"] = "Нарисовать"
         m["media.flip"] = "Сменить камеру"
+        m["media.groupAudio"] = "Аудио · {n}"
+        m["media.groupPhotos"] = "Фото · {n}"
+        m["media.groupVideo"] = "Видео · {n}"
         m["media.microphoneIsOffAllowIt"] = "Микрофон выключен · Разреши его в настройках браузера"
         m["media.noCameraApp"] = "На этом телефоне не нашлось приложения камеры"
         m["media.notNow"] = "Не сейчас"
-        m["media.notesStopAtFiveMinutes"] = "Голосовые длятся до пяти минут и открываются на любом телефоне. Если не разрешить, можно прикрепить аудиофайл."
-        m["media.oneDoodlePerLetter"] = "Один рисунок на письмо"
-        m["media.pause"] = "Пауза: {label}"
     }
 
     private fun ru4(m: HashMap<String, String>) {
+        m["media.notesStopAtFiveMinutes"] = "Голосовые длятся до пяти минут и открываются на любом телефоне. Если не разрешить, можно прикрепить аудиофайл."
+        m["media.oneDoodlePerLetter"] = "Один рисунок на письмо"
+        m["media.pause"] = "Пауза: {label}"
         m["media.pauseVoiceNote"] = "Поставить голосовое на паузу"
         m["media.photoExpired"] = "Срок хранения фото истёк"
         m["media.photoOf"] = "Фото {n} из {of}"
@@ -5041,12 +5056,12 @@ internal object Catalog {
         m["pin.usePin"] = "Ввести PIN-код"
         m["plan.allowance"] = "Лимит"
         m["plan.boardDoodles"] = "Рисунки на доске"
-        m["plan.both"] = "Действует для вас обоих."
-        m["plan.emails"] = "Имейлы"
-        m["plan.free"] = "Бесплатный"
     }
 
     private fun ru5(m: HashMap<String, String>) {
+        m["plan.both"] = "Действует для вас обоих."
+        m["plan.emails"] = "Имейлы"
+        m["plan.free"] = "Бесплатный"
         m["plan.left"] = "Осталось: {n}"
         m["plan.noneLeft"] = "Не осталось"
         m["plan.perDay"] = "{n} в день"
@@ -5194,12 +5209,12 @@ internal object Catalog {
         m["settings.savedOnThisPhoneOnly"] = "Сохраняется только на этом телефоне."
         m["settings.seasonalEffects"] = "Сезонные эффекты"
         m["settings.sectionNotifications"] = "{section}: уведомления"
-        m["settings.seeItAsYourFriend"] = "Посмотреть со стороны"
-        m["settings.settings"] = "Настройки"
-        m["settings.someOn"] = "Включено: {on} из {total}"
     }
 
     private fun ru6(m: HashMap<String, String>) {
+        m["settings.seeItAsYourFriend"] = "Посмотреть со стороны"
+        m["settings.settings"] = "Настройки"
+        m["settings.someOn"] = "Включено: {on} из {total}"
         m["settings.soon"] = "Скоро"
         m["settings.theOldKeyStopsWorking"] = "Старый ключ перестанет работать. Устройства, где выполнен вход, останутся внутри; тем, где только вводили ключ, понадобится новый."
         m["settings.theme"] = "Тема"
@@ -5347,12 +5362,12 @@ internal object Catalog {
         m["write.showSLetter"] = "Показать полученное письмо"
         m["write.theLetterYouAreAnswering"] = "Письмо, на которое ты отвечаешь"
         m["write.thisLetterCantBeEdited"] = "Это письмо уже нельзя изменить."
-        m["write.to"] = "Кому: {friend}"
-        m["write.tooLateTheOriginalVersion"] = "Уже поздно — первая версия в пути."
-        m["write.untilEditOrCancel"] = "До {time} его ещё можно изменить или отменить в «Письмах» или на главной."
     }
 
     private fun ru7(m: HashMap<String, String>) {
+        m["write.to"] = "Кому: {friend}"
+        m["write.tooLateTheOriginalVersion"] = "Уже поздно — первая версия в пути."
+        m["write.untilEditOrCancel"] = "До {time} его ещё можно изменить или отменить в «Письмах» или на главной."
         m["write.yes"] = "Да"
     }
 }
