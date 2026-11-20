@@ -6,6 +6,7 @@ import com.delulutopia.core.data.SessionRepository
 import com.delulutopia.core.data.SessionState
 import com.delulutopia.core.network.ApiCaller
 import com.delulutopia.core.network.DelulutopiaApi
+import com.delulutopia.core.network.model.EmailsDeliveredBody
 import com.delulutopia.core.network.model.PushDeviceBody
 import com.google.android.gms.tasks.Task
 import com.google.firebase.FirebaseApp
@@ -67,6 +68,14 @@ class PushRegistrar @Inject constructor(
     fun onNewToken(token: String) {
         device.token = token
         if (signedIn) scope.launch { register(token) }
+    }
+
+    /**
+     * Read Ticks TK2: tells the API that a pushed email reached this phone, so the sender sees ✓✓.
+     * One try: if it fails, the app's next fetch of Home or the emails delivers it anyway.
+     */
+    fun delivered(emailId: String) {
+        scope.launch { runCatching { caller.call { api.emailsDelivered(EmailsDeliveredBody(listOf(emailId))) } } }
     }
 
     private suspend fun currentToken(): String? = device.token ?: runCatching { FirebaseMessaging.getInstance().token.await() }

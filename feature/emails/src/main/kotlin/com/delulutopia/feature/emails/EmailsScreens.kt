@@ -298,13 +298,21 @@ private fun ThreadCard(row: ThreadRow, nowMs: Long, home: Home?) {
                 maxLines = 1,
             )
             if (snippet.isNotEmpty()) {
-                Text(
-                    snippet,
-                    style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp, lineHeight = 14.sp),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
+                // Read Ticks TK10: my last email's ticks before the snippet, not before a reaction notice.
+                val ticks = TickStatus.ofWire(row.lastStatus)?.takeIf { mineLast && !reactionWins(row.lastReaction, reacted, row.lastEmailAt) }
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    if (ticks != null) {
+                        val spoken = t("emails.status.${ticks.wire}")
+                        ReadTicks(ticks, Modifier.semantics { contentDescription = spoken })
+                    }
+                    Text(
+                        snippet,
+                        style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp, lineHeight = 14.sp),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
             }
         }
         if (unread) DlMailPill(t("emails.new", "fresh" to fresh))
@@ -363,7 +371,6 @@ private fun ThreadBody(vm: ThreadViewModel, me: Citizen?, friend: Citizen?, home
     var unsentSheet by remember { mutableStateOf(false) }
     val items = if (unsent != null) listOf(unsent.email) + vm.items else vm.items
     var photo by remember { mutableStateOf<Pair<List<Att>, Int>?>(null) }
-    val myNewest = vm.items.firstOrNull { it.senderId == me?.id }
     val list = rememberLazyListState()
     val scope = rememberCoroutineScope()
     // EB10/EB11: emails that arrive after the first paint grow in; the pill shows when scrolled up.
@@ -428,7 +435,7 @@ private fun ThreadBody(vm: ThreadViewModel, me: Citizen?, friend: Citizen?, home
                             friend = friend,
                             nowMs = nowMs,
                             maxWidth = maxBubble,
-                            seen = e.readAt?.takeIf { e.id == myNewest?.id },
+                            ticks = if (mine && pending == null) TickStatus.of(e) else null,
                             onPhoto = { photos, at -> photo = photos to at },
                             onReacted = vm::reacted,
                             quoteName = quoteName,
@@ -625,7 +632,8 @@ private fun Bubble(
     friend: Citizen?,
     nowMs: Long,
     maxWidth: Dp,
-    seen: String?,
+    /** Read Ticks TK5: my own email's ticks; null for the friend's and a pending one. */
+    ticks: TickStatus?,
     onPhoto: (List<Att>, Int) -> Unit,
     onReacted: () -> Unit,
     quoteName: (String) -> String,
@@ -685,7 +693,7 @@ private fun Bubble(
         null
     }
     val reacted = reactions.chips.isNotEmpty()
-    val stamp = Time.clock(e.sentAt, nowMs) + (seen?.let { " · " + t("emails.seen", "time" to Time.clock(it, nowMs)) } ?: "")
+    val stamp = Time.clock(e.sentAt, nowMs)
     val ink = MaterialTheme.colorScheme.onSurface
     val reactLabel = t("emails.react")
     val replyLabel = t("emails.reply")
@@ -751,6 +759,7 @@ private fun Bubble(
                     mine = mine,
                     reacted = reacted,
                     stamp = stamp,
+                    ticks = ticks,
                     maxWidth = maxWidth,
                     quoteName = quoteName,
                     onPhoto = onPhoto,
@@ -859,6 +868,8 @@ private fun Bubble(
             recents = remember { reactionRecents(context) },
             isMine = reactions::mine,
             canCopy = e.text.isNotBlank(),
+            infoRows = deliveryRows(e, mine).size,
+            info = { DeliveryCard(e, mine, nowMs) },
             onPick = {
                 layer = null
                 reactions.toggle(it)
@@ -880,6 +891,7 @@ private fun Bubble(
                 mine = mine,
                 reacted = reacted,
                 stamp = stamp,
+                ticks = ticks,
                 maxWidth = maxWidth,
                 quoteName = quoteName,
                 onPhoto = { _, _ -> },
@@ -926,6 +938,7 @@ private fun BubbleSurface(
     mine: Boolean,
     reacted: Boolean,
     stamp: String,
+    ticks: TickStatus? = null,
     maxWidth: Dp,
     quoteName: (String) -> String,
     onPhoto: (List<Att>, Int) -> Unit,
@@ -969,7 +982,7 @@ private fun BubbleSurface(
             if (timeAt == TimeAt.Text) {
                 TextWithTime(
                     text = { onLayout -> LinkedText(e.text, style = style, color = ink, onTextLayout = onLayout) },
-                    time = { BubbleTime(stamp, pending = pending) },
+                    time = { BubbleTime(stamp, pending = pending, ticks = ticks) },
                 )
             } else {
                 LinkedText(e.text, style = style, color = ink)
@@ -982,7 +995,7 @@ private fun BubbleSurface(
                 } else {
                     VideoPlayer(resolveMedia(base, v.url), v.thumbUrl?.let { resolveMedia(base, it) }, v.durationMs, v.width, v.height)
                 }
-                if (timeAt == TimeAt.Video) BubbleTime(stamp, Modifier.align(Alignment.BottomEnd).padding(5.dp), onMedia = true, pending = pending)
+                if (timeAt == TimeAt.Video) BubbleTime(stamp, Modifier.align(Alignment.BottomEnd).padding(5.dp), onMedia = true, pending = pending, ticks = ticks)
             }
         }
         if (allPhotos.isNotEmpty()) {
@@ -1002,7 +1015,7 @@ private fun BubbleSurface(
                         )
                     }
                 }
-                if (timeAt == TimeAt.Photos) BubbleTime(stamp, Modifier.align(Alignment.BottomEnd).padding(5.dp), onMedia = true, pending = pending)
+                if (timeAt == TimeAt.Photos) BubbleTime(stamp, Modifier.align(Alignment.BottomEnd).padding(5.dp), onMedia = true, pending = pending, ticks = ticks)
             }
         }
         // EP7: the notes after this one in the bubble, then the same sender's next emails, play on.
@@ -1022,7 +1035,7 @@ private fun BubbleSurface(
                 )
             }
         }
-        if (timeAt == TimeAt.Line) BubbleTime(stamp, Modifier.align(Alignment.End).padding(top = 0.dp), pending = pending)
+        if (timeAt == TimeAt.Line) BubbleTime(stamp, Modifier.align(Alignment.End).padding(top = 0.dp), pending = pending, ticks = ticks)
     }
 }
 
