@@ -622,6 +622,16 @@ object WebIcons {
         )
     }
 
+    /** Optimistic send OS4: the "Not sent" disc (web IconAlert). */
+    val Alert: ImageVector by lazy {
+        icon(
+            "IconAlert",
+            24f,
+            24f,
+            E("M3 12a9 9 0 1 0 18 0a9 9 0 1 0-18 0M12 7.5v6M12 16.5v.5", fill = false, stroke = true, width = 2f),
+        )
+    }
+
     private class E(val d: String, val fill: Boolean, val stroke: Boolean, val width: Float)
 
     /** Icons that point along the reading direction mirror in Persian (L3), as the web's `dl-rtl-flip`. */

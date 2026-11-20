@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.absoluteOffset
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -353,10 +354,13 @@ fun ThreadScreen(id: String) {
 @Composable
 private fun ThreadBody(vm: ThreadViewModel, me: Citizen?, friend: Citizen?, home: Home?) {
     val nowMs = rememberNow(30_000)
-    // Newest first: item 0 sits at the bottom of the reversed list.
-    val items = vm.items
+    // Newest first: item 0 sits at the bottom of the reversed list. OS3: my email in the air or
+    // failed is the newest, drawn before the server has it.
+    val unsent = vm.composer.unsent
+    var unsentSheet by remember { mutableStateOf(false) }
+    val items = if (unsent != null) listOf(unsent.email) + vm.items else vm.items
     var photo by remember { mutableStateOf<Pair<List<Att>, Int>?>(null) }
-    val myNewest = items.firstOrNull { it.senderId == me?.id }
+    val myNewest = vm.items.firstOrNull { it.senderId == me?.id }
     val list = rememberLazyListState()
     val scope = rememberCoroutineScope()
     // EB10/EB11: emails that arrive after the first paint grow in; the pill shows when scrolled up.
@@ -372,7 +376,7 @@ private fun ThreadBody(vm: ThreadViewModel, me: Citizen?, friend: Citizen?, home
     val openOriginal = { target: String ->
         scope.launch {
             if (vm.ensureLoaded(target)) {
-                lazyIndexOf(vm.items, target)?.let { list.animateScrollToItem(it) }
+                lazyIndexOf(vm.composer.unsent?.let { listOf(it.email) + vm.items } ?: vm.items, target)?.let { list.animateScrollToItem(it) }
                 flashId = target
             }
         }
@@ -382,7 +386,7 @@ private fun ThreadBody(vm: ThreadViewModel, me: Citizen?, friend: Citizen?, home
     LaunchedEffect(newestId) {
         if (newestId == null) return@LaunchedEffect
         val near = list.firstVisibleItemIndex <= 1
-        if (near || newestId == sentId) {
+        if (near || newestId == sentId || newestId.startsWith("local-")) {
             list.animateScrollToItem(0)
             newBelow = false
         } else if (items.first().senderId != me?.id) {
@@ -409,8 +413,10 @@ private fun ThreadBody(vm: ThreadViewModel, me: Citizen?, friend: Citizen?, home
                     // EB5: a run is one sender's emails in a row on one day; its first bubble has the name.
                     val first = newDay || older?.senderId != e.senderId
                     item(key = e.id) {
-                        val fresh = firstIds.isNotEmpty() && e.id !in firstIds
+                        // OS3: the sent email takes the provisional one's place without growing in again.
+                        val fresh = firstIds.isNotEmpty() && e.id !in firstIds && e.id !in vm.quiet
                         val mine = e.senderId == me?.id
+                        val pending = unsent?.takeIf { it.email.id == e.id }?.status
                         Bubble(
                             e,
                             first = first,
@@ -429,8 +435,11 @@ private fun ThreadBody(vm: ThreadViewModel, me: Citizen?, friend: Citizen?, home
                             toward = (if (mine) -1 else 1) * (if (rtl) -1 else 1),
                             flash = flashId == e.id,
                             onFlashed = { if (flashId == e.id) flashId = null },
+                            pending = pending,
+                            onUnsent = { unsentSheet = true },
                             modifier = Modifier
-                                .animateItem(fadeInSpec = null, fadeOutSpec = null)
+                                // OS6: a cancelled bubble fades away; others leave as before.
+                                .animateItem(fadeInSpec = null, fadeOutSpec = if (e.id.startsWith("local-") && motionOn()) tween(200) else null)
                                 .then(if (fresh) Modifier.enter(Enter.PopIn, key = e.id) else Modifier),
                         )
                     }
@@ -521,6 +530,28 @@ private fun ThreadBody(vm: ThreadViewModel, me: Citizen?, friend: Citizen?, home
         }
     }
     photo?.let { (photos, at) -> Lightbox(photos, at, { photo = photos to it }, { photo = null }) }
+    val fail = unsent?.fail
+    if (unsentSheet && unsent?.status == EmailOutbox.Status.Failed && fail != null) {
+        UnsentSheet(
+            fail,
+            reason = when (fail.kind) {
+                EmailOutbox.FailKind.Offline -> t("emails.noConnection")
+                EmailOutbox.FailKind.Timeout -> t("emails.noAnswer")
+                EmailOutbox.FailKind.Server -> t("emails.serverError")
+                EmailOutbox.FailKind.Credits -> creditsLine(home?.emailCredits?.copy(left = 0)) ?: t("emails.serverError")
+                EmailOutbox.FailKind.Refused -> fail.message.ifEmpty { t("common.newerVersion") }
+            },
+            onRetry = {
+                unsentSheet = false
+                vm.outbox.retry(vm.id)
+            },
+            onCancel = {
+                unsentSheet = false
+                vm.outbox.cancel(vm.id)
+            },
+            onDismiss = { unsentSheet = false },
+        )
+    }
 }
 
 /**
@@ -599,8 +630,12 @@ private fun Bubble(
     toward: Int,
     flash: Boolean,
     onFlashed: () -> Unit,
+    pending: EmailOutbox.Status? = null,
+    onUnsent: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
+    // OS3: nothing to reply to or react on until the server has it.
+    val live = pending == null
     val scope = rememberCoroutineScope()
     val view = LocalView.current
     val context = LocalContext.current
@@ -685,7 +720,13 @@ private fun Bubble(
         }
         // BA2: the bubble with its pill, and the ↩ disc on the free side, bottom-aligned.
         Row(verticalAlignment = Alignment.Bottom) {
-            if (mine) ReplyDisc(onReply, Modifier.offset(x = 4.dp))
+            if (mine) {
+                when (pending) {
+                    EmailOutbox.Status.Failed -> UnsentDisc(onUnsent, Modifier.offset(x = 4.dp))
+                    EmailOutbox.Status.Sending -> Spacer(Modifier.size(44.dp))
+                    null -> ReplyDisc(onReply, Modifier.offset(x = 4.dp))
+                }
+            }
             Box(contentAlignment = if (mine) Alignment.CenterEnd else Alignment.CenterStart) {
                 // RE6: the ↩ cue behind the bubble, uncovered as it moves.
                 Box(
@@ -710,70 +751,78 @@ private fun Bubble(
                     onPhoto = onPhoto,
                     onOpenQuote = onOpenQuote,
                     ring = ring.value,
+                    pending = pending,
                     modifier = Modifier
                         .alpha(if (layer != null) 0f else 1f)
                         .onGloballyPositioned { bounds[0] = it.boundsInWindow() }
                         .absoluteOffset { IntOffset((swipe.value * density).roundToInt(), 0) }
-                        .semantics {
-                            customActions = listOfNotNull(
-                                CustomAccessibilityAction(reactLabel) {
-                                    openLayer()
-                                    true
-                                },
-                                CustomAccessibilityAction(replyLabel) {
-                                    replyNow()
-                                    true
-                                },
-                                if (e.text.isNotBlank()) {
-                                    CustomAccessibilityAction(copyLabel) {
-                                        copy()
-                                        true
+                        .then(
+                            if (live) {
+                                Modifier
+                                    .semantics {
+                                        customActions = listOfNotNull(
+                                            CustomAccessibilityAction(reactLabel) {
+                                                openLayer()
+                                                true
+                                            },
+                                            CustomAccessibilityAction(replyLabel) {
+                                                replyNow()
+                                                true
+                                            },
+                                            if (e.text.isNotBlank()) {
+                                                CustomAccessibilityAction(copyLabel) {
+                                                    copy()
+                                                    true
+                                                }
+                                            } else {
+                                                null
+                                            },
+                                        )
                                     }
-                                } else {
-                                    null
-                                },
-                            )
-                        }
-                        .longPressToReact(openLayer)
-                        .pointerInput(toward) {
-                            var raw = 0f
-                            val settle = {
-                                scope.launch { swipe.animateTo(0f, if (on) tween(220) else tween(0)) }
-                            }
-                            detectHorizontalDragGestures(
-                                onDragStart = {
-                                    raw = 0f
-                                    armed = false
-                                },
-                                onDragEnd = {
-                                    settle()
-                                    if (armed) replyNow()
-                                    armed = false
-                                },
-                                onDragCancel = {
-                                    settle()
-                                    armed = false
-                                },
-                            ) { change, amount ->
-                                raw += amount.toDp().value
-                                val offset = swipeOffset(raw, toward)
-                                if (offset != 0f) change.consume()
-                                val nowArmed = abs(offset) >= SWIPE_ARM_DP
-                                if (nowArmed && !armed) {
-                                    view.performHapticFeedback(
-                                        if (Build.VERSION.SDK_INT >=
-                                            Build.VERSION_CODES.R
-                                        ) {
-                                            HapticFeedbackConstants.CONFIRM
-                                        } else {
-                                            HapticFeedbackConstants.VIRTUAL_KEY
-                                        },
-                                    )
-                                }
-                                armed = nowArmed
-                                scope.launch { swipe.snapTo(offset) }
-                            }
-                        },
+                                    .longPressToReact(openLayer)
+                                    .pointerInput(toward) {
+                                        var raw = 0f
+                                        val settle = {
+                                            scope.launch { swipe.animateTo(0f, if (on) tween(220) else tween(0)) }
+                                        }
+                                        detectHorizontalDragGestures(
+                                            onDragStart = {
+                                                raw = 0f
+                                                armed = false
+                                            },
+                                            onDragEnd = {
+                                                settle()
+                                                if (armed) replyNow()
+                                                armed = false
+                                            },
+                                            onDragCancel = {
+                                                settle()
+                                                armed = false
+                                            },
+                                        ) { change, amount ->
+                                            raw += amount.toDp().value
+                                            val offset = swipeOffset(raw, toward)
+                                            if (offset != 0f) change.consume()
+                                            val nowArmed = abs(offset) >= SWIPE_ARM_DP
+                                            if (nowArmed && !armed) {
+                                                view.performHapticFeedback(
+                                                    if (Build.VERSION.SDK_INT >=
+                                                        Build.VERSION_CODES.R
+                                                    ) {
+                                                        HapticFeedbackConstants.CONFIRM
+                                                    } else {
+                                                        HapticFeedbackConstants.VIRTUAL_KEY
+                                                    },
+                                                )
+                                            }
+                                            armed = nowArmed
+                                            scope.launch { swipe.snapTo(offset) }
+                                        }
+                                    }
+                            } else {
+                                Modifier
+                            },
+                        ),
                 )
                 // BA7: the pill hangs 15 dp below the outer edge, 10 dp in.
                 ReactionPill(
@@ -877,6 +926,7 @@ private fun BubbleSurface(
     onOpenQuote: (String) -> Unit,
     ring: Float,
     modifier: Modifier = Modifier,
+    pending: EmailOutbox.Status? = null,
 ) {
     val base = LocalServerBaseUrl.current
     val photos = e.attachments.filter { it.kind == "photo" }
@@ -910,7 +960,7 @@ private fun BubbleSurface(
             if (timeAt == TimeAt.Text) {
                 TextWithTime(
                     text = { onLayout -> LinkedText(e.text, style = style, color = ink, onTextLayout = onLayout) },
-                    time = { BubbleTime(stamp) },
+                    time = { BubbleTime(stamp, pending = pending) },
                 )
             } else {
                 LinkedText(e.text, style = style, color = ink)
@@ -919,7 +969,7 @@ private fun BubbleSurface(
         video?.let { v ->
             Box {
                 VideoPlayer(resolveMedia(base, v.url), v.thumbUrl?.let { resolveMedia(base, it) }, v.durationMs, v.width, v.height)
-                if (timeAt == TimeAt.Video) BubbleTime(stamp, Modifier.align(Alignment.BottomEnd).padding(5.dp), onMedia = true)
+                if (timeAt == TimeAt.Video) BubbleTime(stamp, Modifier.align(Alignment.BottomEnd).padding(5.dp), onMedia = true, pending = pending)
             }
         }
         if (photos.isNotEmpty()) {
@@ -934,7 +984,7 @@ private fun BubbleSurface(
                         )
                     }
                 }
-                if (timeAt == TimeAt.Photos) BubbleTime(stamp, Modifier.align(Alignment.BottomEnd).padding(5.dp), onMedia = true)
+                if (timeAt == TimeAt.Photos) BubbleTime(stamp, Modifier.align(Alignment.BottomEnd).padding(5.dp), onMedia = true, pending = pending)
             }
         }
         audios.forEachIndexed { i, a ->
@@ -944,7 +994,7 @@ private fun BubbleSurface(
                 label = if (audios.size > 1) t("letters.voiceNoteN", "n" to i + 1) else t("media.voiceNoteLower"),
             )
         }
-        if (timeAt == TimeAt.Line) BubbleTime(stamp, Modifier.align(Alignment.End).padding(top = 0.dp))
+        if (timeAt == TimeAt.Line) BubbleTime(stamp, Modifier.align(Alignment.End).padding(top = 0.dp), pending = pending)
     }
 }
 

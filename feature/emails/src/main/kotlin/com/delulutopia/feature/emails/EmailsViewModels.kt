@@ -96,6 +96,7 @@ class ThreadViewModel @AssistedInject constructor(
     private val backend: Backend,
     private val homeRepo: HomeRepository,
     @ApplicationContext context: Context,
+    val outbox: EmailOutbox,
 ) : ViewModel() {
     @AssistedFactory
     interface Factory {
@@ -124,7 +125,10 @@ class ThreadViewModel @AssistedInject constructor(
     var olderFailed by mutableStateOf(false)
         private set
     private var markedFor: String? = null
-    val composer = EmailComposer(id.toString(), backend, homeRepo, viewModelScope, context).also { it.load() }
+    val composer = EmailComposer(id.toString(), backend, homeRepo, viewModelScope, context, outbox).also { it.load() }
+
+    /** OS3: emails that replace a provisional bubble; they do not grow in a second time. */
+    val quiet = mutableSetOf<String>()
 
     /** Newest first. */
     val items: List<Email> get() = known.values.sortedWith(compareByDescending<Email> { it.sentAt }.thenByDescending { it.id })
@@ -135,6 +139,14 @@ class ThreadViewModel @AssistedInject constructor(
         viewModelScope.launch {
             backend.refresher(viewModelScope, setOf("email", "reaction"), Refresher.THREAD_POLL_MS) { load() }
             load()
+        }
+        viewModelScope.launch {
+            outbox.resolutions.collect { (k, r) ->
+                if (k == id && r is EmailOutbox.Resolution.Sent) {
+                    quiet += r.email.id
+                    sent(r.email)
+                }
+            }
         }
     }
 
@@ -231,6 +243,7 @@ class ThreadViewModel @AssistedInject constructor(
     override fun onCleared() {
         composer.saver.flushOnHide()
         composer.saver.dispose()
+        composer.dispose()
     }
 }
 
