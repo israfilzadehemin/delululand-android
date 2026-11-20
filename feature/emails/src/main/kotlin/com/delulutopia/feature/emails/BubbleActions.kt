@@ -216,7 +216,11 @@ fun BubbleTime(label: String, modifier: Modifier = Modifier, onMedia: Boolean = 
 }
 
 /** The time chip's shape on photos and videos. */
-private fun mediaChip(fill: Color, vertical: Dp): Modifier = Modifier.clip(RoundedCornerShape(8.dp)).background(fill).padding(horizontal = 6.dp, vertical = vertical)
+private fun mediaChip(fill: Color, vertical: Dp): Modifier =
+    Modifier
+        .clip(RoundedCornerShape(8.dp))
+        .background(fill)
+        .padding(horizontal = 6.dp, vertical = vertical)
 
 /** BA2: the ↩ disc on the bubble's free side: a 28 dp face in a 44 dp target. */
 @Composable
