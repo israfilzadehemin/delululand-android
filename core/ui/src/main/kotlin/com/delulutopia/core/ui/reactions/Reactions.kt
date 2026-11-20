@@ -87,21 +87,22 @@ fun withMine(list: List<Reaction>, emoji: String, me: String, add: Boolean): Lis
 private val DEFAULT_RECENTS = listOf("❤️", "😂", "🥹", "😮", "😢", "🔥")
 private const val RECENTS = "reactionRecents"
 
-private fun readRecents(context: Context): List<String> {
+internal fun readRecents(context: Context): List<String> {
     val saved = context.getSharedPreferences("device", Context.MODE_PRIVATE).getString(RECENTS, null)?.split('\u0001').orEmpty()
     return (saved + DEFAULT_RECENTS).filter { it.isNotEmpty() }.distinct().take(6)
 }
 
-private fun pushRecent(context: Context, emoji: String) {
+internal fun pushRecent(context: Context, emoji: String) {
     val next = (listOf(emoji) + readRecents(context).filter { it != emoji }).take(6)
     context.getSharedPreferences("device", Context.MODE_PRIVATE).edit().putString(RECENTS, next.joinToString("\u0001")).apply()
 }
 
 /**
- * The chip row under a discussion, a comment or an email (doc "Delululand — Reactions" R1–R3; web
- * reactions/Reactions.tsx): one chip per emoji, highlighted when I am among its users, a count when
- * both used it. Tapping my chip removes mine; tapping the friend's adds the same. ＋ opens six recent
- * emojis and ⋯ the full picker. A long press shows who reacted. Changes show at once.
+ * The chip row under a discussion or a comment (doc "Delululand — Reactions" R1–R3; web
+ * reactions/Reactions.tsx; emails use the bubble pill and long-press layer instead, doc "Delululand —
+ * Bubble Actions"): one chip per emoji, highlighted when I am among its users, a count when both used
+ * it. Tapping my chip removes mine; tapping the friend's adds the same. ＋ opens six recent emojis and
+ * ⋯ the full picker. A long press shows who reacted. Changes show at once.
  */
 @OptIn(ExperimentalLayoutApi::class, ExperimentalFoundationApi::class)
 @Composable
