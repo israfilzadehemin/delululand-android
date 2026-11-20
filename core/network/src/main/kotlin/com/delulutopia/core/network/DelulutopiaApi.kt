@@ -12,7 +12,6 @@ import com.delulutopia.core.network.model.DComments
 import com.delulutopia.core.network.model.DDraft
 import com.delulutopia.core.network.model.DFull
 import com.delulutopia.core.network.model.DPage
-import com.delulutopia.core.network.model.EmailsDeliveredBody
 import com.delulutopia.core.network.model.DPosted
 import com.delulutopia.core.network.model.DeleteMeBody
 import com.delulutopia.core.network.model.DeleteUniverseBody
@@ -25,6 +24,7 @@ import com.delulutopia.core.network.model.EmailCredits
 import com.delulutopia.core.network.model.EmailDraft
 import com.delulutopia.core.network.model.EmailList
 import com.delulutopia.core.network.model.EmailSent
+import com.delulutopia.core.network.model.EmailsDeliveredBody
 import com.delulutopia.core.network.model.EmojiBody
 import com.delulutopia.core.network.model.EnterRequest
 import com.delulutopia.core.network.model.Entered

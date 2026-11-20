@@ -19,7 +19,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
@@ -76,13 +75,15 @@ fun ReadTicks(status: TickStatus, modifier: Modifier = Modifier, tint: Color = M
         // The web's viewBoxes: 16 × 12 for ✓, 20 × 12 for ✓✓.
         val sx = size.width / (if (single) 16f else 20f)
         val sy = size.height / 12f
-        fun p(x: Float, y: Float) = Offset(x * sx, y * sy)
+        fun line(vararg pts: Pair<Float, Float>) = Path().apply {
+            pts.forEachIndexed { i, (x, y) -> if (i == 0) moveTo(x * sx, y * sy) else lineTo(x * sx, y * sy) }
+        }
         val stroke = Stroke(width = 1.8f * sx, cap = StrokeCap.Round, join = StrokeJoin.Round)
         if (single) {
-            drawPath(Path().apply { moveTo(p(2.5f, 6.5f).x, p(2.5f, 6.5f).y); lineTo(p(5.7f, 9.7f).x, p(5.7f, 9.7f).y); lineTo(p(13.5f, 2f).x, p(13.5f, 2f).y) }, color, style = stroke)
+            drawPath(line(2.5f to 6.5f, 5.7f to 9.7f, 13.5f to 2f), color, style = stroke)
         } else {
-            drawPath(Path().apply { moveTo(p(1.5f, 6.5f).x, p(1.5f, 6.5f).y); lineTo(p(4.7f, 9.7f).x, p(4.7f, 9.7f).y); lineTo(p(12.5f, 2f).x, p(12.5f, 2f).y) }, color, style = stroke)
-            drawPath(Path().apply { moveTo(p(9.2f, 9f).x, p(9.2f, 9f).y); lineTo(p(9.9f, 9.7f).x, p(9.9f, 9.7f).y); lineTo(p(18f, 2f).x, p(18f, 2f).y) }, color, style = stroke)
+            drawPath(line(1.5f to 6.5f, 4.7f to 9.7f, 12.5f to 2f), color, style = stroke)
+            drawPath(line(9.2f to 9f, 9.9f to 9.7f, 18f to 2f), color, style = stroke)
         }
     }
 }

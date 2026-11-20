@@ -995,7 +995,15 @@ private fun BubbleSurface(
                 } else {
                     VideoPlayer(resolveMedia(base, v.url), v.thumbUrl?.let { resolveMedia(base, it) }, v.durationMs, v.width, v.height)
                 }
-                if (timeAt == TimeAt.Video) BubbleTime(stamp, Modifier.align(Alignment.BottomEnd).padding(5.dp), onMedia = true, pending = pending, ticks = ticks)
+                if (timeAt == TimeAt.Video) {
+                    BubbleTime(
+                        stamp,
+                        Modifier.align(Alignment.BottomEnd).padding(5.dp),
+                        onMedia = true,
+                        pending = pending,
+                        ticks = ticks,
+                    )
+                }
             }
         }
         if (allPhotos.isNotEmpty()) {
@@ -1015,7 +1023,15 @@ private fun BubbleSurface(
                         )
                     }
                 }
-                if (timeAt == TimeAt.Photos) BubbleTime(stamp, Modifier.align(Alignment.BottomEnd).padding(5.dp), onMedia = true, pending = pending, ticks = ticks)
+                if (timeAt == TimeAt.Photos) {
+                    BubbleTime(
+                        stamp,
+                        Modifier.align(Alignment.BottomEnd).padding(5.dp),
+                        onMedia = true,
+                        pending = pending,
+                        ticks = ticks,
+                    )
+                }
             }
         }
         // EP7: the notes after this one in the bubble, then the same sender's next emails, play on.
