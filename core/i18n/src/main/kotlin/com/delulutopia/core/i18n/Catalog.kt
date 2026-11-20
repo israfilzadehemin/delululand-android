@@ -5,7 +5,7 @@ package com.delulutopia.core.i18n
 
 internal object Catalog {
     val en: Map<String, String> by lazy {
-        HashMap<String, String>(1994).apply {
+        HashMap<String, String>(2016).apply {
             en0(this)
             en1(this)
             en2(this)
@@ -335,12 +335,18 @@ internal object Catalog {
         m["editor.letterText"] = "Letter text"
         m["editor.underline"] = "Underline"
         m["emails.aNewerVersionWasSaved"] = "A newer version was saved on another device. Load it?"
+        m["emails.addReaction"] = "Add"
+        m["emails.addReactionLabel"] = "Add {emoji} too"
+        m["emails.anotherReaction"] = "Another reaction"
         m["emails.attach"] = "Attach"
         m["emails.back"] = "Back"
         m["emails.backToEmails"] = "Back to Emails"
+        m["emails.bubbleLabel"] = "{name}, {time}. Enter for actions"
         m["emails.cancelReply"] = "Cancel reply"
         m["emails.closeAttachments"] = "Close attachments"
         m["emails.continueNewEmail"] = "Continue your new email"
+        m["emails.copied"] = "Copied"
+        m["emails.copyText"] = "Copy text"
         m["emails.couldntLoadOlderEmailsTry"] = "Couldn't load older emails. Try again."
         m["emails.couldntLoadYourDraftCheck"] = "Couldn't load your draft. Check your connection and try again."
         m["emails.count_one"] = "{n} email"
@@ -348,6 +354,7 @@ internal object Catalog {
         m["emails.creditsLeft_one"] = "{n} left today · renews at {time}"
         m["emails.creditsLeft_other"] = "{n} left today · renews at {time}"
         m["emails.email"] = "Email"
+        m["emails.emailActions"] = "Email actions"
         m["emails.emails"] = "Emails"
         m["emails.emailsNewestFirst"] = "Emails, newest first"
         m["emails.emailsOldestFirst"] = "Emails, oldest first"
@@ -372,6 +379,10 @@ internal object Catalog {
         m["emails.noEmailsYet"] = "No emails yet."
         m["emails.photoOfOpenFullSize"] = "Photo {n} of {count}, open full size"
         m["emails.pickAThreadToRead"] = "Pick a thread to read it here."
+        m["emails.react"] = "React"
+        m["emails.reactionsPill"] = "Reactions: {list}, {n}. Open"
+        m["emails.removeReaction"] = "Remove"
+        m["emails.removeReactionLabel"] = "Remove my {emoji}"
         m["emails.reply"] = "Reply"
         m["emails.replyLabel"] = "Reply"
         m["emails.replyingTo"] = "Replying to {name}"
@@ -462,6 +473,9 @@ internal object Catalog {
         m["home.sProfile"] = "{nickname}'s profile"
         m["home.set"] = "· set {age}"
         m["home.setYourMood"] = "Set your mood"
+    }
+
+    private fun en3(m: HashMap<String, String>) {
         m["home.to"] = "To {nickname}"
         m["home.waiting"] = "Send {name}'s key to the one person you want here."
         m["home.waitingCreator"] = "Send {name}'s key to the one person you want here. Lost it? Make a new one."
@@ -473,9 +487,6 @@ internal object Catalog {
         m["home.youUniverse"] = "You › Universe"
         m["home.yourOtherBrowsersStayLogged"] = "Your other browsers stay logged in. Forgot the current one? It can be cleared on the server; there is no e-mail reset."
         m["home.yourOtherDevicesStayLogged"] = "Your other devices stay logged in. Forgot the current one? It can be cleared on the server; there is no e-mail reset."
-    }
-
-    private fun en3(m: HashMap<String, String>) {
         m["letters.arrivesAt"] = "Arrives at {time}"
         m["letters.arrivesIn"] = "Arrives in {countdown}"
         m["letters.back"] = "Back"
@@ -615,6 +626,9 @@ internal object Catalog {
         m["media.uploading"] = "Uploading"
         m["media.use"] = "Use"
         m["media.video"] = "Video"
+    }
+
+    private fun en4(m: HashMap<String, String>) {
         m["media.videoTooLarge"] = "This video is larger than {mb} MB"
         m["media.videoTooLong"] = "This video is longer than {n} seconds"
         m["media.videoWithLength"] = "Video, {length}"
@@ -626,9 +640,6 @@ internal object Catalog {
         m["mood.ANGRY"] = "Angry"
         m["mood.ANXIOUS"] = "Anxious"
         m["mood.BLISSFUL"] = "Blissful"
-    }
-
-    private fun en4(m: HashMap<String, String>) {
         m["mood.BORED"] = "Bored"
         m["mood.BUSY"] = "Busy"
         m["mood.BUTTERFLIES"] = "Butterflies"
@@ -768,6 +779,9 @@ internal object Catalog {
         m["profile.photoNotUpdated"] = "Couldn't update your photo. Try again."
         m["profile.photoPositionDragOrUse"] = "Photo position: drag or use the arrow keys"
         m["profile.photoPositionPinch"] = "Photo position: drag to move, pinch to zoom"
+    }
+
+    private fun en5(m: HashMap<String, String>) {
         m["profile.photoTooLarge"] = "This photo is larger than 10 MB"
         m["profile.pickTimeZone"] = "Pick a time zone from the list"
         m["profile.profile"] = "Profile"
@@ -779,9 +793,6 @@ internal object Catalog {
         m["profile.surname"] = "Surname"
         m["profile.takePhoto"] = "Take photo"
         m["profile.thisDevice"] = "This device"
-    }
-
-    private fun en5(m: HashMap<String, String>) {
         m["profile.thisFileIsntAPhoto"] = "This file isn't a photo we can read"
         m["profile.timeZone"] = "Time zone"
         m["profile.timeZones"] = "Time zones"
@@ -921,6 +932,9 @@ internal object Catalog {
         m["unblock.androidChrome1"] = "Tap ⋮ at the top right, then Settings"
         m["unblock.androidChrome2"] = "Site settings › Notifications"
         m["unblock.androidChrome3"] = "Find this site under Blocked and tap Allow"
+    }
+
+    private fun en6(m: HashMap<String, String>) {
         m["unblock.chrome1"] = "Click the icon left of the address"
         m["unblock.chrome2"] = "Turn on Notifications (or Site settings › Notifications › Allow)"
         m["unblock.comeBack"] = "Come back here"
@@ -932,9 +946,6 @@ internal object Catalog {
         m["unblock.firefox3"] = "Reload the page and tap Allow again"
         m["unblock.iosApp1"] = "Open the iPhone Settings app"
         m["unblock.iosApp2"] = "Tap Notifications, then Delulutopia"
-    }
-
-    private fun en6(m: HashMap<String, String>) {
         m["unblock.iosApp3"] = "Turn on Allow Notifications"
         m["unblock.safari1"] = "Safari menu › Settings… › Websites"
         m["unblock.safari2"] = "Choose Notifications on the left"
@@ -1035,7 +1046,7 @@ internal object Catalog {
     }
 
     val az: Map<String, String> by lazy {
-        HashMap<String, String>(1994).apply {
+        HashMap<String, String>(2016).apply {
             az0(this)
             az1(this)
             az2(this)
@@ -1365,12 +1376,18 @@ internal object Catalog {
         m["editor.letterText"] = "Məktubun mətni"
         m["editor.underline"] = "Altından xətt"
         m["emails.aNewerVersionWasSaved"] = "Başqa cihazda daha təzə versiya saxlanıb. Yükləyək?"
+        m["emails.addReaction"] = "Əlavə et"
+        m["emails.addReactionLabel"] = "Sən də {emoji} qoy"
+        m["emails.anotherReaction"] = "Başqa reaksiya"
         m["emails.attach"] = "Əlavə et"
         m["emails.back"] = "Geri"
         m["emails.backToEmails"] = "E-məktublara qayıt"
+        m["emails.bubbleLabel"] = "{name}, {time}. Seçimlər üçün Enter"
         m["emails.cancelReply"] = "Cavabı ləğv et"
         m["emails.closeAttachments"] = "Əlavələri bağla"
         m["emails.continueNewEmail"] = "Yeni e-məktubuna davam et"
+        m["emails.copied"] = "Kopyalandı"
+        m["emails.copyText"] = "Mətni kopyala"
         m["emails.couldntLoadOlderEmailsTry"] = "Köhnə e-məktublar yüklənmədi. Bir də yoxla."
         m["emails.couldntLoadYourDraftCheck"] = "Qaralaman açılmadı. İnternetə bax və bir də yoxla."
         m["emails.count_one"] = "{n} e-məktub"
@@ -1378,6 +1395,7 @@ internal object Catalog {
         m["emails.creditsLeft_one"] = "Bu gün {n} e-məktub daha yaza bilərsən · yenilənmə: {time}"
         m["emails.creditsLeft_other"] = "Bu gün {n} e-məktub daha yaza bilərsən · yenilənmə: {time}"
         m["emails.email"] = "E-məktub"
+        m["emails.emailActions"] = "E-məktub əməliyyatları"
         m["emails.emails"] = "E-məktublar"
         m["emails.emailsNewestFirst"] = "E-məktublar, ən təzələr əvvəldə"
         m["emails.emailsOldestFirst"] = "E-məktublar, ən köhnələr əvvəldə"
@@ -1402,6 +1420,10 @@ internal object Catalog {
         m["emails.noEmailsYet"] = "Hələ e-məktub yoxdur."
         m["emails.photoOfOpenFullSize"] = "Foto {n} / {count}, böyüt"
         m["emails.pickAThreadToRead"] = "Oxumaq üçün bir yazışma seç."
+        m["emails.react"] = "Reaksiya ver"
+        m["emails.reactionsPill"] = "Reaksiyalar: {list}, {n}. Aç"
+        m["emails.removeReaction"] = "Sil"
+        m["emails.removeReactionLabel"] = "Mənim {emoji} reaksiyamı sil"
         m["emails.reply"] = "Cavab yaz"
         m["emails.replyLabel"] = "Cavab"
         m["emails.replyingTo"] = "Cavab: {name}"
@@ -1492,6 +1514,9 @@ internal object Catalog {
         m["home.sProfile"] = "Profil: {nickname}"
         m["home.set"] = "· {age} seçilib"
         m["home.setYourMood"] = "Əhvalını seç"
+    }
+
+    private fun az3(m: HashMap<String, String>) {
         m["home.to"] = "Kimə: {nickname}"
         m["home.waiting"] = "{name} dünyasının açarını burada görmək istədiyin tək insana göndər."
         m["home.waitingCreator"] = "{name} dünyasının açarını burada görmək istədiyin tək insana göndər. İtirmisən? Yenisini yarat."
@@ -1503,9 +1528,6 @@ internal object Catalog {
         m["home.youUniverse"] = "Mən › Sizin dünyanız"
         m["home.yourOtherBrowsersStayLogged"] = "Digər brauzerlərində hesabın açıq qalır. İndikini unutmusan? Onu serverdə sıfırlamaq olar; e-poçtla bərpa yoxdur."
         m["home.yourOtherDevicesStayLogged"] = "Digər cihazlarında hesabın açıq qalır. İndikini unutmusan? Onu serverdə sıfırlamaq olar; e-poçtla bərpa yoxdur."
-    }
-
-    private fun az3(m: HashMap<String, String>) {
         m["letters.arrivesAt"] = "Çatacaq: {time}"
         m["letters.arrivesIn"] = "Çatmasına {countdown} qalıb"
         m["letters.back"] = "Geri"
@@ -1645,6 +1667,9 @@ internal object Catalog {
         m["media.uploading"] = "Yüklənir"
         m["media.use"] = "Bunu götür"
         m["media.video"] = "Video"
+    }
+
+    private fun az4(m: HashMap<String, String>) {
         m["media.videoTooLarge"] = "Bu video {mb} MB-dan böyükdür"
         m["media.videoTooLong"] = "Bu video {n} saniyədən uzundur"
         m["media.videoWithLength"] = "Video, {length}"
@@ -1656,9 +1681,6 @@ internal object Catalog {
         m["mood.ANGRY"] = "Əsəbiyəm"
         m["mood.ANXIOUS"] = "Narahatam"
         m["mood.BLISSFUL"] = "Xoşbəxtəm"
-    }
-
-    private fun az4(m: HashMap<String, String>) {
         m["mood.BORED"] = "Canım sıxılır"
         m["mood.BUSY"] = "Məşğulam"
         m["mood.BUTTERFLIES"] = "Ürəyim çırpınır"
@@ -1798,6 +1820,9 @@ internal object Catalog {
         m["profile.photoNotUpdated"] = "Foton dəyişmədi. Bir də yoxla."
         m["profile.photoPositionDragOrUse"] = "Fotonun yeri: sürüşdür və ya ox düymələrindən istifadə et"
         m["profile.photoPositionPinch"] = "Fotonun yeri: sürüşdürüb yerini dəyiş, iki barmaqla böyüt"
+    }
+
+    private fun az5(m: HashMap<String, String>) {
         m["profile.photoTooLarge"] = "Bu foto 10 MB-dan böyükdür"
         m["profile.pickTimeZone"] = "Siyahıdan saat qurşağı seç"
         m["profile.profile"] = "Profil"
@@ -1809,9 +1834,6 @@ internal object Catalog {
         m["profile.surname"] = "Soyad"
         m["profile.takePhoto"] = "Şəkil çək"
         m["profile.thisDevice"] = "Bu cihaz"
-    }
-
-    private fun az5(m: HashMap<String, String>) {
         m["profile.thisFileIsntAPhoto"] = "Bu fayl oxuya bildiyimiz foto deyil"
         m["profile.timeZone"] = "Saat qurşağı"
         m["profile.timeZones"] = "Saat qurşaqları"
@@ -1951,6 +1973,9 @@ internal object Catalog {
         m["unblock.androidChrome1"] = "Yuxarıda ⋮ düyməsinə, sonra «Ayarlar»a toxun"
         m["unblock.androidChrome2"] = "Sayt ayarları › Bildirişlər"
         m["unblock.androidChrome3"] = "Bu saytı «Bloklanıb» siyahısında tap və «İcazə verin» seç"
+    }
+
+    private fun az6(m: HashMap<String, String>) {
         m["unblock.chrome1"] = "Ünvanın yanındakı ikona klik et"
         m["unblock.chrome2"] = "Bildirişləri aç (və ya Sayt ayarları › Bildirişlər › İcazə verin)"
         m["unblock.comeBack"] = "Bura qayıt"
@@ -1962,9 +1987,6 @@ internal object Catalog {
         m["unblock.firefox3"] = "Səhifəni yenilə və yenə «İcazə ver»ə toxun"
         m["unblock.iosApp1"] = "iPhone-da Settings tətbiqini aç"
         m["unblock.iosApp2"] = "Notifications, sonra Delulutopia bölməsinə toxun"
-    }
-
-    private fun az6(m: HashMap<String, String>) {
         m["unblock.iosApp3"] = "«Allow Notifications» düyməsini aç"
         m["unblock.safari1"] = "Safari menyusu › Settings… › Websites"
         m["unblock.safari2"] = "Soldan Notifications seç"
@@ -2065,7 +2087,7 @@ internal object Catalog {
     }
 
     val fa: Map<String, String> by lazy {
-        HashMap<String, String>(1994).apply {
+        HashMap<String, String>(2016).apply {
             fa0(this)
             fa1(this)
             fa2(this)
@@ -2395,12 +2417,18 @@ internal object Catalog {
         m["editor.letterText"] = "متن نامه"
         m["editor.underline"] = "زیرخط"
         m["emails.aNewerVersionWasSaved"] = "یه نسخه‌ی تازه‌تر روی یه دستگاه دیگه ذخیره شده. بیارمش؟"
+        m["emails.addReaction"] = "بذار"
+        m["emails.addReactionLabel"] = "تو هم {emoji} بذار"
+        m["emails.anotherReaction"] = "یه واکنش دیگه"
         m["emails.attach"] = "پیوست"
         m["emails.back"] = "برگشت"
         m["emails.backToEmails"] = "برگشت به ایمیل‌ها"
+        m["emails.bubbleLabel"] = "{name}، {time}. برای گزینه‌ها Enter"
         m["emails.cancelReply"] = "لغو پاسخ"
         m["emails.closeAttachments"] = "بستن پیوست‌ها"
         m["emails.continueNewEmail"] = "ایمیل تازه‌ت رو ادامه بده"
+        m["emails.copied"] = "کپی شد"
+        m["emails.copyText"] = "کپی متن"
         m["emails.couldntLoadOlderEmailsTry"] = "ایمیل‌های قدیمی‌تر نیومدن. دوباره امتحان کن."
         m["emails.couldntLoadYourDraftCheck"] = "پیش‌نویست باز نشد. اینترنتت رو چک کن و دوباره امتحان کن."
         m["emails.count_one"] = "{n} ایمیل"
@@ -2408,6 +2436,7 @@ internal object Catalog {
         m["emails.creditsLeft_one"] = "امروز {n} تا ایمیل دیگه می‌تونی بفرستی · ساعت {time} دوباره پر می‌شه"
         m["emails.creditsLeft_other"] = "امروز {n} تا ایمیل دیگه می‌تونی بفرستی · ساعت {time} دوباره پر می‌شه"
         m["emails.email"] = "ایمیل"
+        m["emails.emailActions"] = "گزینه‌های ایمیل"
         m["emails.emails"] = "ایمیل‌ها"
         m["emails.emailsNewestFirst"] = "ایمیل‌ها، تازه‌ترها اول"
         m["emails.emailsOldestFirst"] = "ایمیل‌ها، قدیمی‌ترها اول"
@@ -2432,6 +2461,10 @@ internal object Catalog {
         m["emails.noEmailsYet"] = "هنوز ایمیلی نیست."
         m["emails.photoOfOpenFullSize"] = "عکس {n} از {count}، بزرگش کن"
         m["emails.pickAThreadToRead"] = "یه رشته انتخاب کن تا اینجا بخونیش."
+        m["emails.react"] = "واکنش بده"
+        m["emails.reactionsPill"] = "واکنش‌ها: {list}، {n}. باز کن"
+        m["emails.removeReaction"] = "بردار"
+        m["emails.removeReactionLabel"] = "{emoji} خودم رو بردار"
         m["emails.reply"] = "جواب بده"
         m["emails.replyLabel"] = "جواب"
         m["emails.replyingTo"] = "پاسخ به {name}"
@@ -2522,6 +2555,9 @@ internal object Catalog {
         m["home.sProfile"] = "پروفایل {nickname}"
         m["home.set"] = "· {age} گذاشته شد"
         m["home.setYourMood"] = "حال‌وهوات رو بذار"
+    }
+
+    private fun fa3(m: HashMap<String, String>) {
         m["home.to"] = "به {nickname}"
         m["home.waiting"] = "کلید {name} رو بفرست برای همون یه نفری که می‌خوای اینجا باشه."
         m["home.waitingCreator"] = "کلید {name} رو بفرست برای همون یه نفری که می‌خوای اینجا باشه. گمش کردی؟ یه تازه‌ش رو بساز."
@@ -2533,9 +2569,6 @@ internal object Catalog {
         m["home.youUniverse"] = "من › دنیا"
         m["home.yourOtherBrowsersStayLogged"] = "مرورگرهای دیگه‌ت وارد می‌مونن. رمز فعلی یادت رفته؟ می‌شه روی سرور پاکش کرد؛ بازیابی با ایمیل نداریم."
         m["home.yourOtherDevicesStayLogged"] = "دستگاه‌های دیگه‌ت وارد می‌مونن. رمز فعلی یادت رفته؟ می‌شه روی سرور پاکش کرد؛ بازیابی با ایمیل نداریم."
-    }
-
-    private fun fa3(m: HashMap<String, String>) {
         m["letters.arrivesAt"] = "ساعت {time} می‌رسه"
         m["letters.arrivesIn"] = "{countdown} دیگه می‌رسه"
         m["letters.back"] = "برگشت"
@@ -2675,6 +2708,9 @@ internal object Catalog {
         m["media.uploading"] = "در حال آپلود"
         m["media.use"] = "همینو بذار"
         m["media.video"] = "ویدیو"
+    }
+
+    private fun fa4(m: HashMap<String, String>) {
         m["media.videoTooLarge"] = "این ویدیو از {mb} مگابایت بزرگ‌تره"
         m["media.videoTooLong"] = "این ویدیو از {n} ثانیه بلندتره"
         m["media.videoWithLength"] = "ویدیو، {length}"
@@ -2686,9 +2722,6 @@ internal object Catalog {
         m["mood.ANGRY"] = "عصبانی‌ام"
         m["mood.ANXIOUS"] = "دلشوره دارم"
         m["mood.BLISSFUL"] = "غرق خوشی‌ام"
-    }
-
-    private fun fa4(m: HashMap<String, String>) {
         m["mood.BORED"] = "حوصله‌م سر رفته"
         m["mood.BUSY"] = "سرم شلوغه"
         m["mood.BUTTERFLIES"] = "دلم قنج می‌ره"
@@ -2828,6 +2861,9 @@ internal object Catalog {
         m["profile.photoNotUpdated"] = "عکست عوض نشد. دوباره امتحان کن."
         m["profile.photoPositionDragOrUse"] = "جای عکس: بکشش یا از کلیدهای جهت استفاده کن"
         m["profile.photoPositionPinch"] = "جای عکس: بکش تا جابه‌جا بشه، با دو انگشت بزرگش کن"
+    }
+
+    private fun fa5(m: HashMap<String, String>) {
         m["profile.photoTooLarge"] = "این عکس از ۱۰ مگابایت بزرگ‌تره"
         m["profile.pickTimeZone"] = "یه منطقه‌ی زمانی از فهرست انتخاب کن"
         m["profile.profile"] = "پروفایل"
@@ -2839,9 +2875,6 @@ internal object Catalog {
         m["profile.surname"] = "نام خانوادگی"
         m["profile.takePhoto"] = "عکس بگیر"
         m["profile.thisDevice"] = "این دستگاه"
-    }
-
-    private fun fa5(m: HashMap<String, String>) {
         m["profile.thisFileIsntAPhoto"] = "این فایل عکسی نیست که بتونیم بخونیم"
         m["profile.timeZone"] = "منطقه‌ی زمانی"
         m["profile.timeZones"] = "منطقه‌های زمانی"
@@ -2981,6 +3014,9 @@ internal object Catalog {
         m["unblock.androidChrome1"] = "بالای صفحه روی ⋮ بزن، بعد «تنظیمات»"
         m["unblock.androidChrome2"] = "تنظیمات سایت › اعلان‌ها"
         m["unblock.androidChrome3"] = "این سایت رو زیر «مسدود» پیدا کن و «مجاز» رو بزن"
+    }
+
+    private fun fa6(m: HashMap<String, String>) {
         m["unblock.chrome1"] = "روی آیکون کنار نشانی سایت کلیک کن"
         m["unblock.chrome2"] = "اعلان‌ها رو روشن کن (یا تنظیمات سایت › اعلان‌ها › مجاز)"
         m["unblock.comeBack"] = "برگرد اینجا"
@@ -2992,9 +3028,6 @@ internal object Catalog {
         m["unblock.firefox3"] = "صفحه رو دوباره باز کن و باز روی «اجازه بده» بزن"
         m["unblock.iosApp1"] = "برنامه‌ی Settings آیفون رو باز کن"
         m["unblock.iosApp2"] = "روی Notifications بزن، بعد Delulutopia"
-    }
-
-    private fun fa6(m: HashMap<String, String>) {
         m["unblock.iosApp3"] = "«Allow Notifications» رو روشن کن"
         m["unblock.safari1"] = "منوی Safari › Settings… › Websites"
         m["unblock.safari2"] = "از سمت چپ Notifications رو انتخاب کن"
@@ -3095,7 +3128,7 @@ internal object Catalog {
     }
 
     val tr: Map<String, String> by lazy {
-        HashMap<String, String>(1994).apply {
+        HashMap<String, String>(2016).apply {
             tr0(this)
             tr1(this)
             tr2(this)
@@ -3425,12 +3458,18 @@ internal object Catalog {
         m["editor.letterText"] = "Mektubun metni"
         m["editor.underline"] = "Altı çizili"
         m["emails.aNewerVersionWasSaved"] = "Başka bir cihazda daha yeni bir sürüm kaydedildi. Yükleyelim mi?"
+        m["emails.addReaction"] = "Ekle"
+        m["emails.addReactionLabel"] = "Sen de {emoji} ekle"
+        m["emails.anotherReaction"] = "Başka bir tepki"
         m["emails.attach"] = "Ekle"
         m["emails.back"] = "Geri"
         m["emails.backToEmails"] = "E-postalara dön"
+        m["emails.bubbleLabel"] = "{name}, {time}. Seçenekler için Enter"
         m["emails.cancelReply"] = "Yanıtı iptal et"
         m["emails.closeAttachments"] = "Ekleri kapat"
         m["emails.continueNewEmail"] = "Yeni e-postana devam et"
+        m["emails.copied"] = "Kopyalandı"
+        m["emails.copyText"] = "Metni kopyala"
         m["emails.couldntLoadOlderEmailsTry"] = "Eski e-postalar yüklenemedi. Tekrar dene."
         m["emails.couldntLoadYourDraftCheck"] = "Taslağın açılamadı. Bağlantını kontrol et ve tekrar dene."
         m["emails.count_one"] = "{n} e-posta"
@@ -3438,6 +3477,7 @@ internal object Catalog {
         m["emails.creditsLeft_one"] = "Bugün {n} e-posta daha gönderebilirsin · yenileme: {time}"
         m["emails.creditsLeft_other"] = "Bugün {n} e-posta daha gönderebilirsin · yenileme: {time}"
         m["emails.email"] = "E-posta"
+        m["emails.emailActions"] = "E-posta seçenekleri"
         m["emails.emails"] = "E-postalar"
         m["emails.emailsNewestFirst"] = "E-postalar, en yenisi başta"
         m["emails.emailsOldestFirst"] = "E-postalar, en eskisi başta"
@@ -3462,6 +3502,10 @@ internal object Catalog {
         m["emails.noEmailsYet"] = "Henüz e-posta yok."
         m["emails.photoOfOpenFullSize"] = "Fotoğraf {n} / {count}, büyüt"
         m["emails.pickAThreadToRead"] = "Okumak için bir yazışma seç."
+        m["emails.react"] = "Tepki ver"
+        m["emails.reactionsPill"] = "Tepkiler: {list}, {n}. Aç"
+        m["emails.removeReaction"] = "Kaldır"
+        m["emails.removeReactionLabel"] = "{emoji} tepkimi kaldır"
         m["emails.reply"] = "Cevap yaz"
         m["emails.replyLabel"] = "Cevap"
         m["emails.replyingTo"] = "Yanıt: {name}"
@@ -3552,6 +3596,9 @@ internal object Catalog {
         m["home.sProfile"] = "Profil: {nickname}"
         m["home.set"] = "· {age} seçildi"
         m["home.setYourMood"] = "Ruh hâlini seç"
+    }
+
+    private fun tr3(m: HashMap<String, String>) {
         m["home.to"] = "Kime: {nickname}"
         m["home.waiting"] = "{name} dünyasının anahtarını burada görmek istediğin tek kişiye gönder."
         m["home.waitingCreator"] = "{name} dünyasının anahtarını burada görmek istediğin tek kişiye gönder. Kaybettin mi? Yenisini oluştur."
@@ -3563,9 +3610,6 @@ internal object Catalog {
         m["home.youUniverse"] = "Ben › Dünyanız"
         m["home.yourOtherBrowsersStayLogged"] = "Diğer tarayıcılarında oturumun açık kalır. Şu ankini mi unuttun? Sunucuda sıfırlanabilir; e-postayla sıfırlama yok."
         m["home.yourOtherDevicesStayLogged"] = "Diğer cihazlarında oturumun açık kalır. Şu ankini mi unuttun? Sunucuda sıfırlanabilir; e-postayla sıfırlama yok."
-    }
-
-    private fun tr3(m: HashMap<String, String>) {
         m["letters.arrivesAt"] = "Varış: {time}"
         m["letters.arrivesIn"] = "Varmasına {countdown} kaldı"
         m["letters.back"] = "Geri"
@@ -3705,6 +3749,9 @@ internal object Catalog {
         m["media.uploading"] = "Yükleniyor"
         m["media.use"] = "Bunu kullan"
         m["media.video"] = "Video"
+    }
+
+    private fun tr4(m: HashMap<String, String>) {
         m["media.videoTooLarge"] = "Bu video {mb} MB sınırını aşıyor"
         m["media.videoTooLong"] = "Bu video {n} saniyeden uzun"
         m["media.videoWithLength"] = "Video, {length}"
@@ -3716,9 +3763,6 @@ internal object Catalog {
         m["mood.ANGRY"] = "Sinirliyim"
         m["mood.ANXIOUS"] = "Endişeliyim"
         m["mood.BLISSFUL"] = "Mutluluktan uçuyorum"
-    }
-
-    private fun tr4(m: HashMap<String, String>) {
         m["mood.BORED"] = "Canım sıkılıyor"
         m["mood.BUSY"] = "Yoğunum"
         m["mood.BUTTERFLIES"] = "İçim kıpır kıpır"
@@ -3858,6 +3902,9 @@ internal object Catalog {
         m["profile.photoNotUpdated"] = "Fotoğrafın güncellenemedi. Tekrar dene."
         m["profile.photoPositionDragOrUse"] = "Fotoğrafın yeri: sürükle ya da ok tuşlarını kullan"
         m["profile.photoPositionPinch"] = "Fotoğrafın yeri: taşımak için sürükle, yakınlaştırmak için iki parmakla aç"
+    }
+
+    private fun tr5(m: HashMap<String, String>) {
         m["profile.photoTooLarge"] = "Bu fotoğraf 10 MB sınırını aşıyor"
         m["profile.pickTimeZone"] = "Listeden bir saat dilimi seç"
         m["profile.profile"] = "Profil"
@@ -3869,9 +3916,6 @@ internal object Catalog {
         m["profile.surname"] = "Soyad"
         m["profile.takePhoto"] = "Fotoğraf çek"
         m["profile.thisDevice"] = "Bu cihaz"
-    }
-
-    private fun tr5(m: HashMap<String, String>) {
         m["profile.thisFileIsntAPhoto"] = "Bu dosya okuyabildiğimiz bir fotoğraf değil"
         m["profile.timeZone"] = "Saat dilimi"
         m["profile.timeZones"] = "Saat dilimleri"
@@ -4011,6 +4055,9 @@ internal object Catalog {
         m["unblock.androidChrome1"] = "Sağ üstteki ⋮ simgesine, sonra Ayarlar’a dokun"
         m["unblock.androidChrome2"] = "Site ayarları › Bildirimler"
         m["unblock.androidChrome3"] = "Bu siteyi Engellenenler altında bul ve İzin ver’e dokun"
+    }
+
+    private fun tr6(m: HashMap<String, String>) {
         m["unblock.chrome1"] = "Adresin solundaki simgeye tıkla"
         m["unblock.chrome2"] = "Bildirimler’i aç (ya da Site ayarları › Bildirimler › İzin ver)"
         m["unblock.comeBack"] = "Buraya geri dön"
@@ -4022,9 +4069,6 @@ internal object Catalog {
         m["unblock.firefox3"] = "Sayfayı yenile ve yeniden İzin ver’e dokun"
         m["unblock.iosApp1"] = "iPhone’da Ayarlar uygulamasını aç"
         m["unblock.iosApp2"] = "Bildirimler’e, sonra Delulutopia’ya dokun"
-    }
-
-    private fun tr6(m: HashMap<String, String>) {
         m["unblock.iosApp3"] = "Bildirimlere İzin Ver’i aç"
         m["unblock.safari1"] = "Safari menüsü › Ayarlar… › Web Siteleri"
         m["unblock.safari2"] = "Soldan Bildirimler’i seç"
@@ -4125,7 +4169,7 @@ internal object Catalog {
     }
 
     val ru: Map<String, String> by lazy {
-        HashMap<String, String>(2022).apply {
+        HashMap<String, String>(2044).apply {
             ru0(this)
             ru1(this)
             ru2(this)
@@ -4457,12 +4501,18 @@ internal object Catalog {
         m["editor.letterText"] = "Текст письма"
         m["editor.underline"] = "Подчёркнутый"
         m["emails.aNewerVersionWasSaved"] = "На другом устройстве сохранена более новая версия. Загрузить её?"
+        m["emails.addReaction"] = "Добавить"
+        m["emails.addReactionLabel"] = "Тоже поставить {emoji}"
+        m["emails.anotherReaction"] = "Другая реакция"
         m["emails.attach"] = "Прикрепить"
         m["emails.back"] = "Назад"
         m["emails.backToEmails"] = "К имейлам"
+        m["emails.bubbleLabel"] = "{name}, {time}. Enter — действия"
         m["emails.cancelReply"] = "Отменить ответ"
         m["emails.closeAttachments"] = "Закрыть вложения"
         m["emails.continueNewEmail"] = "Продолжить новый имейл"
+        m["emails.copied"] = "Скопировано"
+        m["emails.copyText"] = "Копировать текст"
         m["emails.couldntLoadOlderEmailsTry"] = "Не удалось загрузить предыдущие имейлы. Попробуй ещё раз."
         m["emails.couldntLoadYourDraftCheck"] = "Не удалось открыть черновик. Проверь соединение и попробуй ещё раз."
         m["emails.count_few"] = "{n} имейла"
@@ -4474,6 +4524,7 @@ internal object Catalog {
         m["emails.creditsLeft_one"] = "Сегодня можно отправить ещё {n} имейл · обновление в {time}"
         m["emails.creditsLeft_other"] = "Сегодня можно отправить ещё {n} имейла · обновление в {time}"
         m["emails.email"] = "Имейл"
+        m["emails.emailActions"] = "Действия с имейлом"
         m["emails.emails"] = "Имейлы"
         m["emails.emailsNewestFirst"] = "Имейлы, сначала новые"
         m["emails.emailsOldestFirst"] = "Имейлы, сначала старые"
@@ -4498,6 +4549,10 @@ internal object Catalog {
         m["emails.noEmailsYet"] = "Имейлов пока нет."
         m["emails.photoOfOpenFullSize"] = "Фото {n} из {count}, открыть целиком"
         m["emails.pickAThreadToRead"] = "Выбери переписку, чтобы прочитать её здесь."
+        m["emails.react"] = "Реакция"
+        m["emails.reactionsPill"] = "Реакции: {list}, {n}. Открыть"
+        m["emails.removeReaction"] = "Убрать"
+        m["emails.removeReactionLabel"] = "Убрать мою {emoji}"
         m["emails.reply"] = "Ответить"
         m["emails.replyLabel"] = "Ответ"
         m["emails.replyingTo"] = "Ответ: {name}"
@@ -4582,6 +4637,9 @@ internal object Catalog {
         m["home.pinChanged"] = "PIN-код изменён"
         m["home.pinStep.confirm"] = "Повтори новый PIN-код"
         m["home.pinStep.current"] = "Текущий PIN-код"
+    }
+
+    private fun ru3(m: HashMap<String, String>) {
         m["home.pinStep.new"] = "Новый PIN-код"
         m["home.previousMoods"] = "Предыдущие настроения"
         m["home.readAt"] = "Прочитано · {time}"
@@ -4593,9 +4651,6 @@ internal object Catalog {
         m["home.waitingCreator"] = "Отправь ключ от мира {name} тому единственному человеку, которого хочешь здесь видеть. Ключ потерян? Создай новый."
         m["home.waitingForSomeoneToJoin"] = "Ждём, когда кто-нибудь придёт"
         m["home.wearing.both"] = "Это настроение сейчас у вас обоих. Если удалить его, оба настроения сбросятся."
-    }
-
-    private fun ru3(m: HashMap<String, String>) {
         m["home.wearing.friend"] = "{friend} сейчас в этом настроении. Если удалить его, настроение сбросится."
         m["home.wearing.me"] = "У тебя сейчас это настроение. Если удалить его, оно сбросится."
         m["home.yesDelete"] = "Да, удалить"
@@ -4735,6 +4790,9 @@ internal object Catalog {
         m["media.removePhoto"] = "Убрать фото {n}"
         m["media.removeVideo"] = "Убрать видео"
         m["media.removeVoiceNote"] = "Убрать голосовое"
+    }
+
+    private fun ru4(m: HashMap<String, String>) {
         m["media.retake"] = "Переснять"
         m["media.scrubBarOf"] = "Перемотка, {time} из {total}"
         m["media.snap"] = "Снять"
@@ -4746,9 +4804,6 @@ internal object Catalog {
         m["media.takeAPhoto"] = "Сделать фото"
         m["media.uploadFailed"] = "Не удалось загрузить. Попробуй ещё раз."
         m["media.uploadTimedOut"] = "Загрузка заняла слишком много времени. Попробуй ещё раз."
-    }
-
-    private fun ru4(m: HashMap<String, String>) {
         m["media.uploading"] = "Загрузка"
         m["media.use"] = "Использовать"
         m["media.video"] = "Видео"
@@ -4888,6 +4943,9 @@ internal object Catalog {
         m["profile.dragToMovePinchOr"] = "Перетащи, чтобы сдвинуть · сведи пальцы или потяни ползунок, чтобы приблизить"
         m["profile.keepIt"] = "Оставить"
         m["profile.localTime"] = "Местное время"
+    }
+
+    private fun ru5(m: HashMap<String, String>) {
         m["profile.matches"] = "Совпадения"
         m["profile.mood"] = "Настроение"
         m["profile.moodSince"] = "{mood} · {age}"
@@ -4899,9 +4957,6 @@ internal object Catalog {
         m["profile.noNameAdded"] = "Имя не указано"
         m["profile.noTimeZoneMatches"] = "По запросу «{trim}» часовых поясов нет."
         m["profile.photoNotRemoved"] = "Не удалось удалить фото. Попробуй ещё раз."
-    }
-
-    private fun ru5(m: HashMap<String, String>) {
         m["profile.photoNotUpdated"] = "Не удалось обновить фото. Попробуй ещё раз."
         m["profile.photoPositionDragOrUse"] = "Положение фото: перетащи или используй стрелки"
         m["profile.photoPositionPinch"] = "Положение фото: перетащи, чтобы сдвинуть, разведи пальцы, чтобы приблизить"
@@ -5041,6 +5096,9 @@ internal object Catalog {
         m["stamps.nothingFound"] = "Ничего не найдено"
         m["stamps.recent"] = "Недавние"
         m["stamps.searchStamps"] = "Поиск марок"
+    }
+
+    private fun ru6(m: HashMap<String, String>) {
         m["stamps.searchStampsByNameOr"] = "Искать марки по названию или слову"
         m["stamps.stamp"] = "Марка: {name}"
         m["stamps.stampChangeIt"] = "Марка: {name}. Изменить"
@@ -5052,9 +5110,6 @@ internal object Catalog {
         m["tabs.new"] = "Новое"
         m["tabs.you"] = "Я"
         m["tabs.youAttention"] = "Я (уведомления на этом устройстве выключены)"
-    }
-
-    private fun ru6(m: HashMap<String, String>) {
         m["unblock.androidChrome1"] = "Нажми ⋮ справа вверху, затем «Настройки»"
         m["unblock.androidChrome2"] = "Настройки сайтов › Уведомления"
         m["unblock.androidChrome3"] = "Найди этот сайт в списке «Заблокировано» и нажми «Разрешить»"

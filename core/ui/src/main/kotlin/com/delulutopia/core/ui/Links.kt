@@ -15,6 +15,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextDecoration
@@ -115,8 +116,14 @@ fun rememberLinkOpener(): (String) -> Unit {
 
 /** Plain text (comments, emails, the board note) with its links tappable. */
 @Composable
-fun LinkedText(text: String, style: TextStyle, color: Color, modifier: Modifier = Modifier) {
+fun LinkedText(
+    text: String,
+    style: TextStyle,
+    color: Color,
+    modifier: Modifier = Modifier,
+    onTextLayout: (TextLayoutResult) -> Unit = {},
+) {
     val open = rememberLinkOpener()
     val linked = remember(text, open) { AnnotatedString(text).withLinks(open) }
-    Text(linked, modifier, style = style, color = color)
+    Text(linked, modifier, style = style, color = color, onTextLayout = onTextLayout)
 }

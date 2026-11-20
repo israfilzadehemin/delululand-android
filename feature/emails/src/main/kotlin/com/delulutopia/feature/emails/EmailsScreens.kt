@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
@@ -51,12 +52,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.boundsInWindow
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalView
-import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.CustomAccessibilityAction
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -94,6 +101,7 @@ import com.delulutopia.core.network.model.Citizen
 import com.delulutopia.core.network.model.Email
 import com.delulutopia.core.network.model.Home
 import com.delulutopia.core.network.model.ThreadRow
+import com.delulutopia.core.ui.EmojiPickerSheet
 import com.delulutopia.core.ui.Lightbox
 import com.delulutopia.core.ui.LinkedText
 import com.delulutopia.core.ui.LocalAppNav
@@ -105,9 +113,10 @@ import com.delulutopia.core.ui.leaves.leafSurface
 import com.delulutopia.core.ui.lightboxSource
 import com.delulutopia.core.ui.media.AudioPlayer
 import com.delulutopia.core.ui.media.VideoPlayer
-import com.delulutopia.core.ui.reactions.Reactions
 import com.delulutopia.core.ui.reactions.noticeLine
+import com.delulutopia.core.ui.reactions.reactionRecents
 import com.delulutopia.core.ui.reactions.reactionWins
+import com.delulutopia.core.ui.reactions.rememberReactionState
 import com.delulutopia.core.ui.rememberNow
 import com.delulutopia.core.ui.signatureOf
 import com.delulutopia.core.ui.tintOf
@@ -392,7 +401,7 @@ private fun ThreadBody(vm: ThreadViewModel, me: Citizen?, friend: Citizen?, home
                 state = list,
                 reverseLayout = true,
                 contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 12.dp),
-                verticalArrangement = Arrangement.spacedBy(6.dp, Alignment.Bottom),
+                verticalArrangement = Arrangement.spacedBy(4.dp, Alignment.Bottom),
             ) {
                 items.forEachIndexed { i, e ->
                     val older = items.getOrNull(i + 1)
@@ -568,7 +577,9 @@ private fun DayChip(label: String) {
 /**
  * One email as a bubble: fill and border in the sender's signature (EB1, the avatar ring's colour),
  * on the viewer's side (EB2), every one open (EB4); the run's first bubble points at its avatar with
- * a 4 dp corner (EB5). Under it the time, "Seen" on my newest read one, and the reactions (EB6).
+ * a 4 dp corner (EB5). Its actions (doc "Delululand — Bubble Actions"): the time inside (BA1), the ↩
+ * disc beside it (BA2), long-press for the layer (BA4, BA5), the pill on its edge and the Reactions
+ * sheet (BA7, BA8); TalkBack gets React / Reply / Copy text as actions.
  */
 @Composable
 private fun Bubble(
@@ -590,9 +601,9 @@ private fun Bubble(
     onFlashed: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val base = LocalServerBaseUrl.current
     val scope = rememberCoroutineScope()
     val view = LocalView.current
+    val context = LocalContext.current
     val on = motionOn()
     // RE6: the bubble's sideways offset in dp, and whether the reply is armed.
     val swipe = remember { Animatable(0f) }
@@ -612,6 +623,20 @@ private fun Bubble(
         }
         onFlashed()
     }
+    // BA4–BA8: this email's reactions, the layer (open on the bubble's window bounds), the sheet, the picker.
+    val reactions = rememberReactionState("emails", e.id, e.reactions, me, onReacted)
+    val bounds = remember { arrayOf(Rect.Zero) }
+    var layer by remember { mutableStateOf<Rect?>(null) }
+    var sheet by remember { mutableStateOf(false) }
+    var all by remember { mutableStateOf(false) }
+    val openLayer = {
+        view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+        layer = bounds[0]
+    }
+    val copy = {
+        layer = null
+        copyEmailText(context, e.text)
+    }
     val person = if (e.senderId == me?.id) {
         me
     } else if (e.senderId == friend?.id) {
@@ -619,14 +644,14 @@ private fun Bubble(
     } else {
         null
     }
-    val photos = e.attachments.filter { it.kind == "photo" }
-    val audios = e.attachments.filter { it.kind == "audio" }
-    val video = e.attachments.firstOrNull { it.kind == "video" }
-    val tail = if (first) 4.dp else 16.dp
-    val shape = RoundedCornerShape(topStart = if (mine) 16.dp else tail, topEnd = if (mine) tail else 16.dp, bottomEnd = 16.dp, bottomStart = 16.dp)
+    val reacted = reactions.chips.isNotEmpty()
+    val stamp = Time.clock(e.sentAt, nowMs) + (seen?.let { " · " + t("emails.seen", "time" to Time.clock(it, nowMs)) } ?: "")
     val ink = MaterialTheme.colorScheme.onSurface
+    val reactLabel = t("emails.react")
+    val replyLabel = t("emails.reply")
+    val copyLabel = t("emails.copyText")
     Column(
-        modifier.fillMaxWidth().padding(top = if (first) 6.dp else 0.dp),
+        modifier.fillMaxWidth().padding(top = if (first) 8.dp else 0.dp, bottom = if (reacted) 15.dp else 0.dp),
         horizontalAlignment = if (mine) Alignment.End else Alignment.Start,
     ) {
         if (first && person != null) {
@@ -658,144 +683,273 @@ private fun Bubble(
                 }
             }
         }
-        Box(contentAlignment = if (mine) Alignment.CenterEnd else Alignment.CenterStart) {
-            // RE6: the ↩ cue behind the bubble, uncovered as it moves.
-            Box(
-                Modifier
-                    .alpha(minOf(1f, abs(swipe.value) / SWIPE_ARM_DP))
-                    .size(32.dp)
-                    .clip(CircleShape)
-                    .background(DlTheme.colors.letterEnvelope)
-                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, CircleShape),
-                contentAlignment = Alignment.Center,
-            ) {
-                Icon(WebIcons.Reply, null, Modifier.size(16.dp), tint = ink)
-            }
-            Column(
-                Modifier
-                    .widthIn(max = maxWidth)
-                    .absoluteOffset { IntOffset((swipe.value * density).roundToInt(), 0) }
-                    .pointerInput(toward) {
-                        var raw = 0f
-                        val settle = {
-                            scope.launch { swipe.animateTo(0f, if (on) tween(220) else tween(0)) }
-                        }
-                        detectHorizontalDragGestures(
-                            onDragStart = {
-                                raw = 0f
-                                armed = false
-                            },
-                            onDragEnd = {
-                                settle()
-                                if (armed) replyNow()
-                                armed = false
-                            },
-                            onDragCancel = {
-                                settle()
-                                armed = false
-                            },
-                        ) { change, amount ->
-                            raw += amount.toDp().value
-                            val offset = swipeOffset(raw, toward)
-                            if (offset != 0f) change.consume()
-                            val nowArmed = abs(offset) >= SWIPE_ARM_DP
-                            if (nowArmed && !armed) {
-                                view.performHapticFeedback(
-                                    if (Build.VERSION.SDK_INT >=
-                                        Build.VERSION_CODES.R
-                                    ) {
-                                        HapticFeedbackConstants.CONFIRM
-                                    } else {
-                                        HapticFeedbackConstants.VIRTUAL_KEY
-                                    },
-                                )
-                            }
-                            armed = nowArmed
-                            scope.launch { swipe.snapTo(offset) }
-                        }
-                    }
-                    .border(3.dp, DlTheme.colors.mailBlue.copy(alpha = ring.value), shape)
-                    .clip(shape)
-                    .background(tintOf(e.senderId))
-                    .border(1.dp, signatureOf(e.senderId).copy(alpha = 0.75f), shape)
-                    .padding(start = 12.dp, end = 12.dp, top = 8.dp, bottom = 9.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                // RE11: the quote at the top inside the bubble.
-                e.replyTo?.let { q -> BubbleQuote(q, quoteName(q.senderId)) { onOpenQuote(q.id) } }
-                if (e.text.isNotEmpty()) {
-                    LinkedText(e.text, style = MaterialTheme.typography.bodyLarge.copy(fontSize = 15.sp, lineHeight = 21.75.sp), color = ink)
-                }
-                video?.let { v -> VideoPlayer(resolveMedia(base, v.url), v.thumbUrl?.let { resolveMedia(base, it) }, v.durationMs, v.width, v.height) }
-                if (photos.isNotEmpty()) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        photos.forEachIndexed { i, p ->
-                            AsyncImage(
-                                model = resolveMedia(base, p.thumbUrl ?: p.url),
-                                contentDescription = t("emails.photoOfOpenFullSize", "n" to i + 1, "count" to photos.size),
-                                modifier = Modifier.size(64.dp).lightboxSource(p).clip(RoundedCornerShape(8.dp)).clickable { onPhoto(photos, i) },
-                                contentScale = ContentScale.Crop,
-                            )
-                        }
-                    }
-                }
-                audios.forEachIndexed { i, a ->
-                    AudioPlayer(
-                        resolveMedia(base, a.url),
-                        a.durationMs,
-                        label = if (audios.size > 1) t("letters.voiceNoteN", "n" to i + 1) else t("media.voiceNoteLower"),
-                    )
-                }
-            }
-        }
-        Row(
-            Modifier.widthIn(max = maxWidth).padding(top = 2.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
-        ) {
-            val time = @Composable {
-                val stamp = Time.clock(e.sentAt, nowMs) + (seen?.let { " · " + t("emails.seen", "time" to Time.clock(it, nowMs)) } ?: "")
-                Text(
-                    stamp,
-                    style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp, fontFeatureSettings = "tnum"),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-            val chips = @Composable {
-                Reactions("emails", e.id, e.reactions, me, friend, chipColour = MaterialTheme.colorScheme.surface, compact = true, onChanged = onReacted)
-            }
-            // RE7: ↩ beside add-reaction (48 dp touch target around the 28×24 chip).
-            val reply = @Composable {
-                val label = t("emails.reply")
+        // BA2: the bubble with its pill, and the ↩ disc on the free side, bottom-aligned.
+        Row(verticalAlignment = Alignment.Bottom) {
+            if (mine) ReplyDisc(onReply, Modifier.offset(x = 4.dp))
+            Box(contentAlignment = if (mine) Alignment.CenterEnd else Alignment.CenterStart) {
+                // RE6: the ↩ cue behind the bubble, uncovered as it moves.
                 Box(
                     Modifier
-                        .size(width = 40.dp, height = 44.dp)
-                        .clickable(role = Role.Button, onClick = onReply)
-                        .semantics { contentDescription = label },
+                        .alpha(minOf(1f, abs(swipe.value) / SWIPE_ARM_DP))
+                        .size(32.dp)
+                        .clip(CircleShape)
+                        .background(DlTheme.colors.letterEnvelope)
+                        .border(1.dp, MaterialTheme.colorScheme.outlineVariant, CircleShape),
                     contentAlignment = Alignment.Center,
                 ) {
-                    Box(
-                        Modifier
-                            .size(width = 28.dp, height = 24.dp)
-                            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(12.dp)),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Icon(WebIcons.Reply, null, Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
-                    }
+                    Icon(WebIcons.Reply, null, Modifier.size(16.dp), tint = ink)
                 }
+                BubbleSurface(
+                    e,
+                    first = first,
+                    mine = mine,
+                    reacted = reacted,
+                    stamp = stamp,
+                    maxWidth = maxWidth,
+                    quoteName = quoteName,
+                    onPhoto = onPhoto,
+                    onOpenQuote = onOpenQuote,
+                    ring = ring.value,
+                    modifier = Modifier
+                        .alpha(if (layer != null) 0f else 1f)
+                        .onGloballyPositioned { bounds[0] = it.boundsInWindow() }
+                        .absoluteOffset { IntOffset((swipe.value * density).roundToInt(), 0) }
+                        .semantics {
+                            customActions = listOfNotNull(
+                                CustomAccessibilityAction(reactLabel) {
+                                    openLayer()
+                                    true
+                                },
+                                CustomAccessibilityAction(replyLabel) {
+                                    replyNow()
+                                    true
+                                },
+                                if (e.text.isNotBlank()) {
+                                    CustomAccessibilityAction(copyLabel) {
+                                        copy()
+                                        true
+                                    }
+                                } else {
+                                    null
+                                },
+                            )
+                        }
+                        .longPressToReact(openLayer)
+                        .pointerInput(toward) {
+                            var raw = 0f
+                            val settle = {
+                                scope.launch { swipe.animateTo(0f, if (on) tween(220) else tween(0)) }
+                            }
+                            detectHorizontalDragGestures(
+                                onDragStart = {
+                                    raw = 0f
+                                    armed = false
+                                },
+                                onDragEnd = {
+                                    settle()
+                                    if (armed) replyNow()
+                                    armed = false
+                                },
+                                onDragCancel = {
+                                    settle()
+                                    armed = false
+                                },
+                            ) { change, amount ->
+                                raw += amount.toDp().value
+                                val offset = swipeOffset(raw, toward)
+                                if (offset != 0f) change.consume()
+                                val nowArmed = abs(offset) >= SWIPE_ARM_DP
+                                if (nowArmed && !armed) {
+                                    view.performHapticFeedback(
+                                        if (Build.VERSION.SDK_INT >=
+                                            Build.VERSION_CODES.R
+                                        ) {
+                                            HapticFeedbackConstants.CONFIRM
+                                        } else {
+                                            HapticFeedbackConstants.VIRTUAL_KEY
+                                        },
+                                    )
+                                }
+                                armed = nowArmed
+                                scope.launch { swipe.snapTo(offset) }
+                            }
+                        },
+                )
+                // BA7: the pill hangs 15 dp below the outer edge, 10 dp in.
+                ReactionPill(
+                    reactions.chips,
+                    mine = reactions.anyMine,
+                    onOpen = { sheet = true },
+                    onLong = openLayer,
+                    modifier = Modifier
+                        .align(if (mine) Alignment.BottomEnd else Alignment.BottomStart)
+                        .offset(x = if (mine) (-10).dp else 10.dp, y = 24.dp),
+                )
             }
-            if (mine) {
-                reply()
-                chips()
-                time()
-            } else {
-                time()
-                chips()
-                reply()
-            }
+            if (!mine) ReplyDisc(onReply, Modifier.offset(x = (-4).dp))
+        }
+        if (reactions.error) {
+            Text(
+                t("reactions.notSavedTryAgain"),
+                Modifier.padding(top = 4.dp),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error,
+            )
         }
     }
+    layer?.let { at ->
+        BubbleLayer(
+            bounds = at,
+            mine = mine,
+            recents = remember { reactionRecents(context) },
+            isMine = reactions::mine,
+            canCopy = e.text.isNotBlank(),
+            onPick = {
+                layer = null
+                reactions.toggle(it)
+            },
+            onMore = {
+                layer = null
+                all = true
+            },
+            onReply = {
+                layer = null
+                onReply()
+            },
+            onCopy = copy,
+            onDismiss = { layer = null },
+        ) {
+            BubbleSurface(
+                e,
+                first = first,
+                mine = mine,
+                reacted = reacted,
+                stamp = stamp,
+                maxWidth = maxWidth,
+                quoteName = quoteName,
+                onPhoto = { _, _ -> },
+                onOpenQuote = {},
+                ring = 0f,
+                modifier = Modifier.clearAndSetSemantics {},
+            )
+        }
+    }
+    if (sheet) {
+        ReactionsSheet(
+            reactions.chips,
+            me?.id,
+            nameOf = { u -> if (u == me?.id) t("emails.you") else (friend?.takeIf { it.id == u }?.nickname ?: "") },
+            onToggle = reactions::toggle,
+            onAnother = {
+                sheet = false
+                all = true
+            },
+            onDismiss = { sheet = false },
+        )
+    }
+    if (all) {
+        EmojiPickerSheet(
+            t("reactions.allEmojis"),
+            onPick = {
+                all = false
+                if (!reactions.mine(it)) reactions.toggle(it)
+            },
+            onDismiss = { all = false },
+        )
+    }
 }
+
+/**
+ * The bubble itself (EB1, EB5, RE11) with the time inside (BA1): after the text on its last line when
+ * it fits, as a chip on photos or a video that come last, on its own line after a voice note. Drawn
+ * in the thread and, lifted, in the long-press layer.
+ */
+@Composable
+private fun BubbleSurface(
+    e: Email,
+    first: Boolean,
+    mine: Boolean,
+    reacted: Boolean,
+    stamp: String,
+    maxWidth: Dp,
+    quoteName: (String) -> String,
+    onPhoto: (List<Att>, Int) -> Unit,
+    onOpenQuote: (String) -> Unit,
+    ring: Float,
+    modifier: Modifier = Modifier,
+) {
+    val base = LocalServerBaseUrl.current
+    val photos = e.attachments.filter { it.kind == "photo" }
+    val audios = e.attachments.filter { it.kind == "audio" }
+    val video = e.attachments.firstOrNull { it.kind == "video" }
+    val timeAt = when {
+        audios.isNotEmpty() -> TimeAt.Line
+        photos.isNotEmpty() -> TimeAt.Photos
+        video != null -> TimeAt.Video
+        e.text.isNotEmpty() -> TimeAt.Text
+        else -> TimeAt.Line
+    }
+    val tail = if (first) 4.dp else 16.dp
+    val shape = RoundedCornerShape(topStart = if (mine) 16.dp else tail, topEnd = if (mine) tail else 16.dp, bottomEnd = 16.dp, bottomStart = 16.dp)
+    val ink = MaterialTheme.colorScheme.onSurface
+    Column(
+        modifier
+            .widthIn(max = maxWidth)
+            .border(3.dp, DlTheme.colors.mailBlue.copy(alpha = ring), shape)
+            .clip(shape)
+            .background(tintOf(e.senderId))
+            .border(1.dp, signatureOf(e.senderId).copy(alpha = 0.75f), shape)
+            // BA7: 8 dp more at the bottom when the pill hangs over the edge.
+            .padding(start = 12.dp, end = 12.dp, top = 8.dp, bottom = if (reacted) 17.dp else 9.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        // RE11: the quote at the top inside the bubble.
+        e.replyTo?.let { q -> BubbleQuote(q, quoteName(q.senderId)) { onOpenQuote(q.id) } }
+        if (e.text.isNotEmpty()) {
+            val style = MaterialTheme.typography.bodyLarge.copy(fontSize = 15.sp, lineHeight = 21.75.sp)
+            if (timeAt == TimeAt.Text) {
+                TextWithTime(
+                    text = { onLayout -> LinkedText(e.text, style = style, color = ink, onTextLayout = onLayout) },
+                    time = { BubbleTime(stamp) },
+                )
+            } else {
+                LinkedText(e.text, style = style, color = ink)
+            }
+        }
+        video?.let { v ->
+            Box {
+                VideoPlayer(resolveMedia(base, v.url), v.thumbUrl?.let { resolveMedia(base, it) }, v.durationMs, v.width, v.height)
+                if (timeAt == TimeAt.Video) BubbleTime(stamp, Modifier.align(Alignment.BottomEnd).padding(5.dp), onMedia = true)
+            }
+        }
+        if (photos.isNotEmpty()) {
+            Box {
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    photos.forEachIndexed { i, p ->
+                        AsyncImage(
+                            model = resolveMedia(base, p.thumbUrl ?: p.url),
+                            contentDescription = t("emails.photoOfOpenFullSize", "n" to i + 1, "count" to photos.size),
+                            modifier = Modifier.size(64.dp).lightboxSource(p).clip(RoundedCornerShape(8.dp)).clickable { onPhoto(photos, i) },
+                            contentScale = ContentScale.Crop,
+                        )
+                    }
+                }
+                if (timeAt == TimeAt.Photos) BubbleTime(stamp, Modifier.align(Alignment.BottomEnd).padding(5.dp), onMedia = true)
+            }
+        }
+        audios.forEachIndexed { i, a ->
+            AudioPlayer(
+                resolveMedia(base, a.url),
+                a.durationMs,
+                label = if (audios.size > 1) t("letters.voiceNoteN", "n" to i + 1) else t("media.voiceNoteLower"),
+            )
+        }
+        if (timeAt == TimeAt.Line) BubbleTime(stamp, Modifier.align(Alignment.End).padding(top = 0.dp))
+    }
+}
+
+/** BA1: where the time goes in a bubble. */
+private enum class TimeAt { Text, Photos, Video, Line }
 
 /** S15 New email (web emails/NewEmailScreen.tsx; canvas E-New). */
 @Composable
