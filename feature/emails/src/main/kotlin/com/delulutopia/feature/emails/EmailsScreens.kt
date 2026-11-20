@@ -440,6 +440,7 @@ private fun ThreadBody(vm: ThreadViewModel, me: Citizen?, friend: Citizen?, home
                             onFlashed = { if (flashId == e.id) flashId = null },
                             pending = pending,
                             onUnsent = { unsentSheet = true },
+                            voiceAfter = voiceRunAfter(items, i),
                             modifier = Modifier
                                 // OS6: a cancelled bubble fades away; others leave as before.
                                 .animateItem(fadeInSpec = null, fadeOutSpec = if (e.id.startsWith("local-") && motionOn()) tween(200) else null)
@@ -635,6 +636,7 @@ private fun Bubble(
     onFlashed: () -> Unit,
     pending: EmailOutbox.Status? = null,
     onUnsent: () -> Unit = {},
+    voiceAfter: List<String> = emptyList(),
     modifier: Modifier = Modifier,
 ) {
     // OS3: nothing to reply to or react on until the server has it.
@@ -755,6 +757,7 @@ private fun Bubble(
                     onOpenQuote = onOpenQuote,
                     ring = ring.value,
                     pending = pending,
+                    voiceAfter = voiceAfter,
                     modifier = Modifier
                         .alpha(if (layer != null) 0f else 1f)
                         .onGloballyPositioned { bounds[0] = it.boundsInWindow() }
@@ -930,6 +933,7 @@ private fun BubbleSurface(
     ring: Float,
     modifier: Modifier = Modifier,
     pending: EmailOutbox.Status? = null,
+    voiceAfter: List<String> = emptyList(),
 ) {
     val base = LocalServerBaseUrl.current
     // Attachment Retention AR6: expired files keep their slots; only live photos open in the lightbox.
@@ -1001,19 +1005,45 @@ private fun BubbleSurface(
                 if (timeAt == TimeAt.Photos) BubbleTime(stamp, Modifier.align(Alignment.BottomEnd).padding(5.dp), onMedia = true, pending = pending)
             }
         }
+        // EP7: the notes after this one in the bubble, then the same sender's next emails, play on.
+        // Expired notes (AR6) have no file: they keep their slot but are left out of the run.
+        val voices = audios.filter { !it.expired }.map { resolveMedia(base, it.url) } + voiceAfter.map { resolveMedia(base, it) }
+        var live = 0
         audios.forEachIndexed { i, a ->
             if (a.expired) {
                 ExpiredVoice(a.durationMs)
             } else {
+                val at = live++
                 AudioPlayer(
-                    resolveMedia(base, a.url),
+                    voices[at],
                     a.durationMs,
                     label = if (audios.size > 1) t("letters.voiceNoteN", "n" to i + 1) else t("media.voiceNoteLower"),
+                    next = voices.drop(at + 1),
                 )
             }
         }
         if (timeAt == TimeAt.Line) BubbleTime(stamp, Modifier.align(Alignment.End).padding(top = 0.dp), pending = pending)
     }
+}
+
+/**
+ * EP7 (doc "Delululand — Earpiece Playback"): the voice notes of the emails after the one at [i]
+ * (items are newest first, so "after" is i - 1, i - 2, …) while they come from the same citizen and
+ * each carries a voice note. The run stops at the friend's email or one without a voice note.
+ */
+internal fun voiceRunAfter(items: List<Email>, i: Int): List<String> {
+    val sender = items[i].senderId
+    val out = mutableListOf<String>()
+    var k = i - 1
+    while (k >= 0) {
+        val e = items[k]
+        if (e.senderId != sender) break
+        val audios = e.attachments.filter { it.kind == "audio" && !it.expired }
+        if (audios.isEmpty()) break
+        audios.mapTo(out) { it.url }
+        k--
+    }
+    return out
 }
 
 /** BA1: where the time goes in a bubble. */

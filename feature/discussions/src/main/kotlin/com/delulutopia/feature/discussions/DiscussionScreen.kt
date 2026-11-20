@@ -289,14 +289,20 @@ private fun Thread(d: DFull, me: Citizen?, friend: Citizen?, vm: DiscussionViewM
                                             }
                                         }
                                     }
+                                    // EP7: the discussion's later voice notes play on after this one; expired
+                                    // ones (AR6) keep their slot but are left out of the run.
+                                    val voices = audios.filter { !it.expired }.map { resolveMedia(base, it.url) }
+                                    var live = 0
                                     audios.forEachIndexed { i, a ->
                                         if (a.expired) {
                                             ExpiredVoice(a.durationMs)
                                             return@forEachIndexed
                                         }
+                                        val at = live++
                                         AudioPlayer(
-                                            resolveMedia(base, a.url),
+                                            voices[at],
                                             a.durationMs,
+                                            next = voices.drop(at + 1),
                                             label = if (audios.size >
                                                 1
                                             ) {

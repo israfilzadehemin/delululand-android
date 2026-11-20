@@ -35,6 +35,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import com.delulutopia.core.designsystem.icon.WebIcons
 import com.delulutopia.core.designsystem.text.Ltr
 import com.delulutopia.core.designsystem.theme.DlTheme
@@ -50,21 +52,34 @@ fun mmss(ms: Long): String {
 
 /**
  * A voice note (FS-R9; web media/AudioPlayer.tsx): play/pause, a scrub bar, elapsed and total. One
- * note plays at a time across the app.
+ * note plays at a time across the app. [next] are the run's notes that play on after this one
+ * (doc "Delululand — Earpiece Playback" EP7); play waits 0.5 s and follows the proximity sensor.
  */
 @Composable
-fun AudioPlayer(url: String, durationMs: Long?, modifier: Modifier = Modifier, compact: Boolean = false, label: String = t("media.voiceNoteLower")) {
+fun AudioPlayer(
+    url: String,
+    durationMs: Long?,
+    modifier: Modifier = Modifier,
+    compact: Boolean = false,
+    label: String = t("media.voiceNoteLower"),
+    next: List<String> = emptyList(),
+) {
     // L3: media progress runs left to right in Persian too, as on every phone.
-    Ltr { AudioPlayerContent(url = url, durationMs = durationMs, modifier = modifier, compact = compact, label = label) }
+    Ltr { AudioPlayerContent(url = url, durationMs = durationMs, modifier = modifier, compact = compact, label = label, next = next) }
 }
 
 @Composable
-private fun AudioPlayerContent(url: String, durationMs: Long?, modifier: Modifier, compact: Boolean, label: String) {
+private fun AudioPlayerContent(url: String, durationMs: Long?, modifier: Modifier, compact: Boolean, label: String, next: List<String>) {
     val context = LocalContext.current
     LaunchedEffect(Unit) { VoiceSpeed.load(context) }
     val speed = VoiceSpeed.speed
     val mine = OnePlayer.url == url
-    val playing = mine && OnePlayer.playing
+    // EP6: during the 0.5 s wait the button already shows pause; a tap cancels the start.
+    val playing = (mine && OnePlayer.playing) || OnePlayer.pending == url
+    // The earpiece session (sensor, screen-off lock, call route) never outlives the screen.
+    LifecycleEventEffect(Lifecycle.Event.ON_STOP) {
+        if (OnePlayer.earpieceSession && (mine || OnePlayer.pending == url)) OnePlayer.pause()
+    }
     LaunchedEffect(playing) {
         while (playing) {
             OnePlayer.tick()
@@ -96,7 +111,7 @@ private fun AudioPlayerContent(url: String, durationMs: Long?, modifier: Modifie
                 .clip(CircleShape)
                 .background(seal)
                 .clickable(role = Role.Button, onClickLabel = if (playing) t("media.pause", "label" to label) else t("media.play", "label" to label)) {
-                    if (playing) OnePlayer.pause() else OnePlayer.play(context, url, speed)
+                    if (playing) OnePlayer.pause() else OnePlayer.playVoice(context, url, next)
                 }
                 .semantics { contentDescription = if (playing) t("media.pause", "label" to label) else t("media.play", "label" to label) },
             contentAlignment = Alignment.Center,

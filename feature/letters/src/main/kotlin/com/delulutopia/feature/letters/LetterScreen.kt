@@ -396,15 +396,21 @@ private fun LetterContent(letter: LetterFull, home: Home?, swiped: Boolean, vm: 
                                             }
                                         }
                                     }
+                                    // EP7: the letter's later voice notes play on after this one; expired
+                                    // ones (AR6) keep their slot but are left out of the run.
+                                    val voices = audios.filter { !it.expired }.map { resolveMedia(base, it.url) }
+                                    var live = 0
                                     audios.forEachIndexed { i, a ->
                                         if (a.expired) {
                                             ExpiredVoice(a.durationMs)
                                         } else {
+                                            val at = live++
                                             AudioPlayer(
-                                                resolveMedia(base, a.url),
+                                                voices[at],
                                                 a.durationMs,
                                                 Modifier.enter(Enter.PopIn, mediaDelay, 300),
                                                 label = if (audios.size > 1) t("letters.voiceNoteN", "n" to i + 1) else t("letters.voiceNoteLower"),
+                                                next = voices.drop(at + 1),
                                             )
                                         }
                                     }
