@@ -87,6 +87,10 @@ import com.delulutopia.core.ui.ReachButton
 import com.delulutopia.core.ui.initials
 import com.delulutopia.core.ui.lightboxSource
 import com.delulutopia.core.ui.media.AudioPlayer
+import com.delulutopia.core.ui.media.ExpiredThumb
+import com.delulutopia.core.ui.media.ExpiredVoice
+import com.delulutopia.core.ui.media.Retention
+import com.delulutopia.core.ui.media.RetentionCaption
 import com.delulutopia.core.ui.noteColorOf
 import com.delulutopia.core.ui.noteInk
 import com.delulutopia.core.ui.noteInkQuiet
@@ -143,8 +147,11 @@ private fun Thread(d: DFull, me: Citizen?, friend: Citizen?, vm: DiscussionViewM
     val state = LetterState.discussion(nowMs, d.windowEndsAt, d.arrivesAt)
     val arrived = state == LetterState.ARRIVED
     val inReach = d.mine && state == LetterState.IN_REACH
-    val photos = d.attachments.filter { it.kind == "photo" }
+    // Attachment Retention AR6: expired files keep their slots; only live photos open in the lightbox.
+    val allPhotos = d.attachments.filter { it.kind == "photo" }
+    val photos = allPhotos.filter { !it.expired }
     val audios = d.attachments.filter { it.kind == "audio" }
+    val anyExpired = d.attachments.any { it.expired }
     val archived = d.archivedAt != null
     val colour = noteColorOf(d.color)
     var photo by rememberSaveable { mutableStateOf(-1) }
@@ -259,15 +266,20 @@ private fun Thread(d: DFull, me: Citizen?, friend: Citizen?, vm: DiscussionViewM
                             }
                             // The slack the comments leave goes under the body, so the foot sits at the bottom.
                             Spacer(Modifier.weight(1f))
-                            if (photos.isNotEmpty() || audios.isNotEmpty() || !arrived) {
+                            if (allPhotos.isNotEmpty() || audios.isNotEmpty() || !arrived) {
                                 // web .dl-paper-foot
                                 Column(
                                     Modifier.fillMaxWidth().then(ruleTop).padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 16.dp),
                                     verticalArrangement = Arrangement.spacedBy(10.dp),
                                 ) {
-                                    if (photos.isNotEmpty()) {
+                                    if (allPhotos.isNotEmpty()) {
                                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                            photos.forEachIndexed { i, p ->
+                                            allPhotos.forEach { p ->
+                                                if (p.expired) {
+                                                    ExpiredThumb()
+                                                    return@forEach
+                                                }
+                                                val i = photos.indexOf(p)
                                                 AsyncImage(
                                                     model = resolveMedia(base, p.thumbUrl ?: p.url),
                                                     contentDescription = t("discussions.photoOfOpenFullSize", "n" to i + 1, "count" to photos.size),
@@ -277,13 +289,20 @@ private fun Thread(d: DFull, me: Citizen?, friend: Citizen?, vm: DiscussionViewM
                                             }
                                         }
                                     }
-                                    // EP7: the discussion's later voice notes play on after this one.
-                                    val voices = audios.map { resolveMedia(base, it.url) }
+                                    // EP7: the discussion's later voice notes play on after this one; expired
+                                    // ones (AR6) keep their slot but are left out of the run.
+                                    val voices = audios.filter { !it.expired }.map { resolveMedia(base, it.url) }
+                                    var live = 0
                                     audios.forEachIndexed { i, a ->
+                                        if (a.expired) {
+                                            ExpiredVoice(a.durationMs)
+                                            return@forEachIndexed
+                                        }
+                                        val at = live++
                                         AudioPlayer(
-                                            voices[i],
+                                            voices[at],
                                             a.durationMs,
-                                            next = voices.drop(i + 1),
+                                            next = voices.drop(at + 1),
                                             label = if (audios.size >
                                                 1
                                             ) {
@@ -293,6 +312,7 @@ private fun Thread(d: DFull, me: Citizen?, friend: Citizen?, vm: DiscussionViewM
                                             },
                                         )
                                     }
+                                    if (anyExpired) RetentionCaption(Retention.otherDays)
                                     if (!arrived) {
                                         Text(
                                             t(

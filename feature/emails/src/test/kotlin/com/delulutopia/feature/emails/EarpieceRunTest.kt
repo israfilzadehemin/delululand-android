@@ -42,6 +42,19 @@ class EarpieceRunTest {
     }
 
     @Test
+    fun anEmailWhoseVoiceNotesExpiredEndsTheRun() {
+        val expired = Email(
+            id = "x",
+            threadId = "t",
+            senderId = "me",
+            sentAt = "2026-11-20T10:00:00Z",
+            attachments = listOf(Att(id = "e", kind = "audio", url = "/media/e", expired = true)),
+        )
+        val list = listOf(email("9", "me", "late"), expired, email("8", "me", "now"))
+        assertEquals(emptyList<String>(), voiceRunAfter(list, 2))
+    }
+
+    @Test
     fun theNewestEmailHasNothingAfterIt() {
         assertEquals(emptyList<String>(), voiceRunAfter(items, 0))
     }

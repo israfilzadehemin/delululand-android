@@ -105,6 +105,11 @@ import com.delulutopia.core.ui.firstLineOf
 import com.delulutopia.core.ui.initials
 import com.delulutopia.core.ui.lightboxSource
 import com.delulutopia.core.ui.media.AudioPlayer
+import com.delulutopia.core.ui.media.ExpiredBlock
+import com.delulutopia.core.ui.media.ExpiredThumb
+import com.delulutopia.core.ui.media.ExpiredVoice
+import com.delulutopia.core.ui.media.Retention
+import com.delulutopia.core.ui.media.RetentionCaption
 import com.delulutopia.core.ui.rememberNow
 import com.delulutopia.core.ui.signature
 import com.delulutopia.core.ui.signatureOf
@@ -212,8 +217,11 @@ private fun LetterContent(letter: LetterFull, home: Home?, swiped: Boolean, vm: 
     } else {
         Moods.text(letter.moodAtSend)
     }
-    val photos = letter.attachments.filter { it.kind == "photo" }
+    // Attachment Retention AR6: expired files keep their slots; only live photos open in the lightbox.
+    val allPhotos = letter.attachments.filter { it.kind == "photo" }
+    val photos = allPhotos.filter { !it.expired }
     val audios = letter.attachments.filter { it.kind == "audio" }
+    val anyExpired = letter.attachments.any { it.expired }
     val doodle = letter.attachments.firstOrNull { it.kind == "doodle" }
     var photo by rememberSaveable(letter.id) { mutableStateOf(-1) }
     var doodleOpen by rememberSaveable(letter.id) { mutableStateOf(false) }
@@ -337,7 +345,7 @@ private fun LetterContent(letter: LetterFull, home: Home?, swiped: Boolean, vm: 
                                 drawLine(margin, Offset(11.dp.toPx(), 0f), Offset(11.dp.toPx(), size.height), 1.dp.toPx())
                             },
                         ) {
-                            val hasMedia = doodle != null || photos.isNotEmpty() || audios.isNotEmpty()
+                            val hasMedia = doodle != null || allPhotos.isNotEmpty() || audios.isNotEmpty()
                             if (hasMedia || sent) {
                                 // Foot: a perforated edge, then the doodle, prints, players and the status line.
                                 val line = MaterialTheme.colorScheme.outlineVariant
@@ -356,7 +364,8 @@ private fun LetterContent(letter: LetterFull, home: Home?, swiped: Boolean, vm: 
                                         .padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 16.dp),
                                     verticalArrangement = Arrangement.spacedBy(10.dp),
                                 ) {
-                                    doodle?.let { d ->
+                                    doodle?.takeIf { it.expired }?.let { ExpiredBlock("doodle", Modifier.fillMaxWidth()) }
+                                    doodle?.takeUnless { it.expired }?.let { d ->
                                         AsyncImage(
                                             model = resolveMedia(base, d.url),
                                             contentDescription = t("letters.doodleOpenFullSize"),
@@ -370,9 +379,14 @@ private fun LetterContent(letter: LetterFull, home: Home?, swiped: Boolean, vm: 
                                             contentScale = ContentScale.Fit,
                                         )
                                     }
-                                    if (photos.isNotEmpty()) {
+                                    if (allPhotos.isNotEmpty()) {
                                         Row(Modifier.padding(top = 4.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                                            photos.forEachIndexed { i, p ->
+                                            allPhotos.forEach { p ->
+                                                if (p.expired) {
+                                                    ExpiredThumb()
+                                                    return@forEach
+                                                }
+                                                val i = photos.indexOf(p)
                                                 Print(
                                                     resolveMedia(base, p.thumbUrl ?: p.url),
                                                     t("letters.photoOfOpenFullSize", "n" to i + 1, "count" to photos.size),
@@ -382,17 +396,25 @@ private fun LetterContent(letter: LetterFull, home: Home?, swiped: Boolean, vm: 
                                             }
                                         }
                                     }
-                                    // EP7: the letter's later voice notes play on after this one.
-                                    val voices = audios.map { resolveMedia(base, it.url) }
+                                    // EP7: the letter's later voice notes play on after this one; expired
+                                    // ones (AR6) keep their slot but are left out of the run.
+                                    val voices = audios.filter { !it.expired }.map { resolveMedia(base, it.url) }
+                                    var live = 0
                                     audios.forEachIndexed { i, a ->
-                                        AudioPlayer(
-                                            voices[i],
-                                            a.durationMs,
-                                            Modifier.enter(Enter.PopIn, mediaDelay, 300),
-                                            label = if (audios.size > 1) t("letters.voiceNoteN", "n" to i + 1) else t("letters.voiceNoteLower"),
-                                            next = voices.drop(i + 1),
-                                        )
+                                        if (a.expired) {
+                                            ExpiredVoice(a.durationMs)
+                                        } else {
+                                            val at = live++
+                                            AudioPlayer(
+                                                voices[at],
+                                                a.durationMs,
+                                                Modifier.enter(Enter.PopIn, mediaDelay, 300),
+                                                label = if (audios.size > 1) t("letters.voiceNoteN", "n" to i + 1) else t("letters.voiceNoteLower"),
+                                                next = voices.drop(at + 1),
+                                            )
+                                        }
                                     }
+                                    if (anyExpired) RetentionCaption(Retention.letterDays)
                                     if (sent) StatusLine(letter, state, nowMs)
                                 }
                             }
@@ -426,7 +448,7 @@ private fun LetterContent(letter: LetterFull, home: Home?, swiped: Boolean, vm: 
     }
 
     if (photo >= 0 && photo < photos.size) Lightbox(photos, photo, { photo = it }, { photo = -1 })
-    if (doodleOpen && doodle != null) Lightbox(listOf(doodle), 0, {}, { doodleOpen = false }, title = t("letters.doodle"))
+    if (doodleOpen && doodle != null && !doodle.expired) Lightbox(listOf(doodle), 0, {}, { doodleOpen = false }, title = t("letters.doodle"))
     if (askCancel) {
         TakeBackDialog(
             friend = friend?.nickname ?: t("common.friend"),
