@@ -39,6 +39,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.rotate
@@ -52,8 +53,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.LayoutDirection
@@ -143,11 +146,15 @@ internal fun DockedComposer(
         }
     }
     val length = count(normalize(composer.text))
-    val outOfCredits = credits != null && credits.left <= 0
+    // OS11: the credits line drops at once while an email is in the air.
+    val inAir = composer.inAir
+    val shown = if (credits != null && inAir > 0) credits.copy(left = maxOf(0, credits.left - inAir), used = credits.used + inAir) else credits
+    val held = composer.held
+    val outOfCredits = shown != null && shown.left <= 0
     val something = composer.text.isNotBlank() || atts.items.isNotEmpty()
     val homeState by composer.homeState.collectAsStateWithLifecycle()
     val limits = stripLimits(homeState.home?.plan, mediaOf(atts.items))
-    val canSend = something && !atts.uploading && !voice.recording && !outOfCredits && !sending && limits?.block == null
+    val canSend = something && !atts.uploading && !voice.recording && !outOfCredits && !sending && limits?.block == null && !held
     val saved = when {
         saveState.status == DraftSaver.Status.Error -> t("common.draftNotSaved")
         saveState.savedAt != null && saveState.status != DraftSaver.Status.Conflict && something ->
@@ -191,6 +198,16 @@ internal fun DockedComposer(
         if (composer.trimmed) Text(TRIMMED, style = MaterialTheme.typography.bodySmall)
         videoError?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error) }
         sendError?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error) }
+        // OS7: why Send waits.
+        val unsent = composer.unsent
+        if (held && unsent != null && open) {
+            Text(
+                if (unsent.status == EmailOutbox.Status.Sending) t("emails.waitPrevious") else t("emails.resolveUnsent"),
+                Modifier.semantics { liveRegion = LiveRegionMode.Polite },
+                style = MaterialTheme.typography.bodySmall,
+                color = quiet,
+            )
+        }
         // RE9: the strip, opening like the tray.
         AnimatedVisibility(
             visible = composer.replyTo != null,
@@ -235,7 +252,7 @@ internal fun DockedComposer(
                     }
                 }
             }
-            Text(creditsLine(credits).orEmpty(), style = small, color = if (outOfCredits) MaterialTheme.colorScheme.error else quiet)
+            Text(creditsLine(shown).orEmpty(), style = small, color = if (outOfCredits) MaterialTheme.colorScheme.error else quiet)
         }
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             val plusLabel = if (tray && trayAsked) t("emails.closeAttachments") else t("emails.attach")
@@ -245,7 +262,8 @@ internal fun DockedComposer(
                     .clip(CircleShape)
                     .background(c.letterEnvelope)
                     .border(1.dp, line, CircleShape)
-                    .clickable(role = Role.Button) {
+                    .alpha(if (held) 0.4f else 1f)
+                    .clickable(enabled = !held, role = Role.Button) {
                         // Attaching is not typing (EB15): opening the tray puts the keyboard away.
                         if (!tray) {
                             focusManager.clearFocus()
@@ -291,6 +309,14 @@ internal fun DockedComposer(
                     .clip(CircleShape)
                     .background(sendBg)
                     .clickable(enabled = canSend, role = Role.Button) {
+                        if (composer.optimistic) {
+                            // OS3: the bubble appears now; the bar is free at once.
+                            val me = homeState.home?.me?.id ?: return@clickable
+                            sendError = null
+                            trayAsked = false
+                            composer.sendOptimistic(me)
+                            return@clickable
+                        }
                         sending = true
                         sendError = null
                         scope.launch {
@@ -321,7 +347,8 @@ internal fun DockedComposer(
             }
         }
     }
-    if (saveState.status == DraftSaver.Status.Conflict) {
+    // OS8: a conflict while held is reconciled by the send itself.
+    if (saveState.status == DraftSaver.Status.Conflict && !held) {
         DlDialog(
             title = t("emails.aNewerVersionWasSaved"),
             text = null,
