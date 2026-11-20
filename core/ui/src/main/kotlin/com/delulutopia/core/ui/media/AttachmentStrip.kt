@@ -97,6 +97,12 @@ fun AttachmentStrip(
     limits: StripLimits? = null,
     /** Attachment Retention AR13: which retention the notice under the strip names; null shows none. */
     retention: RetentionScope? = null,
+    /**
+     * Emails: the add buttons first and the attachments under them, grouped by type in the buttons'
+     * order (photos, voice and audio, video), the retention notice centred (web layout="stacked").
+     * False: attachments and buttons side by side (letters, discussions).
+     */
+    stacked: Boolean = false,
 ) {
     var capped by remember { mutableStateOf<String?>(null) }
     val photosPicker = rememberLauncherForActivityResult(ActivityResultContracts.PickMultipleVisualMedia()) { uris ->
@@ -128,86 +134,119 @@ fun AttachmentStrip(
     )
     val items = attachments.items
     val photoCount = items.count { it.kind == "photo" }
-    Column(modifier.fillMaxWidth()) {
-        Row(
-            Modifier
-                .fillMaxWidth()
-                .background(background)
-                .padding(contentPadding),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
-        ) {
-            Row(
-                Modifier.weight(1f).horizontalScroll(rememberScrollState()).padding(top = 6.dp),
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                var photoNo = 0
-                items.forEachIndexed { index, item ->
-                    when (item.kind) {
-                        "photo" -> {
-                            photoNo++
-                            Print(item, t("media.photoOf", "n" to photoNo, "of" to photoCount), t("media.removePhoto", "n" to photoNo)) {
-                                onRemove(item, index)
-                            }
-                        }
-                        "doodle" -> Print(item, t("media.doodle"), t("media.removeDoodle")) { onRemove(item, index) }
-                        "video" -> Print(item, t("media.video"), t("media.removeVideo"), length = item.att?.durationMs ?: item.pending?.durationMs) {
-                            onRemove(item, index)
-                        }
-                        else -> VoicePill(item) { onRemove(item, index) }
-                    }
-                }
+    val photoNos = items.filter { it.kind == "photo" }.mapIndexed { i, it -> it.key to i + 1 }.toMap()
+    val tile: @Composable (Item) -> Unit = { item ->
+        val index = items.indexOf(item)
+        when (item.kind) {
+            "photo" -> {
+                val n = photoNos[item.key] ?: 0
+                Print(item, t("media.photoOf", "n" to n, "of" to photoCount), t("media.removePhoto", "n" to n)) { onRemove(item, index) }
             }
-            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                val photoOk = limits == null || limits.photoRoom > 0
-                val videoOk = video != null && !video.full && (limits == null || limits.videoRoom)
-                AddButton(WebIcons.Photo, t("media.addPhoto"), enabled && photoOk) {
-                    photosPicker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
-                }
-                CameraButton(
-                    enabled = enabled && (photoOk || videoOk),
-                    photoOk = photoOk,
-                    video = if (video != null) videoOk else null,
-                    onPhoto = camera.photo,
-                    onVideo = camera.video,
-                )
-                if (voice.recording) {
-                    Row(
-                        Modifier
-                            .height(48.dp)
-                            .clip(RoundedCornerShape(24.dp))
-                            .background(MaterialTheme.colorScheme.errorContainer)
-                            .clickable(onClick = voice.stop)
-                            .semantics { contentDescription = t("media.stopRecording") }
-                            .padding(horizontal = 12.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(6.dp),
-                    ) {
-                        Box(Modifier.size(10.dp).background(MaterialTheme.colorScheme.error, CircleShape))
-                        Text(mmss(voice.elapsedMs), style = MaterialTheme.typography.labelLarge.copy(fontFeatureSettings = "tnum"))
-                        Text(t("media.stop"), style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold))
-                    }
-                } else {
-                    AddButton(WebIcons.Mic, t("media.recordAVoiceNote"), enabled, onClick = voice.start)
-                }
-                AddButton(WebIcons.AudioFile, t("media.attachAudioFile"), enabled) { audioPicker.launch("audio/*") }
-                if (doodle != null) {
-                    AddButton(
-                        WebIcons.Doodle,
-                        if (doodle.full) t("media.doodleAttached") else t("media.drawADoodle"),
-                        enabled && !doodle.full,
-                        onClick = doodle.onOpen,
-                    )
-                }
-                if (video != null) {
-                    AddButton(WebIcons.VideoFile, t("media.pickAVideo"), enabled && videoOk) {
-                        videoPicker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.VideoOnly))
-                    }
-                }
+            "doodle" -> Print(item, t("media.doodle"), t("media.removeDoodle")) { onRemove(item, index) }
+            "video" -> Print(item, t("media.video"), t("media.removeVideo"), length = item.att?.durationMs ?: item.pending?.durationMs) {
+                onRemove(item, index)
+            }
+            else -> VoicePill(item) { onRemove(item, index) }
+        }
+    }
+    val buttons: @Composable () -> Unit = {
+        val photoOk = limits == null || limits.photoRoom > 0
+        val videoOk = video != null && !video.full && (limits == null || limits.videoRoom)
+        AddButton(WebIcons.Photo, t("media.addPhoto"), enabled && photoOk) {
+            photosPicker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+        }
+        CameraButton(
+            enabled = enabled && (photoOk || videoOk),
+            photoOk = photoOk,
+            video = if (video != null) videoOk else null,
+            onPhoto = camera.photo,
+            onVideo = camera.video,
+        )
+        if (voice.recording) {
+            Row(
+                Modifier
+                    .height(48.dp)
+                    .clip(RoundedCornerShape(24.dp))
+                    .background(MaterialTheme.colorScheme.errorContainer)
+                    .clickable(onClick = voice.stop)
+                    .semantics { contentDescription = t("media.stopRecording") }
+                    .padding(horizontal = 12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
+                Box(Modifier.size(10.dp).background(MaterialTheme.colorScheme.error, CircleShape))
+                Text(mmss(voice.elapsedMs), style = MaterialTheme.typography.labelLarge.copy(fontFeatureSettings = "tnum"))
+                Text(t("media.stop"), style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold))
+            }
+        } else {
+            AddButton(WebIcons.Mic, t("media.recordAVoiceNote"), enabled, onClick = voice.start)
+        }
+        AddButton(WebIcons.AudioFile, t("media.attachAudioFile"), enabled) { audioPicker.launch("audio/*") }
+        if (doodle != null) {
+            AddButton(
+                WebIcons.Doodle,
+                if (doodle.full) t("media.doodleAttached") else t("media.drawADoodle"),
+                enabled && !doodle.full,
+                onClick = doodle.onOpen,
+            )
+        }
+        if (video != null) {
+            AddButton(WebIcons.VideoFile, t("media.pickAVideo"), enabled && videoOk) {
+                videoPicker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.VideoOnly))
             }
         }
-        retention?.let { RetentionNotice(Retention.days(it)) }
+    }
+    Column(modifier.fillMaxWidth()) {
+        if (stacked) {
+            Column(
+                Modifier
+                    .fillMaxWidth()
+                    .background(background)
+                    .padding(contentPadding),
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
+                Row(
+                    Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) { buttons() }
+                StripGroup.entries.forEach { group ->
+                    val list = items.filter { group.holds(it.kind) }
+                    if (list.isNotEmpty()) {
+                        Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                            Text(
+                                t(group.label, "n" to list.size),
+                                Modifier.padding(horizontal = 4.dp),
+                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                            Row(
+                                Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(top = 8.dp, end = 12.dp),
+                                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) { list.forEach { tile(it) } }
+                        }
+                    }
+                }
+            }
+        } else {
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .background(background)
+                    .padding(contentPadding),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
+                Row(
+                    Modifier.weight(1f).horizontalScroll(rememberScrollState()).padding(top = 6.dp),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) { items.forEach { tile(it) } }
+                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) { buttons() }
+            }
+        }
+        retention?.let { RetentionNotice(Retention.days(it), centered = stacked) }
         limits?.blockText?.let { text ->
             // CM-7: error banner above Send.
             Text(
@@ -249,6 +288,22 @@ fun AttachmentStrip(
                 IconButton(onClick = { attachments.dismissError(key) }) { Icon(WebIcons.Close, t("media.dismiss"), Modifier.size(14.dp)) }
             }
         }
+    }
+}
+
+/** The type groups of the stacked strip, in the add buttons' order. */
+private enum class StripGroup(val label: String) {
+    Photos("media.groupPhotos"),
+
+    /** Voice notes and audio files are one kind on the wire; anything else shows as a pill, as in the row. */
+    Audio("media.groupAudio"),
+    Video("media.groupVideo"),
+    ;
+
+    fun holds(kind: String): Boolean = when (this) {
+        Photos -> kind == "photo" || kind == "doodle"
+        Audio -> kind != "photo" && kind != "doodle" && kind != "video"
+        Video -> kind == "video"
     }
 }
 

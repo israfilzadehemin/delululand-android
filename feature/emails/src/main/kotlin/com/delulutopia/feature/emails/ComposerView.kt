@@ -157,6 +157,7 @@ internal fun ComposerView(composer: EmailComposer, credits: EmailCredits?, onSen
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
             limits = limits,
             retention = RetentionScope.Other,
+            stacked = true,
         )
         videoError?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error) }
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {

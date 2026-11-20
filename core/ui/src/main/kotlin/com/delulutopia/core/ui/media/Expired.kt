@@ -197,12 +197,12 @@ val Hourglass: ImageVector by lazy {
 
 /** AR13, AR14: "Attachments are kept for N days" under the strip, above the tier line. Null days: nothing (older API). */
 @Composable
-fun RetentionNotice(days: Int?, modifier: Modifier = Modifier) {
+fun RetentionNotice(days: Int?, modifier: Modifier = Modifier, centered: Boolean = false) {
     if (days == null) return
     Row(
         modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 2.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(6.dp),
+        horizontalArrangement = if (centered) Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally) else Arrangement.spacedBy(6.dp),
     ) {
         Icon(Hourglass, null, Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
         Text(

@@ -59,6 +59,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -195,6 +196,7 @@ internal fun DockedComposer(
                 contentPadding = PaddingValues(horizontal = 4.dp, vertical = 6.dp),
                 limits = limits,
                 retention = RetentionScope.Other,
+                stacked = true,
             )
         }
         if (composer.trimmed) Text(TRIMMED, style = MaterialTheme.typography.bodySmall)
@@ -235,26 +237,30 @@ internal fun DockedComposer(
             composer.replyTo?.let { last[0] = it }
             last[0]?.let { q -> ReplyStrip(q, quoteName(q.senderId), onCancel = composer::cancelReply) }
         }
-        // Closed: the credits alone; open: the counter and the saved note join them.
-        Row(
-            Modifier.fillMaxWidth().animateContentSize(if (on) tween(160) else tween(0)),
-            horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterHorizontally),
-            verticalAlignment = Alignment.CenterVertically,
+        // The credits, centred on their own line; open, the counter and the saved note follow, start-aligned.
+        val small = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp, fontFeatureSettings = "tnum")
+        Text(
+            creditsLine(shown).orEmpty(),
+            Modifier.fillMaxWidth(),
+            style = small,
+            color = if (outOfCredits) MaterialTheme.colorScheme.error else quiet,
+            textAlign = TextAlign.Center,
+        )
+        AnimatedVisibility(
+            visible = open,
+            enter = fadeIn(tween(if (on) 160 else 0)) + expandVertically(tween(if (on) 160 else 0)),
+            exit = fadeOut(tween(if (on) 120 else 0)) + shrinkVertically(tween(if (on) 120 else 0)),
         ) {
-            val small = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp, fontFeatureSettings = "tnum")
-            AnimatedVisibility(visible = open, enter = fadeIn(tween(if (on) 160 else 0)), exit = fadeOut(tween(if (on) 120 else 0))) {
-                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Text(
-                        t("media.progress", "time" to length, "total" to EMAIL_MAX),
-                        style = small.copy(fontWeight = if (length >= EMAIL_MAX) FontWeight.Bold else FontWeight.Normal),
-                        color = if (length >= EMAIL_MAX) MaterialTheme.colorScheme.error else quiet,
-                    )
-                    if (saved.isNotEmpty()) {
-                        Text(saved, style = small, color = if (saveState.status == DraftSaver.Status.Error) MaterialTheme.colorScheme.error else quiet)
-                    }
+            Row(Modifier.fillMaxWidth().padding(horizontal = 4.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                Text(
+                    t("media.progress", "time" to length, "total" to EMAIL_MAX),
+                    style = small.copy(fontWeight = if (length >= EMAIL_MAX) FontWeight.Bold else FontWeight.Normal),
+                    color = if (length >= EMAIL_MAX) MaterialTheme.colorScheme.error else quiet,
+                )
+                if (saved.isNotEmpty()) {
+                    Text(saved, style = small, color = if (saveState.status == DraftSaver.Status.Error) MaterialTheme.colorScheme.error else quiet)
                 }
             }
-            Text(creditsLine(shown).orEmpty(), style = small, color = if (outOfCredits) MaterialTheme.colorScheme.error else quiet)
         }
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             val plusLabel = if (tray && trayAsked) t("emails.closeAttachments") else t("emails.attach")
