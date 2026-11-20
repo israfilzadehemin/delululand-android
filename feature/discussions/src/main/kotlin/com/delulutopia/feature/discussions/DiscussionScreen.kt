@@ -277,10 +277,13 @@ private fun Thread(d: DFull, me: Citizen?, friend: Citizen?, vm: DiscussionViewM
                                             }
                                         }
                                     }
+                                    // EP7: the discussion's later voice notes play on after this one.
+                                    val voices = audios.map { resolveMedia(base, it.url) }
                                     audios.forEachIndexed { i, a ->
                                         AudioPlayer(
-                                            resolveMedia(base, a.url),
+                                            voices[i],
                                             a.durationMs,
+                                            next = voices.drop(i + 1),
                                             label = if (audios.size >
                                                 1
                                             ) {

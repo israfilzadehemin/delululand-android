@@ -382,12 +382,15 @@ private fun LetterContent(letter: LetterFull, home: Home?, swiped: Boolean, vm: 
                                             }
                                         }
                                     }
+                                    // EP7: the letter's later voice notes play on after this one.
+                                    val voices = audios.map { resolveMedia(base, it.url) }
                                     audios.forEachIndexed { i, a ->
                                         AudioPlayer(
-                                            resolveMedia(base, a.url),
+                                            voices[i],
                                             a.durationMs,
                                             Modifier.enter(Enter.PopIn, mediaDelay, 300),
                                             label = if (audios.size > 1) t("letters.voiceNoteN", "n" to i + 1) else t("letters.voiceNoteLower"),
+                                            next = voices.drop(i + 1),
                                         )
                                     }
                                     if (sent) StatusLine(letter, state, nowMs)
