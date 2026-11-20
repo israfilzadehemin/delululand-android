@@ -64,6 +64,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.IntSize
@@ -173,7 +174,7 @@ fun BubbleTime(label: String, modifier: Modifier = Modifier, onMedia: Boolean = 
             WebIcons.ClockSmall,
             null,
             modifier
-                .then(if (onMedia) Modifier.clip(RoundedCornerShape(8.dp)).background(Color(0x94141620)).padding(horizontal = 6.dp, vertical = 2.dp) else Modifier)
+                .then(if (onMedia) mediaChip(Color(0x94141620), vertical = 2.dp) else Modifier)
                 .size(if (onMedia) 24.dp else 12.dp)
                 .semantics {
                     contentDescription = sending
@@ -187,7 +188,7 @@ fun BubbleTime(label: String, modifier: Modifier = Modifier, onMedia: Boolean = 
         Text(
             t("emails.notSent"),
             modifier
-                .then(if (onMedia) Modifier.clip(RoundedCornerShape(8.dp)).background(MaterialTheme.colorScheme.errorContainer).padding(horizontal = 6.dp, vertical = 1.dp) else Modifier)
+                .then(if (onMedia) mediaChip(MaterialTheme.colorScheme.errorContainer, vertical = 1.dp) else Modifier)
                 .semantics { liveRegion = LiveRegionMode.Polite },
             style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp, lineHeight = 14.sp, fontWeight = FontWeight.SemiBold),
             color = MaterialTheme.colorScheme.error,
@@ -213,6 +214,9 @@ fun BubbleTime(label: String, modifier: Modifier = Modifier, onMedia: Boolean = 
         )
     }
 }
+
+/** The time chip's shape on photos and videos. */
+private fun mediaChip(fill: Color, vertical: Dp): Modifier = Modifier.clip(RoundedCornerShape(8.dp)).background(fill).padding(horizontal = 6.dp, vertical = vertical)
 
 /** BA2: the ↩ disc on the bubble's free side: a 28 dp face in a 44 dp target. */
 @Composable
