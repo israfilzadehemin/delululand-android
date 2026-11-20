@@ -55,6 +55,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.liveRegion
@@ -165,9 +166,12 @@ fun TextWithTime(text: @Composable ((TextLayoutResult) -> Unit) -> Unit, time: @
     }
 }
 
-/** BA1: the time, small and quiet; on media a white chip. OS3/OS4: a clock while sending, "Not sent" in red. */
+/**
+ * BA1: the time, small and quiet; on media a white chip. OS3/OS4: a clock while sending, "Not sent" in red.
+ * Read Ticks TK5: my own email's ticks 3 dp after the time; TalkBack reads "14:16, read".
+ */
 @Composable
-fun BubbleTime(label: String, modifier: Modifier = Modifier, onMedia: Boolean = false, pending: EmailOutbox.Status? = null) {
+fun BubbleTime(label: String, modifier: Modifier = Modifier, onMedia: Boolean = false, pending: EmailOutbox.Status? = null, ticks: TickStatus? = null) {
     if (pending == EmailOutbox.Status.Sending) {
         val sending = t("emails.sendingStatus")
         Icon(
@@ -193,6 +197,27 @@ fun BubbleTime(label: String, modifier: Modifier = Modifier, onMedia: Boolean = 
             style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp, lineHeight = 14.sp, fontWeight = FontWeight.SemiBold),
             color = MaterialTheme.colorScheme.error,
         )
+        return
+    }
+    if (ticks != null) {
+        val spoken = ticks.label(label)
+        val color = if (onMedia) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
+        Row(
+            modifier
+                .then(
+                    if (onMedia) {
+                        Modifier.clip(RoundedCornerShape(8.dp)).background(Color(0x94141620)).padding(horizontal = 6.dp, vertical = 1.dp)
+                    } else {
+                        Modifier
+                    },
+                )
+                .clearAndSetSemantics { contentDescription = spoken },
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(3.dp),
+        ) {
+            Text(label, style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp, lineHeight = 14.sp, fontFeatureSettings = "tnum"), color = color)
+            ReadTicks(ticks, tint = color, onMedia = onMedia)
+        }
         return
     }
     if (onMedia) {
@@ -367,6 +392,9 @@ fun BubbleLayer(
     onReply: () -> Unit,
     onCopy: () -> Unit,
     onDismiss: () -> Unit,
+    /** Read Ticks TK6, TK7: the delivery card above the quick row, [infoRows] rows tall. */
+    infoRows: Int = 0,
+    info: (@Composable () -> Unit)? = null,
     bubble: @Composable () -> Unit,
 ) {
     val density = LocalDensity.current
@@ -388,7 +416,8 @@ fun BubbleLayer(
             )
             val winH = with(density) { maxHeight.toPx() }
             val winW = with(density) { maxWidth.toPx() }
-            val above = with(density) { (52 + 10).dp.toPx() }
+            val card = if (info != null) infoRows * 28 + 12 + 2 + 8 else 0
+            val above = with(density) { (52 + 10 + card).dp.toPx() }
             val below = with(density) { (if (canCopy) 2 * 48 + 14 else 48 + 14).dp.toPx() }
             val edge = with(density) { 12.dp.toPx() }
             val maxH = max(with(density) { 80.dp.toPx() }, winH - above - below - 2 * edge)
@@ -407,6 +436,10 @@ fun BubbleLayer(
                     },
                 horizontalAlignment = if (left) AbsoluteAlignment.Left else AbsoluteAlignment.Right,
             ) {
+                if (info != null) {
+                    info()
+                    Spacer(Modifier.height(8.dp))
+                }
                 QuickRow(recents, isMine, onPick, onMore)
                 Spacer(Modifier.height(10.dp))
                 Box(

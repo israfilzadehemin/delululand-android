@@ -22,6 +22,8 @@ class PushService : FirebaseMessagingService() {
 
     override fun onMessageReceived(message: RemoteMessage) {
         if (!registrar.signedIn) return
+        // Read Ticks TK2: the email reached this phone, even with the app closed.
+        message.data["emailId"]?.takeIf { it.isNotBlank() }?.let(registrar::delivered)
         val notice = PushNotice.of(message.data) ?: return
         Notices.post(applicationContext, notice.tag, notice.event, notice.title, notice.body, notice.path)
     }

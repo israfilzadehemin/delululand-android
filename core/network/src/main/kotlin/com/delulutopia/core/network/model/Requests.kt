@@ -77,3 +77,6 @@ data class DeletionCounts(
 
 /** `DELETE /api/push/devices`: before log-out. */
 @Serializable data class PushDeviceRemoveBody(val platform: String, val token: String)
+
+/** `POST /api/emails/delivered` (Read Ticks TK2): the emails an FCM push announced. */
+@Serializable data class EmailsDeliveredBody(val ids: List<String>)

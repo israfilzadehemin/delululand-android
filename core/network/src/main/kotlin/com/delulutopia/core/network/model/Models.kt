@@ -203,6 +203,8 @@ data class ThreadRow(
     val lastReaction: ReactionNotice? = null,
     /** The newest email answers another (doc "Delululand — Email Replies" RE13: the ↩ prefix). */
     val lastIsReply: Boolean = false,
+    /** Read Ticks TK10: `sent`, `delivered` or `read` when the newest email is mine; null otherwise. */
+    val lastStatus: String? = null,
 )
 
 /**
@@ -228,6 +230,8 @@ data class Email(
     val senderId: Id,
     val text: String = "",
     val sentAt: String,
+    /** Read Ticks TK2: the friend's app received it; null until then. */
+    val deliveredAt: String? = null,
     val readAt: String? = null,
     val attachments: List<Att> = emptyList(),
     val reactions: List<Reaction> = emptyList(),

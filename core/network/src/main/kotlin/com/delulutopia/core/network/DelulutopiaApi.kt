@@ -24,6 +24,7 @@ import com.delulutopia.core.network.model.EmailCredits
 import com.delulutopia.core.network.model.EmailDraft
 import com.delulutopia.core.network.model.EmailList
 import com.delulutopia.core.network.model.EmailSent
+import com.delulutopia.core.network.model.EmailsDeliveredBody
 import com.delulutopia.core.network.model.EmojiBody
 import com.delulutopia.core.network.model.EnterRequest
 import com.delulutopia.core.network.model.Entered
@@ -296,6 +297,10 @@ interface DelulutopiaApi {
 
     @POST("api/emails/threads/{id}/seen")
     suspend fun threadSeen(@Path("id") id: Id)
+
+    /** Read Ticks TK2: the push ack, these emails reached this device. */
+    @POST("api/emails/delivered")
+    suspend fun emailsDelivered(@Body body: EmailsDeliveredBody)
 
     @GET("api/emails/credits")
     suspend fun credits(): EmailCredits
