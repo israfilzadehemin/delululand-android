@@ -57,6 +57,7 @@ import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -70,6 +71,7 @@ import com.delulutopia.core.data.DraftSaver
 import com.delulutopia.core.data.Time
 import com.delulutopia.core.designsystem.component.DlDialog
 import com.delulutopia.core.designsystem.icon.DlIcons
+import com.delulutopia.core.designsystem.icon.WebIcons
 import com.delulutopia.core.designsystem.motion.Motion
 import com.delulutopia.core.designsystem.motion.motionOn
 import com.delulutopia.core.designsystem.theme.DlTheme
@@ -78,6 +80,7 @@ import com.delulutopia.core.network.Uploader
 import com.delulutopia.core.network.model.EmailCredits
 import com.delulutopia.core.network.model.EmailQuote
 import com.delulutopia.core.network.model.EmailSent
+import com.delulutopia.core.network.model.Sticker
 import com.delulutopia.core.ui.media.AttachmentStrip
 import com.delulutopia.core.ui.media.RetentionScope
 import com.delulutopia.core.ui.media.Source
@@ -88,6 +91,10 @@ import com.delulutopia.core.ui.media.tooLong
 import com.delulutopia.core.ui.media.videoMs
 import com.delulutopia.core.ui.plan.mediaOf
 import com.delulutopia.core.ui.plan.stripLimits
+import com.delulutopia.feature.emails.stickers.AddSticker
+import com.delulutopia.feature.emails.stickers.DeleteSticker
+import com.delulutopia.feature.emails.stickers.StickerPicker
+import com.delulutopia.feature.emails.stickers.StickerStore
 import kotlinx.coroutines.launch
 
 /**
@@ -101,6 +108,9 @@ internal fun DockedComposer(
     composer: EmailComposer,
     credits: EmailCredits?,
     quoteName: (String) -> String = { "" },
+    /** Stickers SK1: thread replies only; null where there is no thread. */
+    stickers: StickerStore? = null,
+    onSticker: (Sticker) -> Unit = {},
     onSent: (EmailSent) -> Unit,
 ) {
     val context = LocalContext.current
@@ -131,6 +141,12 @@ internal fun DockedComposer(
     val focusManager = LocalFocusManager.current
     val keyboard = LocalSoftwareKeyboardController.current
     val focused by focus.collectIsFocusedAsState()
+    // SK10: the sticker picker sits where the keyboard was; typing closes it.
+    var pickerOpen by remember { mutableStateOf(false) }
+    var adding by remember { mutableStateOf(false) }
+    var deleting by remember { mutableStateOf<Sticker?>(null) }
+    LaunchedEffect(focused) { if (focused) pickerOpen = false }
+    LaunchedEffect(stickers) { stickers?.load() }
     // Email Replies RE8: a picked reply puts the cursor in the field (unlike +, EB15).
     val field = remember { FocusRequester() }
     LaunchedEffect(composer.focusAsk) {
@@ -165,7 +181,7 @@ internal fun DockedComposer(
     }
     // The tray stays open while it holds something; the bar is open while it is in use.
     val tray = trayAsked || atts.items.isNotEmpty() || voice.recording
-    val open = tray || focused || composer.text.isNotEmpty() || composer.replyTo != null
+    val open = tray || focused || pickerOpen || composer.text.isNotEmpty() || composer.replyTo != null
     val on = motionOn()
     val plusTurn by animateFloatAsState(if (tray) 45f else 0f, if (on) tween(220, easing = Motion.EaseOut) else tween(0), label = "plus")
     val quiet = MaterialTheme.colorScheme.onSurfaceVariant
@@ -296,16 +312,47 @@ internal fun DockedComposer(
                     .animateContentSize(if (on) tween(160, easing = Motion.EaseOut) else tween(0))
                     .background(c.letterEnvelope, shape)
                     .border(1.dp, line, shape)
-                    .padding(horizontal = 16.dp, vertical = 11.dp)
+                    .padding(start = 16.dp, end = if (stickers != null) 6.dp else 16.dp, top = 11.dp, bottom = 11.dp)
                     .semantics { contentDescription = t("emails.writeAReply") },
                 textStyle = style,
                 maxLines = 6,
                 interactionSource = focus,
                 cursorBrush = SolidColor(c.mailBlue),
                 decorationBox = { inner ->
-                    Box {
-                        if (composer.text.isEmpty()) Text(t("emails.writeAReply"), style = style, color = c.inkDisabled)
-                        inner()
+                    Row(verticalAlignment = Alignment.Bottom) {
+                        Box(Modifier.weight(1f)) {
+                            if (composer.text.isEmpty()) Text(t("emails.writeAReply"), style = style, color = c.inkDisabled)
+                            inner()
+                        }
+                        if (stickers != null) {
+                            val stickerLabel = t("stickers.stickers")
+                            Box(
+                                Modifier
+                                    .size(28.dp)
+                                    .clip(CircleShape)
+                                    .background(if (pickerOpen) MaterialTheme.colorScheme.primary.copy(alpha = 0.14f) else Color.Transparent)
+                                    .clickable(enabled = !held, role = Role.Button) {
+                                        if (pickerOpen) {
+                                            pickerOpen = false
+                                            runCatching { field.requestFocus() }
+                                            keyboard?.show()
+                                        } else {
+                                            // Picking is not typing: the keyboard goes, the picker takes its place.
+                                            focusManager.clearFocus()
+                                            keyboard?.hide()
+                                            trayAsked = false
+                                            pickerOpen = true
+                                        }
+                                    }
+                                    .semantics {
+                                        contentDescription = stickerLabel
+                                        selected = pickerOpen
+                                    },
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                Icon(WebIcons.Sticker, null, Modifier.size(22.dp), tint = if (pickerOpen) MaterialTheme.colorScheme.primary else quiet)
+                            }
+                        }
                     }
                 },
             )
@@ -354,7 +401,20 @@ internal fun DockedComposer(
                 }
             }
         }
+        if (stickers != null && pickerOpen) {
+            StickerPicker(
+                store = stickers,
+                disabled = outOfCredits || held,
+                disabledLine = null,
+                onPick = onSticker,
+                onAdd = { adding = true },
+                onDelete = { deleting = it },
+                modifier = Modifier.padding(top = 4.dp),
+            )
+        }
     }
+    if (stickers != null && adding) AddSticker(stickers, onClose = { adding = false })
+    if (stickers != null) deleting?.let { s -> DeleteSticker(stickers, s) { deleting = null } }
     // OS8: a conflict while held is reconciled by the send itself.
     if (saveState.status == DraftSaver.Status.Conflict && !held) {
         DlDialog(

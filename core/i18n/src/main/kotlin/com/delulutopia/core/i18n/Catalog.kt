@@ -5,7 +5,7 @@ package com.delulutopia.core.i18n
 
 internal object Catalog {
     val en: Map<String, String> by lazy {
-        HashMap<String, String>(2162).apply {
+        HashMap<String, String>(2248).apply {
             en0(this)
             en1(this)
             en2(this)
@@ -359,7 +359,6 @@ internal object Catalog {
         m["emails.email"] = "Email"
         m["emails.emailActions"] = "Email actions"
         m["emails.emails"] = "Emails"
-        m["emails.emailsNewestFirst"] = "Emails, newest first"
         m["emails.emailsOldestFirst"] = "Emails, oldest first"
         m["emails.findingOriginal"] = "Loading…"
         m["emails.fold"] = "Fold"
@@ -474,10 +473,10 @@ internal object Catalog {
         m["home.no"] = "No"
         m["home.noMoodYet"] = "No mood yet"
         m["home.notSavedTryAgain"] = "Not saved. Try again."
+        m["home.nothingInThePostYet"] = "Nothing in the post yet"
     }
 
     private fun en3(m: HashMap<String, String>) {
-        m["home.nothingInThePostYet"] = "Nothing in the post yet"
         m["home.ofDeleteOneToAdd"] = "{limit} of {limit} — delete one to add another"
         m["home.ofDigits"] = "{label}, {count} of {pinlength} digits"
         m["home.onItsWayArrives"] = "On its way · arrives {arrives}"
@@ -627,10 +626,10 @@ internal object Catalog {
         m["media.playbackSpeed"] = "Playback speed {speed}"
         m["media.processing"] = "Processing"
         m["media.progress"] = "{time} / {total}"
+        m["media.readFailed"] = "This file couldn't be read from your phone"
     }
 
     private fun en4(m: HashMap<String, String>) {
-        m["media.readFailed"] = "This file couldn't be read from your phone"
         m["media.record"] = "● Record"
         m["media.recordAVideo"] = "Record a video"
         m["media.recordAVoiceNote"] = "Record a voice note"
@@ -780,10 +779,10 @@ internal object Catalog {
         m["plan.premium"] = "Premium"
         m["plan.renews"] = "Renews at {time}"
         m["plan.title"] = "Plan"
+        m["plan.today"] = "Today"
     }
 
     private fun en5(m: HashMap<String, String>) {
-        m["plan.today"] = "Today"
         m["plan.unlimited"] = "Unlimited"
         m["plan.videoEach"] = "{seconds} s each · {daily} a day"
         m["plan.videos"] = "Videos"
@@ -933,10 +932,10 @@ internal object Catalog {
         m["settings.installApp"] = "Install app"
         m["settings.keyMadeOn"] = "Made {day}. Keys can't be shown again; make a new one if it's lost."
         m["settings.keyNotMade"] = "Couldn't make a new key. Try again."
+        m["settings.keysCantBeShown"] = "Keys can't be shown again; make a new one if it's lost."
     }
 
     private fun en6(m: HashMap<String, String>) {
-        m["settings.keysCantBeShown"] = "Keys can't be shown again; make a new one if it's lost."
         m["settings.language"] = "Language"
         m["settings.languageNotSaved"] = "Couldn't change the language. Try again."
         m["settings.languageNote"] = "Your language on every device you use, and in the notifications you get."
@@ -999,6 +998,50 @@ internal object Catalog {
         m["stamps.stamp"] = "Stamp: {name}"
         m["stamps.stampChangeIt"] = "Stamp: {name}. Change it"
         m["stamps.stampThemes"] = "Stamp themes"
+        m["stickers.add"] = "Add"
+        m["stickers.addFavourite"] = "Add to favourites"
+        m["stickers.addSticker"] = "Add a sticker"
+        m["stickers.adding"] = "Adding…"
+        m["stickers.afterAdding"] = "{used} of {cap} after adding"
+        m["stickers.bothCanUse"] = "Both of you can send it. Either of you can delete it; emails that used it keep it."
+        m["stickers.cancel"] = "Cancel"
+        m["stickers.capHint"] = "Free holds 10 stickers per universe · Premium holds 100"
+        m["stickers.couldntLoad"] = "Couldn’t load the stickers. Try again."
+        m["stickers.customBy"] = "Our sticker · added by {name}"
+        m["stickers.delete"] = "Delete"
+        m["stickers.deleteBody"] = "Delete this sticker for both of you? Sent ones stay."
+        m["stickers.deleteTitle"] = "Delete sticker"
+        m["stickers.draw"] = "Draw a sticker"
+        m["stickers.drawHint"] = "Doodle on a clear square"
+        m["stickers.favourites"] = "Favourites"
+        m["stickers.fromPhoto"] = "From a photo"
+        m["stickers.import"] = "Import an image"
+        m["stickers.importHint"] = "PNG, WebP, GIF or JPEG · up to 1 MB · or paste it"
+        m["stickers.inTheApp"] = "Available in the app"
+        m["stickers.keywords"] = "Keywords"
+        m["stickers.keywordsHint"] = "optional · up to 8 · helps search"
+        m["stickers.label"] = "Sticker"
+        m["stickers.labelFrom"] = "Sticker from {name}"
+        m["stickers.labelWith"] = "Sticker: {word}"
+        m["stickers.morePack"] = "More from {pack}"
+        m["stickers.newSticker"] = "New sticker"
+        m["stickers.next"] = "Next"
+        m["stickers.nothingFound"] = "Nothing found"
+        m["stickers.ours"] = "Ours"
+        m["stickers.previewAlt"] = "Your new sticker"
+        m["stickers.recent"] = "Recent"
+        m["stickers.removeFavourite"] = "Remove from favourites"
+        m["stickers.removed"] = "Sticker removed"
+        m["stickers.search"] = "Search stickers"
+        m["stickers.sections"] = "Sticker sections"
+        m["stickers.sentAt"] = "{name} sent it at {time}"
+        m["stickers.sticker"] = "Sticker"
+        m["stickers.stickers"] = "Stickers"
+        m["stickers.tapToSend"] = "Tap to send"
+        m["stickers.tooLarge"] = "This image is larger than 1 MB"
+        m["stickers.unsupported"] = "This sticker format isn’t supported yet"
+        m["stickers.usedOfCap"] = "{used} of {cap}"
+        m["stickers.whiteOutline"] = "White outline"
         m["tabs.discussions"] = "Discussions"
         m["tabs.emails"] = "Emails"
         m["tabs.home"] = "Home"
@@ -1043,6 +1086,9 @@ internal object Catalog {
         m["universe.enterIt"] = "Enter it"
         m["universe.haveAKeyInstead"] = "Have a key instead? {link}"
         m["universe.haveAKeyQ"] = "Have a key instead?"
+    }
+
+    private fun en7(m: HashMap<String, String>) {
         m["universe.invite"] = "Invite"
         m["universe.inviteInvalid"] = "That invite doesn't work."
         m["universe.itsShownOnlyNowLost"] = "It's shown only now. Lost it? Make a new one in You › Universe."
@@ -1086,9 +1132,6 @@ internal object Catalog {
         m["write.arrivesAtChange"] = "Arrives at {time} whatever you change"
         m["write.arrivesAtTime"] = "Arrives at {time}"
         m["write.backDiscardChanges"] = "Back, discard changes"
-    }
-
-    private fun en7(m: HashMap<String, String>) {
         m["write.backKeepTheDraft"] = "Back, keep the draft"
         m["write.couldntLoadYourDraftCheck"] = "Couldn't load your draft. Check your connection and try again."
         m["write.discard"] = "Discard"
@@ -1123,7 +1166,7 @@ internal object Catalog {
     }
 
     val az: Map<String, String> by lazy {
-        HashMap<String, String>(2162).apply {
+        HashMap<String, String>(2248).apply {
             az0(this)
             az1(this)
             az2(this)
@@ -1477,7 +1520,6 @@ internal object Catalog {
         m["emails.email"] = "E-məktub"
         m["emails.emailActions"] = "E-məktub əməliyyatları"
         m["emails.emails"] = "E-məktublar"
-        m["emails.emailsNewestFirst"] = "E-məktublar, ən təzələr əvvəldə"
         m["emails.emailsOldestFirst"] = "E-məktublar, ən köhnələr əvvəldə"
         m["emails.findingOriginal"] = "Yüklənir…"
         m["emails.fold"] = "Qatla"
@@ -1592,10 +1634,10 @@ internal object Catalog {
         m["home.no"] = "Yox"
         m["home.noMoodYet"] = "Hələ əhval yoxdur"
         m["home.notSavedTryAgain"] = "Saxlanmadı. Bir də yoxla."
+        m["home.nothingInThePostYet"] = "Poçtda hələ heç nə yoxdur"
     }
 
     private fun az3(m: HashMap<String, String>) {
-        m["home.nothingInThePostYet"] = "Poçtda hələ heç nə yoxdur"
         m["home.ofDeleteOneToAdd"] = "{limit} / {limit} — yenisi üçün birini sil"
         m["home.ofDigits"] = "{label}, {count} / {pinlength} rəqəm"
         m["home.onItsWayArrives"] = "Yoldadır · çatacaq: {arrives}"
@@ -1745,10 +1787,10 @@ internal object Catalog {
         m["media.playbackSpeed"] = "Səsləndirmə sürəti {speed}"
         m["media.processing"] = "Hazırlanır"
         m["media.progress"] = "{time} / {total}"
+        m["media.readFailed"] = "Bu fayl telefonundan oxunmadı"
     }
 
     private fun az4(m: HashMap<String, String>) {
-        m["media.readFailed"] = "Bu fayl telefonundan oxunmadı"
         m["media.record"] = "● Yaz"
         m["media.recordAVideo"] = "Video çək"
         m["media.recordAVoiceNote"] = "Səsli mesaj yaz"
@@ -1898,10 +1940,10 @@ internal object Catalog {
         m["plan.premium"] = "Premium"
         m["plan.renews"] = "Yenilənmə: {time}"
         m["plan.title"] = "Plan"
+        m["plan.today"] = "Bu gün"
     }
 
     private fun az5(m: HashMap<String, String>) {
-        m["plan.today"] = "Bu gün"
         m["plan.unlimited"] = "Limitsiz"
         m["plan.videoEach"] = "hərəsi {seconds} san · gündə {daily}"
         m["plan.videos"] = "Videolar"
@@ -2051,10 +2093,10 @@ internal object Catalog {
         m["settings.installApp"] = "Tətbiqi quraşdır"
         m["settings.keyMadeOn"] = "Yaradılıb: {day}. Açarı bir daha göstərmək olmur; itsə, yenisini yarat."
         m["settings.keyNotMade"] = "Yeni açar yaradılmadı. Bir də yoxla."
+        m["settings.keysCantBeShown"] = "Açarı bir daha göstərmək olmur; itsə, yenisini yarat."
     }
 
     private fun az6(m: HashMap<String, String>) {
-        m["settings.keysCantBeShown"] = "Açarı bir daha göstərmək olmur; itsə, yenisini yarat."
         m["settings.language"] = "Dil"
         m["settings.languageNotSaved"] = "Dil dəyişmədi. Bir də yoxla."
         m["settings.languageNote"] = "Bütün cihazlarında və gələn bildirişlərdə sənin dilin."
@@ -2117,6 +2159,50 @@ internal object Catalog {
         m["stamps.stamp"] = "Marka: {name}"
         m["stamps.stampChangeIt"] = "Marka: {name}. Dəyiş"
         m["stamps.stampThemes"] = "Marka mövzuları"
+        m["stickers.add"] = "Əlavə et"
+        m["stickers.addFavourite"] = "Sevimlilərə əlavə et"
+        m["stickers.addSticker"] = "Stiker əlavə et"
+        m["stickers.adding"] = "Əlavə olunur…"
+        m["stickers.afterAdding"] = "Əlavədən sonra {used} / {cap}"
+        m["stickers.bothCanUse"] = "İkiniz də göndərə bilərsiniz. Hər biriniz silə bilər; onu işlədən e-məktublarda qalır."
+        m["stickers.cancel"] = "Ləğv et"
+        m["stickers.capHint"] = "Pulsuz: dünyaya 10 stiker · Premium: 100"
+        m["stickers.couldntLoad"] = "Stikerləri yükləmək olmadı. Yenidən yoxla."
+        m["stickers.customBy"] = "Bizim stiker · {name} əlavə edib"
+        m["stickers.delete"] = "Sil"
+        m["stickers.deleteBody"] = "Bu stiker ikiniz üçün də silinsin? Göndərilənlər qalacaq."
+        m["stickers.deleteTitle"] = "Stikeri sil"
+        m["stickers.draw"] = "Stiker çək"
+        m["stickers.drawHint"] = "Şəffaf kvadratda cız"
+        m["stickers.favourites"] = "Sevimlilər"
+        m["stickers.fromPhoto"] = "Fotodan"
+        m["stickers.import"] = "Şəkil yüklə"
+        m["stickers.importHint"] = "PNG, WebP, GIF və ya JPEG · 1 MB-a qədər · və ya yapışdır"
+        m["stickers.inTheApp"] = "Tətbiqdə var"
+        m["stickers.keywords"] = "Açar sözlər"
+        m["stickers.keywordsHint"] = "istəyə görə · 8-ə qədər · axtarışa kömək edir"
+        m["stickers.label"] = "Stiker"
+        m["stickers.labelFrom"] = "{name} stikeri"
+        m["stickers.labelWith"] = "Stiker: {word}"
+        m["stickers.morePack"] = "{pack} paketindən daha çox"
+        m["stickers.newSticker"] = "Yeni stiker"
+        m["stickers.next"] = "Növbəti"
+        m["stickers.nothingFound"] = "Heç nə tapılmadı"
+        m["stickers.ours"] = "Bizimkilər"
+        m["stickers.previewAlt"] = "Yeni stikerin"
+        m["stickers.recent"] = "Son"
+        m["stickers.removeFavourite"] = "Sevimlilərdən çıxar"
+        m["stickers.removed"] = "Stiker silinib"
+        m["stickers.search"] = "Stiker axtar"
+        m["stickers.sections"] = "Stiker bölmələri"
+        m["stickers.sentAt"] = "{name} {time}-da göndərib"
+        m["stickers.sticker"] = "Stiker"
+        m["stickers.stickers"] = "Stikerlər"
+        m["stickers.tapToSend"] = "Göndərmək üçün toxun"
+        m["stickers.tooLarge"] = "Bu şəkil 1 MB-dan böyükdür"
+        m["stickers.unsupported"] = "Bu stiker formatı hələ dəstəklənmir"
+        m["stickers.usedOfCap"] = "{used} / {cap}"
+        m["stickers.whiteOutline"] = "Ağ kontur"
         m["tabs.discussions"] = "Müzakirələr"
         m["tabs.emails"] = "E-məktublar"
         m["tabs.home"] = "Əsas səhifə"
@@ -2161,6 +2247,9 @@ internal object Catalog {
         m["universe.enterIt"] = "İçəri keç"
         m["universe.haveAKeyInstead"] = "Açarın var? {link}"
         m["universe.haveAKeyQ"] = "Açarın var?"
+    }
+
+    private fun az7(m: HashMap<String, String>) {
         m["universe.invite"] = "Dəvət"
         m["universe.inviteInvalid"] = "Bu dəvət işləmir."
         m["universe.itsShownOnlyNowLost"] = "Açar yalnız indi görünür. İtirsən, yenisini Mən › Sizin dünyanız bölməsində yarada bilərsən."
@@ -2204,9 +2293,6 @@ internal object Catalog {
         m["write.arrivesAtChange"] = "Nəyi dəyişsən də, çatacaq: {time}"
         m["write.arrivesAtTime"] = "Çatacaq: {time}"
         m["write.backDiscardChanges"] = "Geri, dəyişikliklər silinsin"
-    }
-
-    private fun az7(m: HashMap<String, String>) {
         m["write.backKeepTheDraft"] = "Geri, qaralama qalsın"
         m["write.couldntLoadYourDraftCheck"] = "Qaralaman açılmadı. İnternetə bax və bir də yoxla."
         m["write.discard"] = "Sil"
@@ -2241,7 +2327,7 @@ internal object Catalog {
     }
 
     val fa: Map<String, String> by lazy {
-        HashMap<String, String>(2162).apply {
+        HashMap<String, String>(2248).apply {
             fa0(this)
             fa1(this)
             fa2(this)
@@ -2595,7 +2681,6 @@ internal object Catalog {
         m["emails.email"] = "ایمیل"
         m["emails.emailActions"] = "گزینه‌های ایمیل"
         m["emails.emails"] = "ایمیل‌ها"
-        m["emails.emailsNewestFirst"] = "ایمیل‌ها، تازه‌ترها اول"
         m["emails.emailsOldestFirst"] = "ایمیل‌ها، قدیمی‌ترها اول"
         m["emails.findingOriginal"] = "در حال بارگذاری…"
         m["emails.fold"] = "جمع کن"
@@ -2710,10 +2795,10 @@ internal object Catalog {
         m["home.no"] = "نه"
         m["home.noMoodYet"] = "هنوز حال‌وهوایی نیست"
         m["home.notSavedTryAgain"] = "ذخیره نشد. دوباره امتحان کن."
+        m["home.nothingInThePostYet"] = "هنوز چیزی توی صندوق نیست"
     }
 
     private fun fa3(m: HashMap<String, String>) {
-        m["home.nothingInThePostYet"] = "هنوز چیزی توی صندوق نیست"
         m["home.ofDeleteOneToAdd"] = "{limit} از {limit} — برای یکی تازه، یکی رو حذف کن"
         m["home.ofDigits"] = "{label}، {count} از {pinlength} رقم"
         m["home.onItsWayArrives"] = "توی راهه · می‌رسه: {arrives}"
@@ -2863,10 +2948,10 @@ internal object Catalog {
         m["media.playbackSpeed"] = "سرعت پخش {speed}"
         m["media.processing"] = "در حال آماده‌سازی"
         m["media.progress"] = "{time} / {total}"
+        m["media.readFailed"] = "این فایل از گوشیت خونده نشد"
     }
 
     private fun fa4(m: HashMap<String, String>) {
-        m["media.readFailed"] = "این فایل از گوشیت خونده نشد"
         m["media.record"] = "● ضبط"
         m["media.recordAVideo"] = "یه ویدیو بگیر"
         m["media.recordAVoiceNote"] = "یه پیام صوتی ضبط کن"
@@ -3016,10 +3101,10 @@ internal object Catalog {
         m["plan.premium"] = "پریمیوم"
         m["plan.renews"] = "ساعت {time} دوباره پر می‌شه"
         m["plan.title"] = "اشتراک"
+        m["plan.today"] = "امروز"
     }
 
     private fun fa5(m: HashMap<String, String>) {
-        m["plan.today"] = "امروز"
         m["plan.unlimited"] = "نامحدود"
         m["plan.videoEach"] = "هر کدوم {seconds} ثانیه · روزی {daily}"
         m["plan.videos"] = "ویدیوها"
@@ -3169,10 +3254,10 @@ internal object Catalog {
         m["settings.installApp"] = "نصب اپ"
         m["settings.keyMadeOn"] = "ساخته‌شده: {day}. کلید دوباره نشون داده نمی‌شه؛ اگه گم شد، یه تازه‌ش رو بساز."
         m["settings.keyNotMade"] = "کلید تازه ساخته نشد. دوباره امتحان کن."
+        m["settings.keysCantBeShown"] = "کلید دوباره نشون داده نمی‌شه؛ اگه گم شد، یه تازه‌ش رو بساز."
     }
 
     private fun fa6(m: HashMap<String, String>) {
-        m["settings.keysCantBeShown"] = "کلید دوباره نشون داده نمی‌شه؛ اگه گم شد، یه تازه‌ش رو بساز."
         m["settings.language"] = "زبان"
         m["settings.languageNotSaved"] = "زبان عوض نشد. دوباره امتحان کن."
         m["settings.languageNote"] = "زبانت روی همه‌ی دستگاه‌هات و توی اعلان‌هایی که می‌گیری."
@@ -3235,6 +3320,50 @@ internal object Catalog {
         m["stamps.stamp"] = "تمبر: {name}"
         m["stamps.stampChangeIt"] = "تمبر: {name}. عوضش کن"
         m["stamps.stampThemes"] = "دسته‌های تمبر"
+        m["stickers.add"] = "اضافه کن"
+        m["stickers.addFavourite"] = "افزودن به محبوب‌ها"
+        m["stickers.addSticker"] = "افزودن استیکر"
+        m["stickers.adding"] = "در حال افزودن…"
+        m["stickers.afterAdding"] = "بعد از افزودن {used} از {cap}"
+        m["stickers.bothCanUse"] = "هر دوتون می‌تونید بفرستیدش. هر کدوم می‌تونید پاکش کنید؛ ایمیل‌هایی که داشتنش نگهش می‌دارن."
+        m["stickers.cancel"] = "لغو"
+        m["stickers.capHint"] = "رایگان: ۱۰ استیکر برای هر دنیا · پریمیوم: ۱۰۰"
+        m["stickers.couldntLoad"] = "استیکرها بار نشدن. دوباره امتحان کن."
+        m["stickers.customBy"] = "استیکر خودمون · {name} اضافه کرده"
+        m["stickers.delete"] = "حذف"
+        m["stickers.deleteBody"] = "این استیکر برای هر دوتون حذف بشه؟ فرستاده‌شده‌ها می‌مونن."
+        m["stickers.deleteTitle"] = "حذف استیکر"
+        m["stickers.draw"] = "استیکر بکش"
+        m["stickers.drawHint"] = "روی مربع شفاف بکش"
+        m["stickers.favourites"] = "محبوب‌ها"
+        m["stickers.fromPhoto"] = "از عکس"
+        m["stickers.import"] = "وارد کردن تصویر"
+        m["stickers.importHint"] = "PNG، WebP، GIF یا JPEG · تا ۱ مگابایت · یا پیست کن"
+        m["stickers.inTheApp"] = "توی اپ هست"
+        m["stickers.keywords"] = "کلیدواژه‌ها"
+        m["stickers.keywordsHint"] = "اختیاری · تا ۸ · به جستجو کمک می‌کنه"
+        m["stickers.label"] = "استیکر"
+        m["stickers.labelFrom"] = "استیکر از {name}"
+        m["stickers.labelWith"] = "استیکر: {word}"
+        m["stickers.morePack"] = "بیشتر از {pack}"
+        m["stickers.newSticker"] = "استیکر جدید"
+        m["stickers.next"] = "بعدی"
+        m["stickers.nothingFound"] = "چیزی پیدا نشد"
+        m["stickers.ours"] = "مال ما"
+        m["stickers.previewAlt"] = "استیکر جدیدت"
+        m["stickers.recent"] = "اخیر"
+        m["stickers.removeFavourite"] = "حذف از محبوب‌ها"
+        m["stickers.removed"] = "استیکر حذف شده"
+        m["stickers.search"] = "جستجوی استیکر"
+        m["stickers.sections"] = "بخش‌های استیکر"
+        m["stickers.sentAt"] = "{name} ساعت {time} فرستاد"
+        m["stickers.sticker"] = "استیکر"
+        m["stickers.stickers"] = "استیکرها"
+        m["stickers.tapToSend"] = "برای فرستادن بزن"
+        m["stickers.tooLarge"] = "این تصویر بزرگ‌تر از ۱ مگابایته"
+        m["stickers.unsupported"] = "این فرمت استیکر هنوز پشتیبانی نمی‌شه"
+        m["stickers.usedOfCap"] = "{used} از {cap}"
+        m["stickers.whiteOutline"] = "حاشیه‌ی سفید"
         m["tabs.discussions"] = "گفت‌وگوها"
         m["tabs.emails"] = "ایمیل‌ها"
         m["tabs.home"] = "خانه"
@@ -3279,6 +3408,9 @@ internal object Catalog {
         m["universe.enterIt"] = "برو تو"
         m["universe.haveAKeyInstead"] = "کلید داری؟ {link}"
         m["universe.haveAKeyQ"] = "کلید داری؟"
+    }
+
+    private fun fa7(m: HashMap<String, String>) {
         m["universe.invite"] = "دعوت‌نامه"
         m["universe.inviteInvalid"] = "این دعوت‌نامه کار نمی‌کنه."
         m["universe.itsShownOnlyNowLost"] = "فقط همین الان نشونش می‌دیم. گمش کردی؟ بعداً از من › دنیا می‌تونی یه کلید تازه بسازی."
@@ -3322,9 +3454,6 @@ internal object Catalog {
         m["write.arrivesAtChange"] = "هر چی هم عوض کنی، ساعت {time} می‌رسه"
         m["write.arrivesAtTime"] = "ساعت {time} می‌رسه"
         m["write.backDiscardChanges"] = "برگشت، تغییرها دور ریخته بشن"
-    }
-
-    private fun fa7(m: HashMap<String, String>) {
         m["write.backKeepTheDraft"] = "برگشت، پیش‌نویس بمونه"
         m["write.couldntLoadYourDraftCheck"] = "پیش‌نویست باز نشد. اینترنتت رو چک کن و دوباره امتحان کن."
         m["write.discard"] = "دور بریز"
@@ -3359,7 +3488,7 @@ internal object Catalog {
     }
 
     val tr: Map<String, String> by lazy {
-        HashMap<String, String>(2162).apply {
+        HashMap<String, String>(2248).apply {
             tr0(this)
             tr1(this)
             tr2(this)
@@ -3713,7 +3842,6 @@ internal object Catalog {
         m["emails.email"] = "E-posta"
         m["emails.emailActions"] = "E-posta seçenekleri"
         m["emails.emails"] = "E-postalar"
-        m["emails.emailsNewestFirst"] = "E-postalar, en yenisi başta"
         m["emails.emailsOldestFirst"] = "E-postalar, en eskisi başta"
         m["emails.findingOriginal"] = "Yükleniyor…"
         m["emails.fold"] = "Katla"
@@ -3828,10 +3956,10 @@ internal object Catalog {
         m["home.no"] = "Hayır"
         m["home.noMoodYet"] = "Henüz ruh hâli yok"
         m["home.notSavedTryAgain"] = "Kaydedilemedi. Tekrar dene."
+        m["home.nothingInThePostYet"] = "Postada henüz bir şey yok"
     }
 
     private fun tr3(m: HashMap<String, String>) {
-        m["home.nothingInThePostYet"] = "Postada henüz bir şey yok"
         m["home.ofDeleteOneToAdd"] = "{limit} / {limit} — yenisi için birini sil"
         m["home.ofDigits"] = "{label}, {count} / {pinlength} rakam"
         m["home.onItsWayArrives"] = "Yolda · varış: {arrives}"
@@ -3981,10 +4109,10 @@ internal object Catalog {
         m["media.playbackSpeed"] = "Oynatma hızı {speed}"
         m["media.processing"] = "Hazırlanıyor"
         m["media.progress"] = "{time} / {total}"
+        m["media.readFailed"] = "Bu dosya telefonundan okunamadı"
     }
 
     private fun tr4(m: HashMap<String, String>) {
-        m["media.readFailed"] = "Bu dosya telefonundan okunamadı"
         m["media.record"] = "● Kayıt"
         m["media.recordAVideo"] = "Video çek"
         m["media.recordAVoiceNote"] = "Sesli mesaj kaydet"
@@ -4134,10 +4262,10 @@ internal object Catalog {
         m["plan.premium"] = "Premium"
         m["plan.renews"] = "Yenileme: {time}"
         m["plan.title"] = "Plan"
+        m["plan.today"] = "Bugün"
     }
 
     private fun tr5(m: HashMap<String, String>) {
-        m["plan.today"] = "Bugün"
         m["plan.unlimited"] = "Sınırsız"
         m["plan.videoEach"] = "her biri {seconds} sn · günde {daily}"
         m["plan.videos"] = "Videolar"
@@ -4287,10 +4415,10 @@ internal object Catalog {
         m["settings.installApp"] = "Uygulamayı yükle"
         m["settings.keyMadeOn"] = "Oluşturuldu: {day}. Anahtar bir daha gösterilemez; kaybolursa yenisini oluştur."
         m["settings.keyNotMade"] = "Yeni anahtar oluşturulamadı. Tekrar dene."
+        m["settings.keysCantBeShown"] = "Anahtar bir daha gösterilemez; kaybolursa yenisini oluştur."
     }
 
     private fun tr6(m: HashMap<String, String>) {
-        m["settings.keysCantBeShown"] = "Anahtar bir daha gösterilemez; kaybolursa yenisini oluştur."
         m["settings.language"] = "Dil"
         m["settings.languageNotSaved"] = "Dil değiştirilemedi. Tekrar dene."
         m["settings.languageNote"] = "Kullandığın her cihazda ve gelen bildirimlerde senin dilin."
@@ -4353,6 +4481,50 @@ internal object Catalog {
         m["stamps.stamp"] = "Pul: {name}"
         m["stamps.stampChangeIt"] = "Pul: {name}. Değiştir"
         m["stamps.stampThemes"] = "Pul temaları"
+        m["stickers.add"] = "Ekle"
+        m["stickers.addFavourite"] = "Favorilere ekle"
+        m["stickers.addSticker"] = "Çıkartma ekle"
+        m["stickers.adding"] = "Ekleniyor…"
+        m["stickers.afterAdding"] = "Ekledikten sonra {used} / {cap}"
+        m["stickers.bothCanUse"] = "İkiniz de gönderebilirsiniz. Biriniz silebilir; kullanılan e-postalarda kalır."
+        m["stickers.cancel"] = "İptal"
+        m["stickers.capHint"] = "Ücretsiz: evren başına 10 çıkartma · Premium: 100"
+        m["stickers.couldntLoad"] = "Çıkartmalar yüklenemedi. Tekrar dene."
+        m["stickers.customBy"] = "Bizim çıkartma · {name} ekledi"
+        m["stickers.delete"] = "Sil"
+        m["stickers.deleteBody"] = "Bu çıkartma ikiniz için de silinsin mi? Gönderilenler kalır."
+        m["stickers.deleteTitle"] = "Çıkartmayı sil"
+        m["stickers.draw"] = "Çıkartma çiz"
+        m["stickers.drawHint"] = "Şeffaf karede çiz"
+        m["stickers.favourites"] = "Favoriler"
+        m["stickers.fromPhoto"] = "Fotoğraftan"
+        m["stickers.import"] = "Görsel içe aktar"
+        m["stickers.importHint"] = "PNG, WebP, GIF veya JPEG · 1 MB’a kadar · ya da yapıştır"
+        m["stickers.inTheApp"] = "Uygulamada var"
+        m["stickers.keywords"] = "Anahtar kelimeler"
+        m["stickers.keywordsHint"] = "isteğe bağlı · 8’e kadar · aramaya yardım eder"
+        m["stickers.label"] = "Çıkartma"
+        m["stickers.labelFrom"] = "{name} çıkartması"
+        m["stickers.labelWith"] = "Çıkartma: {word}"
+        m["stickers.morePack"] = "{pack} paketinden daha fazla"
+        m["stickers.newSticker"] = "Yeni çıkartma"
+        m["stickers.next"] = "İleri"
+        m["stickers.nothingFound"] = "Hiçbir şey bulunamadı"
+        m["stickers.ours"] = "Bizimkiler"
+        m["stickers.previewAlt"] = "Yeni çıkartman"
+        m["stickers.recent"] = "Son kullanılanlar"
+        m["stickers.removeFavourite"] = "Favorilerden çıkar"
+        m["stickers.removed"] = "Çıkartma kaldırıldı"
+        m["stickers.search"] = "Çıkartma ara"
+        m["stickers.sections"] = "Çıkartma bölümleri"
+        m["stickers.sentAt"] = "{name} gönderdi · {time}"
+        m["stickers.sticker"] = "Çıkartma"
+        m["stickers.stickers"] = "Çıkartmalar"
+        m["stickers.tapToSend"] = "Göndermek için dokun"
+        m["stickers.tooLarge"] = "Bu görsel 1 MB’tan büyük"
+        m["stickers.unsupported"] = "Bu çıkartma biçimi henüz desteklenmiyor"
+        m["stickers.usedOfCap"] = "{used} / {cap}"
+        m["stickers.whiteOutline"] = "Beyaz kenar"
         m["tabs.discussions"] = "Sohbetler"
         m["tabs.emails"] = "E-postalar"
         m["tabs.home"] = "Ana sayfa"
@@ -4397,6 +4569,9 @@ internal object Catalog {
         m["universe.enterIt"] = "İçeri gir"
         m["universe.haveAKeyInstead"] = "Anahtarın mı var? {link}"
         m["universe.haveAKeyQ"] = "Anahtarın mı var?"
+    }
+
+    private fun tr7(m: HashMap<String, String>) {
         m["universe.invite"] = "Davet"
         m["universe.inviteInvalid"] = "Bu davet çalışmıyor."
         m["universe.itsShownOnlyNowLost"] = "Anahtar yalnızca şimdi görünüyor. Kaybedersen yenisini Ben › Dünyanız bölümünden oluşturabilirsin."
@@ -4440,9 +4615,6 @@ internal object Catalog {
         m["write.arrivesAtChange"] = "Neyi değiştirirsen değiştir, varış: {time}"
         m["write.arrivesAtTime"] = "Varış: {time}"
         m["write.backDiscardChanges"] = "Geri, değişiklikler silinsin"
-    }
-
-    private fun tr7(m: HashMap<String, String>) {
         m["write.backKeepTheDraft"] = "Geri, taslak kalsın"
         m["write.couldntLoadYourDraftCheck"] = "Taslağın açılamadı. Bağlantını kontrol et ve tekrar dene."
         m["write.discard"] = "Sil"
@@ -4477,7 +4649,7 @@ internal object Catalog {
     }
 
     val ru: Map<String, String> by lazy {
-        HashMap<String, String>(2214).apply {
+        HashMap<String, String>(2300).apply {
             ru0(this)
             ru1(this)
             ru2(this)
@@ -4837,7 +5009,6 @@ internal object Catalog {
         m["emails.email"] = "Имейл"
         m["emails.emailActions"] = "Действия с имейлом"
         m["emails.emails"] = "Имейлы"
-        m["emails.emailsNewestFirst"] = "Имейлы, сначала новые"
         m["emails.emailsOldestFirst"] = "Имейлы, сначала старые"
         m["emails.findingOriginal"] = "Загрузка…"
         m["emails.fold"] = "Свернуть"
@@ -4946,10 +5117,10 @@ internal object Catalog {
         m["home.moodsOf"] = "Настроения {n} из {count}"
         m["home.moreMoods"] = "Ещё настроения"
         m["home.new"] = "НОВОЕ"
+        m["home.newMood"] = "Новое настроение"
     }
 
     private fun ru3(m: HashMap<String, String>) {
-        m["home.newMood"] = "Новое настроение"
         m["home.next"] = "Дальше"
         m["home.night"] = "· ночь"
         m["home.no"] = "Нет"
@@ -5099,10 +5270,10 @@ internal object Catalog {
         m["media.microphoneIsOffAllowIt"] = "Микрофон выключен · Разреши его в настройках браузера"
         m["media.noCameraApp"] = "На этом телефоне не нашлось приложения камеры"
         m["media.notNow"] = "Не сейчас"
+        m["media.notesStopAtFiveMinutes"] = "Голосовые длятся до пяти минут и открываются на любом телефоне. Если не разрешить, можно прикрепить аудиофайл."
     }
 
     private fun ru4(m: HashMap<String, String>) {
-        m["media.notesStopAtFiveMinutes"] = "Голосовые длятся до пяти минут и открываются на любом телефоне. Если не разрешить, можно прикрепить аудиофайл."
         m["media.oneDoodlePerLetter"] = "Один рисунок на письмо"
         m["media.pause"] = "Пауза: {label}"
         m["media.pauseVoiceNote"] = "Поставить голосовое на паузу"
@@ -5252,10 +5423,10 @@ internal object Catalog {
         m["pin.sixDigits"] = "Шесть цифр. Нужно будет повторить один раз."
         m["pin.unlockBrand"] = "Открыть мир {brand}"
         m["pin.unlockWithFingerprint"] = "Открыть по отпечатку"
+        m["pin.usePin"] = "Ввести PIN-код"
     }
 
     private fun ru5(m: HashMap<String, String>) {
-        m["pin.usePin"] = "Ввести PIN-код"
         m["plan.allowance"] = "Лимит"
         m["plan.boardDoodles"] = "Рисунки на доске"
         m["plan.both"] = "Действует для вас обоих."
@@ -5405,10 +5576,10 @@ internal object Catalog {
         m["settings.cancel"] = "Отмена"
         m["settings.changePin"] = "Сменить PIN-код"
         m["settings.createdBy"] = "Создатель"
+        m["settings.device.blocked"] = "Заблокировано"
     }
 
     private fun ru6(m: HashMap<String, String>) {
-        m["settings.device.blocked"] = "Заблокировано"
         m["settings.device.blockedSub"] = "Заблокировано в этом браузере. «Разрешить» покажет, как снять блокировку."
         m["settings.device.blockedSubAndroid"] = "Уведомления этого приложения выключены в настройках Android. «Разрешить» откроет их."
         m["settings.device.iosSub"] = "На iPhone добавь мир {brand} на экран «Домой», чтобы получать уведомления."
@@ -5497,6 +5668,50 @@ internal object Catalog {
         m["stamps.stamp"] = "Марка: {name}"
         m["stamps.stampChangeIt"] = "Марка: {name}. Изменить"
         m["stamps.stampThemes"] = "Темы марок"
+        m["stickers.add"] = "Добавить"
+        m["stickers.addFavourite"] = "В избранное"
+        m["stickers.addSticker"] = "Добавить стикер"
+        m["stickers.adding"] = "Добавляем…"
+        m["stickers.afterAdding"] = "{used} из {cap} после добавления"
+        m["stickers.bothCanUse"] = "Отправлять могут оба. Удалить может любой из вас; в письмах, где он был, он останется."
+        m["stickers.cancel"] = "Отмена"
+        m["stickers.capHint"] = "Бесплатно: 10 стикеров на вселенную · Premium: 100"
+        m["stickers.couldntLoad"] = "Не удалось загрузить стикеры. Попробуй ещё раз."
+        m["stickers.customBy"] = "Наш стикер · добавлено: {name}"
+        m["stickers.delete"] = "Удалить"
+        m["stickers.deleteBody"] = "Удалить этот стикер для вас обоих? Отправленные останутся."
+        m["stickers.deleteTitle"] = "Удалить стикер"
+        m["stickers.draw"] = "Нарисовать стикер"
+        m["stickers.drawHint"] = "Рисуй на прозрачном квадрате"
+        m["stickers.favourites"] = "Избранное"
+        m["stickers.fromPhoto"] = "Из фото"
+        m["stickers.import"] = "Импорт изображения"
+        m["stickers.importHint"] = "PNG, WebP, GIF или JPEG · до 1 МБ · или вставь"
+        m["stickers.inTheApp"] = "Есть в приложении"
+        m["stickers.keywords"] = "Ключевые слова"
+        m["stickers.keywordsHint"] = "необязательно · до 8 · для поиска"
+        m["stickers.label"] = "Стикер"
+        m["stickers.labelFrom"] = "Стикер · {name}"
+        m["stickers.labelWith"] = "Стикер: {word}"
+        m["stickers.morePack"] = "Ещё из «{pack}»"
+        m["stickers.newSticker"] = "Новый стикер"
+        m["stickers.next"] = "Далее"
+        m["stickers.nothingFound"] = "Ничего не найдено"
+        m["stickers.ours"] = "Наши"
+        m["stickers.previewAlt"] = "Твой новый стикер"
+        m["stickers.recent"] = "Недавние"
+        m["stickers.removeFavourite"] = "Убрать из избранного"
+        m["stickers.removed"] = "Стикер удалён"
+        m["stickers.search"] = "Поиск стикеров"
+        m["stickers.sections"] = "Разделы стикеров"
+        m["stickers.sentAt"] = "{name} · отправлено в {time}"
+        m["stickers.sticker"] = "Стикер"
+        m["stickers.stickers"] = "Стикеры"
+        m["stickers.tapToSend"] = "Нажми, чтобы отправить"
+        m["stickers.tooLarge"] = "Это изображение больше 1 МБ"
+        m["stickers.unsupported"] = "Этот формат стикеров пока не поддерживается"
+        m["stickers.usedOfCap"] = "{used} из {cap}"
+        m["stickers.whiteOutline"] = "Белый контур"
         m["tabs.discussions"] = "Обсуждения"
         m["tabs.emails"] = "Имейлы"
         m["tabs.home"] = "Главная"
@@ -5515,6 +5730,9 @@ internal object Catalog {
         m["unblock.edge3"] = "Выбери «Разрешить»"
         m["unblock.firefox1"] = "Нажми на значок слева от адреса"
         m["unblock.firefox2"] = "Рядом с «Отправлять уведомления» нажми ×, чтобы снять «Заблокировано»"
+    }
+
+    private fun ru7(m: HashMap<String, String>) {
         m["unblock.firefox3"] = "Обнови страницу и снова нажми «Разрешить»"
         m["unblock.iosApp1"] = "Открой на iPhone приложение «Настройки»"
         m["unblock.iosApp2"] = "Нажми «Уведомления», затем Delulutopia"
@@ -5558,9 +5776,6 @@ internal object Catalog {
         m["universe.sendItToTheOne"] = "Отправь его тому единственному человеку, которого хочешь здесь видеть."
         m["universe.share"] = "Поделиться"
         m["universe.shareText"] = "Ключ от мира {name}: {key}"
-    }
-
-    private fun ru7(m: HashMap<String, String>) {
         m["universe.stepOf2"] = "Шаг {step} из 2"
         m["universe.stepOf5"] = "Шаг {step} из 5"
         m["universe.thisDevicesZonePickedFor"] = "Взяли часовой пояс этого устройства."

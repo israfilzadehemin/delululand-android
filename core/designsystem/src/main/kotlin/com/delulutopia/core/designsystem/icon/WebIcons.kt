@@ -613,6 +613,59 @@ object WebIcons {
         )
     }
 
+    /** Stickers (doc "Delululand — Stickers" FS-SK1): a square with a peeled corner and a smile. */
+    val Sticker: ImageVector by lazy {
+        icon(
+            "IconSticker",
+            24f,
+            24f,
+            E("M14.5 3.5H6.5a3 3 0 0 0-3 3v11a3 3 0 0 0 3 3h11a3 3 0 0 0 3-3v-8z", fill = false, stroke = true, width = 1.8f),
+            E("M14.5 3.5v3a3 3 0 0 0 3 3h3", fill = false, stroke = true, width = 1.8f),
+            E("M8.3 11.5a0.9 0.9 0 1 0 1.8 0a0.9 0.9 0 1 0 -1.8 0z", fill = true, stroke = false, width = 1.8f),
+            E("M13.9 11.5a0.9 0.9 0 1 0 1.8 0a0.9 0.9 0 1 0 -1.8 0z", fill = true, stroke = false, width = 1.8f),
+            E("M9 15.2q3 2.3 6 0", fill = false, stroke = true, width = 1.8f),
+        )
+    }
+
+    val Recent: ImageVector by lazy {
+        icon(
+            "IconRecent",
+            24f,
+            24f,
+            E("M3.5 12.0a8.5 8.5 0 1 0 17.0 0a8.5 8.5 0 1 0 -17.0 0z", fill = false, stroke = true, width = 1.8f),
+            E("M12 7.5V12l3 2", fill = false, stroke = true, width = 1.8f),
+        )
+    }
+
+    val HeartOutline: ImageVector by lazy {
+        icon(
+            "IconHeartOutline",
+            24f,
+            24f,
+            E("M12 20s-7-4.4-7-9.3A4 4 0 0 1 12 8a4 4 0 0 1 7 2.7C19 15.6 12 20 12 20z", fill = false, stroke = true, width = 1.8f),
+        )
+    }
+
+    val Import: ImageVector by lazy {
+        icon(
+            "IconImport",
+            24f,
+            24f,
+            E("M12 4v11M7.5 10.5L12 15l4.5-4.5", fill = false, stroke = true, width = 1.8f),
+            E("M4.5 16v3.5h15V16", fill = false, stroke = true, width = 1.8f),
+        )
+    }
+
+    val Search: ImageVector by lazy {
+        icon(
+            "IconSearch",
+            24f,
+            24f,
+            E("M4.5 11.0a6.5 6.5 0 1 0 13.0 0a6.5 6.5 0 1 0 -13.0 0z", fill = false, stroke = true, width = 1.9f),
+            E("M16 16l4 4", fill = false, stroke = true, width = 1.9f),
+        )
+    }
+
     val ClockSmall: ImageVector by lazy {
         icon(
             "IconClockSmall",

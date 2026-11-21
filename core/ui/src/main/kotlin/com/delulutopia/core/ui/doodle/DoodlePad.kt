@@ -42,7 +42,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -122,6 +125,8 @@ fun DoodlePad(
     var liveTick by remember { mutableIntStateOf(0) }
 
     val requestClose = { if (blank) onClose() else askDiscard = true }
+    val checkerA = DlTheme.colors.letterEnvelope
+    val checkerB = MaterialTheme.colorScheme.surface
     val done = done@{
         if (blank || exporting || busy || waiting) return@done
         exporting = true
@@ -205,12 +210,15 @@ fun DoodlePad(
                                 .drawBehind {
                                     // Read both so a new history or a moved finger redraws.
                                     if (baseVersion < 0 || liveTick < 0) return@drawBehind
+                                    // Stickers FS-SK19: a clear square shows a checkerboard, as image editors do.
+                                    if (surface.paper == CLEAR) drawChecker(checkerA, checkerB)
                                     drawIntoCanvas { c ->
                                         val n = c.nativeCanvas
                                         n.save()
                                         n.scale(size.width / surface.width, size.height / surface.height)
                                         n.drawBitmap(base, 0f, 0f, null)
-                                        live?.let { drawStroke(n, it, surface.paper) }
+                                        // On a clear square the live eraser shows as a pale trace; it cuts once lifted.
+                                        live?.let { drawStroke(n, it, if (surface.paper == CLEAR) ERASER_GHOST else surface.paper) }
                                         n.restore()
                                     }
                                 },
@@ -303,5 +311,25 @@ private fun Tool(icon: ImageVector, label: String, enabled: Boolean = true, on: 
         contentAlignment = Alignment.Center,
     ) {
         Icon(icon, null, Modifier.size(22.dp), tint = tint)
+    }
+}
+
+/** The live eraser on a clear surface: a pale trace until the stroke ends and cuts. */
+private val ERASER_GHOST = 0x88FFFFFF.toInt()
+
+/** A 12 dp checkerboard under a clear surface. */
+fun DrawScope.drawChecker(a: Color, b: Color) {
+    val cell = 12.dp.toPx()
+    drawRect(b)
+    var y = 0f
+    var row = 0
+    while (y < size.height) {
+        var x = if (row % 2 == 0) 0f else cell
+        while (x < size.width) {
+            drawRect(a, topLeft = Offset(x, y), size = Size(cell, cell))
+            x += cell * 2
+        }
+        y += cell
+        row++
     }
 }

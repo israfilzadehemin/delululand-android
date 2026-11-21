@@ -73,12 +73,13 @@ fun quoteOf(e: Email): EmailQuote {
         thumbUrl = visualOf(e)?.takeUnless { it.expired }?.thumbUrl,
         thumbExpired = visualOf(e)?.expired == true,
         sentAt = e.sentAt,
+        sticker = e.sticker?.url256,
     )
 }
 
-/** RE9, RE11: the quote's text, else "Photo" / "Voice note" / "Video". */
+/** RE9, RE11: the quote's text, else "Sticker" (FS-SK15), else "Photo" / "Voice note" / "Video". */
 fun quoteLine(q: EmailQuote): String =
-    q.text ?: q.media?.let { mediaWords(it.photos, it.audios, it.videos) } ?: ""
+    q.text ?: (if (q.sticker != null) t("stickers.sticker") else null) ?: q.media?.let { mediaWords(it.photos, it.audios, it.videos) } ?: ""
 
 /** RE6: the distance that arms a reply and the most a bubble follows the finger, in dp. */
 const val SWIPE_ARM_DP = 64f

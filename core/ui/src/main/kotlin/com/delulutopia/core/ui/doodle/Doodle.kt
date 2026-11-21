@@ -20,7 +20,16 @@ object Surfaces {
 
     /** Board B5, B6: 1024 × 768 (4:3) on the whiteboard. */
     val BOARD = Surface(1024, 768, 0xFFFBFBF8.toInt())
+
+    /**
+     * A sticker (doc "Delululand — Stickers" FS-SK19): a clear 1024 px square, so the drawing keeps a
+     * see-through background; the eraser cuts back to clear instead of painting paper.
+     */
+    val STICKER = Surface(1024, 1024, CLEAR)
 }
+
+/** The paper of a clear surface: no paper at all. */
+const val CLEAR = 0
 
 /** Q4 Standard: 8 palette colours. */
 val COLOURS: List<Pair<String, Int>> get() = listOf(

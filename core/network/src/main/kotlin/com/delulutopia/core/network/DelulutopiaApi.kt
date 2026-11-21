@@ -60,8 +60,11 @@ import com.delulutopia.core.network.model.Saved
 import com.delulutopia.core.network.model.Selfie
 import com.delulutopia.core.network.model.SelfieSeenBody
 import com.delulutopia.core.network.model.SendAgainBody
+import com.delulutopia.core.network.model.SendStickerBody
 import com.delulutopia.core.network.model.Sent
 import com.delulutopia.core.network.model.StampCatalogue
+import com.delulutopia.core.network.model.Sticker
+import com.delulutopia.core.network.model.StickerCatalogue
 import com.delulutopia.core.network.model.TextBody
 import com.delulutopia.core.network.model.ThreadFull
 import com.delulutopia.core.network.model.ThreadPage
@@ -329,6 +332,27 @@ interface DelulutopiaApi {
 
     @POST("api/emails/threads/{id}/emails")
     suspend fun reply(@Path("id") id: Id, @Body body: DraftVersionBody): EmailSent
+
+    // Stickers (doc "Delululand — Stickers" §5.3)
+    @GET("api/stickers")
+    suspend fun stickers(): StickerCatalogue
+
+    /** SK3: a sticker is an email of its own; the same client id returns the first email (FS-SK7). */
+    @POST("api/emails/threads/{id}/stickers")
+    suspend fun sendSticker(@Path("id") id: Id, @Body body: SendStickerBody): EmailSent
+
+    @Multipart
+    @POST("api/stickers/custom")
+    suspend fun addSticker(@Part file: MultipartBody.Part, @Part("keywords") keywords: RequestBody?): Sticker
+
+    @DELETE("api/stickers/custom/{id}")
+    suspend fun deleteSticker(@Path("id") id: Id)
+
+    @PUT("api/stickers/{id}/favourite")
+    suspend fun favouriteSticker(@Path("id") id: Id)
+
+    @DELETE("api/stickers/{id}/favourite")
+    suspend fun unfavouriteSticker(@Path("id") id: Id)
 
     // Reactions: target = discussions | comments | emails
     @PUT("api/reactions/{target}/{id}")

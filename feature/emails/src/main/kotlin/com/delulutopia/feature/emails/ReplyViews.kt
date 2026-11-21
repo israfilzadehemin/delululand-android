@@ -148,8 +148,13 @@ private fun QuoteThumb(quote: EmailQuote, modifier: Modifier) {
         ExpiredThumb(size = 36.dp, modifier = modifier)
         return
     }
-    val thumb = quote.thumbUrl ?: return
     val base = LocalServerBaseUrl.current
+    // FS-SK15: a quoted sticker shows small and whole, without the photo's crop and corners.
+    quote.sticker?.let { st ->
+        AsyncImage(model = resolveMedia(base, st), contentDescription = null, modifier = modifier.size(36.dp), contentScale = ContentScale.Fit)
+        return
+    }
+    val thumb = quote.thumbUrl ?: return
     AsyncImage(
         model = resolveMedia(base, thumb),
         contentDescription = null,

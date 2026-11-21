@@ -15,6 +15,7 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.emoji2.emojipicker)
+    implementation(libs.mlkit.subject.segmentation)
 
     testImplementation(libs.junit4)
     testImplementation(libs.truth)
