@@ -15,6 +15,8 @@ import com.delulutopia.core.network.model.Citizen
 import com.delulutopia.core.network.model.Home
 import com.delulutopia.core.network.model.Mood
 import com.delulutopia.core.network.model.Row
+import com.delulutopia.core.network.model.Selfie
+import com.delulutopia.core.network.model.SelfieBoard
 import com.delulutopia.core.network.model.UniverseInfo
 import com.delulutopia.core.ui.LocalFirstCitizen
 import com.github.takahirom.roborazzi.captureRoboImage
@@ -133,6 +135,17 @@ class HomeScreenshotTest {
     )
 
     @Test fun empty_dark() = shot("empty_dark", full.copy(from = emptyList(), to = emptyList(), board = null), dark = true)
+
+    /** Selfies DS2: my empty frame and Leyla's locked one on the cork, both materials drawn. */
+    private val selfies = full.copy(
+        from = emptyList(),
+        to = emptyList(),
+        selfies = SelfieBoard(theirs = Selfie("s2", "2", at(-40), at(1400), locked = true)),
+    )
+
+    @Test fun selfies_light() = shot("selfies_light", selfies)
+
+    @Test fun selfies_dark() = shot("selfies_dark", selfies, dark = true)
 
     @Test fun loading() = shot("loading", null)
 

@@ -1,6 +1,5 @@
 package com.delulutopia.feature.home
 
-import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -174,89 +173,91 @@ internal fun BoardTile(home: Home, nowMs: Long, vm: HomeActions) {
         }
     }
 
-    Column(Modifier.fillMaxWidth().animateContentSize(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        when {
-            mini -> Strip(home, board, nowMs, base) { vm.setBoardMini(false) }
-            board != null -> {
-                Box(Modifier.fillMaxWidth()) {
-                    Frame(
-                        Modifier.clickable(onClickLabel = t("board.openFullScreen")) { viewing = true }
-                            .semantics {
-                                contentDescription = if (boardMine) t("board.frame.mine") else t("board.frame.friends", "friend" to friend)
-                            },
+    // §9 fold: the board rolls up into the strip and unrolls out of it (Fold).
+    Fold(mini, Modifier.fillMaxWidth(), strip = { Strip(home, board, nowMs, base) { vm.setBoardMini(false) } }) {
+        Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            when {
+                board != null -> {
+                    Box(Modifier.fillMaxWidth()) {
+                        Frame(
+                            Modifier.clickable(onClickLabel = t("board.openFullScreen")) { viewing = true }
+                                .semantics {
+                                    contentDescription = if (boardMine) t("board.frame.mine") else t("board.frame.friends", "friend" to friend)
+                                },
+                        ) {
+                            BoardImage(board, base)
+                            if (ribbon == board.version) NewChip(Modifier.padding(8.dp), paper = false)
+                        }
+                        Corner(board, canReact, mark, drawn, friend, Modifier.align(AbsoluteAlignment.TopRight).padding(6.dp)) { picking = true }
+                    }
+                    BoardNote(board, home, vm)
+                    // The status line on its own row, the actions under it at the end (web .dl-board-meta wraps).
+                    Row(
+                        Modifier.fillMaxWidth().padding(start = 2.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
                     ) {
-                        BoardImage(board, base)
-                        if (ribbon == board.version) NewChip(Modifier.padding(8.dp), paper = false)
+                        WhoDot(board.authorId)
+                        val reacted = when {
+                            board.reaction == null -> ""
+                            canReact -> t("board.reactedSuffix.me")
+                            else -> t("board.reactedSuffix.friend", "friend" to friend)
+                        }
+                        Text(
+                            tBold(
+                                bylineKey(board),
+                                setOf("name"),
+                                "name" to nameOf(board.authorId),
+                                "friend" to friend,
+                                "age" to ageWords(board.createdAt, nowMs),
+                                style = SpanStyle(fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface),
+                            ) + AnnotatedString(reacted),
+                            Modifier.weight(1f),
+                            style = MaterialTheme.typography.bodyMedium.copy(fontSize = 13.sp, lineHeight = 17.sp),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
                     }
-                    Corner(board, canReact, mark, drawn, friend, Modifier.align(AbsoluteAlignment.TopRight).padding(6.dp)) { picking = true }
-                }
-                BoardNote(board, home, vm)
-                // The status line on its own row, the actions under it at the end (web .dl-board-meta wraps).
-                Row(
-                    Modifier.fillMaxWidth().padding(start = 2.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(10.dp),
-                ) {
-                    WhoDot(board.authorId)
-                    val reacted = when {
-                        board.reaction == null -> ""
-                        canReact -> t("board.reactedSuffix.me")
-                        else -> t("board.reactedSuffix.friend", "friend" to friend)
-                    }
-                    Text(
-                        tBold(
-                            bylineKey(board),
-                            setOf("name"),
-                            "name" to nameOf(board.authorId),
-                            "friend" to friend,
-                            "age" to ageWords(board.createdAt, nowMs),
-                            style = SpanStyle(fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface),
-                        ) + AnnotatedString(reacted),
-                        Modifier.weight(1f),
-                        style = MaterialTheme.typography.bodyMedium.copy(fontSize = 13.sp, lineHeight = 17.sp),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-                Row(
-                    Modifier.fillMaxWidth().offset(x = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
-                ) {
-                    DrawButton(
-                        WebIcons.Doodle,
-                        t("home.edit"),
-                        if (boardMine) t("board.editMine") else t("board.editFriends", "friend" to friend),
-                        enabled = !noDoodles,
+                    Row(
+                        Modifier.fillMaxWidth().offset(x = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
                     ) {
-                        drawing =
-                            "edit"
+                        DrawButton(
+                            WebIcons.Doodle,
+                            t("home.edit"),
+                            if (boardMine) t("board.editMine") else t("board.editFriends", "friend" to friend),
+                            enabled = !noDoodles,
+                        ) {
+                            drawing =
+                                "edit"
+                        }
+                        DrawButton(WebIcons.Write, t("board.draw"), null, enabled = !noDoodles) { drawing = "new" }
+                        IconButton(onClick = { vm.setBoardMini(true) }) { Icon(WebIcons.ChevronUp, t("board.foldTheBoard")) }
                     }
-                    DrawButton(WebIcons.Write, t("board.draw"), null, enabled = !noDoodles) { drawing = "new" }
-                    IconButton(onClick = { vm.setBoardMini(true) }) { Icon(WebIcons.ChevronUp, t("board.foldTheBoard")) }
-                }
-                capLine?.let {
-                    Text(
-                        it,
-                        Modifier.fillMaxWidth(),
-                        style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.SemiBold),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-            }
-            else -> Box(Modifier.fillMaxWidth()) {
-                Frame(Modifier) {
-                    Column(
-                        Modifier.fillMaxSize(),
-                        verticalArrangement = Arrangement.spacedBy(14.dp, Alignment.CenterVertically),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                    ) {
-                        Text(t("board.theBoardIsEmpty"), style = DlTheme.type.letterBody.copy(fontSize = 17.sp), color = Color(0xFF48536C))
-                        DlFilledButton(t("board.drawTheFirstDoodle"), { drawing = "new" }, icon = WebIcons.Write, enabled = !noDoodles)
+                    capLine?.let {
+                        Text(
+                            it,
+                            Modifier.fillMaxWidth(),
+                            style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.SemiBold),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
                     }
                 }
-                IconButton(onClick = {
-                    vm.setBoardMini(true)
-                }, Modifier.align(Alignment.BottomEnd).offset(y = 8.dp)) { Icon(WebIcons.ChevronUp, t("board.foldTheBoard")) }
+                else -> Box(Modifier.fillMaxWidth()) {
+                    Frame(Modifier) {
+                        Column(
+                            Modifier.fillMaxSize(),
+                            verticalArrangement = Arrangement.spacedBy(14.dp, Alignment.CenterVertically),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                        ) {
+                            Text(t("board.theBoardIsEmpty"), style = DlTheme.type.letterBody.copy(fontSize = 17.sp), color = Color(0xFF48536C))
+                            DlFilledButton(t("board.drawTheFirstDoodle"), { drawing = "new" }, icon = WebIcons.Write, enabled = !noDoodles)
+                        }
+                    }
+                    IconButton(onClick = {
+                        vm.setBoardMini(true)
+                    }, Modifier.align(Alignment.BottomEnd).offset(y = 8.dp)) { Icon(WebIcons.ChevronUp, t("board.foldTheBoard")) }
+                }
             }
         }
     }
