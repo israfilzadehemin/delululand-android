@@ -155,7 +155,7 @@ jobs:
         run: |
           echo "${{ github.token }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
           docker network create dl
-          docker run -d --name db --network dl -e POSTGRES_DB=delululand -e POSTGRES_USER=delululand -e POSTGRES_PASSWORD=e2e postgres:18
+          docker run -d --name db --network dl -p 127.0.0.1:5432:5432 -e POSTGRES_DB=delululand -e POSTGRES_USER=delululand -e POSTGRES_PASSWORD=e2e postgres:18
           for i in $(seq 1 30); do docker exec db pg_isready -U delululand -d delululand && break; sleep 2; done
           docker run -d --name api --network dl -p 127.0.0.1:8080:8080 \
             -e DL_ENV=test -e DL_COOKIE_SECURE=false \
@@ -172,8 +172,9 @@ jobs:
           curl -sS http://localhost:8080/api/health | jq -c . || true
           [ "$status" = UP ]
 
-      # The master entry key of universe 1 (as delululand-web's e2e seeds it).
-      - name: Seed the entry key
+      # The master entry key of universe 1 (as delululand-web's e2e seeds it), and one sticker pack
+      # (bin/stickers-sync's catalogue is deploy data, not a migration): the Stickers flow sends from it.
+      - name: Seed the entry key and a sticker pack
         run: |
           docker exec -i db psql -v ON_ERROR_STOP=1 -U delululand -d delululand <<'SQL'
           do $$ begin
@@ -183,13 +184,20 @@ jobs:
             if to_regclass('universe') is not null then
               update universe set code_lookup = digest('E2EKEY234567', 'sha256'), code_hash = null where id = 1;
             end if;
+            if to_regclass('sticker_pack') is not null then
+              insert into sticker_pack (id, slug, names, sort) values (1, 'love', '{"en": "Love"}'::jsonb, 1) on conflict (id) do nothing;
+              insert into sticker (slug, pack_id, keywords, emojis, object_key, sort)
+                values ('love-heart', 1, '{heart}', '{❤️}', 'stickers/love-heart-', 1) on conflict (slug) do nothing;
+            end if;
           end $$;
           SQL
 
       - name: End-to-end flows
         run: |
           set +e
-          ./gradlew :app:testProdDebugUnitTest --tests 'com.delulutopia.app.e2e.*' -Pdl.e2e=http://localhost:8080/ -Proborazzi.test.record=true --info > e2e.out 2>&1
+          # dl.e2e.db: the CI-only database hook (e2e/Hooks.kt Db) for invites, expiry and limit states.
+          ./gradlew :app:testProdDebugUnitTest --tests 'com.delulutopia.app.e2e.*' -Pdl.e2e=http://localhost:8080/ \
+            -Pdl.e2e.db='jdbc:postgresql://localhost:5432/delululand?user=delululand&password=e2e' -Proborazzi.test.record=true --info > e2e.out 2>&1
           code=$?
           grep -E "e2e |FAILED|PASSED|SKIPPED|tests completed|BUILD|OutOfMemory|exit value|Could not complete|crashed" e2e.out
           # A build that fails before any test runs (compile, resolution): Gradle's own reason.

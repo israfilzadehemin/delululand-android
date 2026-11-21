@@ -50,6 +50,7 @@ robolectric = "4.17"
 roborazzi = "1.78.0"
 turbine = "1.2.1"
 truth = "1.4.5"
+postgresql = "42.7.7"
 
 # Code style
 ktlintGradle = "14.2.0"
@@ -115,6 +116,7 @@ roborazzi-compose = { group = "io.github.takahirom.roborazzi", name = "roborazzi
 roborazzi-junit-rule = { group = "io.github.takahirom.roborazzi", name = "roborazzi-junit-rule", version.ref = "roborazzi" }
 turbine = { group = "app.cash.turbine", name = "turbine", version.ref = "turbine" }
 truth = { group = "com.google.truth", name = "truth", version.ref = "truth" }
+postgresql = { group = "org.postgresql", name = "postgresql", version.ref = "postgresql" }
 
 # Build-logic only
 android-gradlePlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "agp" }
