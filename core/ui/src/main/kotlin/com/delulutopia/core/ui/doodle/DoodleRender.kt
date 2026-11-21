@@ -23,7 +23,12 @@ fun drawStroke(canvas: Canvas, s: Stroke, paper: Int) {
     val cut = s.erase && paper == CLEAR
     inkPaint.xfermode = if (cut) clearMode else null
     try {
-        strokeOnly(canvas, s, if (cut) 0xFF000000.toInt() else if (s.erase) paper else s.colour)
+        val colour = when {
+            cut -> 0xFF000000.toInt()
+            s.erase -> paper
+            else -> s.colour
+        }
+        strokeOnly(canvas, s, colour)
     } finally {
         inkPaint.xfermode = null
     }

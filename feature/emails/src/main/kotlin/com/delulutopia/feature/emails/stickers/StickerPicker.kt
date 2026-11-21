@@ -191,7 +191,9 @@ internal fun StickerPicker(
                                     ) { Icon(DlIcons.Plus, null, Modifier.size(24.dp), tint = quiet) }
                                 }
                             }
-                            items(sec.items, key = { sec.key + "-" + it.id }) { s -> Tile(s, base, disabled, own = sec.key == "ours", onPick, onDelete, haptics) }
+                            items(sec.items, key = { sec.key + "-" + it.id }) { s ->
+                                Tile(s, base, disabled, own = sec.key == "ours", onPick, onDelete, haptics)
+                            }
                         }
                     }
                 }
