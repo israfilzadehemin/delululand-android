@@ -5,7 +5,7 @@ package com.delulutopia.core.i18n
 
 internal object Catalog {
     val en: Map<String, String> by lazy {
-        HashMap<String, String>(2072).apply {
+        HashMap<String, String>(2162).apply {
             en0(this)
             en1(this)
             en2(this)
@@ -13,6 +13,7 @@ internal object Catalog {
             en4(this)
             en5(this)
             en6(this)
+            en7(this)
         }
     }
 
@@ -747,11 +748,14 @@ internal object Catalog {
         m["notifyEvent.letterReadHint"] = "When it is opened for the first time"
         m["notifyEvent.moodChanged"] = "{friend} changed mood"
         m["notifyEvent.moodChangedHint"] = "The last change within a minute"
+        m["notifyEvent.selfieNew"] = "New selfie"
+        m["notifyEvent.selfieNewHint"] = "When {friend} pins one"
         m["notifySection.board"] = "Board"
         m["notifySection.discussions"] = "Discussions"
         m["notifySection.emails"] = "Emails"
         m["notifySection.home"] = "Home"
         m["notifySection.letters"] = "Letters"
+        m["notifySection.selfies"] = "Selfies"
         m["pin.back"] = "Back"
         m["pin.confirmYourPin"] = "Confirm your PIN"
         m["pin.createYourPin"] = "Create your PIN"
@@ -776,12 +780,12 @@ internal object Catalog {
         m["plan.premium"] = "Premium"
         m["plan.renews"] = "Renews at {time}"
         m["plan.title"] = "Plan"
-        m["plan.today"] = "Today"
-        m["plan.unlimited"] = "Unlimited"
-        m["plan.videoEach"] = "{seconds} s each · {daily} a day"
     }
 
     private fun en5(m: HashMap<String, String>) {
+        m["plan.today"] = "Today"
+        m["plan.unlimited"] = "Unlimited"
+        m["plan.videoEach"] = "{seconds} s each · {daily} a day"
         m["plan.videos"] = "Videos"
         m["profile.316LettersOrDigits"] = "3–16 letters or digits, no spaces"
         m["profile.allZones"] = "All zones"
@@ -851,6 +855,48 @@ internal object Catalog {
         m["retention.kept_other"] = "Attachments are kept for {n} days"
         m["retention.removed_one"] = "Attachments are removed {n} day after sending"
         m["retention.removed_other"] = "Attachments are removed {n} days after sending"
+        m["selfie.addYourSelfie"] = "Add your selfie"
+        m["selfie.addYoursToSeeIt"] = "Add yours to see it"
+        m["selfie.alt.friends"] = "{friend}'s selfie"
+        m["selfie.alt.mine"] = "Your selfie"
+        m["selfie.close"] = "Close"
+        m["selfie.fold"] = "Fold the selfies"
+        m["selfie.friendsSelfieOpen"] = "{friend}'s selfie, taken {time}. Open full screen"
+        m["selfie.frontCamera"] = "Front camera"
+        m["selfie.goneInMinutes_one"] = "Gone in {n} min"
+        m["selfie.goneInMinutes_other"] = "Gone in {n} min"
+        m["selfie.goneIn_one"] = "Gone in {n} h"
+        m["selfie.goneIn_other"] = "Gone in {n} h"
+        m["selfie.lockedLabel"] = "{friend}'s selfie is hidden until you add yours. Take your selfie"
+        m["selfie.metaAddYours"] = "add yours to see {friend}'s"
+        m["selfie.metaPinning"] = "pinning yours…"
+        m["selfie.metaStays_one"] = "each one stays {n} hour"
+        m["selfie.metaStays_other"] = "each one stays {n} hours"
+        m["selfie.metaYoursFades_one"] = "yours fades in {n} h"
+        m["selfie.metaYoursFades_other"] = "yours fades in {n} h"
+        m["selfie.next"] = "Next selfie"
+        m["selfie.noSelfieYet"] = "No selfie from {friend} yet"
+        m["selfie.notPinned"] = "Couldn't pin your selfie. Try again."
+        m["selfie.pinning"] = "Pinning…"
+        m["selfie.previous"] = "Previous selfie"
+        m["selfie.retake"] = "Retake"
+        m["selfie.reviewFinal"] = "Once you use it, you can't change or remove it."
+        m["selfie.reviewStaysUntil"] = "It stays on the board until {when}, then it's deleted for good."
+        m["selfie.reviewTitle"] = "Your selfie"
+        m["selfie.selfies"] = "Selfies"
+        m["selfie.squareKept"] = "Only the square is kept. Nothing is saved to this device."
+        m["selfie.strip.friend"] = "{friend} · {age}"
+        m["selfie.strip.mine"] = "Yours · {age}"
+        m["selfie.strip.none"] = "No selfies yet"
+        m["selfie.takeASelfie"] = "Take a selfie"
+        m["selfie.taken"] = "taken {time}"
+        m["selfie.todays"] = "Today's selfies"
+        m["selfie.unfold"] = "Unfold the selfies"
+        m["selfie.use"] = "Use"
+        m["selfie.viewerLabel"] = "Selfies, {n} of {total}"
+        m["selfie.waiting"] = "Waiting for someone to join"
+        m["selfie.you"] = "You"
+        m["selfie.yourSelfieOpen"] = "Your selfie, taken {time}. Open full screen"
         m["settings.about"] = "About"
         m["settings.account"] = "Account"
         m["settings.allow"] = "Allow"
@@ -887,6 +933,9 @@ internal object Catalog {
         m["settings.installApp"] = "Install app"
         m["settings.keyMadeOn"] = "Made {day}. Keys can't be shown again; make a new one if it's lost."
         m["settings.keyNotMade"] = "Couldn't make a new key. Try again."
+    }
+
+    private fun en6(m: HashMap<String, String>) {
         m["settings.keysCantBeShown"] = "Keys can't be shown again; make a new one if it's lost."
         m["settings.language"] = "Language"
         m["settings.languageNotSaved"] = "Couldn't change the language. Try again."
@@ -932,9 +981,6 @@ internal object Catalog {
         m["settings.thisPhone"] = "This phone · {state}"
         m["settings.thisPhoneState"] = "this phone: {device}"
         m["settings.universe"] = "Universe"
-    }
-
-    private fun en6(m: HashMap<String, String>) {
         m["settings.universeSaved"] = "Universe saved"
         m["settings.viewProfile"] = "View profile"
         m["settings.welcomeMessage"] = "Welcome message"
@@ -1040,6 +1086,9 @@ internal object Catalog {
         m["write.arrivesAtChange"] = "Arrives at {time} whatever you change"
         m["write.arrivesAtTime"] = "Arrives at {time}"
         m["write.backDiscardChanges"] = "Back, discard changes"
+    }
+
+    private fun en7(m: HashMap<String, String>) {
         m["write.backKeepTheDraft"] = "Back, keep the draft"
         m["write.couldntLoadYourDraftCheck"] = "Couldn't load your draft. Check your connection and try again."
         m["write.discard"] = "Discard"
@@ -1074,7 +1123,7 @@ internal object Catalog {
     }
 
     val az: Map<String, String> by lazy {
-        HashMap<String, String>(2072).apply {
+        HashMap<String, String>(2162).apply {
             az0(this)
             az1(this)
             az2(this)
@@ -1082,6 +1131,7 @@ internal object Catalog {
             az4(this)
             az5(this)
             az6(this)
+            az7(this)
         }
     }
 
@@ -1816,11 +1866,14 @@ internal object Catalog {
         m["notifyEvent.letterReadHint"] = "İlk dəfə açılanda"
         m["notifyEvent.moodChanged"] = "{friend} əhvalını dəyişdi"
         m["notifyEvent.moodChangedHint"] = "Bir dəqiqə ərzində sonuncu dəyişiklik"
+        m["notifyEvent.selfieNew"] = "Yeni selfi"
+        m["notifyEvent.selfieNewHint"] = "{friend} selfi bərkidəndə"
         m["notifySection.board"] = "Lövhə"
         m["notifySection.discussions"] = "Müzakirələr"
         m["notifySection.emails"] = "E-məktublar"
         m["notifySection.home"] = "Əsas səhifə"
         m["notifySection.letters"] = "Məktublar"
+        m["notifySection.selfies"] = "Selfilər"
         m["pin.back"] = "Geri"
         m["pin.confirmYourPin"] = "PIN kodunu təkrarla"
         m["pin.createYourPin"] = "PIN kodunu yarat"
@@ -1845,12 +1898,12 @@ internal object Catalog {
         m["plan.premium"] = "Premium"
         m["plan.renews"] = "Yenilənmə: {time}"
         m["plan.title"] = "Plan"
-        m["plan.today"] = "Bu gün"
-        m["plan.unlimited"] = "Limitsiz"
-        m["plan.videoEach"] = "hərəsi {seconds} san · gündə {daily}"
     }
 
     private fun az5(m: HashMap<String, String>) {
+        m["plan.today"] = "Bu gün"
+        m["plan.unlimited"] = "Limitsiz"
+        m["plan.videoEach"] = "hərəsi {seconds} san · gündə {daily}"
         m["plan.videos"] = "Videolar"
         m["profile.316LettersOrDigits"] = "3–16 hərf və ya rəqəm, boşluqsuz"
         m["profile.allZones"] = "Bütün qurşaqlar"
@@ -1920,6 +1973,48 @@ internal object Catalog {
         m["retention.kept_other"] = "Əlavələr {n} gün saxlanır"
         m["retention.removed_one"] = "Əlavələr göndəriləndən {n} gün sonra silinir"
         m["retention.removed_other"] = "Əlavələr göndəriləndən {n} gün sonra silinir"
+        m["selfie.addYourSelfie"] = "Selfini əlavə et"
+        m["selfie.addYoursToSeeIt"] = "Görmək üçün özününkünü əlavə et"
+        m["selfie.alt.friends"] = "{friend}: selfi"
+        m["selfie.alt.mine"] = "Sənin selfin"
+        m["selfie.close"] = "Bağla"
+        m["selfie.fold"] = "Selfiləri yığ"
+        m["selfie.friendsSelfieOpen"] = "{friend}: selfi, {time}. Tam ekranda aç"
+        m["selfie.frontCamera"] = "Ön kamera"
+        m["selfie.goneInMinutes_one"] = "Silinməyə {n} dəqiqə qalıb"
+        m["selfie.goneInMinutes_other"] = "Silinməyə {n} dəqiqə qalıb"
+        m["selfie.goneIn_one"] = "Silinməyə {n} saat qalıb"
+        m["selfie.goneIn_other"] = "Silinməyə {n} saat qalıb"
+        m["selfie.lockedLabel"] = "{friend}: selfi gizlidir, özününkünü əlavə edəndə görünəcək. Selfi çək"
+        m["selfie.metaAddYours"] = "{friend} — görmək üçün özününkünü əlavə et"
+        m["selfie.metaPinning"] = "səninki bərkidilir…"
+        m["selfie.metaStays_one"] = "hər biri {n} saat qalır"
+        m["selfie.metaStays_other"] = "hər biri {n} saat qalır"
+        m["selfie.metaYoursFades_one"] = "səninkinin silinməsinə {n} saat qalıb"
+        m["selfie.metaYoursFades_other"] = "səninkinin silinməsinə {n} saat qalıb"
+        m["selfie.next"] = "Növbəti selfi"
+        m["selfie.noSelfieYet"] = "{friend} hələ selfi əlavə etməyib"
+        m["selfie.notPinned"] = "Selfini bərkidə bilmədik. Yenidən cəhd et."
+        m["selfie.pinning"] = "Bərkidilir…"
+        m["selfie.previous"] = "Əvvəlki selfi"
+        m["selfie.retake"] = "Yenidən çək"
+        m["selfie.reviewFinal"] = "İstifadə edəndən sonra onu dəyişə və silə bilməzsən."
+        m["selfie.reviewStaysUntil"] = "Lövhədə qalacaq: {when}. Sonra həmişəlik silinəcək."
+        m["selfie.reviewTitle"] = "Sənin selfin"
+        m["selfie.selfies"] = "Selfilər"
+        m["selfie.squareKept"] = "Yalnız kvadrat saxlanır. Bu cihazda heç nə qalmır."
+        m["selfie.strip.friend"] = "{friend} · {age}"
+        m["selfie.strip.mine"] = "Səninki · {age}"
+        m["selfie.strip.none"] = "Hələ selfi yoxdur"
+        m["selfie.takeASelfie"] = "Selfi çək"
+        m["selfie.taken"] = "çəkilib: {time}"
+        m["selfie.todays"] = "Bugünkü selfilər"
+        m["selfie.unfold"] = "Selfiləri aç"
+        m["selfie.use"] = "İstifadə et"
+        m["selfie.viewerLabel"] = "Selfilər, {n} / {total}"
+        m["selfie.waiting"] = "Kiminsə qoşulmasını gözləyir"
+        m["selfie.you"] = "Sən"
+        m["selfie.yourSelfieOpen"] = "Sənin selfin, {time}. Tam ekranda aç"
         m["settings.about"] = "Haqqında"
         m["settings.account"] = "Hesab"
         m["settings.allow"] = "İcazə ver"
@@ -1956,6 +2051,9 @@ internal object Catalog {
         m["settings.installApp"] = "Tətbiqi quraşdır"
         m["settings.keyMadeOn"] = "Yaradılıb: {day}. Açarı bir daha göstərmək olmur; itsə, yenisini yarat."
         m["settings.keyNotMade"] = "Yeni açar yaradılmadı. Bir də yoxla."
+    }
+
+    private fun az6(m: HashMap<String, String>) {
         m["settings.keysCantBeShown"] = "Açarı bir daha göstərmək olmur; itsə, yenisini yarat."
         m["settings.language"] = "Dil"
         m["settings.languageNotSaved"] = "Dil dəyişmədi. Bir də yoxla."
@@ -2001,9 +2099,6 @@ internal object Catalog {
         m["settings.thisPhone"] = "Bu telefon · {state}"
         m["settings.thisPhoneState"] = "bu telefon: {device}"
         m["settings.universe"] = "Sizin dünyanız"
-    }
-
-    private fun az6(m: HashMap<String, String>) {
         m["settings.universeSaved"] = "Dünya saxlandı"
         m["settings.viewProfile"] = "Profilə bax"
         m["settings.welcomeMessage"] = "Salamlama mətni"
@@ -2109,6 +2204,9 @@ internal object Catalog {
         m["write.arrivesAtChange"] = "Nəyi dəyişsən də, çatacaq: {time}"
         m["write.arrivesAtTime"] = "Çatacaq: {time}"
         m["write.backDiscardChanges"] = "Geri, dəyişikliklər silinsin"
+    }
+
+    private fun az7(m: HashMap<String, String>) {
         m["write.backKeepTheDraft"] = "Geri, qaralama qalsın"
         m["write.couldntLoadYourDraftCheck"] = "Qaralaman açılmadı. İnternetə bax və bir də yoxla."
         m["write.discard"] = "Sil"
@@ -2143,7 +2241,7 @@ internal object Catalog {
     }
 
     val fa: Map<String, String> by lazy {
-        HashMap<String, String>(2072).apply {
+        HashMap<String, String>(2162).apply {
             fa0(this)
             fa1(this)
             fa2(this)
@@ -2151,6 +2249,7 @@ internal object Catalog {
             fa4(this)
             fa5(this)
             fa6(this)
+            fa7(this)
         }
     }
 
@@ -2885,11 +2984,14 @@ internal object Catalog {
         m["notifyEvent.letterReadHint"] = "وقتی برای اولین بار باز می‌شه"
         m["notifyEvent.moodChanged"] = "{friend} حال‌وهواش رو عوض کرد"
         m["notifyEvent.moodChangedHint"] = "آخرین تغییر توی یه دقیقه"
+        m["notifyEvent.selfieNew"] = "سلفی تازه"
+        m["notifyEvent.selfieNewHint"] = "وقتی {friend} یکی می‌ذاره"
         m["notifySection.board"] = "تخته"
         m["notifySection.discussions"] = "گفت‌وگوها"
         m["notifySection.emails"] = "ایمیل‌ها"
         m["notifySection.home"] = "خانه"
         m["notifySection.letters"] = "نامه‌ها"
+        m["notifySection.selfies"] = "سلفی‌ها"
         m["pin.back"] = "برگشت"
         m["pin.confirmYourPin"] = "رمزت رو دوباره وارد کن"
         m["pin.createYourPin"] = "رمزت رو بساز"
@@ -2914,12 +3016,12 @@ internal object Catalog {
         m["plan.premium"] = "پریمیوم"
         m["plan.renews"] = "ساعت {time} دوباره پر می‌شه"
         m["plan.title"] = "اشتراک"
-        m["plan.today"] = "امروز"
-        m["plan.unlimited"] = "نامحدود"
-        m["plan.videoEach"] = "هر کدوم {seconds} ثانیه · روزی {daily}"
     }
 
     private fun fa5(m: HashMap<String, String>) {
+        m["plan.today"] = "امروز"
+        m["plan.unlimited"] = "نامحدود"
+        m["plan.videoEach"] = "هر کدوم {seconds} ثانیه · روزی {daily}"
         m["plan.videos"] = "ویدیوها"
         m["profile.316LettersOrDigits"] = "۳ تا ۱۶ حرف یا عدد، بدون فاصله"
         m["profile.allZones"] = "همه‌ی منطقه‌ها"
@@ -2989,6 +3091,48 @@ internal object Catalog {
         m["retention.kept_other"] = "پیوست‌ها {n} روز نگه داشته می‌شن"
         m["retention.removed_one"] = "پیوست‌ها {n} روز بعد از فرستادن پاک می‌شن"
         m["retention.removed_other"] = "پیوست‌ها {n} روز بعد از فرستادن پاک می‌شن"
+        m["selfie.addYourSelfie"] = "سلفی‌ت رو بذار"
+        m["selfie.addYoursToSeeIt"] = "مال خودت رو بذار تا ببینی"
+        m["selfie.alt.friends"] = "سلفی {friend}"
+        m["selfie.alt.mine"] = "سلفی تو"
+        m["selfie.close"] = "بستن"
+        m["selfie.fold"] = "جمع کردن سلفی‌ها"
+        m["selfie.friendsSelfieOpen"] = "سلفی {friend}، {time}. تمام‌صفحه باز کن"
+        m["selfie.frontCamera"] = "دوربین جلو"
+        m["selfie.goneInMinutes_one"] = "{n} دقیقه دیگه پاک می‌شه"
+        m["selfie.goneInMinutes_other"] = "{n} دقیقه دیگه پاک می‌شه"
+        m["selfie.goneIn_one"] = "{n} ساعت دیگه پاک می‌شه"
+        m["selfie.goneIn_other"] = "{n} ساعت دیگه پاک می‌شه"
+        m["selfie.lockedLabel"] = "سلفی {friend} تا وقتی مال خودت رو نذاری پنهونه. سلفی بگیر"
+        m["selfie.metaAddYours"] = "مال خودت رو بذار تا مال {friend} رو ببینی"
+        m["selfie.metaPinning"] = "داره مال تو رو می‌چسبونه…"
+        m["selfie.metaStays_one"] = "هر کدوم {n} ساعت می‌مونه"
+        m["selfie.metaStays_other"] = "هر کدوم {n} ساعت می‌مونه"
+        m["selfie.metaYoursFades_one"] = "مال تو {n} ساعت دیگه می‌ره"
+        m["selfie.metaYoursFades_other"] = "مال تو {n} ساعت دیگه می‌ره"
+        m["selfie.next"] = "سلفی بعدی"
+        m["selfie.noSelfieYet"] = "{friend} هنوز سلفی نذاشته"
+        m["selfie.notPinned"] = "نتونستیم سلفی‌ت رو بچسبونیم. دوباره امتحان کن."
+        m["selfie.pinning"] = "داره می‌چسبه…"
+        m["selfie.previous"] = "سلفی قبلی"
+        m["selfie.retake"] = "دوباره بگیر"
+        m["selfie.reviewFinal"] = "وقتی استفاده‌ش کنی، دیگه نمی‌تونی عوضش کنی یا پاکش کنی."
+        m["selfie.reviewStaysUntil"] = "تا {when} روی تخته می‌مونه، بعد برای همیشه پاک می‌شه."
+        m["selfie.reviewTitle"] = "سلفی تو"
+        m["selfie.selfies"] = "سلفی‌ها"
+        m["selfie.squareKept"] = "فقط مربع نگه داشته می‌شه. چیزی روی این دستگاه ذخیره نمی‌شه."
+        m["selfie.strip.friend"] = "{friend} · {age}"
+        m["selfie.strip.mine"] = "مال تو · {age}"
+        m["selfie.strip.none"] = "هنوز سلفی‌ای نیست"
+        m["selfie.takeASelfie"] = "سلفی بگیر"
+        m["selfie.taken"] = "گرفته‌شده {time}"
+        m["selfie.todays"] = "سلفی‌های امروز"
+        m["selfie.unfold"] = "باز کردن سلفی‌ها"
+        m["selfie.use"] = "استفاده کن"
+        m["selfie.viewerLabel"] = "سلفی‌ها، {n} از {total}"
+        m["selfie.waiting"] = "منتظر اینه که یکی بیاد"
+        m["selfie.you"] = "تو"
+        m["selfie.yourSelfieOpen"] = "سلفی تو، {time}. تمام‌صفحه باز کن"
         m["settings.about"] = "درباره"
         m["settings.account"] = "حساب"
         m["settings.allow"] = "اجازه بده"
@@ -3025,6 +3169,9 @@ internal object Catalog {
         m["settings.installApp"] = "نصب اپ"
         m["settings.keyMadeOn"] = "ساخته‌شده: {day}. کلید دوباره نشون داده نمی‌شه؛ اگه گم شد، یه تازه‌ش رو بساز."
         m["settings.keyNotMade"] = "کلید تازه ساخته نشد. دوباره امتحان کن."
+    }
+
+    private fun fa6(m: HashMap<String, String>) {
         m["settings.keysCantBeShown"] = "کلید دوباره نشون داده نمی‌شه؛ اگه گم شد، یه تازه‌ش رو بساز."
         m["settings.language"] = "زبان"
         m["settings.languageNotSaved"] = "زبان عوض نشد. دوباره امتحان کن."
@@ -3070,9 +3217,6 @@ internal object Catalog {
         m["settings.thisPhone"] = "این گوشی · {state}"
         m["settings.thisPhoneState"] = "این گوشی: {device}"
         m["settings.universe"] = "دنیا"
-    }
-
-    private fun fa6(m: HashMap<String, String>) {
         m["settings.universeSaved"] = "دنیا ذخیره شد"
         m["settings.viewProfile"] = "دیدن پروفایل"
         m["settings.welcomeMessage"] = "پیام خوش‌آمد"
@@ -3178,6 +3322,9 @@ internal object Catalog {
         m["write.arrivesAtChange"] = "هر چی هم عوض کنی، ساعت {time} می‌رسه"
         m["write.arrivesAtTime"] = "ساعت {time} می‌رسه"
         m["write.backDiscardChanges"] = "برگشت، تغییرها دور ریخته بشن"
+    }
+
+    private fun fa7(m: HashMap<String, String>) {
         m["write.backKeepTheDraft"] = "برگشت، پیش‌نویس بمونه"
         m["write.couldntLoadYourDraftCheck"] = "پیش‌نویست باز نشد. اینترنتت رو چک کن و دوباره امتحان کن."
         m["write.discard"] = "دور بریز"
@@ -3212,7 +3359,7 @@ internal object Catalog {
     }
 
     val tr: Map<String, String> by lazy {
-        HashMap<String, String>(2072).apply {
+        HashMap<String, String>(2162).apply {
             tr0(this)
             tr1(this)
             tr2(this)
@@ -3220,6 +3367,7 @@ internal object Catalog {
             tr4(this)
             tr5(this)
             tr6(this)
+            tr7(this)
         }
     }
 
@@ -3954,11 +4102,14 @@ internal object Catalog {
         m["notifyEvent.letterReadHint"] = "İlk kez açılınca"
         m["notifyEvent.moodChanged"] = "{friend} ruh hâlini değiştirdi"
         m["notifyEvent.moodChangedHint"] = "Bir dakika içindeki son değişiklik"
+        m["notifyEvent.selfieNew"] = "Yeni selfie"
+        m["notifyEvent.selfieNewHint"] = "{friend} bir selfie ekleyince"
         m["notifySection.board"] = "Pano"
         m["notifySection.discussions"] = "Sohbetler"
         m["notifySection.emails"] = "E-postalar"
         m["notifySection.home"] = "Ana sayfa"
         m["notifySection.letters"] = "Mektuplar"
+        m["notifySection.selfies"] = "Selfieler"
         m["pin.back"] = "Geri"
         m["pin.confirmYourPin"] = "Şifreni tekrarla"
         m["pin.createYourPin"] = "Şifreni oluştur"
@@ -3983,12 +4134,12 @@ internal object Catalog {
         m["plan.premium"] = "Premium"
         m["plan.renews"] = "Yenileme: {time}"
         m["plan.title"] = "Plan"
-        m["plan.today"] = "Bugün"
-        m["plan.unlimited"] = "Sınırsız"
-        m["plan.videoEach"] = "her biri {seconds} sn · günde {daily}"
     }
 
     private fun tr5(m: HashMap<String, String>) {
+        m["plan.today"] = "Bugün"
+        m["plan.unlimited"] = "Sınırsız"
+        m["plan.videoEach"] = "her biri {seconds} sn · günde {daily}"
         m["plan.videos"] = "Videolar"
         m["profile.316LettersOrDigits"] = "3–16 harf ya da rakam, boşluksuz"
         m["profile.allZones"] = "Tüm saat dilimleri"
@@ -4058,6 +4209,48 @@ internal object Catalog {
         m["retention.kept_other"] = "Ekler {n} gün saklanır"
         m["retention.removed_one"] = "Ekler gönderildikten {n} gün sonra silinir"
         m["retention.removed_other"] = "Ekler gönderildikten {n} gün sonra silinir"
+        m["selfie.addYourSelfie"] = "Selfieni ekle"
+        m["selfie.addYoursToSeeIt"] = "Görmek için seninkini ekle"
+        m["selfie.alt.friends"] = "{friend}: selfie"
+        m["selfie.alt.mine"] = "Selfien"
+        m["selfie.close"] = "Kapat"
+        m["selfie.fold"] = "Selfieleri katla"
+        m["selfie.friendsSelfieOpen"] = "{friend}: selfie, {time}. Tam ekran aç"
+        m["selfie.frontCamera"] = "Ön kamera"
+        m["selfie.goneInMinutes_one"] = "{n} dakika sonra silinir"
+        m["selfie.goneInMinutes_other"] = "{n} dakika sonra silinir"
+        m["selfie.goneIn_one"] = "{n} saat sonra silinir"
+        m["selfie.goneIn_other"] = "{n} saat sonra silinir"
+        m["selfie.lockedLabel"] = "{friend}: selfie, sen ekleyene kadar gizli. Selfie çek"
+        m["selfie.metaAddYours"] = "{friend} — görmek için seninkini ekle"
+        m["selfie.metaPinning"] = "seninki iğneleniyor…"
+        m["selfie.metaStays_one"] = "her biri {n} saat kalır"
+        m["selfie.metaStays_other"] = "her biri {n} saat kalır"
+        m["selfie.metaYoursFades_one"] = "seninki {n} saat sonra kaybolur"
+        m["selfie.metaYoursFades_other"] = "seninki {n} saat sonra kaybolur"
+        m["selfie.next"] = "Sonraki selfie"
+        m["selfie.noSelfieYet"] = "{friend} henüz selfie eklemedi"
+        m["selfie.notPinned"] = "Selfien iğnelenemedi. Tekrar dene."
+        m["selfie.pinning"] = "İğneleniyor…"
+        m["selfie.previous"] = "Önceki selfie"
+        m["selfie.retake"] = "Yeniden çek"
+        m["selfie.reviewFinal"] = "Kullandıktan sonra değiştiremez ya da silemezsin."
+        m["selfie.reviewStaysUntil"] = "Panoda kalacağı zaman: {when}. Sonra tamamen silinir."
+        m["selfie.reviewTitle"] = "Selfien"
+        m["selfie.selfies"] = "Selfieler"
+        m["selfie.squareKept"] = "Yalnızca kare kısım saklanır. Bu cihaza hiçbir şey kaydedilmez."
+        m["selfie.strip.friend"] = "{friend} · {age}"
+        m["selfie.strip.mine"] = "Seninki · {age}"
+        m["selfie.strip.none"] = "Henüz selfie yok"
+        m["selfie.takeASelfie"] = "Selfie çek"
+        m["selfie.taken"] = "çekildi: {time}"
+        m["selfie.todays"] = "Bugünün selfieleri"
+        m["selfie.unfold"] = "Selfieleri aç"
+        m["selfie.use"] = "Kullan"
+        m["selfie.viewerLabel"] = "Selfieler, {n} / {total}"
+        m["selfie.waiting"] = "Birinin katılmasını bekliyor"
+        m["selfie.you"] = "Sen"
+        m["selfie.yourSelfieOpen"] = "Selfien, {time}. Tam ekran aç"
         m["settings.about"] = "Hakkında"
         m["settings.account"] = "Hesap"
         m["settings.allow"] = "İzin ver"
@@ -4094,6 +4287,9 @@ internal object Catalog {
         m["settings.installApp"] = "Uygulamayı yükle"
         m["settings.keyMadeOn"] = "Oluşturuldu: {day}. Anahtar bir daha gösterilemez; kaybolursa yenisini oluştur."
         m["settings.keyNotMade"] = "Yeni anahtar oluşturulamadı. Tekrar dene."
+    }
+
+    private fun tr6(m: HashMap<String, String>) {
         m["settings.keysCantBeShown"] = "Anahtar bir daha gösterilemez; kaybolursa yenisini oluştur."
         m["settings.language"] = "Dil"
         m["settings.languageNotSaved"] = "Dil değiştirilemedi. Tekrar dene."
@@ -4139,9 +4335,6 @@ internal object Catalog {
         m["settings.thisPhone"] = "Bu telefon · {state}"
         m["settings.thisPhoneState"] = "bu telefon: {device}"
         m["settings.universe"] = "Dünyanız"
-    }
-
-    private fun tr6(m: HashMap<String, String>) {
         m["settings.universeSaved"] = "Dünya kaydedildi"
         m["settings.viewProfile"] = "Profile bak"
         m["settings.welcomeMessage"] = "Karşılama mesajı"
@@ -4247,6 +4440,9 @@ internal object Catalog {
         m["write.arrivesAtChange"] = "Neyi değiştirirsen değiştir, varış: {time}"
         m["write.arrivesAtTime"] = "Varış: {time}"
         m["write.backDiscardChanges"] = "Geri, değişiklikler silinsin"
+    }
+
+    private fun tr7(m: HashMap<String, String>) {
         m["write.backKeepTheDraft"] = "Geri, taslak kalsın"
         m["write.couldntLoadYourDraftCheck"] = "Taslağın açılamadı. Bağlantını kontrol et ve tekrar dene."
         m["write.discard"] = "Sil"
@@ -4281,7 +4477,7 @@ internal object Catalog {
     }
 
     val ru: Map<String, String> by lazy {
-        HashMap<String, String>(2108).apply {
+        HashMap<String, String>(2214).apply {
             ru0(this)
             ru1(this)
             ru2(this)
@@ -5038,11 +5234,14 @@ internal object Catalog {
         m["notifyEvent.letterReadHint"] = "Когда его открывают впервые"
         m["notifyEvent.moodChanged"] = "{friend}: новое настроение"
         m["notifyEvent.moodChangedHint"] = "Последнее изменение за минуту"
+        m["notifyEvent.selfieNew"] = "Новое селфи"
+        m["notifyEvent.selfieNewHint"] = "Когда {friend} добавляет селфи"
         m["notifySection.board"] = "Доска"
         m["notifySection.discussions"] = "Обсуждения"
         m["notifySection.emails"] = "Имейлы"
         m["notifySection.home"] = "Главная"
         m["notifySection.letters"] = "Письма"
+        m["notifySection.selfies"] = "Селфи"
         m["pin.back"] = "Назад"
         m["pin.confirmYourPin"] = "Повтори PIN-код"
         m["pin.createYourPin"] = "Придумай PIN-код"
@@ -5053,12 +5252,12 @@ internal object Catalog {
         m["pin.sixDigits"] = "Шесть цифр. Нужно будет повторить один раз."
         m["pin.unlockBrand"] = "Открыть мир {brand}"
         m["pin.unlockWithFingerprint"] = "Открыть по отпечатку"
-        m["pin.usePin"] = "Ввести PIN-код"
-        m["plan.allowance"] = "Лимит"
-        m["plan.boardDoodles"] = "Рисунки на доске"
     }
 
     private fun ru5(m: HashMap<String, String>) {
+        m["pin.usePin"] = "Ввести PIN-код"
+        m["plan.allowance"] = "Лимит"
+        m["plan.boardDoodles"] = "Рисунки на доске"
         m["plan.both"] = "Действует для вас обоих."
         m["plan.emails"] = "Имейлы"
         m["plan.free"] = "Бесплатный"
@@ -5146,6 +5345,56 @@ internal object Catalog {
         m["retention.removed_many"] = "Вложения удаляются через {n} дней после отправки"
         m["retention.removed_one"] = "Вложения удаляются через {n} день после отправки"
         m["retention.removed_other"] = "Вложения удаляются через {n} дня после отправки"
+        m["selfie.addYourSelfie"] = "Добавь своё селфи"
+        m["selfie.addYoursToSeeIt"] = "Добавь своё, чтобы увидеть"
+        m["selfie.alt.friends"] = "{friend}: селфи"
+        m["selfie.alt.mine"] = "Твоё селфи"
+        m["selfie.close"] = "Закрыть"
+        m["selfie.fold"] = "Свернуть селфи"
+        m["selfie.friendsSelfieOpen"] = "{friend}: селфи, {time}. Открыть на весь экран"
+        m["selfie.frontCamera"] = "Фронтальная камера"
+        m["selfie.goneInMinutes_few"] = "Исчезнет через {n} мин"
+        m["selfie.goneInMinutes_many"] = "Исчезнет через {n} мин"
+        m["selfie.goneInMinutes_one"] = "Исчезнет через {n} мин"
+        m["selfie.goneInMinutes_other"] = "Исчезнет через {n} мин"
+        m["selfie.goneIn_few"] = "Исчезнет через {n} ч"
+        m["selfie.goneIn_many"] = "Исчезнет через {n} ч"
+        m["selfie.goneIn_one"] = "Исчезнет через {n} ч"
+        m["selfie.goneIn_other"] = "Исчезнет через {n} ч"
+        m["selfie.lockedLabel"] = "{friend}: селфи скрыто, пока ты не добавишь своё. Сделать селфи"
+        m["selfie.metaAddYours"] = "добавь своё — откроется селфи: {friend}"
+        m["selfie.metaPinning"] = "твоё крепится…"
+        m["selfie.metaStays_few"] = "каждое висит {n} часа"
+        m["selfie.metaStays_many"] = "каждое висит {n} часов"
+        m["selfie.metaStays_one"] = "каждое висит {n} час"
+        m["selfie.metaStays_other"] = "каждое висит {n} часа"
+        m["selfie.metaYoursFades_few"] = "твоё исчезнет через {n} ч"
+        m["selfie.metaYoursFades_many"] = "твоё исчезнет через {n} ч"
+        m["selfie.metaYoursFades_one"] = "твоё исчезнет через {n} ч"
+        m["selfie.metaYoursFades_other"] = "твоё исчезнет через {n} ч"
+        m["selfie.next"] = "Следующее селфи"
+        m["selfie.noSelfieYet"] = "{friend}: селфи пока нет"
+        m["selfie.notPinned"] = "Не удалось прикрепить селфи. Попробуй ещё раз."
+        m["selfie.pinning"] = "Крепится…"
+        m["selfie.previous"] = "Предыдущее селфи"
+        m["selfie.retake"] = "Переснять"
+        m["selfie.reviewFinal"] = "После этого его нельзя изменить или удалить."
+        m["selfie.reviewStaysUntil"] = "Будет на доске до {when}, потом удалится навсегда."
+        m["selfie.reviewTitle"] = "Твоё селфи"
+        m["selfie.selfies"] = "Селфи"
+        m["selfie.squareKept"] = "Сохраняется только квадрат. На этом устройстве ничего не остаётся."
+        m["selfie.strip.friend"] = "{friend} · {age}"
+        m["selfie.strip.mine"] = "Твоё · {age}"
+        m["selfie.strip.none"] = "Селфи пока нет"
+        m["selfie.takeASelfie"] = "Сделать селфи"
+        m["selfie.taken"] = "снято в {time}"
+        m["selfie.todays"] = "Селфи дня"
+        m["selfie.unfold"] = "Развернуть селфи"
+        m["selfie.use"] = "Использовать"
+        m["selfie.viewerLabel"] = "Селфи, {n} из {total}"
+        m["selfie.waiting"] = "Ждём, когда кто-то присоединится"
+        m["selfie.you"] = "Ты"
+        m["selfie.yourSelfieOpen"] = "Твоё селфи, {time}. Открыть на весь экран"
         m["settings.about"] = "О приложении"
         m["settings.account"] = "Аккаунт"
         m["settings.allow"] = "Разрешить"
@@ -5156,6 +5405,9 @@ internal object Catalog {
         m["settings.cancel"] = "Отмена"
         m["settings.changePin"] = "Сменить PIN-код"
         m["settings.createdBy"] = "Создатель"
+    }
+
+    private fun ru6(m: HashMap<String, String>) {
         m["settings.device.blocked"] = "Заблокировано"
         m["settings.device.blockedSub"] = "Заблокировано в этом браузере. «Разрешить» покажет, как снять блокировку."
         m["settings.device.blockedSubAndroid"] = "Уведомления этого приложения выключены в настройках Android. «Разрешить» откроет их."
@@ -5209,9 +5461,6 @@ internal object Catalog {
         m["settings.savedOnThisPhoneOnly"] = "Сохраняется только на этом телефоне."
         m["settings.seasonalEffects"] = "Сезонные эффекты"
         m["settings.sectionNotifications"] = "{section}: уведомления"
-    }
-
-    private fun ru6(m: HashMap<String, String>) {
         m["settings.seeItAsYourFriend"] = "Посмотреть со стороны"
         m["settings.settings"] = "Настройки"
         m["settings.someOn"] = "Включено: {on} из {total}"
@@ -5309,6 +5558,9 @@ internal object Catalog {
         m["universe.sendItToTheOne"] = "Отправь его тому единственному человеку, которого хочешь здесь видеть."
         m["universe.share"] = "Поделиться"
         m["universe.shareText"] = "Ключ от мира {name}: {key}"
+    }
+
+    private fun ru7(m: HashMap<String, String>) {
         m["universe.stepOf2"] = "Шаг {step} из 2"
         m["universe.stepOf5"] = "Шаг {step} из 5"
         m["universe.thisDevicesZonePickedFor"] = "Взяли часовой пояс этого устройства."
@@ -5362,9 +5614,6 @@ internal object Catalog {
         m["write.showSLetter"] = "Показать полученное письмо"
         m["write.theLetterYouAreAnswering"] = "Письмо, на которое ты отвечаешь"
         m["write.thisLetterCantBeEdited"] = "Это письмо уже нельзя изменить."
-    }
-
-    private fun ru7(m: HashMap<String, String>) {
         m["write.to"] = "Кому: {friend}"
         m["write.tooLateTheOriginalVersion"] = "Уже поздно — первая версия в пути."
         m["write.untilEditOrCancel"] = "До {time} его ещё можно изменить или отменить в «Письмах» или на главной."

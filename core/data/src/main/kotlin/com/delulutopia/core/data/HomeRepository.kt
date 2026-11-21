@@ -61,7 +61,7 @@ class HomeRepository @Inject constructor(private val backend: Backend) {
         started = scope.launch {
             refresher = backend.refresher(
                 scope,
-                setOf("letter", "discussion", "comment", "email", "reaction", "board", "mood", "moods", "profile", "universe", "language"),
+                setOf("letter", "discussion", "comment", "email", "reaction", "board", "selfie", "mood", "moods", "profile", "universe", "language"),
                 deadlines = { deadlines() },
             ) { load() }
             launch { backend.live.signals.collect { if (it.name == "moods") loadMoods() } }
@@ -110,6 +110,7 @@ class HomeRepository @Inject constructor(private val backend: Backend) {
     private fun deadlines(): List<String?> {
         val h = _state.value.home ?: return emptyList()
         return (h.from + h.to).flatMap { listOf(it.windowEndsAt, it.arrivesAt) } +
-            h.newDiscussions.map { it.arrivesAt } + listOf(h.emailCredits?.renewsAt)
+            h.newDiscussions.map { it.arrivesAt } + listOf(h.emailCredits?.renewsAt) +
+            listOfNotNull(h.selfies?.mine?.expiresAt, h.selfies?.theirs?.expiresAt)
     }
 }

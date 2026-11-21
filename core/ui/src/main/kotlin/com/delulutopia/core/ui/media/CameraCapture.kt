@@ -33,6 +33,42 @@ private class CaptureVideoLimited : ActivityResultContracts.CaptureVideo() {
         .putExtra(MediaStore.EXTRA_VIDEO_QUALITY, 1)
 }
 
+/**
+ * Selfies Q1: the phone's camera app, asked to open on the front lens. Not every camera app reads
+ * these extras, and the citizen can still switch lenses there (decided 21 Nov 2026).
+ */
+private class TakeFrontPicture : ActivityResultContracts.TakePicture() {
+    override fun createIntent(context: Context, input: Uri): Intent = super.createIntent(context, input)
+        .putExtra("android.intent.extras.CAMERA_FACING", 1)
+        .putExtra("android.intent.extras.LENS_FACING_FRONT", 1)
+        .putExtra("android.intent.extra.USE_FRONT_CAMERA", true)
+}
+
+/** Selfies DS4: one front-camera shot into cache/camera/, as [rememberCameraCapture]'s photos (CA10). */
+@Composable
+fun rememberSelfieCapture(onPhoto: (Uri) -> Unit, onNoCamera: () -> Unit): () -> Unit {
+    val context = LocalContext.current
+    val target = remember { arrayOfNulls<Uri>(1) }
+    val done by rememberUpdatedState(onPhoto)
+    val none by rememberUpdatedState(onNoCamera)
+    val take = rememberLauncherForActivityResult(TakeFrontPicture()) { ok ->
+        target[0]?.takeIf { ok && sizeOf(context, it) > 0 }?.let(done)
+    }
+    return remember(take) {
+        {
+            val uri = captureUri(context, "jpg")
+            target[0] = uri
+            try {
+                take.launch(uri)
+            } catch (_: ActivityNotFoundException) {
+                none()
+            } catch (_: SecurityException) {
+                none()
+            }
+        }
+    }
+}
+
 @Composable
 fun rememberCameraCapture(onPhoto: (Uri) -> Unit, onVideo: (Uri) -> Unit, onNoCamera: () -> Unit): CameraCapture {
     val context = LocalContext.current

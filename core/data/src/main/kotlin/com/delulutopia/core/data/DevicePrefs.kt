@@ -26,6 +26,13 @@ class DevicePrefs @Inject constructor(@ApplicationContext context: Context) {
 
     fun setBoardMini(mini: Boolean) = put(BOARD_MINI, mini, _boardMini)
 
+    private val _selfieMini = flag(SELFIE_MINI, false)
+
+    /** Selfies DS1: the selfie board folded to a strip. */
+    val selfieMini: StateFlow<Boolean> = _selfieMini.asStateFlow()
+
+    fun setSelfieMini(mini: Boolean) = put(SELFIE_MINI, mini, _selfieMini)
+
     private val _lettersList = flag(LETTERS_LIST, false)
 
     /** Letters: the compact list instead of the tile grid. */
@@ -63,6 +70,7 @@ class DevicePrefs @Inject constructor(@ApplicationContext context: Context) {
 
     private companion object {
         const val BOARD_MINI = "boardMini"
+        const val SELFIE_MINI = "selfieMini"
         const val LETTERS_LIST = "lettersList"
         const val LEAVES = "leaves"
         const val RECENT_EMOJIS = "recentEmojis"

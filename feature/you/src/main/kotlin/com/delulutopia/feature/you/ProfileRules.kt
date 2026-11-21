@@ -49,6 +49,7 @@ val SECTION_LABELS get() = mapOf(
     "discussions" to t("discussions.discussions"),
     "emails" to t("emails.emails"),
     "board" to t("board.board"),
+    "selfies" to t("notifySection.selfies"),
     "home" to t("notFound.home"),
 )
 
@@ -64,6 +65,7 @@ fun eventLabel(key: String, friend: String): Pair<String, String> = when (key) {
     "board.doodle" -> t("notifyEvent.boardDoodle") to t("notifyEvent.boardDoodleHint", "friend" to friend)
     "board.reaction" -> t("notifyEvent.boardReaction") to ""
     "board.note" -> t("notifyEvent.boardNote") to ""
+    "selfie.new" -> t("notifyEvent.selfieNew") to t("notifyEvent.selfieNewHint", "friend" to friend)
     "mood.changed" -> t("notifyEvent.moodChanged", "friend" to friend) to t("notifyEvent.moodChangedHint")
     else -> key to ""
 }

@@ -30,6 +30,7 @@ object Notices {
         "discussions" to listOf("discussion.arrived", "discussion.comment", "discussion.reaction"),
         "emails" to listOf("email.new", "email.reaction"),
         "board" to listOf("board.doodle", "board.reaction", "board.note"),
+        "selfies" to listOf("selfie.new"),
         "home" to listOf("mood.changed"),
     )
 
