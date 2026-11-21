@@ -7,9 +7,11 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -62,11 +64,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.semantics.CustomAccessibilityAction
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -101,6 +105,7 @@ import com.delulutopia.core.network.model.Att
 import com.delulutopia.core.network.model.Citizen
 import com.delulutopia.core.network.model.Email
 import com.delulutopia.core.network.model.Home
+import com.delulutopia.core.network.model.StickerRef
 import com.delulutopia.core.network.model.ThreadRow
 import com.delulutopia.core.ui.EmojiPickerSheet
 import com.delulutopia.core.ui.Lightbox
@@ -124,6 +129,7 @@ import com.delulutopia.core.ui.reactions.rememberReactionState
 import com.delulutopia.core.ui.rememberNow
 import com.delulutopia.core.ui.signatureOf
 import com.delulutopia.core.ui.tintOf
+import com.delulutopia.feature.emails.stickers.StickerSheet
 import java.time.Instant
 import java.time.ZoneId
 import kotlin.math.abs
@@ -251,7 +257,10 @@ private fun ThreadCard(row: ThreadRow, nowMs: Long, home: Home?) {
     val snippet = if (reactionWins(row.lastReaction, reacted, row.lastEmailAt)) {
         noticeLine(row.lastReaction!!, reacted, home?.friend?.nickname ?: t("common.friend"))
     } else {
-        val words = row.lastText ?: row.lastMedia?.let { mediaWords(it.photos, it.audios, it.videos) } ?: ""
+        val words = row.lastText
+            ?: (if (row.lastSticker) t("stickers.sticker") else null)
+            ?: row.lastMedia?.let { mediaWords(it.photos, it.audios, it.videos) }
+            ?: ""
         // Email Replies RE13: ↩ before a reply's snippet, as Letters B2.
         if (row.lastIsReply && words.isNotEmpty()) "↩ $words" else words
     }
@@ -369,7 +378,14 @@ private fun ThreadBody(vm: ThreadViewModel, me: Citizen?, friend: Citizen?, home
     // failed is the newest, drawn before the server has it.
     val unsent = vm.composer.unsent
     var unsentSheet by remember { mutableStateOf(false) }
-    val items = if (unsent != null) listOf(unsent.email) + vm.items else vm.items
+    // Stickers FS-SK6: stickers in the air or failed, drawn like OS3's email.
+    val stickersOut = vm.stickerOutbox.of(vm.id)
+    var unsentSticker by remember { mutableStateOf<String?>(null) }
+    var stickerOf by remember { mutableStateOf<Email?>(null) }
+    val favourites = vm.stickers.catalogue?.favourites
+    val provisional = (listOfNotNull(unsent?.email) + stickersOut.map { it.email })
+        .sortedWith(compareByDescending<Email> { it.sentAt }.thenByDescending { it.id })
+    val items = if (provisional.isNotEmpty()) provisional + vm.items else vm.items
     var photo by remember { mutableStateOf<Pair<List<Att>, Int>?>(null) }
     val list = rememberLazyListState()
     val scope = rememberCoroutineScope()
@@ -386,7 +402,7 @@ private fun ThreadBody(vm: ThreadViewModel, me: Citizen?, friend: Citizen?, home
     val openOriginal = { target: String ->
         scope.launch {
             if (vm.ensureLoaded(target)) {
-                lazyIndexOf(vm.composer.unsent?.let { listOf(it.email) + vm.items } ?: vm.items, target)?.let { list.animateScrollToItem(it) }
+                lazyIndexOf(items, target)?.let { list.animateScrollToItem(it) }
                 flashId = target
             }
         }
@@ -426,7 +442,8 @@ private fun ThreadBody(vm: ThreadViewModel, me: Citizen?, friend: Citizen?, home
                         // OS3: the sent email takes the provisional one's place without growing in again.
                         val fresh = firstIds.isNotEmpty() && e.id !in firstIds && e.id !in vm.quiet
                         val mine = e.senderId == me?.id
-                        val pending = unsent?.takeIf { it.email.id == e.id }?.status
+                        val stickerOut = stickersOut.firstOrNull { it.email.id == e.id }
+                        val pending = stickerOut?.status ?: unsent?.takeIf { it.email.id == e.id }?.status
                         Bubble(
                             e,
                             first = first,
@@ -446,8 +463,12 @@ private fun ThreadBody(vm: ThreadViewModel, me: Citizen?, friend: Citizen?, home
                             flash = flashId == e.id,
                             onFlashed = { if (flashId == e.id) flashId = null },
                             pending = pending,
-                            onUnsent = { unsentSheet = true },
+                            onUnsent = { if (stickerOut != null) unsentSticker = e.id else unsentSheet = true },
                             voiceAfter = voiceRunAfter(items, i),
+                            onSticker = { stickerOf = e },
+                            favourite = e.sticker?.takeIf { favourites != null }?.let { st ->
+                                Favourite(favourites.orEmpty().contains(st.id)) { vm.stickers.toggleFavourite(st.id) }
+                            },
                             modifier = Modifier
                                 // OS6: a cancelled bubble fades away; others leave as before.
                                 .animateItem(fadeInSpec = null, fadeOutSpec = if (e.id.startsWith("local-") && motionOn()) tween(200) else null)
@@ -535,7 +556,7 @@ private fun ThreadBody(vm: ThreadViewModel, me: Citizen?, friend: Citizen?, home
                 }
             }
         }
-        DockedComposer(vm.composer, home?.emailCredits, quoteName) { sent ->
+        DockedComposer(vm.composer, home?.emailCredits, quoteName, stickers = vm.stickers, onSticker = vm::sendSticker) { sent ->
             sentId = sent.email.id
             vm.sent(sent.email)
         }
@@ -563,6 +584,46 @@ private fun ThreadBody(vm: ThreadViewModel, me: Citizen?, friend: Citizen?, home
             onDismiss = { unsentSheet = false },
         )
     }
+    val failedSticker = stickersOut.firstOrNull { it.email.id == unsentSticker && it.status == EmailOutbox.Status.Failed }
+    val stickerFail = failedSticker?.fail
+    if (failedSticker != null && stickerFail != null) {
+        UnsentSheet(
+            stickerFail,
+            reason = failReason(stickerFail, home),
+            onRetry = {
+                unsentSticker = null
+                vm.stickerOutbox.retry(failedSticker.email.id)
+            },
+            onCancel = {
+                unsentSticker = null
+                vm.stickerOutbox.cancel(failedSticker.email.id)
+            },
+            onDismiss = { unsentSticker = null },
+        )
+    }
+    // SK10: the sticker's sheet; "More from this pack" sends from here.
+    stickerOf?.let { em ->
+        val st = em.sticker ?: return@let
+        val who = { id: String? -> if (id == me?.id) t("emails.you") else (friend?.nickname ?: "") }
+        StickerSheet(
+            store = vm.stickers,
+            sticker = st,
+            caption = t("stickers.sentAt", "name" to who(em.senderId), "time" to Time.clock(em.sentAt, nowMs)),
+            canSend = (home?.emailCredits?.left ?: 0) > 0,
+            addedBy = { s -> t("stickers.customBy", "name" to who(s.custom?.by)) },
+            onSend = vm::sendSticker,
+            onDismiss = { stickerOf = null },
+        )
+    }
+}
+
+/** OS9: why an email or sticker didn't go. */
+private fun failReason(fail: EmailOutbox.Fail, home: Home?): String = when (fail.kind) {
+    EmailOutbox.FailKind.Offline -> t("emails.noConnection")
+    EmailOutbox.FailKind.Timeout -> t("emails.noAnswer")
+    EmailOutbox.FailKind.Server -> t("emails.serverError")
+    EmailOutbox.FailKind.Credits -> creditsLine(home?.emailCredits?.copy(left = 0)) ?: t("emails.serverError")
+    EmailOutbox.FailKind.Refused -> fail.message.ifEmpty { t("common.newerVersion") }
 }
 
 /**
@@ -645,6 +706,10 @@ private fun Bubble(
     pending: EmailOutbox.Status? = null,
     onUnsent: () -> Unit = {},
     voiceAfter: List<String> = emptyList(),
+    /** Stickers SK10: a tap on a sticker opens its sheet. */
+    onSticker: () -> Unit = {},
+    /** Stickers SK7: the layer's ★ item for a sticker. */
+    favourite: Favourite? = null,
     modifier: Modifier = Modifier,
 ) {
     // OS3: nothing to reply to or react on until the server has it.
@@ -767,6 +832,9 @@ private fun Bubble(
                     ring = ring.value,
                     pending = pending,
                     voiceAfter = voiceAfter,
+                    onSticker = if (live) onSticker else null,
+                    onLong = if (live) openLayer else null,
+                    senderName = person?.nickname.orEmpty(),
                     modifier = Modifier
                         .alpha(if (layer != null) 0f else 1f)
                         .onGloballyPositioned { bounds[0] = it.boundsInWindow() }
@@ -870,6 +938,12 @@ private fun Bubble(
             canCopy = e.text.isNotBlank(),
             infoRows = deliveryRows(e, mine).size,
             info = { DeliveryCard(e, mine, nowMs) },
+            favourite = favourite?.let { f ->
+                Favourite(f.on) {
+                    layer = null
+                    f.onToggle()
+                }
+            },
             onPick = {
                 layer = null
                 reactions.toggle(it)
@@ -947,8 +1021,15 @@ private fun BubbleSurface(
     modifier: Modifier = Modifier,
     pending: EmailOutbox.Status? = null,
     voiceAfter: List<String> = emptyList(),
+    onSticker: (() -> Unit)? = null,
+    onLong: (() -> Unit)? = null,
+    senderName: String = "",
 ) {
     val base = LocalServerBaseUrl.current
+    e.sticker?.let { st ->
+        StickerSurface(e, st, mine, first, stamp, ticks, pending, quoteName, onOpenQuote, ring, onSticker, onLong, senderName, modifier)
+        return
+    }
     // Attachment Retention AR6: expired files keep their slots; only live photos open in the lightbox.
     val allPhotos = e.attachments.filter { it.kind == "photo" }
     val photos = allPhotos.filter { !it.expired }
@@ -977,6 +1058,14 @@ private fun BubbleSurface(
     ) {
         // RE11: the quote at the top inside the bubble.
         e.replyTo?.let { q -> BubbleQuote(q, quoteName(q.senderId)) { onOpenQuote(q.id) } }
+        // Stickers: an email that was only a sticker no longer there.
+        if (e.text.isEmpty() && e.attachments.isEmpty()) {
+            Text(
+                t("stickers.removed"),
+                style = MaterialTheme.typography.bodyLarge.copy(fontSize = 15.sp, fontStyle = FontStyle.Italic),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
         if (e.text.isNotEmpty()) {
             val style = MaterialTheme.typography.bodyLarge.copy(fontSize = 15.sp, lineHeight = 21.75.sp)
             if (timeAt == TimeAt.Text) {
@@ -1052,6 +1141,65 @@ private fun BubbleSurface(
             }
         }
         if (timeAt == TimeAt.Line) BubbleTime(stamp, Modifier.align(Alignment.End).padding(top = 0.dp), pending = pending, ticks = ticks)
+    }
+}
+
+/**
+ * Stickers SK11: a sticker sent alone, 140 dp with no bubble fill or border, the time as a chip on
+ * it; a reply's quote rides above in a small bubble of the sender's colour (web .dl-bubble--sticker).
+ */
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun StickerSurface(
+    e: Email,
+    st: StickerRef,
+    mine: Boolean,
+    first: Boolean,
+    stamp: String,
+    ticks: TickStatus?,
+    pending: EmailOutbox.Status?,
+    quoteName: (String) -> String,
+    onOpenQuote: (String) -> Unit,
+    ring: Float,
+    onSticker: (() -> Unit)?,
+    onLong: (() -> Unit)?,
+    senderName: String,
+    modifier: Modifier,
+) {
+    val base = LocalServerBaseUrl.current
+    val label = if (mine) t("stickers.label") else t("stickers.labelFrom", "name" to senderName)
+    Column(
+        modifier.border(3.dp, DlTheme.colors.mailBlue.copy(alpha = ring), RoundedCornerShape(16.dp)),
+        horizontalAlignment = if (mine) Alignment.End else Alignment.Start,
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+        e.replyTo?.let { q ->
+            val tail = if (first) 4.dp else 16.dp
+            val shape = RoundedCornerShape(topStart = if (mine) 16.dp else tail, topEnd = if (mine) tail else 16.dp, bottomEnd = 16.dp, bottomStart = 16.dp)
+            Box(
+                Modifier
+                    .widthIn(max = 240.dp)
+                    .clip(shape)
+                    .background(tintOf(e.senderId))
+                    .border(1.dp, signatureOf(e.senderId).copy(alpha = 0.75f), shape)
+                    .padding(8.dp),
+            ) { BubbleQuote(q, quoteName(q.senderId)) { onOpenQuote(q.id) } }
+        }
+        Box(
+            Modifier
+                .size(140.dp)
+                .then(
+                    if (onSticker != null) {
+                        Modifier.combinedClickable(role = Role.Button, onLongClick = onLong, onClick = onSticker)
+                    } else {
+                        Modifier
+                    },
+                )
+                .semantics { contentDescription = label },
+        ) {
+            AsyncImage(resolveMedia(base, st.url512), null, Modifier.fillMaxSize())
+            BubbleTime(stamp, Modifier.align(Alignment.BottomEnd).padding(4.dp), onMedia = true, pending = pending, ticks = ticks)
+        }
     }
 }
 

@@ -30,6 +30,8 @@ recyclerview = "1.4.0"
 media3 = "1.11.1"
 exif = "1.4.2"
 biometric = "1.1.0"
+# Stickers FS-SK20: the subject cut-out (Google Play services, on-device)
+mlkitSubjectSegmentation = "16.0.0-beta1"
 
 # Push (FCM, Android Build B3); latest on 19 Nov 2026
 firebaseBom = "35.2.0"
@@ -73,6 +75,8 @@ androidx-compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "u
 androidx-compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 
 androidx-compose-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
+
+mlkit-subject-segmentation = { group = "com.google.android.gms", name = "play-services-mlkit-subject-segmentation", version.ref = "mlkitSubjectSegmentation" }
 
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
 firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging" }

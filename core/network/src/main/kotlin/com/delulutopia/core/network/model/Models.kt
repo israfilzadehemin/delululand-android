@@ -229,6 +229,8 @@ data class ThreadRow(
     val lastIsReply: Boolean = false,
     /** Read Ticks TK10: `sent`, `delivered` or `read` when the newest email is mine; null otherwise. */
     val lastStatus: String? = null,
+    /** Stickers FS-SK15: the newest email is a sticker ("Sticker" snippet). */
+    val lastSticker: Boolean = false,
 )
 
 /**
@@ -245,6 +247,8 @@ data class EmailQuote(
     /** The photo or video it would show has expired (Attachment Retention AR9): the crossed-out icon. */
     val thumbExpired: Boolean = false,
     val sentAt: String,
+    /** Stickers FS-SK15: the quoted email is this sticker (256 px image URL). */
+    val sticker: String? = null,
 )
 
 @Serializable
@@ -261,7 +265,51 @@ data class Email(
     val reactions: List<Reaction> = emptyList(),
     /** The email this one answers (RE11); null for a plain email. */
     val replyTo: EmailQuote? = null,
+    /** Stickers SK3: this email is a sticker (no text, no attachments). */
+    val sticker: StickerRef? = null,
 )
+
+// Stickers (doc "Delululand — Stickers" §5.3)
+
+@Serializable
+data class StickerRef(val id: Id, val url256: String, val url512: String)
+
+@Serializable
+data class StickerPack(val slug: String, val name: String, val sort: Int = 0)
+
+@Serializable
+data class StickerCustom(val by: Id? = null)
+
+@Serializable
+data class Sticker(
+    val id: Id,
+    /** The pack's slug; null for the universe's own stickers. */
+    val pack: String? = null,
+    /** Hidden search words in every language (SK5). */
+    val keywords: List<String> = emptyList(),
+    val emojis: List<String> = emptyList(),
+    val url256: String,
+    val url512: String,
+    /** One of Ours: who added it (SK8). */
+    val custom: StickerCustom? = null,
+) {
+    val ref: StickerRef get() = StickerRef(id, url256, url512)
+}
+
+@Serializable
+data class StickerCount(val used: Int = 0, val cap: Int = 0)
+
+@Serializable
+data class StickerCatalogue(
+    val packs: List<StickerPack> = emptyList(),
+    val stickers: List<Sticker> = emptyList(),
+    val recent: List<Id> = emptyList(),
+    val favourites: List<Id> = emptyList(),
+    val custom: StickerCount = StickerCount(),
+)
+
+@Serializable
+data class SendStickerBody(val stickerId: Id, val replyToId: Id? = null, val clientId: String)
 
 @Serializable
 data class EmailList(val items: List<Email>, val olderCursor: String? = null)
@@ -469,6 +517,8 @@ data class PlanLimits(
     val videosDaily: Int,
     /** Null is unlimited (Premium, ST1). */
     val boardDoodlesDaily: Int? = null,
+    /** Stickers SK9: custom stickers per universe. */
+    val customStickers: Int? = null,
 )
 
 @Serializable

@@ -11,8 +11,11 @@ import com.delulutopia.core.data.HomeRepository
 import com.delulutopia.core.data.Refresher
 import com.delulutopia.core.network.ApiException
 import com.delulutopia.core.network.model.Email
+import com.delulutopia.core.network.model.Sticker
 import com.delulutopia.core.network.model.ThreadFull
 import com.delulutopia.core.network.model.ThreadRow
+import com.delulutopia.feature.emails.stickers.StickerOutbox
+import com.delulutopia.feature.emails.stickers.StickerStore
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -97,6 +100,8 @@ class ThreadViewModel @AssistedInject constructor(
     private val homeRepo: HomeRepository,
     @ApplicationContext context: Context,
     val outbox: EmailOutbox,
+    val stickerOutbox: StickerOutbox,
+    val stickers: StickerStore,
 ) : ViewModel() {
     @AssistedFactory
     interface Factory {
@@ -148,6 +153,22 @@ class ThreadViewModel @AssistedInject constructor(
                 }
             }
         }
+        viewModelScope.launch {
+            stickerOutbox.sent.collect { s ->
+                if (s.threadId == id) {
+                    quiet += s.email.id
+                    sent(s.email)
+                    homeRepo.refreshSoon()
+                }
+            }
+        }
+    }
+
+    /** Stickers FS-SK6: one tap sends; the reply target goes with it and the strip closes. */
+    fun sendSticker(sticker: Sticker) {
+        val me = homeRepo.state.value.home?.me?.id ?: return
+        stickerOutbox.send(id, me, sticker.ref, composer.replyTo)
+        composer.cancelReply()
     }
 
     suspend fun load() {

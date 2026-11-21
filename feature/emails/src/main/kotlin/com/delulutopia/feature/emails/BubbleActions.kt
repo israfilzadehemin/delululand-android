@@ -395,6 +395,8 @@ fun BubbleLayer(
     /** Read Ticks TK6, TK7: the delivery card above the quick row, [infoRows] rows tall. */
     infoRows: Int = 0,
     info: (@Composable () -> Unit)? = null,
+    /** Stickers SK7: a sticker's ★ Add to / Remove from favourites; null for other emails. */
+    favourite: Favourite? = null,
     bubble: @Composable () -> Unit,
 ) {
     val density = LocalDensity.current
@@ -418,7 +420,8 @@ fun BubbleLayer(
             val winW = with(density) { maxWidth.toPx() }
             val card = if (info != null) infoRows * 28 + 12 + 2 + 8 else 0
             val above = with(density) { (52 + 10 + card).dp.toPx() }
-            val below = with(density) { (if (canCopy) 2 * 48 + 14 else 48 + 14).dp.toPx() }
+            val rows = 1 + (if (canCopy) 1 else 0) + (if (favourite != null) 1 else 0)
+            val below = with(density) { (rows * 48 + 14).dp.toPx() }
             val edge = with(density) { 12.dp.toPx() }
             val maxH = max(with(density) { 80.dp.toPx() }, winH - above - below - 2 * edge)
             val h = minOf(bounds.height, maxH)
@@ -454,7 +457,7 @@ fun BubbleLayer(
                         .shadow(14.dp, RoundedCornerShape(16.dp), clip = false),
                 ) { bubble() }
                 Spacer(Modifier.height(14.dp))
-                Menu(canCopy, onReply, onCopy)
+                Menu(canCopy, onReply, onCopy, favourite)
             }
         }
     }
@@ -506,7 +509,7 @@ private fun QuickRow(recents: List<String>, isMine: (String) -> Boolean, onPick:
 }
 
 @Composable
-private fun Menu(canCopy: Boolean, onReply: () -> Unit, onCopy: () -> Unit) {
+private fun Menu(canCopy: Boolean, onReply: () -> Unit, onCopy: () -> Unit, favourite: Favourite?) {
     val shape = RoundedCornerShape(12.dp)
     Column(
         Modifier
@@ -521,8 +524,26 @@ private fun Menu(canCopy: Boolean, onReply: () -> Unit, onCopy: () -> Unit) {
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
             MenuItem(t("emails.copyText"), { Icon(DlIcons.Copy, null, Modifier.size(18.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant) }, onCopy)
         }
+        if (favourite != null) {
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+            MenuItem(
+                if (favourite.on) t("stickers.removeFavourite") else t("stickers.addFavourite"),
+                {
+                    Icon(
+                        WebIcons.Star,
+                        null,
+                        Modifier.size(18.dp),
+                        tint = if (favourite.on) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                },
+                favourite.onToggle,
+            )
+        }
     }
 }
+
+/** Stickers SK7: whether the sticker is a favourite, and the toggle (which also closes the layer). */
+data class Favourite(val on: Boolean, val onToggle: () -> Unit)
 
 @Composable
 private fun MenuItem(label: String, icon: @Composable () -> Unit, onClick: () -> Unit) {

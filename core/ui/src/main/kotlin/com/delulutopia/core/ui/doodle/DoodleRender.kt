@@ -4,6 +4,8 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Path
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffXfermode
 import android.graphics.RectF
 import java.io.ByteArrayOutputStream
 
@@ -17,7 +19,24 @@ private val inkPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
  * dot. The eraser paints paper (the paper is part of the image, so erasing to it is exact).
  */
 fun drawStroke(canvas: Canvas, s: Stroke, paper: Int) {
-    val colour = if (s.erase) paper else s.colour
+    // A clear surface: the eraser cuts the ink away rather than painting paper over it.
+    val cut = s.erase && paper == CLEAR
+    inkPaint.xfermode = if (cut) clearMode else null
+    try {
+        val colour = when {
+            cut -> 0xFF000000.toInt()
+            s.erase -> paper
+            else -> s.colour
+        }
+        strokeOnly(canvas, s, colour)
+    } finally {
+        inkPaint.xfermode = null
+    }
+}
+
+private val clearMode = PorterDuffXfermode(PorterDuff.Mode.CLEAR)
+
+private fun strokeOnly(canvas: Canvas, s: Stroke, colour: Int) {
     val pts = s.points
     if (pts.isEmpty()) return
     if (pts.size == 1) {
@@ -42,7 +61,7 @@ fun drawStroke(canvas: Canvas, s: Stroke, paper: Int) {
 
 /** Paper, then the backdrop unless a clear wiped it (the doodle being edited), then every visible stroke. */
 fun render(canvas: Canvas, history: History, surface: Surface, backdrop: Bitmap?) {
-    canvas.drawColor(surface.paper)
+    if (surface.paper == CLEAR) canvas.drawColor(0, PorterDuff.Mode.CLEAR) else canvas.drawColor(surface.paper)
     if (backdrop != null && !history.cleared) {
         canvas.drawBitmap(backdrop, null, RectF(0f, 0f, surface.width.toFloat(), surface.height.toFloat()), Paint(Paint.FILTER_BITMAP_FLAG))
     }
