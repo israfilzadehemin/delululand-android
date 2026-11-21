@@ -14,13 +14,11 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.click
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasContentDescription
-import androidx.compose.ui.test.hasScrollToNodeAction
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
-import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.performTouchInput
@@ -263,18 +261,7 @@ class Ui(val test: ComposeUiTest, private val case: String) {
 
     fun seesLabel(label: String) = count(hasContentDescription(label, substring = true)) > 0 || count(hasContentDescription(label, substring = true), true) > 0
 
-    /**
-     * Whether a node matching [m] exists, scrolling vertical lists to it when it doesn't: a lazy
-     * list composes only what is on screen, so a Home row under the boards isn't there until then.
-     */
-    private fun present(m: SemanticsMatcher): Boolean {
-        if (count(m) > 0 || count(m, true) > 0) return true
-        val lists = SemanticsMatcher.keyIsDefined(SemanticsProperties.VerticalScrollAxisRange) and hasScrollToNodeAction()
-        val n = count(lists)
-        return (0 until n).any { i -> runCatching { test.onAllNodes(lists)[i].performScrollToNode(m) }.isSuccess } && count(m) > 0
-    }
-
-    fun see(text: String, timeoutMs: Long = 20_000) = until(timeoutMs, "\"$text\"") { present(hasText(text, substring = true)) }
+    fun see(text: String, timeoutMs: Long = 20_000) = until(timeoutMs, "\"$text\"") { sees(text) }
 
     fun seeLabel(label: String, timeoutMs: Long = 20_000) = until(timeoutMs, "[$label]") { seesLabel(label) }
 
@@ -296,7 +283,7 @@ class Ui(val test: ComposeUiTest, private val case: String) {
     /** Taps the first clickable node showing [text] (scrolled into view first). */
     fun tap(text: String, exact: Boolean = false, timeoutMs: Long = 20_000) {
         val m = hasText(text, substring = !exact) and hasClickAction()
-        until(timeoutMs, "a tappable \"$text\"") { present(m) }
+        until(timeoutMs, "a tappable \"$text\"") { count(m) > 0 }
         val node = test.onAllNodes(m)[0]
         scrollIn(node)
         node.performClick()
@@ -306,7 +293,7 @@ class Ui(val test: ComposeUiTest, private val case: String) {
 
     fun tapLabel(label: String, exact: Boolean = false, timeoutMs: Long = 20_000) {
         val m = hasContentDescription(label, substring = !exact) and hasClickAction()
-        until(timeoutMs, "a tappable [$label]") { present(m) }
+        until(timeoutMs, "a tappable [$label]") { count(m) > 0 }
         val node = test.onAllNodes(m)[0]
         scrollIn(node)
         node.performClick()

@@ -21,7 +21,8 @@ import org.robolectric.annotation.GraphicsMode
 @OptIn(ExperimentalTestApi::class)
 @RunWith(RobolectricTestRunner::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
-@Config(qualifiers = "w412dp-h915dp-xxhdpi")
+// Tall enough that Home's letter rows sit inside what the LazyColumn composes, under both boards.
+@Config(qualifiers = "w412dp-h1600dp-xxhdpi")
 class FlowsE2ETest {
     private fun case(name: String, block: Ui.(() -> MainActivity) -> Unit) {
         E2E.prepare()
