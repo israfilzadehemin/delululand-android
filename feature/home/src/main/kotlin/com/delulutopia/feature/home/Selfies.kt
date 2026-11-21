@@ -2,9 +2,8 @@ package com.delulutopia.feature.home
 
 import android.net.Uri
 import android.util.Base64
-import androidx.compose.animation.animateContentSize
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -41,16 +40,21 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.FilterQuality
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
+import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.path
@@ -62,6 +66,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -85,7 +91,7 @@ import com.delulutopia.core.ui.NewChip
 import com.delulutopia.core.ui.ageWords
 import com.delulutopia.core.ui.media.rememberSelfieCapture
 import java.time.Instant
-import kotlin.random.Random
+import kotlin.math.roundToInt
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -184,10 +190,8 @@ internal fun SelfieBoard(home: Home, nowMs: Long, vm: HomeActions) {
         if (theirs != null && !locked) add(Shown(theirs, false, friend))
     }
 
-    Column(Modifier.fillMaxWidth().animateContentSize(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        if (mini) {
-            Strip(home, mine, theirs, locked, nowMs, base) { vm.setSelfieMini(false) }
-        } else {
+    Fold(mini, Modifier.fillMaxWidth(), strip = { Strip(home, mine, theirs, locked, nowMs, base) { vm.setSelfieMini(false) } }) {
+        Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Cork {
                 // Left: mine (or the empty frame, or the one developing).
                 when {
@@ -311,27 +315,25 @@ internal fun SelfieBoard(home: Home, nowMs: Long, vm: HomeActions) {
     }
 }
 
-/** DS2: the light wood frame and the cork inside it. */
+/**
+ * DS2: a cork board in a light wood frame, both real material (BoardTextures), the frame's lip
+ * shading the cork just inside it; one bevel line and a low shadow, as iOS.
+ */
 @Composable
 private fun Cork(content: @Composable () -> Unit) {
     val dark = DlTheme.isDark
-    val wood = if (dark) listOf(Color(0xFF7A5638), Color(0xFF5E412A), Color(0xFF73523A)) else listOf(Color(0xFFBC8D60), Color(0xFF9F7048), Color(0xFFB58658))
-    val cork = if (dark) Color(0xFF9C7A58) else Color(0xFFC9A27A)
-    val specks = remember { List(420) { Triple(Random(it).nextFloat(), Random(it * 7 + 3).nextFloat(), it % 3) } }
+    val shape = RoundedCornerShape(5.dp)
     Box(
-        Modifier.fillMaxWidth().shadow(2.dp, RoundedCornerShape(6.dp)).background(Brush.linearGradient(wood), RoundedCornerShape(6.dp)).padding(10.dp),
+        Modifier.fillMaxWidth().shadow(3.dp, shape).clip(shape).drawBehind { fill(BoardTextures.wood(dark)) }
+            .border(1.dp, Brush.verticalGradient(listOf(Color.White.copy(alpha = 0.28f), Color.Black.copy(alpha = 0.22f))), shape)
+            .padding(10.dp),
     ) {
-        Box(Modifier.fillMaxWidth().height(232.dp).clip(RoundedCornerShape(2.dp)).background(cork)) {
-            Canvas(Modifier.fillMaxSize()) {
-                specks.forEach { (x, y, k) ->
-                    val color = when (k) {
-                        0 -> Color(0x61643719)
-                        1 -> Color(0x59FFF0D7)
-                        else -> Color(0x47784B23)
-                    }
-                    drawCircle(color, radius = if (k == 2) 1.6f * density else 1f * density, center = Offset(x * size.width, y * size.height))
-                }
-            }
+        Box(
+            Modifier.fillMaxWidth().height(232.dp).clipToBounds().drawBehind {
+                fill(BoardTextures.cork(dark))
+                lip(if (dark) 0.45f else 0.32f)
+            },
+        ) {
             Row(
                 Modifier.fillMaxSize(),
                 horizontalArrangement = Arrangement.spacedBy(20.dp, Alignment.CenterHorizontally),
@@ -341,6 +343,37 @@ private fun Cork(content: @Composable () -> Unit) {
             }
         }
     }
+}
+
+/** Draws [image] scaled to fill and centred, cropping the overflow (SwiftUI scaledToFill). */
+private fun DrawScope.fill(image: ImageBitmap) {
+    val scale = maxOf(size.width / image.width, size.height / image.height)
+    val w = (image.width * scale).roundToInt()
+    val h = (image.height * scale).roundToInt()
+    drawImage(
+        image,
+        dstOffset = IntOffset(((size.width - w) / 2).roundToInt(), ((size.height - h) / 2).roundToInt()),
+        dstSize = IntSize(w, h),
+        filterQuality = FilterQuality.Medium,
+    )
+}
+
+/** The frame's lip: a soft shade along each inner edge of the cork. */
+private fun DrawScope.lip(alpha: Float) {
+    val d = 7.dp.toPx()
+    val shade = Color.Black.copy(alpha = alpha * 0.7f)
+    drawRect(Brush.verticalGradient(listOf(shade, Color.Transparent), 0f, d), size = Size(size.width, d))
+    drawRect(Brush.verticalGradient(listOf(Color.Transparent, shade), size.height - d, size.height), Offset(0f, size.height - d), Size(size.width, d))
+    drawRect(Brush.horizontalGradient(listOf(shade, Color.Transparent), 0f, d), size = Size(d, size.height))
+    drawRect(Brush.horizontalGradient(listOf(Color.Transparent, shade), size.width - d, size.width), Offset(size.width - d, 0f), Size(d, size.height))
+}
+
+/** Polaroid card stock: faintly warm, a touch darker toward the bottom, a hairline edge. */
+private fun Modifier.polaroidPaper(dark: Boolean): Modifier {
+    val top = if (dark) PaperDark else Paper
+    return background(if (dark) Color(0xFFCCC7BA) else Color(0xFFEDEBE3))
+        .background(Brush.verticalGradient(listOf(top, top.copy(alpha = 0.94f))))
+        .border(0.5.dp, Color.Black.copy(alpha = 0.07f))
 }
 
 @Composable
@@ -362,15 +395,16 @@ private fun Polaroid(
     newChip: Boolean = false,
     photo: @Composable BoxScope.() -> Unit,
 ) {
-    val paper = if (DlTheme.isDark) PaperDark else Paper
+    val dark = DlTheme.isDark
     Box(Modifier.rotate(tilt)) {
         Column(
-            Modifier.width(138.dp).shadow(5.dp).background(paper)
+            // Pinned flat to the cork: a tight contact shadow, not a lift.
+            Modifier.width(138.dp).shadow(1.5.dp).polaroidPaper(dark)
                 .then(if (onClick != null) Modifier.clickable(role = Role.Button, onClick = onClick) else Modifier)
                 .then(if (label != null) Modifier.semantics { contentDescription = label } else Modifier)
                 .padding(start = 8.dp, end = 8.dp, top = 8.dp),
         ) {
-            Box(Modifier.size(122.dp).background(Color(0xFF3A3840)), content = photo)
+            Box(Modifier.size(122.dp).background(Color(0xFF3A3840)).border(0.5.dp, Color.Black.copy(alpha = 0.16f)), content = photo)
             Caption(caption, time)
         }
         Pin(pin, Modifier.align(Alignment.TopCenter).offset(y = (-6).dp))
@@ -433,16 +467,16 @@ private fun Caption(name: String, time: String, quiet: Boolean = false, big: Boo
 /** DS1: the folded strip, the Board's on wood, with NEW while unseen. */
 @Composable
 private fun Strip(home: Home, mine: Selfie?, theirs: Selfie?, locked: Boolean, nowMs: Long, base: String, onUnfold: () -> Unit) {
-    val wood = if (DlTheme.isDark) listOf(Color(0xFF7A5638), Color(0xFF5E412A)) else listOf(Color(0xFFBC8D60), Color(0xFF9F7048))
+    val dark = DlTheme.isDark
     Row(
-        Modifier.fillMaxWidth().shadow(1.dp, RoundedCornerShape(8.dp)).background(Brush.linearGradient(wood), RoundedCornerShape(8.dp))
+        Modifier.fillMaxWidth().shadow(1.dp, RoundedCornerShape(8.dp)).clip(RoundedCornerShape(8.dp)).drawBehind { fill(BoardTextures.wood(dark)) }
             .clickable(onClickLabel = t("selfie.unfold"), onClick = onUnfold)
             .padding(start = 8.dp, end = 12.dp, top = 8.dp, bottom = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         Row(
-            Modifier.size(72.dp, 54.dp).clip(RoundedCornerShape(3.dp)).background(if (DlTheme.isDark) Color(0xFF9C7A58) else Color(0xFFC9A27A)),
+            Modifier.size(72.dp, 54.dp).clip(RoundedCornerShape(3.dp)).drawBehind { fill(BoardTextures.cork(dark)) },
             horizontalArrangement = Arrangement.spacedBy(5.dp, Alignment.CenterHorizontally),
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -533,9 +567,9 @@ private fun SelfieReview(uri: Uri, name: String, time: String, until: String, on
 @Composable
 private fun BigPolaroid(tilt: Float, name: String, time: String, photo: @Composable BoxScope.() -> Unit) {
     Column(
-        Modifier.rotate(tilt).width(310.dp).shadow(6.dp).background(if (DlTheme.isDark) PaperDark else Paper).padding(start = 16.dp, end = 16.dp, top = 16.dp),
+        Modifier.rotate(tilt).width(310.dp).shadow(3.dp).polaroidPaper(DlTheme.isDark).padding(start = 16.dp, end = 16.dp, top = 16.dp),
     ) {
-        Box(Modifier.size(278.dp).background(Color(0xFF3A3840)), content = photo)
+        Box(Modifier.size(278.dp).background(Color(0xFF3A3840)).border(0.5.dp, Color.Black.copy(alpha = 0.16f)), content = photo)
         Caption(name, time, big = true)
     }
 }
