@@ -125,6 +125,8 @@ dependencies {
     testImplementation(libs.roborazzi)
     testImplementation(libs.roborazzi.compose)
     testImplementation(libs.roborazzi.junit.rule)
+    // e2e: the CI-only database hook (E2E.kt Db): invites, expiry and limit states the API clock can't reach in a test.
+    testImplementation(libs.postgresql)
 }
 
 // The parity run (ParityScreensTest) walks the real app; a screen can take longer than runTest's minute.
@@ -132,4 +134,5 @@ tasks.withType<Test>().configureEach {
     systemProperty("kotlinx.coroutines.test.default_timeout", "5m")
     // The end-to-end cases (e2e/FlowsE2ETest) run only when CI's e2e job passes the API's URL.
     providers.gradleProperty("dl.e2e").orNull?.let { systemProperty("dl.e2e", it) }
+    providers.gradleProperty("dl.e2e.db").orNull?.let { systemProperty("dl.e2e.db", it) }
 }

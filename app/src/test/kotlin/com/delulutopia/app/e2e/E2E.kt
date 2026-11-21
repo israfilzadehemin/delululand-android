@@ -60,6 +60,9 @@ object E2E {
     /** The PIN the Change PIN case switches to and back from. */
     const val A_PIN_2 = "975310"
 
+    /** A fixture under app/src/test/resources/e2e/. */
+    fun fixture(name: String): ByteArray = E2E::class.java.classLoader!!.getResourceAsStream("e2e/$name")!!.use { it.readBytes() }
+
     fun prepare() {
         assumeTrue("no e2e API (set -Pdl.e2e)", server != null)
         System.setProperty("dl.baseUrl", server!!)
@@ -73,7 +76,12 @@ object E2E {
 }
 
 /** User B, through the API as the web app would call it. */
-class Friend(private val base: String = E2E.server!!, private val id: Int = E2E.B_ID, private val pin: String = E2E.B_PIN) {
+class Friend(
+    private val base: String = E2E.server!!,
+    private val id: Int = E2E.B_ID,
+    private val pin: String = E2E.B_PIN,
+    private val key: String = E2E.KEY,
+) {
     private val cookies = CookieManager(null, CookiePolicy.ACCEPT_ALL)
     private val json = Json { ignoreUnknownKeys = true }
 
@@ -93,7 +101,7 @@ class Friend(private val base: String = E2E.server!!, private val id: Int = E2E.
         return once(method, path, body)
     }
 
-    private fun once(method: String, path: String, body: String?): Answer {
+    private fun once(method: String, path: String, body: String?, multipart: Multipart? = null): Answer {
         val url = URL(base + path.trimStart('/'))
         val c = url.openConnection() as HttpURLConnection
         c.requestMethod = method
@@ -106,6 +114,11 @@ class Friend(private val base: String = E2E.server!!, private val id: Int = E2E.
             c.setRequestProperty("Content-Type", "application/json")
             c.outputStream.use { it.write(body.encodeToByteArray()) }
         }
+        if (multipart != null) {
+            c.doOutput = true
+            c.setRequestProperty("Content-Type", "multipart/form-data; boundary=${multipart.boundary}")
+            c.outputStream.use { it.write(multipart.bytes()) }
+        }
         val status = c.responseCode
         cookies.put(url.toURI(), c.headerFields.filterKeys { it != null })
         val text = (if (status >= 400) c.errorStream else c.inputStream)?.use { it.readBytes().decodeToString() }.orEmpty()
@@ -117,9 +130,48 @@ class Friend(private val base: String = E2E.server!!, private val id: Int = E2E.
         return a
     }
 
+    /** A multipart form: [fields], then [file] (a fixture under test resources e2e/) as `file`. */
+    class Multipart(val fields: Map<String, String>, val file: String, val mime: String, val bytes: ByteArray = E2E.fixture(file)) {
+        val boundary = "dl-e2e-" + System.nanoTime()
+
+        fun bytes(): ByteArray {
+            val out = java.io.ByteArrayOutputStream()
+            fun line(s: String) = out.write((s + "\r\n").encodeToByteArray())
+            fields.forEach { (k, v) ->
+                line("--$boundary")
+                line("Content-Disposition: form-data; name=\"$k\"")
+                line("")
+                line(v)
+            }
+            line("--$boundary")
+            line("Content-Disposition: form-data; name=\"file\"; filename=\"$file\"")
+            line("Content-Type: $mime")
+            line("")
+            out.write(bytes)
+            line("")
+            line("--$boundary--")
+            return out.toByteArray()
+        }
+    }
+
+    /** A multipart POST (uploads, the board, selfies, stickers). */
+    fun upload(path: String, form: Multipart): Answer {
+        repeat(5) {
+            val a = once("POST", path, null, form)
+            if (a.status != 429) return a
+            Thread.sleep(runCatching { a.obj["retryAfterMs"]!!.jsonPrimitive.long }.getOrDefault(1_000L) + 100)
+        }
+        return once("POST", path, null, form)
+    }
+
+    fun uploadOk(path: String, form: Multipart, what: String): Answer = ok(upload(path, form), what)
+
+    /** This citizen's public id. */
+    fun me(): String = home()["me"]!!.jsonObject["id"]!!.jsonPrimitive.content
+
     /** Key, then PIN (created on a fresh stack). */
     fun signIn(): Friend {
-        ok(call("POST", "api/entry", """{"code":"${E2E.KEY}"}"""), "entry")
+        ok(call("POST", "api/entry", """{"code":"$key"}"""), "entry")
         val users = ok(call("GET", "api/universe/entry"), "cards").obj["users"]!!.jsonArray
         // Cards come oldest first; their ids are public ids (doc "Delululand — Public IDs").
         val me = users[id - 1].jsonObject
@@ -165,16 +217,37 @@ class Friend(private val base: String = E2E.server!!, private val id: Int = E2E.
         return ok(call("POST", "api/emails/threads", """{"draftVersion":$sv}"""), "send email").obj["thread"]!!.jsonObject["id"]!!.jsonPrimitive.content
     }
 
-    fun reply(threadId: String, text: String) {
+    /** A reply in [threadId]; [replyToId] quotes one of its emails (doc "Delululand — Email Replies"). Returns the email id. */
+    fun reply(threadId: String, text: String, replyToId: String? = null): String {
         val v = ok(call("GET", "api/emails/drafts/$threadId"), "r draft").obj["version"]!!.jsonPrimitive.int
-        val sv = ok(call("PUT", "api/emails/drafts/$threadId", """{"subject":"","text":${quote(text)},"version":$v}"""), "save r draft")
+        val to = replyToId?.let { "\"$it\"" } ?: "null"
+        val sv = ok(call("PUT", "api/emails/drafts/$threadId", """{"subject":"","text":${quote(text)},"replyToId":$to,"version":$v}"""), "save r draft")
             .obj["version"]!!.jsonPrimitive.int
-        ok(call("POST", "api/emails/threads/$threadId/emails", """{"draftVersion":$sv}"""), "reply")
+        val sent = ok(call("POST", "api/emails/threads/$threadId/emails", """{"draftVersion":$sv}"""), "reply").obj
+        return (sent["email"] ?: sent["id"])!!.let { if (it is JsonObject) it["id"]!!.jsonPrimitive.content else it.jsonPrimitive.content }
     }
+
+    /** The thread's emails, oldest first as the API pages them (newest page). */
+    fun thread(threadId: String): List<JsonObject> =
+        ok(call("GET", "api/emails/threads/$threadId"), "thread").obj["emails"]!!.jsonObject["items"]!!.jsonArray.map { it.jsonObject }
 
     fun setMood(key: String) = ok(call("PUT", "api/me/mood", """{"mood":"$key"}"""), "mood")
 
     fun home(): JsonObject = ok(call("GET", "api/home"), "home").obj
+
+    /** A file's status, asked the way an image view asks (any type, no JSON). */
+    fun fetch(path: String): Int {
+        val url = URL(base + path.trimStart('/'))
+        val c = url.openConnection() as HttpURLConnection
+        c.setRequestProperty("Accept", "*/*")
+        val jar = cookies.cookieStore.get(url.toURI()).joinToString("; ") { "${it.name}=${it.value}" }
+        if (jar.isNotEmpty()) c.setRequestProperty("Cookie", jar)
+        return c.responseCode.also { runCatching { (if (it >= 400) c.errorStream else c.inputStream)?.close() } }
+    }
+
+    fun json(path: String, what: String = path): JsonObject = ok(call("GET", path), what).obj
+
+    fun must(method: String, path: String, body: String? = null): Answer = ok(call(method, path, body), "$method $path")
 }
 
 /** UI steps with strict checks: a missing text fails the case with what the screen showed instead. */
@@ -399,12 +472,12 @@ class Ui(val test: ComposeUiTest, private val case: String) {
         }
     }
 
-    /** From a fresh install to Home as user A: key, welcome, card, PIN (created on a fresh stack). */
-    fun signIn(name: String = "userone") {
+    /** From a fresh install to Home: key, welcome, card, PIN (created on a fresh stack). User A of universe 1 by default. */
+    fun signIn(name: String = "userone", key: String = E2E.KEY, pin: String = E2E.A_PIN) {
         step("landing") {
             until(30_000, "the landing or the cards") { sees("Enter your universe") || sees(name) }
             if (!sees(name)) {
-                type("Key", E2E.KEY)
+                type("Key", key)
                 tap("Enter", exact = true)
                 // UV-3: the welcome; Enter goes on to the cards.
                 until(20_000, "the welcome or the cards") { sees("Welcome to") || sees(name) }
@@ -418,13 +491,13 @@ class Ui(val test: ComposeUiTest, private val case: String) {
         }
         step("pin") {
             if (sees("Create your PIN")) {
-                pin(E2E.A_PIN)
+                pin(pin)
                 see("Confirm your PIN")
             }
-            pin(E2E.A_PIN)
+            pin(pin)
             pass(1500)
             // A Change PIN case that stopped half-way leaves the other PIN: put the usual one back.
-            if (sees("Wrong PIN")) {
+            if (pin == E2E.A_PIN && key == E2E.KEY && sees("Wrong PIN")) {
                 pin(E2E.A_PIN_2)
                 runCatching {
                     Friend(id = E2E.A_ID, pin = E2E.A_PIN_2).signIn()
