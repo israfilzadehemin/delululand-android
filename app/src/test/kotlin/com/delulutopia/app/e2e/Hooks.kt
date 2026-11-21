@@ -5,7 +5,6 @@ import android.content.ClipData
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
-import android.hardware.fingerprint.FingerprintManager
 import android.net.Uri
 import android.provider.MediaStore
 import android.security.keystore.KeyGenParameterSpec
@@ -44,6 +43,7 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import org.junit.Assume.assumeTrue
 import org.robolectric.Shadows.shadowOf
+import org.robolectric.shadow.api.Shadow
 import org.robolectric.shadows.ShadowDialog
 
 /**
@@ -218,11 +218,11 @@ object Media {
 /**
  * Fingerprint unlock under Robolectric (decided 21 Nov 2026): Robolectric has no AndroidKeyStore,
  * so a test provider of that name keeps AES keys in memory (the cipher stays the JDK's AES/GCM);
- * the fingerprint itself is Robolectric's [FingerprintManager] shadow on API 27, where
+ * the fingerprint itself is Robolectric's FingerprintManager shadow on API 27, where
  * androidx.biometric shows its own dialog and asks FingerprintManager. No production code changes.
  */
 object Biometrics {
-    class FakeKeyStoreProvider : Provider("AndroidKeyStore", "1.0", "e2e in-memory AndroidKeyStore") {
+    class FakeKeyStoreProvider : Provider("AndroidKeyStore", 1.0, "e2e in-memory AndroidKeyStore") {
         init {
             put("KeyStore.AndroidKeyStore", Store::class.java.name)
             put("KeyGenerator.AES", Generator::class.java.name)
@@ -306,9 +306,8 @@ object Biometrics {
         val keyguard = context.getSystemService(android.app.KeyguardManager::class.java)
         shadowOf(keyguard).setIsDeviceSecure(true)
         shadowOf(keyguard).setIsKeyguardSecure(true)
-        val fm = fingerprints()
-        shadowOf(fm).setIsHardwareDetected(true)
-        shadowOf(fm).setDefaultFingerprints(1)
+        fingerprints("setIsHardwareDetected", true)
+        fingerprints("setDefaultFingerprints", 1)
     }
 
     fun uninstall() {
@@ -316,11 +315,19 @@ object Biometrics {
         keys.clear()
     }
 
-    @Suppress("DEPRECATION")
-    private fun fingerprints(): FingerprintManager = ApplicationProvider.getApplicationContext<Context>().getSystemService(FingerprintManager::class.java)
+    /**
+     * Robolectric's ShadowFingerprintManager, by reflection: compileSdk 37's stubs no longer carry
+     * android.hardware.fingerprint.FingerprintManager, but API 27's runtime does.
+     */
+    private fun fingerprints(method: String, vararg args: Any) {
+        val fm = ApplicationProvider.getApplicationContext<Context>().getSystemService("fingerprint") ?: error("no fingerprint service")
+        val shadow = Shadow.extract<Any>(fm)
+        val m = shadow.javaClass.methods.first { it.name == method && it.parameterCount == args.size }
+        m.invoke(shadow, *args)
+    }
 
     /** The finger on the sensor: the open prompt succeeds. */
-    fun touch() = shadowOf(fingerprints()).authenticationSucceeds()
+    fun touch() = fingerprints("authenticationSucceeds")
 
     /** androidx.biometric's own fingerprint dialog (API < 28), if it is showing. */
     fun dialog(activity: FragmentActivity): android.app.Dialog? {
