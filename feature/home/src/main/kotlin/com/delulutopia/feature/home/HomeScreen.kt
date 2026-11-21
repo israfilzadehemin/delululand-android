@@ -156,6 +156,7 @@ private fun HomeContent(home: Home, stale: Boolean, moods: List<Mood>, moodLimit
     ) {
         if (stale) item(key = "offline") { OfflineBanner() }
         item(key = "board") { Box(Modifier.leafSurface("board")) { BoardTile(home, nowMs, vm) } }
+        if (home.selfies != null) item(key = "selfies") { Box(Modifier.leafSurface("selfies")) { SelfieBoard(home, nowMs, vm) } }
         item(key = "moods") {
             // The moods rise one after another (web .dl-moods: 0, 50, 100 ms); the hint fades in last.
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {

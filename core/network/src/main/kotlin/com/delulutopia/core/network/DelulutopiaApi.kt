@@ -57,6 +57,8 @@ import com.delulutopia.core.network.model.SaveDiscussionDraftBody
 import com.delulutopia.core.network.model.SaveDraftBody
 import com.delulutopia.core.network.model.SaveEmailDraftBody
 import com.delulutopia.core.network.model.Saved
+import com.delulutopia.core.network.model.Selfie
+import com.delulutopia.core.network.model.SelfieSeenBody
 import com.delulutopia.core.network.model.SendAgainBody
 import com.delulutopia.core.network.model.Sent
 import com.delulutopia.core.network.model.StampCatalogue
@@ -195,6 +197,14 @@ interface DelulutopiaApi {
 
     @POST("api/board/seen")
     suspend fun boardSeen(@Body body: VersionBody)
+
+    // Selfies (doc "Delululand — Selfies")
+    @Multipart
+    @POST("api/selfies")
+    suspend fun postSelfie(@Part file: MultipartBody.Part): Selfie
+
+    @POST("api/selfies/seen")
+    suspend fun selfieSeen(@Body body: SelfieSeenBody)
 
     // Letters and the draft
     @GET("api/draft")

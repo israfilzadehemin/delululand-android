@@ -54,8 +54,8 @@ class PushNoticeTest {
 
         val ids = manager.notificationChannels.map { it.id }
         assertThat(ids).containsExactlyElementsIn(Notices.EVENTS)
-        assertThat(Notices.EVENTS).hasSize(12)
-        assertThat(manager.notificationChannelGroups.map { it.id }).containsExactly("letters", "discussions", "emails", "board", "home")
+        assertThat(Notices.EVENTS).hasSize(13)
+        assertThat(manager.notificationChannelGroups.map { it.id }).containsExactly("letters", "discussions", "emails", "board", "selfies", "home")
         assertThat(manager.getNotificationChannel("mood.changed").group).isEqualTo("home")
         assertThat(manager.getNotificationChannel("mood.changed").name.toString()).contains("Leyla")
         assertThat(manager.getNotificationChannel("letter.read").lockscreenVisibility).isEqualTo(android.app.Notification.VISIBILITY_PRIVATE)

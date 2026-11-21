@@ -9,6 +9,17 @@ import kotlinx.coroutines.flow.StateFlow
 interface HomeActions {
     val boardMini: StateFlow<Boolean>
 
+    /** Selfies DS1: the selfie board folded. */
+    val selfieMini: StateFlow<Boolean>
+
+    fun setSelfieMini(mini: Boolean)
+
+    /** Selfies Q3: once per id, the friend's selfie was shown unlocked. */
+    fun selfieSeen(id: String)
+
+    /** Selfies DS4: pins the shot; null when pinned, else the words to show. */
+    suspend fun postSelfie(jpeg: ByteArray): String?
+
     fun flipped()
 
     fun setBoardMini(mini: Boolean)

@@ -17,6 +17,8 @@ import com.delulutopia.core.network.model.Mood
 import com.delulutopia.core.network.model.MoodBody
 import com.delulutopia.core.network.model.MoodEditBody
 import com.delulutopia.core.network.model.ReactionBody
+import com.delulutopia.core.network.model.SelfieBoard
+import com.delulutopia.core.network.model.SelfieSeenBody
 import com.delulutopia.core.network.model.VersionBody
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -38,6 +40,7 @@ class HomeViewModel @Inject constructor(
     HomeActions {
     val state: StateFlow<HomeRepository.State> = repo.state
     override val boardMini: StateFlow<Boolean> = prefs.boardMini
+    override val selfieMini: StateFlow<Boolean> = prefs.selfieMini
 
     private var lastRefetch = 0L
 
@@ -51,6 +54,40 @@ class HomeViewModel @Inject constructor(
     }
 
     override fun setBoardMini(mini: Boolean) = prefs.setBoardMini(mini)
+
+    override fun setSelfieMini(mini: Boolean) = prefs.setSelfieMini(mini)
+
+    // Selfies (doc "Delululand — Selfies")
+
+    private val tellingSelfie = mutableSetOf<String>()
+
+    /** Q3: tell the server once that the friend's selfie was on screen, unlocked. */
+    override fun selfieSeen(id: String) {
+        if (!tellingSelfie.add(id)) return
+        viewModelScope.launch {
+            try {
+                backend.run { selfieSeen(SelfieSeenBody(id)) }
+            } catch (_: ApiException) {
+                tellingSelfie.remove(id)
+            }
+        }
+    }
+
+    /** DS4: one live selfie each; a second is refused with its own sentence (409 SELFIE_EXISTS). */
+    override suspend fun postSelfie(jpeg: ByteArray): String? {
+        Uploader.precheck(Uploader.Kind.Photo, jpeg.size.toLong())?.let { return it }
+        return try {
+            val view = backend.run {
+                postSelfie(MultipartBody.Part.createFormData("file", "selfie.jpg", jpeg.toRequestBody("image/jpeg".toMediaType())))
+            }
+            repo.patch { h -> h.copy(selfies = (h.selfies ?: SelfieBoard()).copy(mine = view)) }
+            repo.refreshSoon()
+            null
+        } catch (e: ApiException) {
+            repo.refreshSoon()
+            if (e.isOffline) t("selfie.notPinned") else e.message
+        }
+    }
 
     // Moods (S3, custom moods CM1–CM7)
     override fun refreshMoods() {

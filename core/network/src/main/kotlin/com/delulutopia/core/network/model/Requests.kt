@@ -80,3 +80,6 @@ data class DeletionCounts(
 
 /** `POST /api/emails/delivered` (Read Ticks TK2): the emails an FCM push announced. */
 @Serializable data class EmailsDeliveredBody(val ids: List<String>)
+
+/** Selfies Q3: the friend's selfie shown unlocked. */
+@Serializable data class SelfieSeenBody(val id: String)

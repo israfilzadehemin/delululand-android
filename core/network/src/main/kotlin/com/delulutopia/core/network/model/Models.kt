@@ -146,6 +146,10 @@ data class Home(
     val universe: UniverseInfo,
     /** Subscription Tiers: null from an API before V24; nothing is limited on screen then. */
     val plan: Plan? = null,
+    /** Daily selfies (doc "Delululand — Selfies"): null from an API before V32, which hides the board. */
+    val selfies: SelfieBoard? = null,
+    /** The friend's selfie, not yet shown unlocked on my Home (Q3). */
+    val selfieNew: Boolean = false,
 ) {
     /** The other citizen's name for sentences, or "your friend" while the creator is alone (Universe U8). */
     val friendName: String get() = friend?.nickname ?: t("settings.yourFriend")
@@ -158,7 +162,27 @@ data class HomeCounts(
     val emailsUnread: Int = 0,
     val emailsReacted: Int = 0,
     val boardNew: Boolean = false,
+    val selfieNew: Boolean = false,
 )
+
+// Selfies (doc "Delululand — Selfies")
+
+@Serializable
+data class Selfie(
+    val id: Id,
+    val authorId: Id,
+    val createdAt: String,
+    /** Gone at this instant (DS7): hidden on Home, which then reloads. */
+    val expiresAt: String,
+    /** Null while locked (Q2): the friend's selfie before mine is up. */
+    val url: String? = null,
+    val locked: Boolean = false,
+    /** A tiny JPEG as a data URI, only while locked; shown blurred. */
+    val blurPreview: String? = null,
+)
+
+@Serializable
+data class SelfieBoard(val ttlHours: Int = 24, val mine: Selfie? = null, val theirs: Selfie? = null)
 
 // Board (doc "Delululand — Board" §3)
 

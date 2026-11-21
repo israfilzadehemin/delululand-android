@@ -38,6 +38,14 @@ class HomeScreenshotTest {
     private object Fake : HomeActions {
         override val boardMini: StateFlow<Boolean> = MutableStateFlow(false)
 
+        override val selfieMini: StateFlow<Boolean> = MutableStateFlow(false)
+
+        override fun setSelfieMini(mini: Boolean) = Unit
+
+        override fun selfieSeen(id: String) = Unit
+
+        override suspend fun postSelfie(jpeg: ByteArray): String? = null
+
         override fun flipped() = Unit
 
         override fun setBoardMini(mini: Boolean) = Unit
